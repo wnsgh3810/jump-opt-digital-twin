@@ -1,0 +1,22 @@
+[Phase 3] Contact (solref_tc, imp0) on Phase 2 base (=15744.4)
+X0 (default contact) = 15744.40  [should ~= Phase 2 15744.4]  (5.9s)
+gen  1 best= 15385.35 solref=0.00276 imp0=0.2410 nfev=  8 (53s)
+gen  2 best= 15385.35 solref=0.00276 imp0=0.2410 nfev= 16 (98s)
+gen  3 best= 15350.62 solref=0.00203 imp0=0.3144 nfev= 24 (143s)
+gen  4 best= 15350.62 solref=0.00203 imp0=0.3144 nfev= 32 (187s)
+gen  5 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 40 (231s)
+gen  6 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 48 (275s)
+gen  7 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 56 (319s)
+gen  8 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 64 (363s)
+gen  9 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 72 (406s)
+gen 10 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 80 (450s)
+gen 11 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 88 (493s)
+gen 12 best= 15329.66 solref=0.00217 imp0=0.3713 nfev= 96 (536s)
+gen 13 best= 15329.66 solref=0.00217 imp0=0.3713 nfev=104 (580s)
+gen 14 best= 15329.66 solref=0.00217 imp0=0.3713 nfev=112 (623s)
+gen 15 best= 15329.66 solref=0.00217 imp0=0.3713 nfev=120 (667s)
+gen 16 best= 15329.66 solref=0.00217 imp0=0.3713 nfev=128 (710s)
+
+[Phase 3 done] best=15329.66  Δ vs Phase2=+2.6%  cumulative=62.9%
+  solref_tc=0.00217  imp0=0.3713
+Written: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase3\phase3_best.json

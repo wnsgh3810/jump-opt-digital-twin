@@ -2,16 +2,16 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 3 시작 (Stribeck friction — 저-gain 점프 regression 회복)
-- **Last completed**: Phase 2 ✅ joint friction. score **15,744.40 (−22.7% vs P1, 누적 −61.9%)**. plots+anim+docs commit.
-- **Next action**: Phase 3 = Stribeck friction (v_s, fs 추가) — 저속 고마찰(sit2stand 유지) + 고속 저마찰(0421 P70/P90/P100 회복). MuJoCo native 미지원 → callback으로 velocity-dependent 마찰 구현 검토.
+- **Now**: Phase 4 시작 (★ balanced objective 재분석 — sit2stand vs jump tension frontier)
+- **Last completed**: Phase 3 ✅ contact (solref_tc=0.00217, imp0=0.371). score **15,329.66 (+2.6%, 누적 −62.9%)**.
+- **Next action**: Phase 4 = jump under-jump 정면 분석. 점프 h_sim/h_real 비율이 phase마다 악화(80%→54%). score가 sit2stand 지배 → 점프 희생. group-normalize 또는 jump-protect 가중치로 KEEP 축(mass/friction/contact) 재최적화 → trade-off frontier 규명. (사용자 "weights 자율 조정 가능" 근거)
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: **15,744.40** (Phase 2)
-- **KEEP model (누적)**: Phase 1 mass 15p + Phase 2 friction (fv_hip=0.926, fv_knee=0.127, fc_hip=0.095, fc_knee=0.809)
-- **핵심 tension**: hip 점성마찰(0.93)이 sit2stand+high-PD엔 최적이나 저-gain position-PD 점프(0421 P70/P90/P100)를 과도 감쇠 → 심한 regression. Stribeck이 해결 후보.
-- **미해결**: sit2stand_gnd q-tracking (발산은 잡았으나 real squat 재현 안 됨, Mode A 한계).
+- **Best score so far**: **15,329.66** (Phase 3, default weights)
+- **KEEP model (누적)**: Phase 1 mass 15p + Phase 2 friction(fv_hip=0.926,fv_knee=0.127,fc_hip=0.095,fc_knee=0.809) + Phase 3 contact(solref_tc=0.00217,imp0=0.371)
+- **★★★ 핵심 발견**: 점프 progressively under-jump (h 80%→64%→54%). sit2stand-지배 score가 점프 에너지 희생. dq RMSE가 점프 잔차 지배. tau_scale 금지 하 근본 tension.
+- **미해결**: sit2stand_gnd q-tracking (Mode A 한계). 저-gain 점프 regression.
 - **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장.
-- **다음 후보**: Phase 3 Stribeck → contact(Phase 5) → q_offset 재검토 → armature(arm_hip) 재검토
+- **다음 후보**: Phase 4 balanced obj → q_offset → arm_hip → 최종 ablation + 종합 보고
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 
