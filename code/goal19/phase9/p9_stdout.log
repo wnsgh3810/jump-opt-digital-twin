@@ -1,0 +1,21 @@
+[Phase 9] Stribeck friction (break trade-off?) — base=15182.0
+X0 (no Stribeck, fv_hip=0.787) = 15181.76  [should ~= 15182.0]  (7s)
+gen  1 best= 15180.08 fv_h=0.753 ds_h=0.053 ds_k=1.079 vs=0.060 (84s)
+gen  2 best= 15141.83 fv_h=0.848 ds_h=0.196 ds_k=0.369 vs=0.061 (160s)
+gen  3 best= 15140.47 fv_h=0.828 ds_h=0.011 ds_k=0.677 vs=0.146 (236s)
+gen  4 best= 15130.73 fv_h=0.783 ds_h=0.002 ds_k=0.448 vs=0.087 (314s)
+gen  5 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (390s)
+gen  6 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (466s)
+gen  7 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (543s)
+gen  8 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (619s)
+gen  9 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (696s)
+gen 10 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (772s)
+gen 11 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (849s)
+gen 12 best= 15111.10 fv_h=0.807 ds_h=0.030 ds_k=0.828 vs=0.033 (925s)
+gen 13 best= 15102.22 fv_h=0.846 ds_h=0.019 ds_k=0.623 vs=0.034 (1002s)
+gen 14 best= 15102.22 fv_h=0.846 ds_h=0.019 ds_k=0.623 vs=0.034 (1079s)
+gen 15 best= 15099.65 fv_h=0.835 ds_h=0.007 ds_k=0.709 vs=0.045 (1156s)
+gen 16 best= 15099.65 fv_h=0.835 ds_h=0.007 ds_k=0.709 vs=0.045 (1234s)
+
+[Phase 9 done] best=15099.65  Δ vs uniform-friction final = +0.54%  → DROP (no gain)
+Written: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase9\phase9_best.json

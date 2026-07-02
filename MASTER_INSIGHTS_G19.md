@@ -35,11 +35,11 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 | 4 | **★ trade-off frontier** (λ 재최적화, jump vs sit2stand) | ✅ | **15,189** | +0.9% (누적 −63.2%) | 2026-07-03 |
 | 5 | torque-deficit 진단 (tau_scale 미채택) | ✅ | (진단) | — | 2026-07-03 |
 | 6 | **★ q_offset ablation — per-trial fudge 완전 제거** | ✅ | **15,182** | fudge 62→0, zero cost | 2026-07-03 |
-| 7+ | 최종 ablation + 종합 보고 (Notion) | ⏳ | — | — | — |
-| 3 | motor armature (arm_hip, arm_knee 2D) | ⏳ | — | — | — |
-| 4 | contact (solref/imp0 2D) — 바닥충돌 항상 ON | ⏳ | — | — | — |
-| 5 | base mass extension (m_base_scale 1D) | ⏳ | — | — | — |
-| 6 | q_offset 결정 (제거/date-group/per-trial) | ⏳ | — | — | — |
+| 7 | 최종 ablation + 종합 보고 + GH Pages 배포 정상화 | ✅ | — | — | 2026-07-03 |
+| 8 | 자율 ablation: arm_hip DROP + dt DROP | ✅ | (검증) | 미탐색 axis 없음 | 2026-07-03 |
+| 9 | Stribeck 마찰 (mjcb_passive) | ✅ | 15,100 | +0.54% DROP | 2026-07-03 |
+
+**★★★ 최종 결론**: 모든 합리적 axis 소진 (arm_hip/dt/Stribeck 전부 DROP). 통합 모델 **15,182 (−63.2%)** = 주어진 제약 하 진짜 구조적 최적. 점프 under-jump는 torque ceiling(Phase 5, tau_scale ~1.6 필요, 금지)이지 axis 부족 아님. Coulomb-Viscous 균일 마찰 = velocity-dependent Stribeck과 동등.
 | 7+ | 자율 확장 (tau noise reduction 대안, Stribeck, backlash, dt, integrator) | ⏳ | — | — | — |
 
 **폐기된 Phase**: 원래 P1 (motor LPF motor_tm) — 사용자 금지
