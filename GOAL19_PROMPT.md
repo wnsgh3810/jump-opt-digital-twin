@@ -1,5 +1,19 @@
 # GOAL19 — Unified 7-Dataset Mode A Digital Twin
 
+## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
+
+- **Now**: Phase 0 (Pure CAD Baseline) 시작 대기
+- **Last completed**: (없음)
+- **Next action**: `code/goal19/phase0/run_pure_base.py` 작성/실행 → 31 exp aggregate score
+- **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
+- **Best score so far**: (Phase 0 결과 대기)
+- **KEEP axes**: (없음)
+- **DROP axes**: (없음)
+
+> **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
+
+---
+
 **Created**: 2026-07-02 (KST)
 **Alarm**: 2026-07-03 22:00 KST cron (~24h autonomous loop)
 **Repo**: `C:/Users/junho/Documents/jump-opt-digital-twin/` (git, MkDocs + GH Pages)
