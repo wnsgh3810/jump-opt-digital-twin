@@ -1,0 +1,54 @@
+<mujoco model="g12_iter38_11d">
+<option cone="elliptic" impratio="100" gravity="0 0 -9.81" timestep="0.0005" integrator="RK4"/>
+<default><default class="leg">
+  <geom friction="1.0 0.02 0.01" margin="0.001" condim="6"/>
+  <joint axis="0 1 0"/>
+  <motor ctrlrange="-100 100" ctrllimited="false"/>
+  <default class="foot">
+    <geom type="cylinder" size="0.0210" priority="1"
+       solref="0.007085 1.6072" solimp="0.25260 0.72007 0.005409 0.5 2" condim="6"/>
+  </default>
+</default></default>
+<asset>
+  <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+  <texture type="2d" name="groundplane" builtin="checker" mark="edge"
+           rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+  <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+</asset>
+<visual><headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/></visual>
+<worldbody>
+  <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+  <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"
+        solref="0.007085 1.6072" solimp="0.25260 0.72007 0.005409 0.5 2"/>
+  <body name="base" pos="0 0 0" childclass="leg">
+    <joint name="base_z" type="slide" axis="0 0 1" armature="0" damping="0" frictionloss="0"/>
+    <inertial pos="0 0 0" mass="1.289665" diaginertia="0.005 0.005 0.005"/>
+    <geom type="box" size="0.06 0.03 0.025" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+    <body name="thigh" pos="0 0 -0.025">
+      <joint name="hip" type="hinge" armature="0.00000000"
+             damping="0.44242008" frictionloss="2.04564549"
+             stiffness="0.08012000" springref="0"/>
+      <inertial pos="0 0 -0.06637" mass="0.99264"
+                diaginertia="0.010340 0.010340 0.0002"/>
+      <geom type="capsule" size="0.018" fromto="0 0 0 0 0 -0.2500"
+            rgba="0.6 0.6 0.7 1" contype="1" conaffinity="1"/>
+      <body name="calf" pos="0 0 -0.2500">
+        <joint name="knee" type="hinge" armature="0.01983000"
+               damping="0.00515781" frictionloss="0.18582999"
+               stiffness="1.16157000" springref="0"/>
+        <inertial pos="0 0 -0.03661" mass="0.69869"
+                  diaginertia="0.002873 0.002873 0.0001"/>
+        <geom type="capsule" size="0.014" fromto="0 0 0 0 0 -0.2500"
+              rgba="0.5 0.6 0.6 1" contype="1" conaffinity="1"/>
+        <geom name="foot" class="foot"
+              fromto="0 -0.0065 -0.2500  0 0.0065 -0.2500"
+              rgba="0.5 0.5 0.5 1"/>
+      </body>
+    </body>
+  </body>
+</worldbody>
+<actuator>
+  <motor name="hip_act" joint="hip" gear="1"/>
+  <motor name="knee_act" joint="knee" gear="1"/>
+</actuator>
+</mujoco>

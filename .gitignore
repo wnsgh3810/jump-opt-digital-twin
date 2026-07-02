@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+env/
+venv/
+.venv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# MkDocs / Quarto build output
+/site/
+/_site/
+.cache/
+/_freeze/
+
+# Large binaries (should be regenerable)
+*.npz
+*.mp4
+*.avi
+
+# Sim outputs (regenerable, kept locally)
+code/goal19/**/anims/
+code/goal19/**/*.gif
+code/goal19/**/sim_data/*.npz
+
+# Local temp
+tmp_*
+*.tmp

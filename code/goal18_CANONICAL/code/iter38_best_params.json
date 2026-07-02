@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "source": "goal12/iter38/iter38_metrics.json per_trial 0424_60_0.75_60_2 with iter6 overrides",
+    "purpose": "Reference model params for GOAL18 canonical XML generation (visual XML — actual sim params can differ)",
+    "verified": "2026-07-01, GOAL18 v14 LOCKED"
+  },
+  "iter38_raw": {
+    "fv_hip": 0.44242008097557617,
+    "fv_knee": 0.005157814351430768,
+    "fc_hip": 2.0456454927823104,
+    "fc_knee": 0.18582999169728892,
+    "m_base": 1.2450909688928333,
+    "m_thigh_scale": 1.0154887550602512,
+    "m_calf_scale": 0.7505875318271736
+  },
+  "iter6_overrides": {
+    "m_base_scale": 1.0358,
+    "solref_tc": 0.007085,
+    "imp0": 0.2526,
+    "M_thigh_scale_mult": 0.9315,
+    "M_calf_scale_mult": 1.0148,
+    "arm_knee": 0.01983
+  },
+  "final_effective": {
+    "fv_hip": 0.44242008,
+    "fv_knee": 0.005157814,
+    "fc_hip": 2.04564549,
+    "fc_knee": 0.18582999,
+    "m_base": 1.28966501,
+    "m_thigh_scale": 0.94569,
+    "m_calf_scale": 0.76172,
+    "solref_tc": 0.007085,
+    "imp0": 0.2526,
+    "arm_knee": 0.01983
+  }
+}

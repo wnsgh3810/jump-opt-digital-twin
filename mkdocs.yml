@@ -1,0 +1,89 @@
+site_name: Jump-Opt Digital Twin (GOAL19)
+site_description: Unified 7-dataset Mode A digital twin — Base-up axis-by-axis physics validation
+site_url: https://example.github.io/jump-opt-digital-twin/
+repo_url: https://github.com/example/jump-opt-digital-twin
+
+theme:
+  name: material
+  language: ko
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+      generic: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - glightbox
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Overview:
+    - Mission: overview/mission.md
+    - Datasets: overview/datasets.md
+    - Score function: overview/score.md
+    - Locks and prohibitions: overview/locks.md
+  - Phases:
+    - Phase 0 — Pure CAD Baseline: phase_0/index.md
+    - Phase 1 (진행 중): phase_1/index.md
+  - Sub-experiments:
+    - All 31 experiments: sub_experiments/index.md
+  - Insights:
+    - MASTER (누적 발견): insights/master.md
+    - Iteration history: insights/history.md
+  - Reference:
+    - GOAL19 prompt: reference/goal19_prompt.md
+    - CANONICAL LOCK (v14): reference/canonical_lock.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/example/jump-opt-digital-twin
