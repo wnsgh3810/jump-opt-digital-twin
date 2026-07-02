@@ -33,12 +33,18 @@ Base 모델 (Pure CAD) → axis-by-axis 물리 검증 → unified single param s
 
 ## 🌐 Docs
 
-Live docs at: https://wnsgh3810.github.io/jump-opt-digital-twin/ (TBD after first push)
+Live docs at: https://wnsgh3810.github.io/jump-opt-digital-twin/
+
+**만약 사이트가 구버전이면** (배포는 성공했으나 서빙 안 될 때):
+GitHub → repo **Settings → Pages → Build and deployment → Source** 를 확인:
+- **"GitHub Actions"** 로 설정 (현 workflow `.github/workflows/deploy.yml`가 이걸로 배포) — 권장
+- 또는 **"Deploy from a branch → `gh-pages` / (root)"** (gh-pages 브랜치에 빌드본 존재)
+
+둘 중 하나로 맞추면 최신 콘텐츠(ablation, 15,182)가 즉시 서빙됨. 모든 콘텐츠는 `main`(소스) + `gh-pages`(빌드본) 브랜치에 안전.
 
 Build locally:
 ```bash
-mkdocs serve
-# Open http://localhost:8000
+mkdocs serve   # http://localhost:8000
 ```
 
 ## 🔒 절대 금지
