@@ -2,9 +2,10 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 10 ✅ LODO-CV 완료 (ratio 1.04, 일반화 입증). 모델 완성 + 검증 완료. alarm 대기.
-- **Last completed**: Phase 10 ✅ leave-one-dataset-out CV. held-out/in-sample ratio 평균 **1.04** → overfit 아닌 진짜 digital twin 입증. refit params fold 간 안정.
-- **Next action**: **GOAL19 최적화+검증 완전 종료**. 15,182 (−63.2%) 확정 + 일반화 입증. alarm(22:00 KST) 대기. 사용자 새 방향 시 즉시 반영.
+- **Now**: GOAL19 최적화+검증 완전 종료 (Phase 0-10). alarm 재생성 후 대기.
+- **Last completed**: Phase 10 LODO-CV (ratio 1.04, 일반화 입증) + **cron 재생성**.
+- **★ 중요**: 원래 cron `f2752ee6`가 Claude Code 재시작 때 소실됨(session-only). 새 alarm `b1724131` (0 22 3 7 * one-shot) 재생성. Stop hook의 원래 조건(f2752ee6)은 해당 id로 못 채움 → 사용자가 `/goal clear`로 loop 종료 가능.
+- **Next action**: 작업 완결. alarm(22:00 KST 07-03) 또는 사용자 새 방향/`goal clear` 대기. 추가 axis grinding은 검증된 최적점에 무가치.
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire) — 미발화, loop 유지
 - **Best score so far**: **15,182** (최종 통합 모델, 21 params, 0 fudge). live: https://wnsgh3810.github.io/jump-opt-digital-twin/
 - **★ 최종 모델**: `code/goal19/goal19_final_model.json`
