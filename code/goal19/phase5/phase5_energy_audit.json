@@ -1,0 +1,31 @@
+{
+  "diagnostic": true,
+  "note": "tau_scale FORBIDDEN in model; audit only",
+  "sweep": [
+    {
+      "tau_scale": 1.0,
+      "h_ratio": 0.5634016272280038
+    },
+    {
+      "tau_scale": 1.1,
+      "h_ratio": 0.6534278719181813
+    },
+    {
+      "tau_scale": 1.2,
+      "h_ratio": 0.7295570871978332
+    },
+    {
+      "tau_scale": 1.3,
+      "h_ratio": 0.789913615545365
+    },
+    {
+      "tau_scale": 1.4,
+      "h_ratio": 0.844671331978546
+    },
+    {
+      "tau_scale": 1.5,
+      "h_ratio": 0.8919414842065206
+    }
+  ],
+  "tau_scale_for_h1": null
+}
