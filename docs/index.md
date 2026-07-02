@@ -61,5 +61,5 @@ graph LR
 
 ## 🔗 Repository
 
-- Source: [GitHub](https://github.com/example/jump-opt-digital-twin)
+- Source: [GitHub](https://github.com/wnsgh3810/jump-opt-digital-twin)
 - Data: `C:/Users/junho/Desktop/jump_opt/goal18_v13/Iter6/` (로컬 canonical)

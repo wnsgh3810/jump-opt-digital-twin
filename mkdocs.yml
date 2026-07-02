@@ -1,7 +1,7 @@
 site_name: Jump-Opt Digital Twin (GOAL19)
 site_description: Unified 7-dataset Mode A digital twin — Base-up axis-by-axis physics validation
-site_url: https://example.github.io/jump-opt-digital-twin/
-repo_url: https://github.com/example/jump-opt-digital-twin
+site_url: https://wnsgh3810.github.io/jump-opt-digital-twin/
+repo_url: https://github.com/wnsgh3810/jump-opt-digital-twin
 
 theme:
   name: material
@@ -86,4 +86,4 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/example/jump-opt-digital-twin
+      link: https://github.com/wnsgh3810/jump-opt-digital-twin

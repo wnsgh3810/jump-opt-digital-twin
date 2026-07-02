@@ -33,7 +33,7 @@ Base 모델 (Pure CAD) → axis-by-axis 물리 검증 → unified single param s
 
 ## 🌐 Docs
 
-Live docs at: https://<USERNAME>.github.io/jump-opt-digital-twin/ (TBD after first push)
+Live docs at: https://wnsgh3810.github.io/jump-opt-digital-twin/ (TBD after first push)
 
 Build locally:
 ```bash
