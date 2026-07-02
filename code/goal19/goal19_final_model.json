@@ -1,0 +1,48 @@
+{
+  "name": "GOAL19 FINAL unified digital twin",
+  "score": 15182.0,
+  "score_note": "zero q_offset (no per-trial fudge) \u2014 Phase 6 proved per-trial offsets unnecessary",
+  "cumulative_vs_phase0_pct": 63.214039433813134,
+  "q_offset": "ZERO (0 fudge params) \u2014 fully unified",
+  "mass_15d": [
+    1.1515772718093662,
+    0.9486496333852702,
+    0.9056234978136585,
+    1.410583919223634,
+    0.9436276209263823,
+    0.262720417595138,
+    1.1809111275187267,
+    1.3250366244420557,
+    1.0416463356236285,
+    1.0734672594650634,
+    -0.005108043542156363,
+    0.0008161020404316953,
+    -0.017879151477970524,
+    -0.009933505499032765,
+    0.01995192315480968
+  ],
+  "m_foot_ex": 0.2270233349153278,
+  "friction": {
+    "fv_hip": 0.7872008105393102,
+    "fv_knee": 0.1270313864143112,
+    "fc_hip": 0.09467027772217118,
+    "fc_knee": 0.5241222129696196
+  },
+  "contact": {
+    "solref_tc": 0.0021749413193005037,
+    "imp0": 0.3713328795592347
+  },
+  "forbidden": [
+    "tau_scale",
+    "motor_tm LPF",
+    "per-trial fudge",
+    "Mode B"
+  ],
+  "params_count": {
+    "mass": 15,
+    "friction": 4,
+    "contact": 2,
+    "q_offset": 0,
+    "total": 21
+  }
+}

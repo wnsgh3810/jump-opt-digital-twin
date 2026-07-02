@@ -2,16 +2,16 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 5 준비 (q_offset 재검토 또는 최종 ablation + 종합 보고)
-- **Last completed**: Phase 4 ✅ trade-off frontier. λ=1 joint re-opt 채택 → **15,189 (누적 −63.2%)**. frontier plot + Mode-A 에너지 결손 규명.
-- **Next action**: Phase 5 = q_offset(encoder bias) 재검토 (per-trial fudge 회피) OR 최종 ablation table + 종합 보고서 (alarm 대비). 남은 개선 여지 적음(frontier plateau) → 종합 정리 우선 고려.
+- **Now**: Phase 7 = 최종 ablation table + 종합 보고서 + Notion parent 갱신 (alarm 대비)
+- **Last completed**: Phase 6 ✅ q_offset ablation. **per-trial fudge(62) 완전 제거, zero cost** → **15,182 (−63.2%)**. 완전 통합 달성.
+- **Next action**: Phase 7 = ablation table(P0→P6) + 종합 결론 문서 + Notion parent page 갱신 + 최종 commit. 모델은 구조적 ceiling 도달 → 정리 phase.
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: **15,189** (Phase 4, λ=1)
-- **채택 모델 (Phase 4 unified best)**: mass 15p (M_foot_ex 0.263→0.227) + friction(fv_hip=0.787,fv_knee=0.127,fc_hip=0.095,fc_knee=0.524) + contact(solref_tc=0.00217,imp0=0.371). → `phase4_adopted_model.json`
-- **★★★ 핵심 결론**: (1) 점프 under-jump 주범=friction, (2) h_ratio가 λ=8에도 0.62 plateau = Mode-A 근본 에너지 결손(~38%), tau_scale 금지 하 못 메움, (3) sit2stand 우수 재현/점프는 형태 O 절대에너지 X. **단일 param set의 Pareto 최적.**
-- **미해결(구조적)**: 점프 절대 높이 (tau_scale 또는 tendon 물리 필요), sit2stand_gnd q-tracking.
+- **Best score so far**: **15,182** (최종 통합 모델, 21 params, 0 fudge)
+- **★ 최종 모델**: `code/goal19/goal19_final_model.json` (mass 15p + friction 4 + contact 2, q_offset=ZERO)
+- **★★★ 핵심 결론**: (1) fudge 완전 제거(62→0) = 진짜 통합, (2) 점프 under-jump 주범=friction+mass+torque under-read, (3) h_ratio λ=8에도 0.62 plateau = Mode-A 에너지 결손, tau_scale 금지 하 구조적. sit2stand 우수/점프 형태 O 절대에너지 X.
+- **미해결(구조적)**: 점프 절대 높이 (tau_scale 또는 tendon), sit2stand_gnd q-tracking.
 - **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장.
-- **다음 후보**: q_offset → 최종 ablation + 종합 보고 (Notion parent 갱신)
+- **다음**: 최종 ablation + 종합 보고 → Notion parent → alarm 대기
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

@@ -33,7 +33,9 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 | 2 | **joint friction** (fv/fc 4D CMA-ES) | ✅ | **15,744.40** | **−22.7%** (누적 −61.9%) | 2026-07-03 |
 | 3 | **contact (solref_tc/imp0 2D)** | ✅ | **15,329.66** | **+2.6%** (누적 −62.9%) | 2026-07-03 |
 | 4 | **★ trade-off frontier** (λ 재최적화, jump vs sit2stand) | ✅ | **15,189** | +0.9% (누적 −63.2%) | 2026-07-03 |
-| 5+ | q_offset 재검토 / 최종 ablation + 종합 보고 | ⏳ | — | — | — |
+| 5 | torque-deficit 진단 (tau_scale 미채택) | ✅ | (진단) | — | 2026-07-03 |
+| 6 | **★ q_offset ablation — per-trial fudge 완전 제거** | ✅ | **15,182** | fudge 62→0, zero cost | 2026-07-03 |
+| 7+ | 최종 ablation + 종합 보고 (Notion) | ⏳ | — | — | — |
 | 3 | motor armature (arm_hip, arm_knee 2D) | ⏳ | — | — | — |
 | 4 | contact (solref/imp0 2D) — 바닥충돌 항상 ON | ⏳ | — | — | — |
 | 5 | base mass extension (m_base_scale 1D) | ⏳ | — | — | — |
@@ -195,7 +197,33 @@ com_dz_thigh=-0.005 com_dx_thigh=0.001 com_dz_calf=-0.018 com_dx_calf=-0.010 arm
 
 ---
 
-(Phase 4~ skeleton — 실행 시 append)
+## Phase 4 — Trade-off frontier ✅ / Phase 5 — Torque 진단 ✅ / Phase 6 — q_offset 제거 ✅
+
+**Phase 4** (frontier): λ=1 joint re-opt 채택 → **15,189** (순차 phase 15,330 능가). 점프 under-jump 주범=friction. h_ratio가 λ=8에도 0.62 plateau = **Mode-A 근본 에너지 결손**.
+
+**Phase 5** (진단, tau_scale 미채택): 점프 h_real 복원에 가상 tau_scale **~1.6** 필요. 결손 = mass over-est(sit2stand 최적) + friction + AK80-9 under-read 복합. **모델은 측정 토크가 만드는 것을 충실 재현.**
+
+**Phase 6** (★ fudge 제거): per-trial q_offset(62 fudge) → date-group(12) → **zero(0)** 모두 동일 score(15,182). **per-trial fudge 완전 불필요 → 제거. 완전 통합 달성.**
+
+## ★★★ GOAL19 최종 통합 모델 (21 params, 0 fudge)
+
+```
+Score 15,182 (−63.2% vs Pure CAD 41,271)
+mass/inertia/CoM (15) + friction (4) + contact (2), q_offset=ZERO
+파일: code/goal19/goal19_final_model.json
+```
+
+**금지 준수**: tau_scale ✗ / motor_tm LPF ✗ / per-trial fudge ✗(제거) / Mode B ✗ / kneeCurrentTorquePaper ✗
+
+**digital twin 성적**:
+- sit2stand: q/dq/GRF 우수 재현 (mass+friction fit, 발산 안정화)
+- jump: q/dq 형태 O, 절대 높이 56% (구조적 — 측정 토크+통합 mass 한계, tau_scale 금지)
+
+**미해결(구조적, 사용자 결정 필요)**: 점프 절대 높이 (tau_scale 또는 tendon 물리), sit2stand_gnd q-tracking (Mode A GND squat 재현).
+
+---
+
+(Phase 7~ skeleton — 실행 시 append)
 
 ## 🔗 관련 문서
 
