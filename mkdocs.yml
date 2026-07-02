@@ -79,6 +79,7 @@ nav:
     - Phase 4 — Trade-off frontier: phase_4/index.md
     - Phase 5 — Torque 진단: phase_5/index.md
     - Phase 6 — q_offset 제거: phase_6/index.md
+    - Phase 8 — untested axes ablation: phase_8/index.md
   - Sub-experiments:
     - All 31 experiments: sub_experiments/index.md
   - Insights:

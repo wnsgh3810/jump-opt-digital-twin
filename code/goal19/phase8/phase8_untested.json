@@ -1,0 +1,17 @@
+{
+  "baseline": 15182.0,
+  "results": {
+    "arm_hip": {
+      "best": 0.0,
+      "score": 15181.756851680297,
+      "improve_pct": 0.0016015565782065806,
+      "keep": false
+    },
+    "dt": {
+      "best": 0.0005,
+      "score": 15181.756851680297,
+      "improve_pct": 0.0016015565782065806,
+      "keep": false
+    }
+  }
+}

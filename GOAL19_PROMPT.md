@@ -2,16 +2,16 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 7 = 최종 ablation table + 종합 보고서 + Notion parent 갱신 (alarm 대비)
-- **Last completed**: Phase 6 ✅ q_offset ablation. **per-trial fudge(62) 완전 제거, zero cost** → **15,182 (−63.2%)**. 완전 통합 달성.
-- **Next action**: Phase 7 = ablation table(P0→P6) + 종합 결론 문서 + Notion parent page 갱신 + 최종 commit. 모델은 구조적 ceiling 도달 → 정리 phase.
-- **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: **15,182** (최종 통합 모델, 21 params, 0 fudge)
-- **★ 최종 모델**: `code/goal19/goal19_final_model.json` (mass 15p + friction 4 + contact 2, q_offset=ZERO)
-- **★★★ 핵심 결론**: (1) fudge 완전 제거(62→0) = 진짜 통합, (2) 점프 under-jump 주범=friction+mass+torque under-read, (3) h_ratio λ=8에도 0.62 plateau = Mode-A 에너지 결손, tau_scale 금지 하 구조적. sit2stand 우수/점프 형태 O 절대에너지 X.
-- **미해결(구조적)**: 점프 절대 높이 (tau_scale 또는 tendon), sit2stand_gnd q-tracking.
-- **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장.
-- **다음**: 최종 ablation + 종합 보고 → Notion parent → alarm 대기
+- **Now**: Phase 8 ✅ 완료 (untested axes 모두 DROP). 모델 구조적 최적 확인. alarm까지 loop 유지, 추가 productive axis 소진.
+- **Last completed**: Phase 8 ✅ arm_hip DROP(0 최적, Phase1 lock 검증) + dt DROP(0.0005 최적). ablation 완전성 확인 → 모델은 제약 하 진짜 최적.
+- **Next action**: 모든 합리적 axis 소진 (KEEP 없음). alarm(22:00 KST) 대기. 사용자 새 방향 시 즉시 반영. Stribeck은 frontier상 상한 못 넘어 미시도(향후 후보).
+- **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire) — 미발화, loop 유지
+- **Best score so far**: **15,182** (최종 통합 모델, 21 params, 0 fudge). live: https://wnsgh3810.github.io/jump-opt-digital-twin/
+- **★ 최종 모델**: `code/goal19/goal19_final_model.json`
+- **★★★ 핵심 결론**: fudge 완전제거(62→0) / 점프 under-jump 주범=friction+mass+torque under-read / h_ratio λ=8에도 0.62 plateau = Mode-A 구조적 에너지 결손.
+- **미해결(구조적)**: 점프 절대 높이, sit2stand_gnd q-tracking.
+- **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x도 확장.
+- **다음**: Phase 8 untested axes → 결과 ablation append → alarm 대기
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

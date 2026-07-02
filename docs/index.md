@@ -59,6 +59,7 @@ q_offset:              ZERO
 - [Phase 4 — Trade-off frontier ★](phase_4/index.md)
 - [Phase 5 — Torque-deficit 진단 ★](phase_5/index.md)
 - [Phase 6 — q_offset 제거 ★](phase_6/index.md)
+- [Phase 8 — untested axes ablation (완전성)](phase_8/index.md)
 
 ## 🚧 미해결 (구조적, 사용자 결정 필요)
 
