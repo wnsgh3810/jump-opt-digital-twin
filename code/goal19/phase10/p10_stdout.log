@@ -1,0 +1,22 @@
+[Phase 10] Leave-One-Dataset-Out CV (generalization test)
+
+In-sample (full model) per-exp mean by dataset:
+  sit2stand_air_0319    : mean=   226.1 (n=1)
+  sit2stand_gnd_0319    : mean=  1681.7 (n=1)
+  sit2stand_0324        : mean=   229.3 (n=5)
+  jump_position_0421    : mean=   251.2 (n=6)
+  jump_torque_0422      : mean=   467.4 (n=3)
+  jump_0424             : mean=   675.6 (n=9)
+  jump_0602             : mean=   522.9 (n=6)
+
+LODO: refit on other 6, evaluate held-out:
+  hold-out sit2stand_air_0319    : held=   219.0 vs in-sample=   226.1  ratio=0.97  refit(M_foot,fv_hip,fc_knee)=[0.210,0.893,0.581]  (311s)
+  hold-out sit2stand_gnd_0319    : held=  1651.8 vs in-sample=  1681.7  ratio=0.98  refit(M_foot,fv_hip,fc_knee)=[0.173,0.885,0.678]  (278s)
+  hold-out sit2stand_0324        : held=   243.1 vs in-sample=   229.3  ratio=1.06  refit(M_foot,fv_hip,fc_knee)=[0.258,0.727,0.507]  (194s)
+  hold-out jump_position_0421    : held=   285.6 vs in-sample=   251.2  ratio=1.14  refit(M_foot,fv_hip,fc_knee)=[0.229,0.835,0.835]  (319s)
+  hold-out jump_torque_0422      : held=   499.6 vs in-sample=   467.4  ratio=1.07  refit(M_foot,fv_hip,fc_knee)=[0.265,0.847,0.717]  (329s)
+  hold-out jump_0424             : held=   715.5 vs in-sample=   675.6  ratio=1.06  refit(M_foot,fv_hip,fc_knee)=[0.249,0.548,0.740]  (304s)
+  hold-out jump_0602             : held=   528.0 vs in-sample=   522.9  ratio=1.01  refit(M_foot,fv_hip,fc_knee)=[0.232,0.848,0.533]  (318s)
+
+Mean held-out/in-sample ratio = 1.04 (1.0=perfect generalization, >>1=overfit)
+Written: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase10\phase10_lodo_cv.json

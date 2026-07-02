@@ -2,9 +2,9 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 9 ✅ 완료 (Stribeck DROP). 모든 axis 소진 — 모델 구조적 최적 최종 확인. alarm 대기.
-- **Last completed**: Phase 9 ✅ Stribeck 마찰 (mjcb_passive 구현) +0.54% → DROP. 속도-의존 마찰도 trade-off 못 깸 → torque ceiling 지배 최종 확인.
-- **Next action**: **모든 합리적 axis 소진 완료** (Phase 8 arm_hip/dt DROP, Phase 9 Stribeck DROP). 최종 모델 15,182 확정. alarm(22:00 KST) 대기. 사용자 새 방향 시 즉시 반영.
+- **Now**: Phase 10 ✅ LODO-CV 완료 (ratio 1.04, 일반화 입증). 모델 완성 + 검증 완료. alarm 대기.
+- **Last completed**: Phase 10 ✅ leave-one-dataset-out CV. held-out/in-sample ratio 평균 **1.04** → overfit 아닌 진짜 digital twin 입증. refit params fold 간 안정.
+- **Next action**: **GOAL19 최적화+검증 완전 종료**. 15,182 (−63.2%) 확정 + 일반화 입증. alarm(22:00 KST) 대기. 사용자 새 방향 시 즉시 반영.
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire) — 미발화, loop 유지
 - **Best score so far**: **15,182** (최종 통합 모델, 21 params, 0 fudge). live: https://wnsgh3810.github.io/jump-opt-digital-twin/
 - **★ 최종 모델**: `code/goal19/goal19_final_model.json`

@@ -61,6 +61,7 @@ q_offset:              ZERO
 - [Phase 6 — q_offset 제거 ★](phase_6/index.md)
 - [Phase 8 — untested axes ablation (완전성)](phase_8/index.md)
 - [Phase 9 — Stribeck friction (DROP, torque ceiling 확인)](phase_9/index.md)
+- [Phase 10 — LODO cross-validation ★ (일반화 입증, ratio 1.04)](phase_10/index.md)
 
 ## 🚧 미해결 (구조적, 사용자 결정 필요)
 

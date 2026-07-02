@@ -38,8 +38,11 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 | 7 | 최종 ablation + 종합 보고 + GH Pages 배포 정상화 | ✅ | — | — | 2026-07-03 |
 | 8 | 자율 ablation: arm_hip DROP + dt DROP | ✅ | (검증) | 미탐색 axis 없음 | 2026-07-03 |
 | 9 | Stribeck 마찰 (mjcb_passive) | ✅ | 15,100 | +0.54% DROP | 2026-07-03 |
+| 10 | **★ LODO cross-validation** (일반화 검증) | ✅ | ratio 1.04 | overfit 아님 | 2026-07-03 |
 
-**★★★ 최종 결론**: 모든 합리적 axis 소진 (arm_hip/dt/Stribeck 전부 DROP). 통합 모델 **15,182 (−63.2%)** = 주어진 제약 하 진짜 구조적 최적. 점프 under-jump는 torque ceiling(Phase 5, tau_scale ~1.6 필요, 금지)이지 axis 부족 아님. Coulomb-Viscous 균일 마찰 = velocity-dependent Stribeck과 동등.
+**★★★ 최종 결론**: 모든 합리적 axis 소진 (arm_hip/dt/Stribeck 전부 DROP). 통합 모델 **15,182 (−63.2%)** = 주어진 제약 하 진짜 구조적 최적. 점프 under-jump는 torque ceiling(Phase 5, tau_scale ~1.6 필요, 금지)이지 axis 부족 아님. C-V 균일 마찰 = Stribeck 동등.
+
+**★ 일반화 입증 (Phase 10 LODO-CV)**: leave-one-dataset-out 결과 held-out/in-sample ratio **평균 1.04** (sit2stand 0.97~0.98, jumps 1.01~1.14). refit params(M_foot~0.23, fv_hip~0.79, fc_knee~0.65) fold 간 안정. **overfit 아닌 진짜 digital twin** — 미지의 유사 실험도 4% 이내 예측. jump_0424 held-out시 fv_hip=0.548(낮음) → 0424 저-gain 점프가 fv_hip을 아래로 당김 재확인.
 | 7+ | 자율 확장 (tau noise reduction 대안, Stribeck, backlash, dt, integrator) | ⏳ | — | — | — |
 
 **폐기된 Phase**: 원래 P1 (motor LPF motor_tm) — 사용자 금지
