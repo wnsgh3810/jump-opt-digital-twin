@@ -2,15 +2,16 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 2 시작 (joint friction — 발산 안정화 + 저-gain 점프 복구)
-- **Last completed**: Phase 1 ✅ 완료. score **20,367.75 (−50.6%)** (full 15D best 채택). plots + anim + docs commit.
-- **Next action**: Phase 2 = joint friction (fv_hip, fv_knee, fc_hip, fc_knee) 4D NM/CMA-ES. sit2stand_gnd 발산 + jump_0424 regression 겨냥.
+- **Now**: Phase 3 시작 (Stribeck friction — 저-gain 점프 regression 회복)
+- **Last completed**: Phase 2 ✅ joint friction. score **15,744.40 (−22.7% vs P1, 누적 −61.9%)**. plots+anim+docs commit.
+- **Next action**: Phase 3 = Stribeck friction (v_s, fs 추가) — 저속 고마찰(sit2stand 유지) + 고속 저마찰(0421 P70/P90/P100 회복). MuJoCo native 미지원 → callback으로 velocity-dependent 마찰 구현 검토.
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: **20,367.75** (Phase 1)
-- **KEEP model (Phase 1, 15 param)**: M_base=1.152, M_thigh=0.949, M_calf=0.906, M_p=1.411, M_c=0.944, M_foot_ex=0.263, I_thigh=1.181, I_calf=1.325, I_p=1.042, I_c=1.073, com_dz_thigh=-0.005, com_dx_thigh=0.001, com_dz_calf=-0.018, com_dx_calf=-0.010, arm_knee=0.020
-- **핵심 발견**: foot mass + knee armature가 잔차 지배. 통합 mass가 sit2stand/0421/0422 대폭 개선하나 jump_0424 저-gain regression (다중 데이터셋 tension). sit2stand_gnd sim 발산 미해결.
-- **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장할 것.
-- **다음 후보**: Phase 2 friction → Phase 5 contact (발산+regression) → q_offset 재검토
+- **Best score so far**: **15,744.40** (Phase 2)
+- **KEEP model (누적)**: Phase 1 mass 15p + Phase 2 friction (fv_hip=0.926, fv_knee=0.127, fc_hip=0.095, fc_knee=0.809)
+- **핵심 tension**: hip 점성마찰(0.93)이 sit2stand+high-PD엔 최적이나 저-gain position-PD 점프(0421 P70/P90/P100)를 과도 감쇠 → 심한 regression. Stribeck이 해결 후보.
+- **미해결**: sit2stand_gnd q-tracking (발산은 잡았으나 real squat 재현 안 됨, Mode A 한계).
+- **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장.
+- **다음 후보**: Phase 3 Stribeck → contact(Phase 5) → q_offset 재검토 → armature(arm_hip) 재검토
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

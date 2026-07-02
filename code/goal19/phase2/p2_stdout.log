@@ -1,0 +1,28 @@
+[Phase 2] Joint friction 4D on Phase 1 base (=20367.75)
+X0 (near-zero friction) = 20367.75  (5.6s)  [should ~= Phase 1 20367.75]
+gen  1 best= 16056.98 nfev= 10 (64s)
+gen  2 best= 16056.98 nfev= 20 (121s)
+gen  3 best= 16056.98 nfev= 30 (176s)
+gen  4 best= 16056.98 nfev= 40 (233s)
+gen  5 best= 16056.98 nfev= 50 (289s)
+gen  6 best= 16056.98 nfev= 60 (347s)
+gen  7 best= 15806.65 nfev= 70 (404s)
+gen  8 best= 15767.52 nfev= 80 (461s)
+gen  9 best= 15767.52 nfev= 90 (517s)
+gen 10 best= 15767.52 nfev=100 (573s)
+gen 11 best= 15767.52 nfev=110 (629s)
+gen 12 best= 15767.52 nfev=120 (685s)
+gen 13 best= 15744.40 nfev=130 (741s)
+gen 14 best= 15744.40 nfev=140 (797s)
+gen 15 best= 15744.40 nfev=150 (853s)
+gen 16 best= 15744.40 nfev=160 (909s)
+gen 17 best= 15744.40 nfev=170 (965s)
+gen 18 best= 15744.40 nfev=180 (1022s)
+gen 19 best= 15744.40 nfev=190 (1078s)
+
+[Phase 2 done] best=15744.40  Δ vs Phase1 = +22.7%
+  fv_hip   = 0.92566
+  fv_knee  = 0.12703
+  fc_hip   = 0.09467
+  fc_knee  = 0.80890
+Written: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase2\phase2_best.json

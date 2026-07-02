@@ -29,8 +29,9 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 | Phase | Axis | 상태 | Score | Δ | 완료 시각 |
 |---|---|---|---|---|---|
 | 0 | **Pure CAD Base (unified 31 exp, real)** | ✅ | **41,271.18** | baseline | 2026-07-02 (Phase 0 complete) |
-| 1 | **로봇 동역학** (15D CMA-ES → drop-test → 5 KEEP refine) | ✅ | **20,367.75** | **−50.6%** | 2026-07-03 (full-15D best) |
-| 2 | joint friction (fv/fc 4D) | ⏳ | — | — | — |
+| 1 | **로봇 동역학** (15D CMA-ES → drop-test) | ✅ | **20,367.75** | **−50.6%** | 2026-07-03 (full-15D best) |
+| 2 | **joint friction** (fv/fc 4D CMA-ES) | ✅ | **15,744.40** | **−22.7%** (누적 −61.9%) | 2026-07-03 |
+| 3 | Stribeck friction (저속 고마찰/고속 저마찰) — 저-gain 점프 회복 | ⏳ | — | — | — |
 | 3 | motor armature (arm_hip, arm_knee 2D) | ⏳ | — | — | — |
 | 4 | contact (solref/imp0 2D) — 바닥충돌 항상 ON | ⏳ | — | — | — |
 | 5 | base mass extension (m_base_scale 1D) | ⏳ | — | — | — |
@@ -147,7 +148,29 @@ com_dz_thigh=-0.005 com_dx_thigh=0.001 com_dz_calf=-0.018 com_dx_calf=-0.010 arm
 
 ---
 
-(Phase 2~7 skeleton — 실행 시 append)
+## Phase 2 — Joint friction ✅ (fv/fc 4D)
+
+**Status**: Complete (2026-07-03). Score **15,744.40** (−22.7% vs Phase 1, 누적 **−61.9%**).
+
+**best**: fv_hip=0.926, fv_knee=0.127, fc_hip=0.095, fc_knee=0.809 (Phase 1 mass 모델 위 4D CMA-ES).
+
+**Drop-test**: KEEP fv_hip(+14%), fc_knee(+11%). DROP fv_knee(+2.4%), fc_hip(+0.2%). → **hip=점성 지배, knee=쿨롱 지배** (물리적으로 타당).
+
+**★★ 핵심 발견 (새 tension)**:
+- sit2stand 전부 +50~71% (sit2stand_gnd 발산 안정화: q1 sim −14→+0.5, dq 1초 후 0 정착).
+- high-PD 점프 (120_2, 150_2.2_*) +7~18%.
+- **저-gain position-PD 점프 심한 regression**: 0421 P70 −138%, P90 −124%, P100 −156%. hip 점성마찰(0.93)이 느린 sit2stand엔 맞지만 빠른 저-gain 점프를 과도 감쇠.
+- Net +22.7% (sit2stand 지배).
+
+**→ Phase 3 = Stribeck friction**: 저속 고마찰(sit2stand 유지) + 고속 저마찰(저-gain 점프 회복). 속도-무관 C-V 한계 해결. [[G12 Iter32]] Stribeck 시도 참고.
+
+**sit2stand_gnd 부분해결**: 발산은 잡음. 그러나 q-tracking 여전 부정확 (real 느린 squat, sim 정적). Mode A 토크 replay가 이 GND trial squat 재현 못 함. → q_offset/contact 재검토.
+
+**Files**: `phase2_best.json`, `phase2_final_breakdown.json`, `docs/phase_2/`, `anim/sit2stand_gnd_phase2.gif`
+
+---
+
+(Phase 3~ skeleton — 실행 시 append)
 
 ## 🔗 관련 문서
 
