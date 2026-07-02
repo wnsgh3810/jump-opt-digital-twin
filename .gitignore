@@ -35,3 +35,5 @@ code/goal19/**/sim_data/*.npz
 # Local temp
 tmp_*
 *.tmp
+MUJOCO_LOG.TXT
+**/MUJOCO_LOG.TXT
