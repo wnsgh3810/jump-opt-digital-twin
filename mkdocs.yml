@@ -73,7 +73,12 @@ nav:
     - Locks and prohibitions: overview/locks.md
   - Phases:
     - Phase 0 — Pure CAD Baseline: phase_0/index.md
-    - Phase 1 (진행 중): phase_1/index.md
+    - Phase 1 — 로봇 동역학: phase_1/index.md
+    - Phase 2 — Joint friction: phase_2/index.md
+    - Phase 3 — Contact: phase_3/index.md
+    - Phase 4 — Trade-off frontier: phase_4/index.md
+    - Phase 5 — Torque 진단: phase_5/index.md
+    - Phase 6 — q_offset 제거: phase_6/index.md
   - Sub-experiments:
     - All 31 experiments: sub_experiments/index.md
   - Insights:
