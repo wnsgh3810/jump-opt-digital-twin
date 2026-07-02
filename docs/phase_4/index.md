@@ -25,7 +25,7 @@ Phases 1–3에서 발견: **점프가 phase마다 under-jump 악화** (h_sim/h_
 | 4.0 | 4475 | 11597 | 16072 | 0.614 | 0.256 / 0.190 / 0.060 |
 | 8.0 | 4806 | 11535 | 16340 | 0.619 | 0.304 / 0.038 / 0.016 |
 
-![frontier](../../code/goal19/phase4/frontier.png)
+![frontier](../assets/frontier.png)
 
 ## ★★★ 3가지 핵심 발견
 

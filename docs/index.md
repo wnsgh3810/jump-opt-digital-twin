@@ -4,6 +4,24 @@
 
 > **최종 결과: Pure CAD 41,271 → 통합 모델 15,182 (−63.2%). 21 physical params, per-trial fudge 0개.**
 
+## 🎬 Digital twin in action
+
+v14 canonical animation (jump_position_0421 / P70, Mode A — 실측 토크 replay):
+
+![jump animation](assets/anim/jump_position_0421_P70_phase1.gif)
+
+**Sim vs Real (최종 모델, 4-panel: q / dq / τ / GRF)** — 대표 예시:
+
+| 좋은 점프 (position PD) | 고-PD 점프 | sit2stand |
+|---|---|---|
+| ![P70](assets/plots/jump_position_0421__P70_D0p75_P70_D2.png) | ![P100D3](assets/plots/jump_torque_0422__P100_D3.png) | ![s2s](assets/plots/sit2stand_0324__P20_D1.png) |
+
+**Trade-off frontier** (jump vs sit2stand, Phase 4):
+
+![frontier](assets/frontier.png)
+
+전체 31개 sub-experiment plot은 각 [Phase 페이지](#phase)에 있습니다.
+
 ## 🏁 Ablation (Phase 0 → 6)
 
 | Phase | Axis 추가 | Score | Δ | 핵심 |

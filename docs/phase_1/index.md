@@ -100,3 +100,8 @@ CMA-ES (cma 4.4.4), pop=12, maxfevals=400, sigma0=0.15 (normalized). 34 gen / 40
 - Finalize (per-exp + plots + anim): `finalize_phase1.py` → `phase1_final_breakdown.json`
 - Refine (폐기): `run_phase1_refine.py`
 - External sources: [external_sources.md](external_sources.md)
+
+
+## 4-panel plot (sit2stand_gnd — Phase 1 상태)
+
+![sit2stand_gnd P1](../assets/plots/phase1_sit2stand_gnd.png)

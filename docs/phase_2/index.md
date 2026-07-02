@@ -47,3 +47,8 @@ Phase 2 stack = full 4D friction (fv_hip=0.926, fv_knee=0.127, fc_hip=0.095, fc_
 - Finalize (drop-test + per-exp + plots): `finalize_phase2.py` → `phase2_final_breakdown.json`
 - Plots: `plots/` (sit2stand_gnd 안정화, 저-gain regression, high-PD 개선)
 - External sources: [external_sources.md](external_sources.md)
+
+
+## 4-panel plot (sit2stand_gnd — friction으로 발산 안정화)
+
+![sit2stand_gnd P2](../assets/plots/phase2_sit2stand_gnd.png)
