@@ -1,0 +1,350 @@
+{
+  "full": [
+    "sit2stand_air_0319/ROOT",
+    "sit2stand_gnd_0319/ROOT",
+    "sit2stand_0324/P10_D0",
+    "sit2stand_0324/P10_D1",
+    "sit2stand_0324/P20_D1",
+    "sit2stand_0324/P30_D1",
+    "sit2stand_0324/P60_D1.5_P60_D2",
+    "jump_position_0421/P60_D0.75_P60_D2",
+    "jump_position_0421/P70_D0.75_P70_D2",
+    "jump_position_0421/P80_D0.75_P80_D2",
+    "jump_position_0421/P90_D0.75_P90_D2",
+    "jump_position_0421/P100_D0.75_P100_D2",
+    "jump_position_0421/P200_D1.5_P200_D4",
+    "jump_torque_0422/P40_D0.7",
+    "jump_torque_0422/P70_D2",
+    "jump_torque_0422/P100_D3",
+    "jump_0424/60_0.75_60_2",
+    "jump_0424/60_1.5_60_1.5",
+    "jump_0424/90_0.75_90_2",
+    "jump_0424/120_2_120_2",
+    "jump_0424/120_2.2_150_2.5",
+    "jump_0424/120_2.2_200_2.8",
+    "jump_0424/150_2.2_250_3",
+    "jump_0424/150_2.2_350_3.5",
+    "jump_0424/150_2.2_500_4",
+    "jump_0602/60_0.75_60_2",
+    "jump_0602/60_1.5_60_1.5",
+    "jump_0602/90_0.75_90_2",
+    "jump_0602/120_2_120_2",
+    "jump_0602/150_2.2_250_3",
+    "jump_0602/150_2.2_500_5"
+  ],
+  "partial": [],
+  "missing": [],
+  "total": 31,
+  "summary": [
+    {
+      "dataset": "sit2stand_air_0319",
+      "sub": "ROOT",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal12\\xval_v2\\sit2stand_air_0319\\ROOT\\cycle_final.npz",
+      "n": 57412,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": false
+    },
+    {
+      "dataset": "sit2stand_gnd_0319",
+      "sub": "ROOT",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_clean\\sit2stand_gnd_0319\\mode_A\\sim_data\\cycle00.npz",
+      "n": 4356,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "sit2stand_0324",
+      "sub": "P10_D0",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_clean\\sit2stand_0324\\P10_D0\\mode_A\\sim_data\\cycle01.npz",
+      "n": 3837,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": false
+    },
+    {
+      "dataset": "sit2stand_0324",
+      "sub": "P10_D1",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_clean\\sit2stand_0324\\P10_D1\\cycle_final.npz",
+      "n": 54918,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": false
+    },
+    {
+      "dataset": "sit2stand_0324",
+      "sub": "P20_D1",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_clean\\sit2stand_0324\\P20_D1\\mode_A\\sim_data\\cycle01.npz",
+      "n": 4064,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": false
+    },
+    {
+      "dataset": "sit2stand_0324",
+      "sub": "P30_D1",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_clean\\sit2stand_0324\\P30_D1\\mode_A\\sim_data\\cycle01.npz",
+      "n": 4119,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": false
+    },
+    {
+      "dataset": "sit2stand_0324",
+      "sub": "P60_D1.5_P60_D2",
+      "is_jump": false,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_clean\\sit2stand_0324\\P60_D1.5_P60_D2\\mode_A\\sim_data\\cycle01.npz",
+      "n": 4340,
+      "h_real": 0.0,
+      "has_tau": true,
+      "has_grf": false
+    },
+    {
+      "dataset": "jump_position_0421",
+      "sub": "P60_D0.75_P60_D2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_position_0421\\P60_D0.75_P60_D2\\sim_data\\iter6_sim.npz",
+      "n": 161,
+      "h_real": 0.9,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_position_0421",
+      "sub": "P70_D0.75_P70_D2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v5_unified\\Iter6\\jump_position_0421\\P70_D0.75_P70_D2\\mode_A\\sim_data\\cycle01.npz",
+      "n": 158,
+      "h_real": 0.9,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_position_0421",
+      "sub": "P80_D0.75_P80_D2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18\\iter0R\\jump_position_0421\\P80_D0.75_P80_D2\\sim_data\\jump_position_0421_P80_D0.75_P80_D2_iter0R_modeA.npz",
+      "n": 160,
+      "h_real": 0.85,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_position_0421",
+      "sub": "P90_D0.75_P90_D2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v5_unified\\Iter6\\jump_position_0421\\P90_D0.75_P90_D2\\sim_data\\cycle1.npz",
+      "n": 155,
+      "h_real": 0.85,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_position_0421",
+      "sub": "P100_D0.75_P100_D2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_position_0421\\P100_D0.75_P100_D2\\sim_data\\iter6_sim.npz",
+      "n": 153,
+      "h_real": 0.8,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_position_0421",
+      "sub": "P200_D1.5_P200_D4",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_position_0421\\P200_D1.5_P200_D4\\sim_data\\iter6_sim.npz",
+      "n": 151,
+      "h_real": 0.75,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_torque_0422",
+      "sub": "P40_D0.7",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_modeA\\jump_torque_0422\\sim_data\\jump_torque_0422_P40_D0.7.npz",
+      "n": 142,
+      "h_real": 0.9,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_torque_0422",
+      "sub": "P70_D2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_modeA\\jump_torque_0422\\sim_data\\jump_torque_0422_P70_D2.npz",
+      "n": 146,
+      "h_real": 0.85,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_torque_0422",
+      "sub": "P100_D3",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal16\\cross_validation_modeA\\jump_torque_0422\\sim_data\\jump_torque_0422_P100_D3.npz",
+      "n": 146,
+      "h_real": 0.8,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "60_0.75_60_2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\60_0.75_60_2\\sim_data\\run_log.npz",
+      "n": 151,
+      "h_real": 0.9,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "60_1.5_60_1.5",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\60_1.5_60_1.5\\sim_data\\run_log.npz",
+      "n": 153,
+      "h_real": 0.91,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "90_0.75_90_2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v5_unified\\Iter6\\jump_0424\\90_0.75_90_2\\mode_A\\sim_data\\cycle1.npz",
+      "n": 151,
+      "h_real": 0.894,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "120_2_120_2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\120_2_120_2\\sim_data\\run_log.npz",
+      "n": 145,
+      "h_real": 0.84,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "120_2.2_150_2.5",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\120_2.2_150_2.5\\sim_data\\run_log.npz",
+      "n": 144,
+      "h_real": 0.81,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "120_2.2_200_2.8",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\120_2.2_200_2.8\\sim_data\\run_log.npz",
+      "n": 146,
+      "h_real": 0.795,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "150_2.2_250_3",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\150_2.2_250_3\\sim_data\\run_log.npz",
+      "n": 143,
+      "h_real": 0.77,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "150_2.2_350_3.5",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\150_2.2_350_3.5\\sim_data\\run_log.npz",
+      "n": 143,
+      "h_real": 0.77,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0424",
+      "sub": "150_2.2_500_4",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0424\\150_2.2_500_4\\sim_data\\run_log.npz",
+      "n": 146,
+      "h_real": 0.775,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0602",
+      "sub": "60_0.75_60_2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18\\iter1\\jump_0602\\60_0.75_60_2\\sim_data\\run_log.npz",
+      "n": 142,
+      "h_real": 0.94,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0602",
+      "sub": "60_1.5_60_1.5",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18\\iter1\\jump_0602\\60_1.5_60_1.5\\sim_data\\run_log.npz",
+      "n": 141,
+      "h_real": 0.96,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0602",
+      "sub": "90_0.75_90_2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0602\\90_0.75_90_2\\sim_data\\run_log.npz",
+      "n": 143,
+      "h_real": 0.98,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0602",
+      "sub": "120_2_120_2",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0602\\120_2_120_2\\sim_data\\iter6_sim.npz",
+      "n": 137,
+      "h_real": 0.94,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0602",
+      "sub": "150_2.2_250_3",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0602\\150_2.2_250_3\\sim_data\\run_log.npz",
+      "n": 136,
+      "h_real": 0.9,
+      "has_tau": true,
+      "has_grf": true
+    },
+    {
+      "dataset": "jump_0602",
+      "sub": "150_2.2_500_5",
+      "is_jump": true,
+      "npz": "C:\\Users\\junho\\Desktop\\jump_opt\\goal18_v4\\Iter6\\jump_0602\\150_2.2_500_5\\sim_data\\iter6_sim.npz",
+      "n": 140,
+      "h_real": 0.8,
+      "has_tau": true,
+      "has_grf": true
+    }
+  ]
+}

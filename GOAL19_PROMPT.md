@@ -2,13 +2,15 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 0 (Pure CAD Baseline) 시작 대기
-- **Last completed**: (없음)
-- **Next action**: `code/goal19/phase0/run_pure_base.py` 작성/실행 → 31 exp aggregate score
+- **Now**: Phase 1 (로봇 동역학 15D+ CMA-ES) 시작 대기
+- **Last completed**: Phase 0 - Pure CAD Baseline (score_total=**41,271.18**, 31/31 exp, 6.2s)
+- **Next action**: `code/goal19/phase1/run_dynamics_cmaes.py` — 15D+ (M_scale, I_scale, com_shift per part) CMA-ES
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: (Phase 0 결과 대기)
-- **KEEP axes**: (없음)
+- **Best score so far**: 41,271.18 (Phase 0)
+- **KEEP axes**: (Phase 0 = baseline만)
 - **DROP axes**: (없음)
+- **Worst offender**: `sit2stand_gnd_0319/ROOT` (10,262 = 25% of total; 39mm foot pen). Phase 1 우선 target.
+- **Jump h_sim vs h_real**: 평균 0.61m vs 0.83m — mass/inertia calibration 필요
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

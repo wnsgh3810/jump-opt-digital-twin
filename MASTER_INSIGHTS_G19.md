@@ -28,8 +28,8 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 
 | Phase | Axis | 상태 | Score | Δ | 완료 시각 |
 |---|---|---|---|---|---|
-| 0 | Pure CAD Base (inherited iter0R) | ✅ | 59,736 | baseline | 2026-07-02 22:15 |
-| 1 | **로봇 동역학** (mass + inertia + CoM per part, 7-10D) | ⏳ | — | — | — |
+| 0 | **Pure CAD Base (unified 31 exp, real)** | ✅ | **41,271.18** | baseline | 2026-07-02 (Phase 0 complete) |
+| 1 | **로봇 동역학** (mass + inertia + CoM per part, 15D+) | ⏳ | — | — | — |
 | 2 | joint friction (fv/fc 4D) | ⏳ | — | — | — |
 | 3 | motor armature (arm_hip, arm_knee 2D) | ⏳ | — | — | — |
 | 4 | contact (solref/imp0 2D) — 바닥충돌 항상 ON | ⏳ | — | — | — |
@@ -55,37 +55,44 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 
 ---
 
-## Phase 0 — Pure CAD Baseline ✅ INHERITED
+## Phase 0 — Pure CAD Baseline ✅ COMPLETE
 
-**Status**: Completed (2026-07-02 22:15 KST, inherited from GOAL18 iter0R)
+**Status**: Completed (2026-07-02, freshly run in Documents/jump-opt-digital-twin repo)
 
-**Rationale**: GOAL18 iter0R 이미 동일한 Pure CAD 설정으로 31 exp 실행 완료. 물리적으로 재실행해도 동일 결과. 계승하여 시간 절약.
-
-**Params (PURE_BASE, from iter0R)**:
+**Params (PURE_BASE)**:
 ```python
 PURE_BASE = dict(
-    # Iter0R = Pure GOAL7 Base
     fv_hip=0.001, fv_knee=0.001, fc_hip=0.001, fc_knee=0.001,
-    m_base=1.21623,       # M_BASE_CAD
-    solref_tc=0.006320,   # SOLREF_TC default (Iter2)
-    imp0=0.14301,         # IMP0 default (Iter2)
-    m_thigh_scale=1.0, m_calf_scale=1.0,
-    arm_knee=0.00490,     # ARM_KNEE_G default
-    arm_hip=0.0,          # build_xml_i38 LOCK
-    motor_tm=0.0,         # LPF 없음 (직접 τ 입력)
+    m_base_scale=1.0,      # CAD (M_BASE_CAD = 1.21623 unmodified)
+    solref_tc=0.006320, imp0=0.14301,
+    m_thigh_scale=1.0, m_calf_scale=1.0, m_p_scale=1.0, m_c_scale=1.0,
+    m_foot_extra=0.0,      # Pure CAD (iter5 had 0.60)
+    arm_knee=0.00490, arm_hip=0.0,
+    motor_tm=0.0,          # LPF forbidden
 )
 ```
 
-**Weights (iter0R)**: Wq1=Wq2=100, Wdq1=Wdq2=50, Wh=100 (jump), Wt=0, Wgrf=0.1, Wpen=50
+**Weights**: Wq=100, Wdq=50, Wh_jump=100, Wt=0, Wgrf=0.1, Wpen=50
 
-**Score**: **59,736.29** (baseline for all subsequent improvement calculations)
+**Score total**: **41,271.18** (unified 31 exp) — baseline for all subsequent Δ%.
 
-**Best sub-experiment**: `jump_0602/60_1.5_60_1.5` (228.1)
-**Worst sub-experiment**: `jump_torque_0422/P100_D3` (5,883.9)
+**Aggregates**:
+- Sit2stand mean: 2,969.74 (7 subs)
+- Jump mean: 837.63 (24 subs)
 
-**결과 파일**: `goal19/phase0/pure_base_aggregate.json` (iter0R 계승)
+**Best sub**: `jump_0424/90_0.75_90_2` (338.85)
+**Worst sub**: `sit2stand_gnd_0319/ROOT` (10,262.53 = 25% of total; 39mm foot penetration, rmse_q2=46 rad)
 
-**Notion child page**: (다음 단계 생성)
+**Key observations for Phase 1**:
+1. **sit2stand_gnd_0319** — worst offender. Contact + base fixed model needs work. Priority.
+2. **Jump heights systematically LOW** (h_sim 0.61m mean vs h_real 0.83m mean) — mass/inertia calibration expected fix.
+3. **High-PD subs (150_2.2_500, 120_2_120_2, P100_D3)** — 7-29mm penetration. Contact / inertia coupling.
+4. **jump_position_0421 P70/P90 excellent** (rmse_q1 < 0.15) — position PD already tracks well.
+
+**Files**:
+- Runner: `code/goal19/phase0/run_pure_base_31exp.py`
+- Result JSON: `code/goal19/phase0/pure_base_31exp_result.json`
+- Docs: `docs/phase_0/index.md`
 
 ---
 
