@@ -1,0 +1,32 @@
+Full 15D best      = 20367.75
+Parsimonious(5 KEEP, drops->CAD) = 21603.96  (loses +1236.2 vs full)
+----------------------------------------------------------------------
+gen  1  best= 21603.96  nfev= 10  (56s)
+gen  2  best= 21603.96  nfev= 20  (111s)
+gen  3  best= 20803.03  nfev= 30  (166s)
+gen  4  best= 20802.86  nfev= 40  (220s)
+gen  5  best= 20802.86  nfev= 50  (275s)
+gen  6  best= 20802.86  nfev= 60  (329s)
+gen  7  best= 20533.65  nfev= 70  (384s)
+gen  8  best= 20533.65  nfev= 80  (438s)
+gen  9  best= 20533.65  nfev= 90  (493s)
+gen 10  best= 20533.65  nfev=100  (547s)
+gen 11  best= 20533.65  nfev=110  (601s)
+gen 12  best= 20533.65  nfev=120  (656s)
+gen 13  best= 20533.65  nfev=130  (711s)
+gen 14  best= 20533.65  nfev=140  (765s)
+gen 15  best= 20533.65  nfev=150  (819s)
+gen 16  best= 20533.65  nfev=160  (874s)
+gen 17  best= 20533.65  nfev=170  (928s)
+gen 18  best= 20533.65  nfev=180  (982s)
+gen 19  best= 20533.65  nfev=190  (1037s)
+gen 20  best= 20533.65  nfev=200  (1092s)
+gen 21  best= 20533.65  nfev=210  (1146s)
+----------------------------------------------------------------------
+Refined 5D best = 20533.65  (Δ vs Phase0 = 50.2%)
+  M_base_s         = 1.08776
+  M_p_s            = 1.56484
+  M_foot_ex        = 0.40273
+  com_dz_calf      = -0.02397
+  arm_knee         = 0.02394
+Written: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase1\phase1_refine_best.json

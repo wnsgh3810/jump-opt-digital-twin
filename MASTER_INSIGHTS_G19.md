@@ -125,12 +125,25 @@ com_dz_thigh=-0.005 com_dx_thigh=0.001 com_dz_calf=-0.018 com_dx_calf=-0.010 arm
 4. **calf CoM −18mm** 유의미 (+8.4%).
 5. **Boundary chasing**: M_foot_ex(0.30), M_p_s(1.5), arm_knee(0.02) 상한 → refine에서 확장.
 
-**시사점 (다음 Phase)**:
-- arm_knee가 KEEP이고 상한 chase → Phase 3(armature) 조기 통합됨. arm_hip도 재검토 후보.
-- inertia scale 무의미 → Phase에서 link I 재시도 불필요.
-- 잔차 여전 큼 (20K). sit2stand_gnd penetration + high-PD jump가 남은 주범 예상 → contact(Phase 5) 또는 friction(Phase 2)로.
+**Per-exp 결과 (Phase 0→1)**:
+- sit2stand (7): +34~76% 전부 개선
+- jump_position_0421 (6): +5~84% 전부 개선
+- jump_torque_0422 (3): +52~83% 전부 개선
+- **jump_0424 (9): −47~+7% 대부분 regression** ⚠️
+- jump_0602 (6): −31~+34% 혼재
 
-**Files**: `phase1_best.json`, `phase1_droptest.json`, `phase1_refine_best.json`, `docs/phase_1/`
+**★★ 정직한 발견 (Phase 2+ 과제)**:
+1. **다중 데이터셋 tension**: 통합 mass(무거운 foot+paddle)가 sit2stand/0421/0422엔 큰 도움이나 jump_0424 저-gain(60_0.75 −37%, 90_0.75 −47%)엔 해. Pure CAD에서 좋던 점프가 악화.
+2. **sit2stand_gnd_0319 sim 발산**: score −63%지만 q sim 발산(q1→−14, q2→+22). Mode A GND 토크 replay 불안정. GRF spike 4600N. → contact/friction 최우선.
+
+**★ clip 버그 (교훈)**: `eval_wrapper.clip_x`가 refine의 확장 bound를 silently clip. refine 20,533은 artifact. **full 15D best(20,367, M_foot_ex=0.263)가 진짜 최적**. foot mass 0.30 이상 확장은 악화. 향후 bound 확장 시 clip 범위도 확장 필수.
+
+**시사점 (다음 Phase)**:
+- arm_knee KEEP + 상한 chase → Phase 3(armature) 조기 통합. arm_hip 재검토 후보.
+- inertia scale 무의미 → link I 재시도 불필요.
+- 남은 주범: sit2stand_gnd 발산 + jump_0424 regression. → **Phase 2 = joint friction** (발산 안정화 + 저-gain 점프 복구 시도) 또는 **contact**.
+
+**Files**: `phase1_best.json`(채택), `phase1_droptest.json`, `phase1_final_breakdown.json`, `docs/phase_1/`. refine 폐기.
 
 ---
 

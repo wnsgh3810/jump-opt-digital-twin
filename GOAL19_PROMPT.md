@@ -2,15 +2,15 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 1 마무리 (refine + plots + anim), Phase 2 준비
-- **Last completed**: Phase 1 로봇 동역학 15D CMA-ES → score **20,367.75 (−50.6%)** + drop-test 완료
-- **Next action**: refine 완료 → 4-panel plots + canonical anim → commit → Phase 2 (잔차 분석 기반: friction or contact)
+- **Now**: Phase 2 시작 (joint friction — 발산 안정화 + 저-gain 점프 복구)
+- **Last completed**: Phase 1 ✅ 완료. score **20,367.75 (−50.6%)** (full 15D best 채택). plots + anim + docs commit.
+- **Next action**: Phase 2 = joint friction (fv_hip, fv_knee, fc_hip, fc_knee) 4D NM/CMA-ES. sit2stand_gnd 발산 + jump_0424 regression 겨냥.
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: **20,367.75** (Phase 1 full-15D)
-- **KEEP axes (누적)**: M_foot_ex(+24.9%), arm_knee(+21.3%), M_base_s(+8.8%), com_dz_calf(+8.4%), M_p_s(+5.6%)
-- **DROP axes**: 모든 inertia scale(I_*), M_thigh/M_calf/M_c, com_dz_thigh/com_dx_thigh/com_dx_calf
-- **핵심**: foot mass + knee 반사관성이 잔차 지배. link inertia scale 무의미(armature가 흡수). → Phase 3(armature) 조기통합, link I 재시도 불필요.
-- **남은 주범**: sit2stand_gnd penetration + high-PD jump → Phase 2/5 (friction/contact) 후보
+- **Best score so far**: **20,367.75** (Phase 1)
+- **KEEP model (Phase 1, 15 param)**: M_base=1.152, M_thigh=0.949, M_calf=0.906, M_p=1.411, M_c=0.944, M_foot_ex=0.263, I_thigh=1.181, I_calf=1.325, I_p=1.042, I_c=1.073, com_dz_thigh=-0.005, com_dx_thigh=0.001, com_dz_calf=-0.018, com_dx_calf=-0.010, arm_knee=0.020
+- **핵심 발견**: foot mass + knee armature가 잔차 지배. 통합 mass가 sit2stand/0421/0422 대폭 개선하나 jump_0424 저-gain regression (다중 데이터셋 tension). sit2stand_gnd sim 발산 미해결.
+- **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장할 것.
+- **다음 후보**: Phase 2 friction → Phase 5 contact (발산+regression) → q_offset 재검토
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

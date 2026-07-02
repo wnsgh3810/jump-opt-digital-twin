@@ -1,7 +1,13 @@
 # Phase 1 — 로봇 동역학 (mass + inertia + CoM per part)
 
-**Status**: CMA-ES + drop-test 완료, refine 진행 중
-**Phase 0 baseline**: 41,271.18 → **Phase 1 full-15D best: 20,367.75 (−50.6%)**
+**Status**: ✅ 완료 (2026-07-03)
+**Phase 0 baseline**: 41,271.18 → **Phase 1 best: 20,367.75 (−50.6%)** (full 15D CMA-ES)
+
+## 최종 채택 모델
+
+**Phase 1 = full 15D CMA-ES best** (아래 best_x). Drop-test는 물리 해석용, refine는 clip 버그로 폐기 (하단 참조).
+
+per-exp breakdown → `phase1_final_breakdown.json`, 대표 4-panel plots → `plots/`, canonical anim → `anim/jump_position_0421_P70_phase1.gif`.
 
 ## 목표
 
@@ -65,18 +71,32 @@ CMA-ES (cma 4.4.4), pop=12, maxfevals=400, sigma0=0.15 (normalized). 34 gen / 40
 3. **Link inertia scale (I_*)은 전부 DROP.** MuJoCo가 composite mass+geometry에서 자동 계산 → armature가 이미 회전을 지배하므로 link I 미세조정은 무의미. **[MuJoCo CAD calibration 문헌](external_sources.md)의 "uniform density 가정 systematic bias"를 armature가 흡수.**
 4. **calf CoM −18mm** shift가 유의미 (+8.4%) — [Bridging Sim-to-Real 논문](external_sources.md)의 부품별 CoM 편차와 일치.
 
-## ⚠️ Boundary chasing
+## 📊 Per-experiment 결과 (Phase 0 → Phase 1)
 
-3개 KEEP축이 상한 접근: `M_foot_ex→0.263 (bound 0.30)`, `M_p_s→1.411 (bound 1.5)`, `arm_knee→0.020 (bound 0.020)`. → **refine 단계에서 bound 확장** (M_foot_ex→0.6, M_p_s→1.8, arm_knee→0.05). DROP 10축은 CAD로 pin.
+| Dataset | 개선 범위 | 요약 |
+|---|---|---|
+| sit2stand (7) | **+34% ~ +76%** | 전부 대폭 개선 |
+| jump_position_0421 (6) | **+5% ~ +84%** | 전부 개선 |
+| jump_torque_0422 (3) | **+52% ~ +83%** | 전부 개선 |
+| jump_0424 (9) | **−47% ~ +7%** | ⚠️ 대부분 regression |
+| jump_0602 (6) | −31% ~ +34% | 혼재 |
 
-## Refine (진행 중)
+**Net −50.6%** — sit2stand + 0421 + 0422가 압도적으로 개선.
 
-5-KEEP-only + 확장 bound CMA-ES (pop=10, maxfevals=200). DROP축 CAD pin. 결과는 완료 시 갱신.
+## ⚠️ 정직한 발견 (Phase 2+ 과제)
+
+1. **jump_0424 저-gain regression**: `60_0.75`(−37%), `90_0.75`(−47%), `150_2.2_250`(−23%) 등. Pure CAD에서 이미 좋던 subs가 통합 mass 모델(무거운 foot+paddle)로 **더 낮게/느리게 점프** → 악화. sit2stand/0421/0422를 돕는 mass가 이 점프들엔 해. **다중 데이터셋 tension**.
+2. **sit2stand_gnd_0319 여전히 sim 발산**: score는 −63%(10262→3754)지만 q1 sim→−14, q2 sim→+22 (real은 flat). Mode A 토크 replay가 GND에서 불안정. GRF spike 4600N + 조기 penetration. → contact(Phase 5) / friction(Phase 2) 최우선 target.
+
+## ⚠️ Refine 폐기 (clip 버그)
+
+`run_phase1_refine.py`는 5-KEEP 확장 bound CMA-ES를 시도했으나, `eval_wrapper`의 `clip_x`가 **원래 15D bound로 silently clip** → 확장 bound(M_foot_ex 0.30→0.60)가 실제 적용 안 됨. Refine이 보고한 20,533은 clip된 artifact. 진짜 확장 모델은 21,082(더 나쁨). **결론: foot mass를 0.30 이상 확장하면 오히려 악화 → full 15D best(M_foot_ex=0.263)가 진짜 최적.** (교훈: 향후 phase에서 bound 확장 시 clip 범위도 함께 확장.)
 
 ## Files
 
 - Runner: `code/goal19/phase1/run_phase1_cmaes.py`
-- Best: `code/goal19/phase1/phase1_best.json`
-- Drop-test: `code/goal19/phase1/run_droptest.py` → `phase1_droptest.json`
-- Refine: `code/goal19/phase1/run_phase1_refine.py`
+- Best: `code/goal19/phase1/phase1_best.json` (**채택**)
+- Drop-test: `run_droptest.py` → `phase1_droptest.json`
+- Finalize (per-exp + plots + anim): `finalize_phase1.py` → `phase1_final_breakdown.json`
+- Refine (폐기): `run_phase1_refine.py`
 - External sources: [external_sources.md](external_sources.md)
