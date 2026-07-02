@@ -2,15 +2,15 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 1 (로봇 동역학 15D+ CMA-ES) 시작 대기
-- **Last completed**: Phase 0 - Pure CAD Baseline (score_total=**41,271.18**, 31/31 exp, 6.2s)
-- **Next action**: `code/goal19/phase1/run_dynamics_cmaes.py` — 15D+ (M_scale, I_scale, com_shift per part) CMA-ES
+- **Now**: Phase 1 마무리 (refine + plots + anim), Phase 2 준비
+- **Last completed**: Phase 1 로봇 동역학 15D CMA-ES → score **20,367.75 (−50.6%)** + drop-test 완료
+- **Next action**: refine 완료 → 4-panel plots + canonical anim → commit → Phase 2 (잔차 분석 기반: friction or contact)
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: 41,271.18 (Phase 0)
-- **KEEP axes**: (Phase 0 = baseline만)
-- **DROP axes**: (없음)
-- **Worst offender**: `sit2stand_gnd_0319/ROOT` (10,262 = 25% of total; 39mm foot pen). Phase 1 우선 target.
-- **Jump h_sim vs h_real**: 평균 0.61m vs 0.83m — mass/inertia calibration 필요
+- **Best score so far**: **20,367.75** (Phase 1 full-15D)
+- **KEEP axes (누적)**: M_foot_ex(+24.9%), arm_knee(+21.3%), M_base_s(+8.8%), com_dz_calf(+8.4%), M_p_s(+5.6%)
+- **DROP axes**: 모든 inertia scale(I_*), M_thigh/M_calf/M_c, com_dz_thigh/com_dx_thigh/com_dx_calf
+- **핵심**: foot mass + knee 반사관성이 잔차 지배. link inertia scale 무의미(armature가 흡수). → Phase 3(armature) 조기통합, link I 재시도 불필요.
+- **남은 주범**: sit2stand_gnd penetration + high-PD jump → Phase 2/5 (friction/contact) 후보
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

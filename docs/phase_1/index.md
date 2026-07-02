@@ -1,70 +1,82 @@
 # Phase 1 — 로봇 동역학 (mass + inertia + CoM per part)
 
-**Status**: 진행 중 (CMA-ES running)
-**Phase 0 baseline**: 41,271.18 → **Best so far: 24,060.78 (-42%)** at gen 2
+**Status**: CMA-ES + drop-test 완료, refine 진행 중
+**Phase 0 baseline**: 41,271.18 → **Phase 1 full-15D best: 20,367.75 (−50.6%)**
 
 ## 목표
 
-Pure CAD 상태에서 확인된 잔차 (특히 sit2stand_gnd 39mm 침투, jump h_sim 0.61m << h_real 0.83m)를 해결하기 위해 **부품별 mass/inertia/CoM 오차**를 동시 fit한다.
+Pure CAD 잔차 (sit2stand_gnd 39mm 침투, jump h_sim 0.61m << h_real 0.83m)를 부품별 mass/inertia/CoM 오차 동시 fit으로 해결.
 
-## 15D search space
+## 15D search + CMA-ES
 
-| # | Param | Range | X0 (Pure CAD) |
-|---|---|---|---|
-| 0 | `M_base_scale` | [0.75, 1.30] | 1.0 |
-| 1 | `M_thigh_scale` | [0.75, 1.30] | 1.0 |
-| 2 | `M_calf_scale` | [0.75, 1.30] | 1.0 |
-| 3 | `M_p_scale` (paddle hip) | [0.5, 1.5] | 1.0 |
-| 4 | `M_c_scale` (paddle knee) | [0.5, 1.5] | 1.0 |
-| 5 | `M_foot_extra` (kg) | [0.0, 0.30] | 0.0 |
-| 6 | `I_thigh_scale` | [0.5, 1.5] | 1.0 |
-| 7 | `I_calf_scale` | [0.5, 1.5] | 1.0 |
-| 8 | `I_p_scale` | [0.5, 1.5] | 1.0 |
-| 9 | `I_c_scale` | [0.5, 1.5] | 1.0 |
-| 10 | `com_shift_thigh_z` (m) | [-0.020, 0.020] | 0.0 |
-| 11 | `com_shift_thigh_x` (m) | [-0.020, 0.020] | 0.0 |
-| 12 | `com_shift_calf_z` (m) | [-0.020, 0.020] | 0.0 |
-| 13 | `com_shift_calf_x` (m) | [-0.020, 0.020] | 0.0 |
-| 14 | `arm_knee` | [0.001, 0.020] | 0.00490 |
+CMA-ES (cma 4.4.4), pop=12, maxfevals=400, sigma0=0.15 (normalized). 34 gen / 408 eval. 66s/gen.
 
-## Optimizer
+수렴: 41,271 → gen1 25,283 → gen5 21,133 → gen29 20,371 → gen34 **20,368**.
 
-**CMA-ES** (cma 4.4.4). Population 12, maxfevals 400, sigma0 = 0.15 (normalized). Bounds via [0,1] normalization. Seed=42.
+## Full 15D best_x
 
-Rationale (see [external sources](external_sources.md)):
-- Non-differentiable score (MuJoCo forward sim, contact events)
-- Multi-modal (different jump PDs may have local minima)
-- Coupled (mass × inertia)
-- CMA-ES robust to noise + no gradient required
+| # | Param | Range | best | 해석 |
+|---|---|---|---:|---|
+| 0 | M_base_s | [0.75,1.30] | **1.152** | base +15% (CVT/wiring unmodeled) |
+| 1 | M_thigh_s | [0.75,1.30] | 0.949 | thigh −5% |
+| 2 | M_calf_s | [0.75,1.30] | 0.906 | calf −9% |
+| 3 | M_p_s | [0.5,1.5] | **1.411** | paddle_hip +41% (bound chase↑) |
+| 4 | M_c_s | [0.5,1.5] | 0.944 | |
+| 5 | M_foot_ex | [0.0,0.30] | **0.263** | foot +263g (bound chase↑) |
+| 6 | I_thigh_s | [0.5,1.5] | 1.181 | |
+| 7 | I_calf_s | [0.5,1.5] | 1.325 | |
+| 8 | I_p_s | [0.5,1.5] | 1.042 | |
+| 9 | I_c_s | [0.5,1.5] | 1.073 | |
+| 10 | com_dz_thigh | [±0.02] | −0.005 | |
+| 11 | com_dx_thigh | [±0.02] | +0.001 | |
+| 12 | com_dz_calf | [±0.02] | **−0.018** | calf CoM −18mm |
+| 13 | com_dx_calf | [±0.02] | −0.010 | |
+| 14 | arm_knee | [0.001,0.02] | **0.020** | knee 반사관성 (bound chase↑) |
 
-## Progress (auto-updated)
+## 🔬 Drop-test (핵심 결과)
 
-*(phase1_progress.json에서 실시간)*
+각 축을 Pure CAD 값으로 pin 후 31-exp 재평가. `|Δ|/best < 3%` → DROP.
 
-| Gen | Best score | Pop mean | Elapsed |
-|---|---|---|---|
-| 1 | 25,283 | 41,685 | 66s |
-| 2 | 24,060 | 31,385 | 132s |
+| Axis | best | pin→ | Δ score | Δ% | 판정 |
+|---|---:|---:|---:|---:|:--:|
+| **M_foot_ex** | 0.263 | 0.0 | +5061.8 | **+24.9%** | ★ KEEP |
+| **arm_knee** | 0.020 | 0.005 | +4330.8 | **+21.3%** | ★ KEEP |
+| **M_base_s** | 1.152 | 1.0 | +1785.6 | +8.8% | KEEP |
+| **com_dz_calf** | −0.018 | 0.0 | +1706.3 | +8.4% | KEEP |
+| **M_p_s** | 1.411 | 1.0 | +1136.5 | +5.6% | KEEP |
+| I_thigh_s | 1.181 | 1.0 | +464.7 | +2.3% | DROP |
+| I_calf_s | 1.325 | 1.0 | +384.6 | +1.9% | DROP |
+| com_dz_thigh | −0.005 | 0.0 | +280.3 | +1.4% | DROP |
+| M_thigh_s | 0.949 | 1.0 | +207.0 | +1.0% | DROP |
+| com_dx_calf | −0.010 | 0.0 | +166.9 | +0.8% | DROP |
+| I_c_s | 1.073 | 1.0 | +49.2 | +0.2% | DROP |
+| com_dx_thigh | +0.001 | 0.0 | +48.7 | +0.2% | DROP |
+| I_p_s | 1.042 | 1.0 | +43.7 | +0.2% | DROP |
+| M_c_s | 0.944 | 1.0 | −46.6 | −0.2% | DROP |
+| M_calf_s | 0.906 | 1.0 | −79.7 | −0.4% | DROP |
 
-## Key insight — early convergence direction
+**KEEP (5)**: M_foot_ex, arm_knee, M_base_s, com_dz_calf, M_p_s
+**DROP (10)**: 모든 4개 inertia scale + M_thigh/M_calf/M_c + com_dz_thigh/com_dx_thigh/com_dx_calf
 
-At gen 2 best_x:
-- **M_thigh_scale = 1.226** (CAD +22.6% mass on thigh)
-- **I_thigh_scale = 1.168** (CAD +16.8% inertia on thigh)
-- **M_p_scale = 1.195** (paddle_hip heavier)
-- **M_c_scale = 0.760** (paddle_knee lighter)
-- **M_foot_extra = 0.094 kg** (94g extra on foot)
+## 💡 물리적 통찰
 
-This aligns with the [Bridging Sim-to-Real paper](external_sources.md) which reported thigh inertia noticeably higher than CAD while shank consistent. Our CMA-ES independently confirmed the same signature.
+1. **Foot mass가 최대 인자** (−CAD 263g). 실 하드웨어에 foot 고무·볼트·센서가 CAD에 없음. Jump h 재현의 핵심.
+2. **Knee 반사관성(arm_knee)이 2번째** (+21%). CVT+knee-side 모터 rotor inertia가 link inertia보다 회전 동역학 지배.
+3. **Link inertia scale (I_*)은 전부 DROP.** MuJoCo가 composite mass+geometry에서 자동 계산 → armature가 이미 회전을 지배하므로 link I 미세조정은 무의미. **[MuJoCo CAD calibration 문헌](external_sources.md)의 "uniform density 가정 systematic bias"를 armature가 흡수.**
+4. **calf CoM −18mm** shift가 유의미 (+8.4%) — [Bridging Sim-to-Real 논문](external_sources.md)의 부품별 CoM 편차와 일치.
 
-## Drop-test (upon CMA-ES completion)
+## ⚠️ Boundary chasing
 
-Runner: `code/goal19/phase1/run_droptest.py`. For each of 15 axes, pin to X0 (Pure CAD value), evaluate 31-exp score. Axis **DROPS** if `|Δscore| / best < 3%`.
+3개 KEEP축이 상한 접근: `M_foot_ex→0.263 (bound 0.30)`, `M_p_s→1.411 (bound 1.5)`, `arm_knee→0.020 (bound 0.020)`. → **refine 단계에서 bound 확장** (M_foot_ex→0.6, M_p_s→1.8, arm_knee→0.05). DROP 10축은 CAD로 pin.
+
+## Refine (진행 중)
+
+5-KEEP-only + 확장 bound CMA-ES (pop=10, maxfevals=200). DROP축 CAD pin. 결과는 완료 시 갱신.
 
 ## Files
 
 - Runner: `code/goal19/phase1/run_phase1_cmaes.py`
-- Live progress: `code/goal19/phase1/phase1_progress.json`
-- Final result: `code/goal19/phase1/phase1_best.json` (produced on completion)
-- Drop-test: `code/goal19/phase1/run_droptest.py`
+- Best: `code/goal19/phase1/phase1_best.json`
+- Drop-test: `code/goal19/phase1/run_droptest.py` → `phase1_droptest.json`
+- Refine: `code/goal19/phase1/run_phase1_refine.py`
 - External sources: [external_sources.md](external_sources.md)
