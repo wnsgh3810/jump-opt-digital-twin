@@ -2,16 +2,16 @@
 
 ## 🔄 CURRENT STATE (Claude가 매 phase 완료 후 여기 갱신)
 
-- **Now**: Phase 4 시작 (★ balanced objective 재분석 — sit2stand vs jump tension frontier)
-- **Last completed**: Phase 3 ✅ contact (solref_tc=0.00217, imp0=0.371). score **15,329.66 (+2.6%, 누적 −62.9%)**.
-- **Next action**: Phase 4 = jump under-jump 정면 분석. 점프 h_sim/h_real 비율이 phase마다 악화(80%→54%). score가 sit2stand 지배 → 점프 희생. group-normalize 또는 jump-protect 가중치로 KEEP 축(mass/friction/contact) 재최적화 → trade-off frontier 규명. (사용자 "weights 자율 조정 가능" 근거)
+- **Now**: Phase 5 준비 (q_offset 재검토 또는 최종 ablation + 종합 보고)
+- **Last completed**: Phase 4 ✅ trade-off frontier. λ=1 joint re-opt 채택 → **15,189 (누적 −63.2%)**. frontier plot + Mode-A 에너지 결손 규명.
+- **Next action**: Phase 5 = q_offset(encoder bias) 재검토 (per-trial fudge 회피) OR 최종 ablation table + 종합 보고서 (alarm 대비). 남은 개선 여지 적음(frontier plateau) → 종합 정리 우선 고려.
 - **Alarm**: 2026-07-03 22:00 KST cron `f2752ee6` (자동 fire)
-- **Best score so far**: **15,329.66** (Phase 3, default weights)
-- **KEEP model (누적)**: Phase 1 mass 15p + Phase 2 friction(fv_hip=0.926,fv_knee=0.127,fc_hip=0.095,fc_knee=0.809) + Phase 3 contact(solref_tc=0.00217,imp0=0.371)
-- **★★★ 핵심 발견**: 점프 progressively under-jump (h 80%→64%→54%). sit2stand-지배 score가 점프 에너지 희생. dq RMSE가 점프 잔차 지배. tau_scale 금지 하 근본 tension.
-- **미해결**: sit2stand_gnd q-tracking (Mode A 한계). 저-gain 점프 regression.
+- **Best score so far**: **15,189** (Phase 4, λ=1)
+- **채택 모델 (Phase 4 unified best)**: mass 15p (M_foot_ex 0.263→0.227) + friction(fv_hip=0.787,fv_knee=0.127,fc_hip=0.095,fc_knee=0.524) + contact(solref_tc=0.00217,imp0=0.371). → `phase4_adopted_model.json`
+- **★★★ 핵심 결론**: (1) 점프 under-jump 주범=friction, (2) h_ratio가 λ=8에도 0.62 plateau = Mode-A 근본 에너지 결손(~38%), tau_scale 금지 하 못 메움, (3) sit2stand 우수 재현/점프는 형태 O 절대에너지 X. **단일 param set의 Pareto 최적.**
+- **미해결(구조적)**: 점프 절대 높이 (tau_scale 또는 tendon 물리 필요), sit2stand_gnd q-tracking.
 - **주의**: eval_wrapper clip 버그 — bound 확장 시 clip_x 범위도 확장.
-- **다음 후보**: Phase 4 balanced obj → q_offset → arm_hip → 최종 ablation + 종합 보고
+- **다음 후보**: q_offset → 최종 ablation + 종합 보고 (Notion parent 갱신)
 
 > **작업 loop 규칙**: 매 phase 시작 전 이 md 재read → CURRENT STATE 확인 → 진행 → 완료 후 CURRENT STATE 갱신 + commit.
 

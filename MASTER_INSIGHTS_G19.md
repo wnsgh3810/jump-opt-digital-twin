@@ -32,7 +32,8 @@ Base 모델 (CAD only)부터 시작해서 7 dataset × 31 sub-experiment Mode A 
 | 1 | **로봇 동역학** (15D CMA-ES → drop-test) | ✅ | **20,367.75** | **−50.6%** | 2026-07-03 (full-15D best) |
 | 2 | **joint friction** (fv/fc 4D CMA-ES) | ✅ | **15,744.40** | **−22.7%** (누적 −61.9%) | 2026-07-03 |
 | 3 | **contact (solref_tc/imp0 2D)** | ✅ | **15,329.66** | **+2.6%** (누적 −62.9%) | 2026-07-03 |
-| 4 | **★ balanced objective 재분석** (sit2stand vs jump tension) | ⏳ | — | — | — |
+| 4 | **★ trade-off frontier** (λ 재최적화, jump vs sit2stand) | ✅ | **15,189** | +0.9% (누적 −63.2%) | 2026-07-03 |
+| 5+ | q_offset 재검토 / 최종 ablation + 종합 보고 | ⏳ | — | — | — |
 | 3 | motor armature (arm_hip, arm_knee 2D) | ⏳ | — | — | — |
 | 4 | contact (solref/imp0 2D) — 바닥충돌 항상 ON | ⏳ | — | — | — |
 | 5 | base mass extension (m_base_scale 1D) | ⏳ | — | — | — |
@@ -186,7 +187,7 @@ com_dz_thigh=-0.005 com_dx_thigh=0.001 com_dz_calf=-0.018 com_dx_calf=-0.010 arm
 | 1 +mass | 0.542 | 0.844 | 64% |
 | 2 +friction | 0.456 | 0.844 | 54% |
 
-**원인**: score가 sit2stand 잔차(200~4000)에 지배됨. 점프 잔차(130~800)는 상대적으로 작아 CMA-ES가 sit2stand 정확도를 위해 점프를 희생. Phase 1 mass↑(무거운 leg=낮은 점프) + Phase 2 friction(에너지 dissipate)이 sit2stand는 개선하나 점프 에너지 감소. **tau_scale 금지 + mass가 sit2stand 최적 → 점프 under-powered.**
+**원인 (정밀)**: 현재 잔차 sum은 오히려 **점프가 지배** (jump 12,520 vs sit2stand 2,809). tension은 "sit2stand가 score 지배"가 아니라 **"sit2stand-최적 mass/friction이 jump-suboptimal"**. Phase 1 mass는 sit2stand를 ~18k 감소(엄청난 개선)시켰고 점프는 소폭 악화 → 총합 최소화 gradient가 sit2stand-favoring mass를 선택. 무거운 foot mass(0.263kg) + hip 점성마찰(0.93)이 sit2stand엔 최적이나 점프 에너지를 뺏음. **tau_scale 금지 하 근본 trade-off.**
 
 **잔차 분해 (Phase 2)**: 모든 점프 그룹에서 **dq RMSE가 지배** (jump_0424 dq=4846/6394=76%). h와 dq는 연결(약한 leg 신전 = 낮은 속도 + 낮은 높이).
 

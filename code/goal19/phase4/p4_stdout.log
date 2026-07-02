@@ -1,0 +1,16 @@
+[Phase 4] Jump vs sit2stand trade-off frontier
+Phase 3 stack (default): total=15330 s2s=2809 jump=12520 h_ratio=0.542
+  DEFAULT3 (M_foot_ex,fv_hip,fc_knee) = [np.float64(0.2627), np.float64(0.9257), np.float64(0.8089)]
+--------------------------------------------------------------------------------
+LAMBDA= 1.0: total=15189 s2s=3053 jump=12136 h_ratio=0.563  params=[np.float64(0.227), np.float64(0.7872), np.float64(0.5241)]  (526s)
+LAMBDA= 2.0: total=15293 s2s=3275 jump=12018 h_ratio=0.570  params=[np.float64(0.2383), np.float64(0.7479), np.float64(0.4193)]  (524s)
+LAMBDA= 4.0: total=16072 s2s=4475 jump=11597 h_ratio=0.614  params=[np.float64(0.2558), np.float64(0.19), np.float64(0.0599)]  (522s)
+LAMBDA= 8.0: total=16340 s2s=4806 jump=11535 h_ratio=0.619  params=[np.float64(0.304), np.float64(0.0382), np.float64(0.0157)]  (519s)
+--------------------------------------------------------------------------------
+Frontier (jump weight lam -> jump h recovers, sit2stand degrades):
+  lam=phase3_default s2s=   2809 jump=  12520 h_ratio=0.542
+  lam=1.0            s2s=   3053 jump=  12136 h_ratio=0.563
+  lam=2.0            s2s=   3275 jump=  12018 h_ratio=0.570
+  lam=4.0            s2s=   4475 jump=  11597 h_ratio=0.614
+  lam=8.0            s2s=   4806 jump=  11535 h_ratio=0.619
+Written: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase4\phase4_frontier.json
