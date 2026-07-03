@@ -101,6 +101,14 @@ SOLIMP_WIDTH_OVERRIDE = None  # solimp width (None=IMP_MID_G). wider=smoother tr
 STIFF_HIP = 0.0    # hip joint stiffness Nm/rad (parallel elastic; springref=0 -> assists extension from crouch)
 STIFF_KNEE = 0.0   # knee joint stiffness Nm/rad
 SPRINGREF_KNEE = 0.0  # knee spring rest angle (mj frame). <0 => catapult: loaded at crouch(+2.5), relaxed near takeoff
+TAU_SCALE_DIAG = 1.0  # DIAGNOSTIC ONLY (NOT part of model / forbidden to adopt): multiplies jump input torque to test torque-under-read hypothesis
+TAU_SAT_THRESH = 999.0  # DIAGNOSTIC ONLY: torque above this (Nm) is boosted (mimics AK80-9 current saturation under-read)
+TAU_SAT_GAIN = 0.0      # DIAGNOSTIC ONLY: boost factor for the over-threshold torque
+def _tau_diag(tau_arr):
+    a = np.asarray(tau_arr) * TAU_SCALE_DIAG
+    if TAU_SAT_GAIN != 0.0:
+        a = a + TAU_SAT_GAIN * np.sign(a) * np.maximum(0.0, np.abs(a) - TAU_SAT_THRESH)
+    return a
 
 
 def _fric_str():
@@ -280,8 +288,8 @@ Q2_WAIT_SIM = -(-np.pi/2)
 
 def run_jump_sim(model, td, q1_offset, q2_offset, motor_tm=MOTOR_TM_LOCK):
     t_real = td['t']
-    tau_h_input_raw = -td['tau1_real']
-    tau_k_input_raw = -td['tau2_real']
+    tau_h_input_raw = _tau_diag(-td['tau1_real'])
+    tau_k_input_raw = _tau_diag(-td['tau2_real'])
 
     # Settle target: fixed Q_MU_INIT (original) OR the trial's REAL start pose.
     if USE_REAL_JUMP_INIT:

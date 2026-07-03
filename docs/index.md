@@ -105,7 +105,7 @@ q_offset:              ZERO
 ## 🚧 진행 중 / 남은 이슈
 
 - **contact 재최적화 (진행 중)**: knee flex가 GRF chatter 재유발 → (stiff_knee, solref_tc, imp0, m_foot_ex) 결합 재최적화로 GRF smooth + height 유지.
-- **점프 절대 높이 잔여**: knee flex로 h_ratio 0.44→0.67(0424), 0.49→0.70(0602)까지 회복. 완전(0.9+)엔 추가 여지 (mass 재분배, flex 미세조정).
+- **★ 점프 잔차 규명 (Phase 11e capstone)**: 남은 dq2(sim 18 vs real 27)/height 잔차가 torque under-read인지 진단(tau_scale는 진단용, 채택 X). **uniform·current-dependent 어떤 torque boost도 height만 올리고 dq2·total은 악화** → torque under-read 아님. 실측 dq2는 push 내내 moderate하다 마지막 ~10ms에 27로 spike하는데 그 순간 torque는 이미 음(braking) → **near-full-extension 기하 특이점(다리 펼수록 관절 유효관성 붕괴)의 velocity 튐**을 sim이 과소재현. tau_scale로도 못 닫는 구조적 한계 = 현 모델(h 0.73–0.85)이 규칙 하 실질 floor.
 - **sit2stand_gnd q-tracking**: 발산은 잡았으나 real squat 재현 안 됨 (Mode A GND 한계).
 
 ## 🔗 Repository / Data
