@@ -1,0 +1,8 @@
+all-data model per-dataset mean: {'jump_0424': 325.4, 'jump_0602': 210.9, 'jump_position_0421': 323.3, 'jump_torque_0422': 326.3}
+LODO jump_0424: held-out mean=479.2 vs all-data 325.4 => ratio 1.472
+LODO jump_0602: held-out mean=283.3 vs all-data 210.9 => ratio 1.343
+LODO jump_position_0421: held-out mean=515.5 vs all-data 323.3 => ratio 1.595
+LODO jump_torque_0422: held-out mean=343.8 vs all-data 326.3 => ratio 1.054
+
+GENERALIZATION: mean ratio 1.366, max 1.595  (~1 good, >>1 overfit)
+SAVED C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase11\lodo_flex_result.json
