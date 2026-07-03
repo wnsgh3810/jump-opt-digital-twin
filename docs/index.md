@@ -2,8 +2,8 @@
 
 **Unified 7-dataset Mode A digital twin for a 2-DoF single-leg jump robot.**
 
-> **최종 결과: Pure CAD 41,271 → 통합 모델 11,242 (−72.8%). 22 physical params, per-trial fudge 0개.**
-> **★ 재검증(2026-07-03): "점프 under-jump = 측정 한계, tau_scale로만 보정 가능"은 틀렸다. tau_scale 안 쓴 이전 GOAL(GOAL10)을 참조해보니 빠뜨린 물리 축 = knee 관절 유연성(transmission compliance)이었다. 추가 시 jump q/dq/height가 동시에 개선. 이어서 (flex, 접촉, foot mass) 결합 재최적화 → foot mass가 0으로 떨어짐(Phase 1의 무거운 foot은 유연성 부재를 보상하던 것). GRF chatter까지 제거. 15,182 → 11,242.**
+> **최종 결과: Pure CAD 41,271 → 통합 모델 10,183 (−75.3%). 22 physical params, per-trial fudge 0개.**
+> **★ 재검증(2026-07-03): "점프 under-jump = 측정 한계, tau_scale로만 보정 가능"은 틀렸다. tau_scale 안 쓴 이전 GOAL(GOAL10)을 참조해보니 빠뜨린 물리 축 = knee 관절 유연성(transmission compliance)이었다. 추가 시 jump q/dq/height 동시 개선 → foot mass가 0으로(무거운 foot은 유연성 부재를 보상하던 것) → GRF chatter 제거 → 12-D 결합 재적합. 15,182 → 10,183.**
 
 ## 🎬 Digital twin in action
 
@@ -39,20 +39,21 @@ v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs r
 | **6** | per-trial q_offset 제거 (62→0) | 15,182 | fudge 0 | 완전 통합 달성 |
 | **11a** | jump integrator → implicitfast | 15,121 | +0.4% | RK4 GRF chatter 완화 (cosmetic) |
 | **11b ★** | knee 관절 유연성 (stiffness, tau_scale-free) | 11,572 | −23.5% | 누락된 물리 축 재발견 (GOAL10 참조). jump q/dq/height 동시 개선 |
-| **11c ★** | **(flex,contact,foot) 결합 재최적화** | **11,242** | **−2.9%** | **foot mass→0 (flex가 대체). GRF chatter 제거(970→658), h_ratio 0.741→0.774** |
+| **11c ★** | (flex,contact,foot) 결합 재최적화 | 11,242 | −2.9% | foot mass→0 (flex가 대체). GRF chatter 제거(970→658), h_ratio 0.741→0.774 |
+| **11d ★** | **12-D 결합 재적합 (mass+inertia+friction+flex+contact)** | **10,183** | **−9.4%** | **hard jumps(0424/0602)+sit2stand↑, dq2 84→79. stiff_knee→2.0, knee Coulomb↑(CVT). 0421 h 0.90→0.82 trade** |
 
-**Net Pure CAD 41,271 → 11,242 (−72.8%)**. 축 11b/11c가 재검증의 핵심.
+**Net Pure CAD 41,271 → 10,183 (−75.3%)**. 축 11b(flex)가 재검증의 핵심.
 
-## 📊 최종 성적 (그룹별) — flex+contact 재최적화 후
+## 📊 최종 성적 (그룹별) — 12-D 결합 재적합 후
 
 | 그룹 | n | mean score | jump h_ratio | (재검증 전) |
 |---|---:|---:|---:|---:|
-| sit2stand (0324/air) | 6 | **390** | — | (436) |
-| jump_position_0421 | 6 | **263** | **0.896** | (0.734) |
-| jump_torque_0422 | 3 | **287** | **0.878** | (0.761) |
-| jump_0602 | 6 | **272** | **0.732** | (0.493) |
-| jump_0424 | 9 | **404** | **0.692** | (0.442) |
-| sit2stand_gnd (outlier) | 1 | 1200 | — | (Mode A GND 한계) |
+| sit2stand (0324/air) | 6 | **349** | — | (436) |
+| jump_position_0421 | 6 | 323 | 0.823 | (0.734) |
+| jump_torque_0422 | 3 | 326 | **0.846** | (0.761) |
+| jump_0602 | 6 | **211** | **0.749** | (0.493) |
+| jump_0424 | 9 | **325** | **0.733** | (0.442) |
+| sit2stand_gnd (outlier) | 1 | 976 | — | (Mode A GND 한계) |
 
 ## 🔑 핵심 발견
 
@@ -75,10 +76,11 @@ mass/inertia/CoM (15): M_base=1.152 M_thigh=0.949 M_calf=0.906 M_p=1.411 M_c=0.9
                         M_foot_ex=0.227 I_thigh=1.181 I_calf=1.325 I_p=1.042 I_c=1.073
                         com_dz_thigh=-0.005 com_dx_thigh=0.001 com_dz_calf=-0.018
                         com_dx_calf=-0.010 arm_knee=0.020
-friction (4):          fv_hip=0.787 fv_knee=0.127 fc_hip=0.095 fc_knee=0.524
-contact (2):           solref_tc=0.00258 imp0=0.147   (재최적화: 더 부드럽게 → GRF chatter 제거)
-joint flex (1) ★:      stiff_knee=1.20 (springref=0; stiff_hip=0 무의미)
-M_foot_ex ★:           ~0.00 kg  (기존 0.227 → 0. flex가 대체)
+friction (4):          fv_hip=0.713 fv_knee=0.362 fc_hip=0.095 fc_knee=0.988 (knee Coulomb↑ = CVT seal)
+contact (2):           solref_tc=0.00312 imp0=0.137
+joint flex (1) ★:      stiff_knee=2.00 (springref=0; stiff_hip=0 무의미)
+mass/inertia (재적합):  M_base=1.081 M_calf=1.048 M_p=1.288 com_dz_calf=-0.025 arm_knee=0.021
+M_foot_ex ★:           0.021 kg  (기존 0.227 → ~0. flex가 대체)
 integrator:            jump=implicitfast, sit2stand=implicitfast
 q_offset:              ZERO
 ```

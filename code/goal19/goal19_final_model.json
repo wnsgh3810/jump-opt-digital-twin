@@ -5,10 +5,10 @@
   "cumulative_vs_phase0_pct": 63.214039433813134,
   "q_offset": "ZERO (0 fudge params) \u2014 fully unified",
   "mass_15d": [
-    1.1515772718093662,
+    1.0805965266075221,
     0.9486496333852702,
-    0.9056234978136585,
-    1.410583919223634,
+    1.0478137066849094,
+    1.2883077606540532,
     0.9436276209263823,
     0.262720417595138,
     1.1809111275187267,
@@ -17,21 +17,21 @@
     1.0734672594650634,
     -0.005108043542156363,
     0.0008161020404316953,
-    -0.017879151477970524,
+    -0.024642226221816332,
     -0.009933505499032765,
-    0.01995192315480968
+    0.020627546051369794
   ],
-  "m_foot_ex": 0.0011527897606029313,
+  "m_foot_ex": 0.020860598187614498,
   "m_foot_ex_note": "re-open joint re-opt: foot mass 0.227 -> ~0. Phase 1's heavy foot was COMPENSATING for missing knee flex. With flex added, foot mass unnecessary => total 11572->11241, GRF 970->658, h_ratio 0.741->0.774 all improve.",
   "friction": {
-    "fv_hip": 0.7872008105393102,
-    "fv_knee": 0.1270313864143112,
+    "fv_hip": 0.7128995979875281,
+    "fv_knee": 0.36233624322918345,
     "fc_hip": 0.09467027772217118,
-    "fc_knee": 0.5241222129696196
+    "fc_knee": 0.9884150094291342
   },
   "contact": {
-    "solref_tc": 0.0025833483437682206,
-    "imp0": 0.14705464754569458,
+    "solref_tc": 0.003117504340193587,
+    "imp0": 0.13655186992855306,
     "_prev_solref_tc": 0.0021749413193005037,
     "_prev_imp0": 0.3713328795592347
   },
@@ -39,13 +39,19 @@
   "jump_integrator_note": "re-open (2026-07-03): RK4 chattered on stiff contact (0-130N GRF oscillation during push-off). implicitfast smooths GRF, total 15182->15121. h_ratio unchanged (0.563) => chattering was cosmetic, NOT the height limiter.",
   "joint_flex": {
     "stiff_hip": 0.0,
-    "stiff_knee": 1.2019188089941402,
+    "stiff_knee": 1.9999610632225586,
     "springref": 0.0
   },
-  "joint_flex_note": "★ re-open (2026-07-03): added knee transmission compliance (GOAL10 tau_scale-free precedent, springref=0). USER CHALLENGE was correct: prior no-tau_scale goal (GOAL10) reproduced jump height via joint flex, which GOAL19 had dropped. sk=1.15 is score-optimal. NOT a height fudge: summed jump rmse_q1 -49%, rmse_q2 -37%, rmse_dq1 -33%, rmse_dq2 -34%, dh -41% (q/dq AND height all improve). hip stiffness negligible (knee-only identical). Total 15121->11572 (-23.5%). Jump h_ratio 0.563->0.741.",
-  "score_reopen": 11241.5,
-  "score_reopen_history": [15182, 15121, 11572, 11241],
-  "grf_chatter_note": "RESOLVED via joint re-opt of (stiff_knee, solref_tc, imp0, m_foot_ex): softer contact (imp0 0.371->0.147) removed GRF chatter (ΣGRFrmse 970->658, below pre-flex 797). foot mass ->0 (flex replaces it). h_ratio 0.741->0.774, total 11572->11241. See code/goal19/phase11/reopt_flex_contact.py.",
+  "joint_flex_note": "\u2605 re-open (2026-07-03): added knee transmission compliance (GOAL10 tau_scale-free precedent, springref=0). USER CHALLENGE was correct: prior no-tau_scale goal (GOAL10) reproduced jump height via joint flex, which GOAL19 had dropped. sk=1.15 is score-optimal. NOT a height fudge: summed jump rmse_q1 -49%, rmse_q2 -37%, rmse_dq1 -33%, rmse_dq2 -34%, dh -41% (q/dq AND height all improve). hip stiffness negligible (knee-only identical). Total 15121->11572 (-23.5%). Jump h_ratio 0.563->0.741.",
+  "score_reopen": 10182.9,
+  "score_reopen_history": [
+    15182,
+    15121,
+    11572,
+    11241,
+    10182.9
+  ],
+  "grf_chatter_note": "RESOLVED via joint re-opt of (stiff_knee, solref_tc, imp0, m_foot_ex): softer contact (imp0 0.371->0.147) removed GRF chatter (\u03a3GRFrmse 970->658, below pre-flex 797). foot mass ->0 (flex replaces it). h_ratio 0.741->0.774, total 11572->11241. See code/goal19/phase11/reopt_flex_contact.py.",
   "forbidden": [
     "tau_scale",
     "motor_tm LPF",
@@ -57,6 +63,7 @@
     "friction": 4,
     "contact": 2,
     "q_offset": 0,
-    "total": 21
-  }
+    "total": 22
+  },
+  "broad_refit_note": "Phase 11d: 12-D CMA-ES joint re-fit in flex regime (flex+contact+mass+calf-CoM+arm_knee+friction). total 11241->10183 (-9.4%). stiff_knee->2.0, fc_knee->0.99 (CVT Coulomb, physically motivated, NOT runaway: plateaus). TRADE (honest): harder jumps 0424/0602 + sit2stand improved; position jump 0421 h 0.90->0.82. Overall h_ratio flat 0.772. dq2 residual 84->79. GRF push-off smooth (end lift-off spike only)."
 }

@@ -1,0 +1,63 @@
+WARM total=11242 grf=659 h=0.774 obj=12559
+  NEW BEST obj=12329 total=11041 grf=644 h=0.741
+gen 1: best_total=11041 grf=644 h=0.741
+  NEW BEST obj=12255 total=10769 grf=743 h=0.772
+  NEW BEST obj=12194 total=10876 grf=659 h=0.755
+gen 2: best_total=10876 grf=659 h=0.755
+gen 3: best_total=10876 grf=659 h=0.755
+  NEW BEST obj=12060 total=10461 grf=799 h=0.753
+  NEW BEST obj=11927 total=10367 grf=780 h=0.752
+gen 4: best_total=10367 grf=780 h=0.752
+gen 5: best_total=10367 grf=780 h=0.752
+  NEW BEST obj=11903 total=10396 grf=753 h=0.777
+  NEW BEST obj=11867 total=10218 grf=825 h=0.769
+gen 6: best_total=10218 grf=825 h=0.769
+gen 7: best_total=10218 grf=825 h=0.769
+  NEW BEST obj=11832 total=10298 grf=767 h=0.772
+gen 8: best_total=10298 grf=767 h=0.772
+gen 9: best_total=10298 grf=767 h=0.772
+gen 10: best_total=10298 grf=767 h=0.772
+gen 11: best_total=10298 grf=767 h=0.772
+gen 12: best_total=10298 grf=767 h=0.772
+gen 13: best_total=10298 grf=767 h=0.772
+gen 14: best_total=10298 grf=767 h=0.772
+gen 15: best_total=10298 grf=767 h=0.772
+gen 16: best_total=10298 grf=767 h=0.772
+  NEW BEST obj=11822 total=10183 grf=820 h=0.772
+gen 17: best_total=10183 grf=820 h=0.772
+
+SAVED C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase11\reopt_broad_flex_best.json
+{
+  "obj": 11822.151399162434,
+  "total": 10182.884619236896,
+  "grf": 819.6333899627684,
+  "h_ratio": 0.7719780020733994,
+  "x": [
+    1.9999610632225586,
+    0.003117504340193587,
+    0.13655186992855306,
+    0.020860598187614498,
+    1.0805965266075221,
+    1.2883077606540532,
+    1.0478137066849094,
+    -0.024642226221816332,
+    0.020627546051369794,
+    0.7128995979875281,
+    0.36233624322918345,
+    0.9884150094291342
+  ],
+  "names": [
+    "stiff_knee",
+    "solref_tc",
+    "imp0",
+    "m_foot_ex",
+    "M_base_s",
+    "M_p_s",
+    "M_calf_s",
+    "com_dz_calf",
+    "arm_knee",
+    "fv_hip",
+    "fv_knee",
+    "fc_knee"
+  ]
+}
