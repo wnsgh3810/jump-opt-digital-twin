@@ -1,0 +1,8 @@
+4-param (11c) all-data per-dataset mean: {'jump_0424': 403.5, 'jump_0602': 272.0, 'jump_position_0421': 262.7, 'jump_torque_0422': 321.4}
+LODO jump_0424: held-out 483.7 vs 403.5 => ratio 1.199
+LODO jump_0602: held-out 300.4 vs 272.0 => ratio 1.104
+LODO jump_position_0421: held-out 586.4 vs 262.7 => ratio 2.232
+LODO jump_torque_0422: held-out 311.4 vs 321.4 => ratio 0.969
+
+4-PARAM GENERALIZATION: mean ratio 1.376, max 2.232
+(compare 12-D broad refit: mean 1.366, max 1.595)

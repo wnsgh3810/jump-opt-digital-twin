@@ -101,6 +101,7 @@ q_offset:              ZERO
 - [Phase 9 — Stribeck friction (DROP, torque ceiling 확인)](phase_9/index.md)
 - [Phase 10 — LODO cross-validation ★ (일반화 입증, ratio 1.04)](phase_10/index.md)
 - **Phase 11 ★★ — knee 관절 유연성 재발견 (tau_scale-free, "측정 한계" 결론 정정)** ← 재검증 핵심
+- **Phase 11f — LODO 재검증**: 12-D 모델 held-out 절대오차 합 1622 < 4-param 1682 → **12-D(10183)가 더 잘 일반화** (높은 ratio는 in-sample도 잘 맞춰 생긴 착시; overfit 판단은 절대 held-out error로). 0421은 position-PD 별개 regime.
 
 ## 🚧 진행 중 / 남은 이슈
 
