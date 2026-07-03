@@ -1,0 +1,29 @@
+WARM total=9891 grf=820 h=0.772 nan=0
+gen 1: best_total=9891 h=0.772
+  NEW BEST total=10050 grf=706 h=0.752
+gen 2: best_total=10050 h=0.752
+  NEW BEST total=9909 grf=767 h=0.764
+gen 3: best_total=9909 h=0.764
+gen 4: best_total=9909 h=0.764
+  NEW BEST total=9942 grf=734 h=0.764
+gen 5: best_total=9942 h=0.764
+gen 6: best_total=9942 h=0.764
+gen 7: best_total=9942 h=0.764
+  NEW BEST total=9828 grf=743 h=0.789
+gen 8: best_total=9828 h=0.789
+gen 9: best_total=9828 h=0.789
+gen 10: best_total=9828 h=0.789
+gen 11: best_total=9828 h=0.789
+gen 12: best_total=9828 h=0.789
+gen 13: best_total=9828 h=0.789
+gen 14: best_total=9828 h=0.789
+gen 15: best_total=9828 h=0.789
+gen 16: best_total=9828 h=0.789
+
+SAVED C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase11\reopt_wide_unified_best.json
+{
+  "total": 9828.212527704785,
+  "grf": 742.633938536442,
+  "h_ratio": 0.7885656228409139
+}
+PARAMS: {'M_base': 0.9473, 'M_thigh': 1.4678, 'M_calf': 0.5696, 'M_p': 1.4151, 'M_c': 0.4946, 'I_thigh': 0.5004, 'I_calf': 1.9869, 'I_p': 0.8544, 'I_c': 1.0714, 'com_dz_th': 0.0102, 'com_dz_ca': -0.0265, 'arm_knee': 0.0212, 'm_foot': 0.0012, 'stiff_knee': 1.7146, 'solref_tc': 0.0027, 'imp0': 0.0826, 'fv_hip': 0.7076, 'fv_knee': 0.2749, 'fc_knee': 1.1501}
