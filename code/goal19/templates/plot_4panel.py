@@ -106,8 +106,12 @@ def plot_sub(ds, sub, out_png, arm_hip=0.0, arm_knee=0.00490, title_extra=""):
     q2_sim = (-log['q'][:, 2])[mask]
     dq1_sim = (-log['dq'][:, 1])[mask]
     dq2_sim = (-log['dq'][:, 2])[mask]
-    tau1_sim = log['tau_app'][:, 0][mask]
-    tau2_sim = log['tau_app'][:, 1][mask]
+    # tau_app is in MuJoCo joint frame (= -tau_real by Mode A construction).
+    # Convert to canonical/real frame (negate) so it overlays tau_real, exactly
+    # as the angles are converted (q_sim = -q_mj - pi/2). Otherwise the two curves
+    # look like mirror images of the SAME torque.
+    tau1_sim = (-log['tau_app'][:, 0])[mask]
+    tau2_sim = (-log['tau_app'][:, 1])[mask]
     grf_sim = log['grf_z'][mask]
 
     q1_real = td['q1'] + q1_off
