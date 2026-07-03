@@ -1,5 +1,5 @@
 {
-  "total": 10182.884619236896,
+  "total": 9891.24352351367,
   "groups": {
     "sit2stand_air_0319": {
       "n": 1,
@@ -10,7 +10,7 @@
     },
     "sit2stand_gnd_0319": {
       "n": 1,
-      "score": 975.5788587610854,
+      "score": 683.9377630378609,
       "hs": 0.0,
       "hr": 0.0,
       "jump": false
@@ -64,7 +64,7 @@
       "ds": "sit2stand_gnd_0319",
       "sub": "ROOT",
       "is_jump": false,
-      "score": 975.5788587610854,
+      "score": 683.9377630378609,
       "h_sim": null,
       "h_real": null
     },

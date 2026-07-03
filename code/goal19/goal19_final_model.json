@@ -43,13 +43,14 @@
     "springref": 0.0
   },
   "joint_flex_note": "\u2605 re-open (2026-07-03): added knee transmission compliance (GOAL10 tau_scale-free precedent, springref=0). USER CHALLENGE was correct: prior no-tau_scale goal (GOAL10) reproduced jump height via joint flex, which GOAL19 had dropped. sk=1.15 is score-optimal. NOT a height fudge: summed jump rmse_q1 -49%, rmse_q2 -37%, rmse_dq1 -33%, rmse_dq2 -34%, dh -41% (q/dq AND height all improve). hip stiffness negligible (knee-only identical). Total 15121->11572 (-23.5%). Jump h_ratio 0.563->0.741.",
-  "score_reopen": 10182.9,
+  "score_reopen": 9891.0,
   "score_reopen_history": [
     15182,
     15121,
     11572,
     11241,
-    10182.9
+    10183,
+    9891
   ],
   "grf_chatter_note": "RESOLVED via joint re-opt of (stiff_knee, solref_tc, imp0, m_foot_ex): softer contact (imp0 0.371->0.147) removed GRF chatter (\u03a3GRFrmse 970->658, below pre-flex 797). foot mass ->0 (flex replaces it). h_ratio 0.741->0.774, total 11572->11241. See code/goal19/phase11/reopt_flex_contact.py.",
   "forbidden": [
@@ -65,5 +66,6 @@
     "q_offset": 0,
     "total": 22
   },
-  "broad_refit_note": "Phase 11d: 12-D CMA-ES joint re-fit in flex regime (flex+contact+mass+calf-CoM+arm_knee+friction). total 11241->10183 (-9.4%). stiff_knee->2.0, fc_knee->0.99 (CVT Coulomb, physically motivated, NOT runaway: plateaus). TRADE (honest): harder jumps 0424/0602 + sit2stand improved; position jump 0421 h 0.90->0.82. Overall h_ratio flat 0.772. dq2 residual 84->79. GRF push-off smooth (end lift-off spike only)."
+  "broad_refit_note": "Phase 11d: 12-D CMA-ES joint re-fit in flex regime (flex+contact+mass+calf-CoM+arm_knee+friction). total 11241->10183 (-9.4%). stiff_knee->2.0, fc_knee->0.99 (CVT Coulomb, physically motivated, NOT runaway: plateaus). TRADE (honest): harder jumps 0424/0602 + sit2stand improved; position jump 0421 h 0.90->0.82. Overall h_ratio flat 0.772. dq2 residual 84->79. GRF push-off smooth (end lift-off spike only).",
+  "gnd_autobasez_note": "Phase 11g: GND sit2stand start-slam fix. base_z was hardcoded 0.19 (foot buried/floating) -> 2000N slam -> divergence. Auto-compute base_z from FK so foot sits on ground at t=0. gnd 976->684 (-30%), total 10183->9891 (-76.0% vs CAD). Remaining gnd error = open-loop torque replay drift over 8s quasi-static squat (Mode A structural limit for near-static motion)."
 }

@@ -2,7 +2,7 @@
 
 **Unified 7-dataset Mode A digital twin for a 2-DoF single-leg jump robot.**
 
-> **최종 결과: Pure CAD 41,271 → 통합 모델 10,183 (−75.3%). 22 physical params, per-trial fudge 0개.**
+> **최종 결과: Pure CAD 41,271 → 통합 모델 9,891 (−76.0%). 22 physical params, per-trial fudge 0개.**
 > **★ 재검증(2026-07-03): "점프 under-jump = 측정 한계, tau_scale로만 보정 가능"은 틀렸다. tau_scale 안 쓴 이전 GOAL(GOAL10)을 참조해보니 빠뜨린 물리 축 = knee 관절 유연성(transmission compliance)이었다. 추가 시 jump q/dq/height 동시 개선 → foot mass가 0으로(무거운 foot은 유연성 부재를 보상하던 것) → GRF chatter 제거 → 12-D 결합 재적합. 15,182 → 10,183.**
 
 ## 🎬 Digital twin in action

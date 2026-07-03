@@ -101,6 +101,7 @@ SOLIMP_WIDTH_OVERRIDE = None  # solimp width (None=IMP_MID_G). wider=smoother tr
 STIFF_HIP = 0.0    # hip joint stiffness Nm/rad (parallel elastic; springref=0 -> assists extension from crouch)
 STIFF_KNEE = 0.0   # knee joint stiffness Nm/rad
 SPRINGREF_KNEE = 0.0  # knee spring rest angle (mj frame). <0 => catapult: loaded at crouch(+2.5), relaxed near takeoff
+GND_AUTO_BASEZ = True  # GND sit2stand: auto-place foot on ground at start (fix start-slam divergence)
 TAU_SCALE_DIAG = 1.0  # DIAGNOSTIC ONLY (NOT part of model / forbidden to adopt): multiplies jump input torque to test torque-under-read hypothesis
 TAU_SAT_THRESH = 999.0  # DIAGNOSTIC ONLY: torque above this (Nm) is boosted (mimics AK80-9 current saturation under-read)
 TAU_SAT_GAIN = 0.0      # DIAGNOSTIC ONLY: boost factor for the over-threshold torque
@@ -426,7 +427,17 @@ def run_sit2stand_cycle(model, td, q1_offset, q2_offset, motor_tm=MOTOR_TM_LOCK,
 
     data = mujoco.MjData(model)
     if is_gnd:
-        data.qpos[:] = [BASE_Z_INIT, q1_start_sim, q2_start_sim]
+        # Auto base_z: place foot exactly on ground for the start pose (prevents
+        # start-slam divergence — base_z is a free slider not PD-controlled).
+        data.qpos[:] = [1.0, q1_start_sim, q2_start_sim]
+        mujoco.mj_forward(model, data)
+        _fg = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "foot")
+        if _fg >= 0 and GND_AUTO_BASEZ:
+            _foot_z = float(data.geom_xpos[_fg][2])
+            base_z0 = 1.0 - _foot_z + FOOT_RADIUS  # foot cylinder bottom -> ground z=0
+        else:
+            base_z0 = BASE_Z_INIT
+        data.qpos[:] = [base_z0, q1_start_sim, q2_start_sim]
         hip_idx = 1; knee_idx = 2
     else:
         data.qpos[:] = [q1_start_sim, q2_start_sim]
