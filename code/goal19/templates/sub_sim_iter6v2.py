@@ -88,6 +88,20 @@ FC_HIP = 0.0
 FV_KNEE = 0.0
 FC_KNEE = 0.0
 
+# ── GOAL19 continuation: previously-untested axes (defaults = original behavior) ──
+FOOT_MU_SLIDE = 1.0     # tangential (foot slip). was hardcoded 1.0
+FOOT_MU_TORSION = 0.02  # torsional
+FOOT_MU_ROLL = 0.01     # rolling
+USE_REAL_JUMP_INIT = False  # True: jump settles to trial's real start pose (not fixed Q_MU_INIT)
+BASE_Z_INIT_OFF = 0.0   # additive offset to BASE_Z_INIT
+JUMP_INTEGRATOR = "implicitfast"  # ADOPTED (re-open): RK4 chattered on stiff contact; implicitfast smooths GRF, total 15182->15121
+IMP1_OVERRIDE = None        # solimp max impedance (None=use IMP1_G). higher=firmer contact
+SOLIMP_WIDTH_OVERRIDE = None  # solimp width (None=IMP_MID_G). wider=smoother transition
+
+
+def _fric_str():
+    return f"{FOOT_MU_SLIDE:.5f} {FOOT_MU_TORSION:.5f} {FOOT_MU_ROLL:.5f}"
+
 
 # ── Composite inertia (same as iter5) ────────────────────────────────────────
 def ci_locked():
@@ -123,8 +137,10 @@ def _solref_str():
     return f"{SOLREF_TC_LOCK:.6f} {SOLREF_D_G}"
 
 def _solimp_str():
-    imp0_eff = min(IMP0_LOCK, IMP1_G * 0.99)
-    return f"{imp0_eff:.6f} {IMP1_G:.5f} {IMP_MID_G:.6f} 0.5 2"
+    imp1 = IMP1_OVERRIDE if IMP1_OVERRIDE is not None else IMP1_G
+    width = SOLIMP_WIDTH_OVERRIDE if SOLIMP_WIDTH_OVERRIDE is not None else IMP_MID_G
+    imp0_eff = min(IMP0_LOCK, imp1 * 0.99)
+    return f"{imp0_eff:.6f} {imp1:.5f} {width:.6f} 0.5 2"
 
 
 def _base_mass():
@@ -137,18 +153,18 @@ def build_xml_jump_6d(arm_hip, arm_knee):
     sr = _solref_str(); si = _solimp_str()
     M_base = _base_mass()
     return f"""<mujoco model="iter6_jump_6d">
-<option cone="{CONE}" impratio="{IMPRATIO}" gravity="0 0 -9.81" timestep="{DT}" integrator="RK4"/>
+<option cone="{CONE}" impratio="{IMPRATIO}" gravity="0 0 -9.81" timestep="{DT}" integrator="{JUMP_INTEGRATOR}"/>
 <default><default class="leg">
-  <geom friction="1.0 0.02 0.01" margin="0.001" condim="6"/>
+  <geom friction="{_fric_str()}" margin="0.001" condim="6"/>
   <joint axis="0 1 0"/>
   <motor ctrlrange="-100 100" ctrllimited="false"/>
   <default class="foot">
-    <geom type="cylinder" size="{FOOT_RADIUS:.4f}" priority="1" solref="{sr}" solimp="{si}" condim="6" friction="1.0 0.02 0.01" margin="0.001"/>
+    <geom type="cylinder" size="{FOOT_RADIUS:.4f}" priority="1" solref="{sr}" solimp="{si}" condim="6" friction="{_fric_str()}" margin="0.001"/>
   </default>
 </default></default>
 <worldbody>
   <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
-  <geom name="floor" size="0 0 0.05" type="plane" solref="{sr}" solimp="{si}" friction="1.0 0.02 0.01" margin="0.001"/>
+  <geom name="floor" size="0 0 0.05" type="plane" solref="{sr}" solimp="{si}" friction="{_fric_str()}" margin="0.001"/>
   <body name="base" pos="0 0 0" childclass="leg">
     <joint name="base_z" type="slide" axis="0 0 1" armature="0" damping="0" frictionloss="0"/>
     <inertial pos="0 0 0" mass="{M_base:.6f}" diaginertia="0.005 0.005 0.005"/>
@@ -180,16 +196,16 @@ def build_xml_sit2stand_air_6d(arm_hip, arm_knee):
     return f"""<mujoco model="iter6_s2s_air">
 <option cone="{CONE}" impratio="{IMPRATIO}" gravity="0 0 -9.81" timestep="{DT}" integrator="implicitfast"/>
 <default><default class="leg">
-  <geom friction="1.0 0.02 0.01" margin="0.001" condim="6"/>
+  <geom friction="{_fric_str()}" margin="0.001" condim="6"/>
   <joint axis="0 1 0"/>
   <motor ctrlrange="-100 100" ctrllimited="false"/>
   <default class="foot">
-    <geom type="cylinder" size="{FOOT_RADIUS:.4f}" priority="1" solref="{sr}" solimp="{si}" condim="6" friction="1.0 0.02 0.01" margin="0.001"/>
+    <geom type="cylinder" size="{FOOT_RADIUS:.4f}" priority="1" solref="{sr}" solimp="{si}" condim="6" friction="{_fric_str()}" margin="0.001"/>
   </default>
 </default></default>
 <worldbody>
   <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
-  <geom name="floor" pos="0 0 -10.0" size="0 0 0.05" type="plane" solref="{sr}" solimp="{si}" friction="1.0 0.02 0.01" margin="0.001"/>
+  <geom name="floor" pos="0 0 -10.0" size="0 0 0.05" type="plane" solref="{sr}" solimp="{si}" friction="{_fric_str()}" margin="0.001"/>
   <body name="base" pos="0 0 1.5" childclass="leg">
     <inertial pos="0 0 0" mass="{M_base:.6f}" diaginertia="0.005 0.005 0.005"/>
     <geom type="box" size="0.06 0.03 0.025" contype="0" conaffinity="0"/>
@@ -220,16 +236,16 @@ def build_xml_sit2stand_gnd_6d(arm_hip, arm_knee):
     return f"""<mujoco model="iter6_s2s_gnd">
 <option cone="{CONE}" impratio="{IMPRATIO}" gravity="0 0 -9.81" timestep="{DT}" integrator="implicitfast"/>
 <default><default class="leg">
-  <geom friction="1.0 0.02 0.01" margin="0.001" condim="6"/>
+  <geom friction="{_fric_str()}" margin="0.001" condim="6"/>
   <joint axis="0 1 0"/>
   <motor ctrlrange="-100 100" ctrllimited="false"/>
   <default class="foot">
-    <geom type="cylinder" size="{FOOT_RADIUS:.4f}" priority="1" solref="{sr}" solimp="{si}" condim="6" friction="1.0 0.02 0.01" margin="0.001"/>
+    <geom type="cylinder" size="{FOOT_RADIUS:.4f}" priority="1" solref="{sr}" solimp="{si}" condim="6" friction="{_fric_str()}" margin="0.001"/>
   </default>
 </default></default>
 <worldbody>
   <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
-  <geom name="floor" size="0 0 0.05" type="plane" solref="{sr}" solimp="{si}" friction="1.0 0.02 0.01" margin="0.001"/>
+  <geom name="floor" size="0 0 0.05" type="plane" solref="{sr}" solimp="{si}" friction="{_fric_str()}" margin="0.001"/>
   <body name="base" pos="0 0 0" childclass="leg">
     <joint name="base_z" type="slide" axis="0 0 1" armature="0" damping="0" frictionloss="0"/>
     <inertial pos="0 0 0" mass="{M_base:.6f}" diaginertia="0.005 0.005 0.005"/>
@@ -263,8 +279,17 @@ def run_jump_sim(model, td, q1_offset, q2_offset, motor_tm=MOTOR_TM_LOCK):
     tau_h_input_raw = -td['tau1_real']
     tau_k_input_raw = -td['tau2_real']
 
+    # Settle target: fixed Q_MU_INIT (original) OR the trial's REAL start pose.
+    if USE_REAL_JUMP_INIT:
+        q1_start_eff = float(td['q1'][0]) + q1_offset
+        q2_start_eff = float(td['q2'][0]) + q2_offset
+        set_q1 = -q1_start_eff - np.pi / 2
+        set_q2 = -q2_start_eff
+    else:
+        set_q1, set_q2 = Q1_MU_INIT, Q2_MU_INIT
+
     data = mujoco.MjData(model)
-    data.qpos[:] = [BASE_Z_INIT, Q1_MU_INIT, Q2_MU_INIT]
+    data.qpos[:] = [BASE_Z_INIT + BASE_Z_INIT_OFF, set_q1, set_q2]
     data.qvel[:] = 0.0
     mujoco.mj_forward(model, data)
 
@@ -289,8 +314,8 @@ def run_jump_sim(model, td, q1_offset, q2_offset, motor_tm=MOTOR_TM_LOCK):
     for k in range(N):
         t_cur = k * dt
         if t_cur < T_SETTLE:
-            tau_h = SETTLE_KP * (Q1_MU_INIT - data.qpos[1]) + SETTLE_KD * (0 - data.qvel[1])
-            tau_k = SETTLE_KP * (Q2_MU_INIT - data.qpos[2]) + SETTLE_KD * (0 - data.qvel[2])
+            tau_h = SETTLE_KP * (set_q1 - data.qpos[1]) + SETTLE_KD * (0 - data.qvel[1])
+            tau_k = SETTLE_KP * (set_q2 - data.qpos[2]) + SETTLE_KD * (0 - data.qvel[2])
             tau_h_filt = tau_h
             tau_k_filt = tau_k
         elif t_cur < T_SETTLE + T_motion:

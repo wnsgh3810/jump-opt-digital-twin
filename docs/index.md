@@ -6,9 +6,13 @@
 
 ## 🎬 Digital twin in action
 
-v14 canonical animation (jump_position_0421 / P70, Mode A — 실측 토크 replay):
+v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs real 라벨 표시** (Hsim / Hreal). 정수기: jump 접촉 integrator `implicitfast` 채택 (RK4 GRF chattering 제거).
 
-![jump animation](assets/anim/jump_position_0421_P70_phase1.gif)
+| Position-PD jump (재현 우수, h_ratio 0.82) | Torque-command jump (under-jump, h_ratio 0.50) |
+|---|---|
+| ![pos jump](assets/anim/jump_position_0421_P70_phase1.gif) | ![torque jump](assets/anim/jump_0424_90_torque_phase1.gif) |
+
+> **★ 핵심 진단 (재검증)**: 점프 under-jump은 균일하지 않다. **위치제어 점프(0421)는 h를 0.82로 잘 재현**하지만, **토크명령 점프(0424/0602)는 0.50으로 크게 미달**하며 *명령 토크가 클수록 더 나빠진다* (60_0.75: 0.56 → 150_2.2_500: 0.49). 이 split은 **AK80-9 전류→토크 under-read(포화)**의 지문이다 — 위치제어 τ는 PD로 계산돼 정확하고, 토크명령 τ는 포화 시 측정 전류토크가 실제 출력보다 작게 읽힌다. Mode A는 이 작게 읽힌 τ를 충실히 replay → 낮은 점프. **sim 버그가 아니라 측정 한계**이며, 유일한 보정 수단은 `tau_scale`(현재 금지, 이전 GOAL들의 "MASSIVE WIN" 축).
 
 **Sim vs Real (최종 모델, 4-panel: q / dq / τ / GRF)** — 대표 예시:
 
@@ -51,7 +55,9 @@ v14 canonical animation (jump_position_0421 / P70, Mode A — 실측 토크 repl
 
 3. **★ per-trial fudge 완전 불필요**: 62개 per-trial q_offset을 zero cost로 제거. 물리 모델이 q-tracking을 완전히 담당 → 진짜 통합 single param set.
 
-4. **★ 점프 under-jump = 구조적 한계**: 점프 절대 높이는 실측의 44~76% (데이터셋별). 원인 = sit2stand-최적 mass(과중) + friction 소산 + AK80-9 torque under-read 복합. tau_scale(금지)로만 보정 가능. **digital twin은 "측정된 토크가 만드는 것"을 충실히 재현** — gap은 측정·통합모델 한계이지 sim 버그가 아님 ([Phase 5 진단](phase_5/index.md)).
+4. **★ 점프 under-jump = 측정 한계 (재검증으로 정밀화)**: 이전엔 "mass 과중+friction+torque 복합"이라 했으나, 재검증 결과 **원인이 측정 방식별로 깔끔히 갈린다**. 위치제어 점프(PD 계산 τ)는 h_ratio 0.82로 잘 재현; 토크명령 점프(전류측정 τ)는 0.50이며 명령 토크↑일수록 악화 → **AK80-9 전류→토크 under-read(포화)**가 지배 원인. `tau_scale`(금지)로만 보정 가능. **digital twin은 "측정된 토크가 만드는 것"을 충실히 재현** — gap은 측정 한계이지 sim 버그가 아님 ([Phase 5 진단](phase_5/index.md)).
+
+5. **재검증에서 반증된 가설들** (사용자 지적 축 전수 테스트): foot slip(μ 0.4→3.0) · real jump init pose · base_z offset — **모두 h_ratio 무변화 또는 악화**. GRF chattering(RK4)은 실재하나 **cosmetic** — `implicitfast`로 제거해도 h_ratio 0.563 불변 (score 15182→15121 소폭 개선만). 즉 under-jump의 원인은 이들이 아니라 위 4번(측정 한계)로 수렴.
 
 ## 🤖 최종 통합 모델 (21 params, 0 fudge)
 

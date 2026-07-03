@@ -41,6 +41,10 @@ def make_anim(ds, sub, out_gif, x=None, kind=None):
         q1_canon = (-log['q'][:, 1] - np.pi/2)[mask]
         q2_canon = (-log['q'][:, 2])[mask]
         kind = kind or 'gnd'   # jump base moves — gnd-style base_z compute
+        # Jump height: peak base_z (sim) vs measured (real). Keep label short so it fits.
+        _h_sim = float(log['q'][:, 0].max())
+        _h_real = float(td.get('h_real', 0.0)) if isinstance(td, dict) else 0.0
+        _label = f"{sub}  Hsim {_h_sim:.2f} / Hreal {_h_real:.2f} m"
     else:
         from sub_sim_motor_tm import load_sit2stand_cycle, SIT2STAND_GND_ID
         is_gnd = (f"{ds}/{sub}" == SIT2STAND_GND_ID)
@@ -66,9 +70,10 @@ def make_anim(ds, sub, out_gif, x=None, kind=None):
     tmp_npz.parent.mkdir(parents=True, exist_ok=True)
     np.savez(tmp_npz, t_sim=t_sim, q1_sim=q1_canon, q2_sim=q2_canon)
 
+    _lbl = _label if is_jump else f"{ds}/{sub}"
     try:
         render_sit2stand(str(tmp_npz), str(CANON_XML), str(out_gif),
-                         trial_label=f"{ds}/{sub}", kind=kind)
+                         trial_label=_lbl, kind=kind)
     except Exception as e:
         print(f"  anim render err {ds}/{sub}: {e}"); return False
     return Path(out_gif).exists()

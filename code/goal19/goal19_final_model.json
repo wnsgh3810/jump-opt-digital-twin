@@ -32,6 +32,9 @@
     "solref_tc": 0.0021749413193005037,
     "imp0": 0.3713328795592347
   },
+  "jump_integrator": "implicitfast",
+  "jump_integrator_note": "re-open (2026-07-03): RK4 chattered on stiff contact (0-130N GRF oscillation during push-off). implicitfast smooths GRF, total 15182->15121. h_ratio unchanged (0.563) => chattering was cosmetic, NOT the height limiter.",
+  "score_reopen": 15121.0,
   "forbidden": [
     "tau_scale",
     "motor_tm LPF",
