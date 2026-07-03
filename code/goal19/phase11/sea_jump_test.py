@@ -1,3 +1,7 @@
+# UPDATE (2026-07-03): rotor needs REAL inertia (diaginertia, triangle-ineq valid), NOT armature —
+# then motor DOES move. RESULT: soft spring (k=40) -> motor dq2 peak 28 == real 27 (rigid gives 18)!
+# => series compliance REPRODUCES the terminal spike. But base-jump still buggy (h~0.19): 2-body push-off
+# needs cleaner topology/settle. Velocity-spike hypothesis CONFIRMED; full jump integration = future work.
 # WIP/BUGGY (2026-07-03): series spring does not transmit motion to link even when rigid
 # (sea_k=5000 -> link constant, no jump). Topology/settle/sign bug. INCONCLUSIVE test.
 # Kept as starting point for a proper SEA reimplementation.
