@@ -40,9 +40,10 @@ v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs r
 | **11a** | jump integrator → implicitfast | 15,121 | +0.4% | RK4 GRF chatter 완화 (cosmetic) |
 | **11b ★** | knee 관절 유연성 (stiffness, tau_scale-free) | 11,572 | −23.5% | 누락된 물리 축 재발견 (GOAL10 참조). jump q/dq/height 동시 개선 |
 | **11c ★** | (flex,contact,foot) 결합 재최적화 | 11,242 | −2.9% | foot mass→0 (flex가 대체). GRF chatter 제거(970→658), h_ratio 0.741→0.774 |
-| **11d ★** | **12-D 결합 재적합 (mass+inertia+friction+flex+contact)** | **10,183** | **−9.4%** | **hard jumps(0424/0602)+sit2stand↑, dq2 84→79. stiff_knee→2.0, knee Coulomb↑(CVT). 0421 h 0.90→0.82 trade** |
+| **11d ★** | 12-D 결합 재적합 (mass+inertia+friction+flex+contact) | 10,183 | −9.4% | hard jumps(0424/0602)+sit2stand↑, dq2 84→79. stiff_knee→2.0, knee Coulomb↑(CVT). 0421 h 0.90→0.82 trade |
+| **11g ★** | **GND sit2stand start-slam fix (auto base_z)** | **9,891** | **−2.9%** | **worst trial 976→684. foot를 t=0에 지면에 정확히 배치 → 2000N slam·발산 제거 (물리적으로 옳음)** |
 
-**Net Pure CAD 41,271 → 10,183 (−75.3%)**. 축 11b(flex)가 재검증의 핵심.
+**Net Pure CAD 41,271 → 9,891 (−76.0%)**. 축 11b(flex)가 재검증의 핵심.
 
 ## 📊 최종 성적 (그룹별) — 12-D 결합 재적합 후
 
@@ -53,7 +54,7 @@ v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs r
 | jump_torque_0422 | 3 | 326 | **0.846** | (0.761) |
 | jump_0602 | 6 | **211** | **0.749** | (0.493) |
 | jump_0424 | 9 | **325** | **0.733** | (0.442) |
-| sit2stand_gnd (outlier) | 1 | 976 | — | (Mode A GND 한계) |
+| sit2stand_gnd (outlier) | 1 | **684** | — | (976→684, start-slam fix) |
 
 ## 🔑 핵심 발견
 
@@ -106,8 +107,8 @@ q_offset:              ZERO
 ## 🚧 진행 중 / 남은 이슈
 
 - **contact 재최적화 (진행 중)**: knee flex가 GRF chatter 재유발 → (stiff_knee, solref_tc, imp0, m_foot_ex) 결합 재최적화로 GRF smooth + height 유지.
-- **★ 점프 잔차 규명 (Phase 11e capstone)**: 남은 dq2(sim 18 vs real 27)/height 잔차가 torque under-read인지 진단(tau_scale는 진단용, 채택 X). **uniform·current-dependent 어떤 torque boost도 height만 올리고 dq2·total은 악화** → torque under-read 아님. 실측 dq2는 push 내내 moderate하다 마지막 ~10ms에 27로 spike하는데 그 순간 torque는 이미 음(braking) → **near-full-extension 기하 특이점(다리 펼수록 관절 유효관성 붕괴)의 velocity 튐**을 sim이 과소재현. tau_scale로도 못 닫는 구조적 한계 = 현 모델(h 0.73–0.85)이 규칙 하 실질 floor.
-- **sit2stand_gnd q-tracking**: 발산은 잡았으나 real squat 재현 안 됨 (Mode A GND 한계).
+- **★ 점프 잔차 규명 (Phase 11e capstone)**: 남은 dq2(sim 18 vs real 27)/height 잔차가 torque under-read인지 진단(tau_scale는 진단용, 채택 X). **uniform·current-dependent 어떤 torque boost도 height만 올리고 dq2·total은 악화** → torque under-read 아님. 실측 dq2는 push 내내 moderate하다 마지막 ~10ms에 27로 spike하는데 그 순간 torque는 이미 음(braking) → **near-full-extension 기하 특이점(다리 펼수록 관절 유효관성 붕괴)의 velocity 튐**을 sim이 과소재현. tau_scale로도 못 닫음. **단, 미해결 열린 축**: 지금 flex는 *병렬* 스프링. 진짜 전달계는 *직렬 탄성(SEA: motor→spring→link)* 으로 takeoff 순간 에너지 스냅을 낼 수 있음 → 이 terminal spike를 재현할 후보. SEA 시제 구현은 buggy(직렬 스프링이 rigid여도 link 미전달)라 **inconclusive** — 정밀 재구현 필요 (`code/goal19/phase11/sea_jump_test.py`, WIP).
+- **sit2stand_gnd q-tracking**: start-slam은 auto base_z로 해결(976→684). 남은 잔차는 8s 준정적 squat의 open-loop 토크 replay drift (Mode A 구조 한계).
 
 ## 🔗 Repository / Data
 
