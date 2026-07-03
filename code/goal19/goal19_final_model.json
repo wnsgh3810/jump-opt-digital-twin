@@ -21,7 +21,8 @@
     -0.009933505499032765,
     0.01995192315480968
   ],
-  "m_foot_ex": 0.2270233349153278,
+  "m_foot_ex": 0.0011527897606029313,
+  "m_foot_ex_note": "re-open joint re-opt: foot mass 0.227 -> ~0. Phase 1's heavy foot was COMPENSATING for missing knee flex. With flex added, foot mass unnecessary => total 11572->11241, GRF 970->658, h_ratio 0.741->0.774 all improve.",
   "friction": {
     "fv_hip": 0.7872008105393102,
     "fv_knee": 0.1270313864143112,
@@ -29,20 +30,22 @@
     "fc_knee": 0.5241222129696196
   },
   "contact": {
-    "solref_tc": 0.0021749413193005037,
-    "imp0": 0.3713328795592347
+    "solref_tc": 0.0025833483437682206,
+    "imp0": 0.14705464754569458,
+    "_prev_solref_tc": 0.0021749413193005037,
+    "_prev_imp0": 0.3713328795592347
   },
   "jump_integrator": "implicitfast",
   "jump_integrator_note": "re-open (2026-07-03): RK4 chattered on stiff contact (0-130N GRF oscillation during push-off). implicitfast smooths GRF, total 15182->15121. h_ratio unchanged (0.563) => chattering was cosmetic, NOT the height limiter.",
   "joint_flex": {
     "stiff_hip": 0.0,
-    "stiff_knee": 1.15,
+    "stiff_knee": 1.2019188089941402,
     "springref": 0.0
   },
   "joint_flex_note": "★ re-open (2026-07-03): added knee transmission compliance (GOAL10 tau_scale-free precedent, springref=0). USER CHALLENGE was correct: prior no-tau_scale goal (GOAL10) reproduced jump height via joint flex, which GOAL19 had dropped. sk=1.15 is score-optimal. NOT a height fudge: summed jump rmse_q1 -49%, rmse_q2 -37%, rmse_dq1 -33%, rmse_dq2 -34%, dh -41% (q/dq AND height all improve). hip stiffness negligible (knee-only identical). Total 15121->11572 (-23.5%). Jump h_ratio 0.563->0.741.",
-  "score_reopen": 11572.0,
-  "score_reopen_history": [15182, 15121, 11572],
-  "grf_chatter_note": "flex re-excites contact-solver GRF chatter (ΣGRFrmse 797->970). solref_tc 0.00217->0.005 smooths it (->675, below pre-flex baseline) at +3% total, h unchanged. NOT applied here (manual override); TODO joint re-opt of (stiff_knee, solref_tc, imp0, m_foot_ex) since old contact was fit without flex.",
+  "score_reopen": 11241.5,
+  "score_reopen_history": [15182, 15121, 11572, 11241],
+  "grf_chatter_note": "RESOLVED via joint re-opt of (stiff_knee, solref_tc, imp0, m_foot_ex): softer contact (imp0 0.371->0.147) removed GRF chatter (ΣGRFrmse 970->658, below pre-flex 797). foot mass ->0 (flex replaces it). h_ratio 0.741->0.774, total 11572->11241. See code/goal19/phase11/reopt_flex_contact.py.",
   "forbidden": [
     "tau_scale",
     "motor_tm LPF",

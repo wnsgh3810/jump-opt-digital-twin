@@ -1,0 +1,46 @@
+  NEW BEST obj=14708 total=11997 grf=1355 h=0.792  sk=1.826 srtc=0.00152 imp0=0.375 mfx=0.251
+  NEW BEST obj=13711 total=11983 grf=864 h=0.714  sk=0.834 srtc=0.00218 imp0=0.371 mfx=0.122
+  NEW BEST obj=13358 total=11736 grf=811 h=0.778  sk=1.557 srtc=0.00344 imp0=0.309 mfx=0.217
+  NEW BEST obj=12978 total=11419 grf=779 h=0.755  sk=1.132 srtc=0.00282 imp0=0.331 mfx=0.090
+gen 1: best_obj=12978 (total=11419 grf=779)
+  NEW BEST obj=12913 total=11402 grf=755 h=0.809  sk=1.549 srtc=0.00287 imp0=0.212 mfx=0.009
+gen 2: best_obj=12913 (total=11402 grf=755)
+gen 3: best_obj=12913 (total=11402 grf=755)
+gen 4: best_obj=12913 (total=11402 grf=755)
+  NEW BEST obj=12837 total=11341 grf=748 h=0.798  sk=1.419 srtc=0.00422 imp0=0.354 mfx=0.002
+  NEW BEST obj=12811 total=11352 grf=730 h=0.795  sk=1.407 srtc=0.00168 imp0=0.126 mfx=0.005
+gen 5: best_obj=12811 (total=11352 grf=730)
+  NEW BEST obj=12758 total=11425 grf=666 h=0.752  sk=1.065 srtc=0.00277 imp0=0.184 mfx=0.043
+gen 6: best_obj=12758 (total=11425 grf=666)
+  NEW BEST obj=12742 total=11405 grf=669 h=0.765  sk=1.208 srtc=0.00256 imp0=0.143 mfx=0.074
+  NEW BEST obj=12721 total=11384 grf=668 h=0.757  sk=1.082 srtc=0.00294 imp0=0.197 mfx=0.022
+gen 7: best_obj=12721 (total=11384 grf=668)
+gen 8: best_obj=12721 (total=11384 grf=668)
+gen 9: best_obj=12721 (total=11384 grf=668)
+  NEW BEST obj=12676 total=11374 grf=651 h=0.754  sk=1.104 srtc=0.00215 imp0=0.112 mfx=0.069
+gen 10: best_obj=12676 (total=11374 grf=651)
+gen 11: best_obj=12676 (total=11374 grf=651)
+gen 12: best_obj=12676 (total=11374 grf=651)
+  NEW BEST obj=12672 total=11331 grf=670 h=0.776  sk=1.228 srtc=0.00215 imp0=0.124 mfx=0.010
+  NEW BEST obj=12559 total=11242 grf=659 h=0.774  sk=1.202 srtc=0.00258 imp0=0.147 mfx=0.001
+gen 13: best_obj=12559 (total=11242 grf=659)
+
+SAVED C:\Users\junho\Documents\jump-opt-digital-twin\code\goal19\phase11\reopt_flex_contact_best.json
+BEST: {
+  "obj": 12558.598668329956,
+  "total": 11241.507507829749,
+  "grf": 658.5455802501037,
+  "h_ratio": 0.774116957833487,
+  "x": [
+    1.2019188089941402,
+    0.0025833483437682206,
+    0.14705464754569458,
+    0.0011527897606029313
+  ],
+  "names": [
+    "stiff_knee",
+    "solref_tc",
+    "imp0",
+    "m_foot_ex"
+  ]
+}
