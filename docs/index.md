@@ -2,7 +2,8 @@
 
 **Unified 7-dataset Mode A digital twin for a 2-DoF single-leg jump robot.**
 
-> **최종 결과: Pure CAD 41,271 → 통합 모델 15,182 (−63.2%). 21 physical params, per-trial fudge 0개.**
+> **최종 결과: Pure CAD 41,271 → 통합 모델 11,572 (−72.0%). 22 physical params, per-trial fudge 0개.**
+> **★ 재검증(2026-07-03): "점프 under-jump = 측정 한계, tau_scale로만 보정 가능"은 틀렸다. tau_scale 안 쓴 이전 GOAL(GOAL10)을 참조해보니 빠뜨린 물리 축 = knee 관절 유연성(transmission compliance)이었다. 추가 시 jump q/dq/height가 동시에 개선 (측정 한계 아님). 15,182 → 11,572.**
 
 ## 🎬 Digital twin in action
 
@@ -12,7 +13,7 @@ v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs r
 |---|---|
 | ![pos jump](assets/anim/jump_position_0421_P70_phase1.gif) | ![torque jump](assets/anim/jump_0424_90_torque_phase1.gif) |
 
-> **★ 핵심 진단 (재검증)**: 점프 under-jump은 균일하지 않다. **위치제어 점프(0421)는 h를 0.82로 잘 재현**하지만, **토크명령 점프(0424/0602)는 0.50으로 크게 미달**하며 *명령 토크가 클수록 더 나빠진다* (60_0.75: 0.56 → 150_2.2_500: 0.49). 이 split은 **AK80-9 전류→토크 under-read(포화)**의 지문이다 — 위치제어 τ는 PD로 계산돼 정확하고, 토크명령 τ는 포화 시 측정 전류토크가 실제 출력보다 작게 읽힌다. Mode A는 이 작게 읽힌 τ를 충실히 replay → 낮은 점프. **sim 버그가 아니라 측정 한계**이며, 유일한 보정 수단은 `tau_scale`(현재 금지, 이전 GOAL들의 "MASSIVE WIN" 축).
+> **★ 핵심 발견 (재검증, 정정)**: 처음엔 under-jump을 "AK80-9 전류토크 포화 under-read → tau_scale로만 보정"이라 결론냈으나 **이는 틀렸다**. tau_scale을 쓰지 않은 이전 GOAL(**GOAL10**)이 점프 높이를 ratio ~0.87로 재현했고, 그 핵심 축은 **knee 관절 유연성(transmission compliance, `stiffness` Nm/rad)** — GOAL19 금지 목록(tau_scale, motor_tm, Mode B, per-trial fudge)에 **없는** 정당한 물리 축이었다. GOAL19가 이걸 빠뜨렸던 것. 통합 모델에 knee stiffness(sk=1.15, springref=0)를 넣으니 **점프 q/dq/height가 동시에 개선** (rmse_q1 −49%, rmse_q2 −37%, rmse_dq1 −33%, rmse_dq2 −34%, dh −41%) → 높이 fudge가 아니라 **누락된 물리 자유도**를 되찾은 것. hip stiffness는 무의미(knee가 전부). **남은 이슈**: flex가 contact-solver GRF chatter를 재유발(위 torque-jump plot GRF 진동) → contact 재최적화 예정.
 
 **Sim vs Real (최종 모델, 4-panel: q / dq / τ / GRF)** — 대표 예시:
 
@@ -35,17 +36,21 @@ v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs r
 | **2** | joint friction (fv/fc 4D) | 15,744 | **−22.7%** | hip 점성 + knee 쿨롱; sit2stand_gnd 발산 안정화 |
 | **3** | contact (solref/imp0 2D) | 15,330 | +2.6% | stiffer contact = sharp push-off |
 | **4** | frontier re-opt (λ=1) | 15,189 | +0.9% | 결합 재최적화 > 순차 phase |
-| **6** | per-trial q_offset 제거 (62→0) | **15,182** | fudge 0 | **완전 통합 달성** |
+| **6** | per-trial q_offset 제거 (62→0) | 15,182 | fudge 0 | 완전 통합 달성 |
+| **11a** | jump integrator → implicitfast | 15,121 | +0.4% | RK4 GRF chatter 완화 (cosmetic) |
+| **11b ★** | **knee 관절 유연성 (stiffness, tau_scale-free)** | **11,572** | **−23.5%** | **누락된 물리 축 재발견 (GOAL10 참조). jump q/dq/height 동시 개선** |
 
-## 📊 최종 성적 (그룹별)
+**Net Pure CAD 41,271 → 11,572 (−72.0%)**. 축 11b가 재검증의 핵심 발견.
 
-| 그룹 | n | mean score | jump h_ratio |
-|---|---:|---:|---:|
-| sit2stand | 7 | 436 | — (우수 재현) |
-| jump_position_0421 | 6 | 251 | 0.734 |
-| jump_torque_0422 | 3 | 467 | 0.761 |
-| jump_0602 | 6 | 523 | 0.493 |
-| jump_0424 | 9 | 676 | 0.442 |
+## 📊 최종 성적 (그룹별) — knee flex 적용 후
+
+| 그룹 | n | mean score | jump h_ratio | (flex 전) |
+|---|---:|---:|---:|---:|
+| sit2stand | 7 | ~475 | — | (436) |
+| jump_position_0421 | 6 | **251** | **0.853** | (0.734) |
+| jump_torque_0422 | 3 | **345** | **0.845** | (0.761) |
+| jump_0602 | 6 | **286** | **0.699** | (0.493) |
+| jump_0424 | 9 | **417** | **0.666** | (0.442) |
 
 ## 🔑 핵심 발견
 
@@ -55,11 +60,13 @@ v14 canonical animation, Mode A (실측 토크 replay). **점프 높이 sim vs r
 
 3. **★ per-trial fudge 완전 불필요**: 62개 per-trial q_offset을 zero cost로 제거. 물리 모델이 q-tracking을 완전히 담당 → 진짜 통합 single param set.
 
-4. **★ 점프 under-jump = 측정 한계 (재검증으로 정밀화)**: 이전엔 "mass 과중+friction+torque 복합"이라 했으나, 재검증 결과 **원인이 측정 방식별로 깔끔히 갈린다**. 위치제어 점프(PD 계산 τ)는 h_ratio 0.82로 잘 재현; 토크명령 점프(전류측정 τ)는 0.50이며 명령 토크↑일수록 악화 → **AK80-9 전류→토크 under-read(포화)**가 지배 원인. `tau_scale`(금지)로만 보정 가능. **digital twin은 "측정된 토크가 만드는 것"을 충실히 재현** — gap은 측정 한계이지 sim 버그가 아님 ([Phase 5 진단](phase_5/index.md)).
+4. **★★ 점프 under-jump = 누락된 물리 축 (knee 관절 유연성) — "측정 한계" 결론 정정**: 처음엔 "AK80-9 포화 under-read, tau_scale로만 보정"이라 결론냈으나 **틀렸다**. tau_scale을 쓰지 않은 이전 GOAL(**GOAL10**)이 점프 높이를 ratio ~0.87로 재현했고, 그 축은 **knee 관절 유연성**(transmission compliance, MuJoCo `stiffness`, springref=0) — GOAL19 금지 목록에 **없는** 정당한 물리 자유도였다. GOAL19가 통합 fit 과정에서 이걸 빠뜨렸던 것. sk=1.15 추가 시 total 15,121→11,572(−23.5%), **jump rmse_q1 −49%, rmse_q2 −37%, rmse_dq1 −33%, rmse_dq2 −34%, dh −41% 동시 개선** → 높이 fudge가 아니라 실제 dynamics를 되찾음. (교훈: "다 해봤다"는 성급했다. 이전 goal 이력 참조가 결정적이었다.)
 
-5. **재검증에서 반증된 가설들** (사용자 지적 축 전수 테스트): foot slip(μ 0.4→3.0) · real jump init pose · base_z offset — **모두 h_ratio 무변화 또는 악화**. GRF chattering(RK4)은 실재하나 **cosmetic** — `implicitfast`로 제거해도 h_ratio 0.563 불변 (score 15182→15121 소폭 개선만). 즉 under-jump의 원인은 이들이 아니라 위 4번(측정 한계)로 수렴.
+5. **재검증에서 반증된 가설들**: foot slip(μ 0.4→3.0) · real jump init pose · base_z offset · viscous friction(fv→0은 전 그룹 균일 +0.08) — 모두 under-jump split을 설명 못 함. GRF chattering(RK4)은 실재하나 높이엔 무관(cosmetic) → `implicitfast` 채택. **이 반증들이 있었기에** knee flex가 진짜 원인임이 좁혀졌다.
 
-## 🤖 최종 통합 모델 (21 params, 0 fudge)
+6. **⚠️ 남은 이슈 (진행 중)**: knee flex가 contact-solver GRF chatter를 재유발 (ΣGRFrmse 797→970). solref_tc 0.00217→0.005로 smoothing 가능(→675)하나 수동 override → **flex 포함 contact 재최적화** 예정.
+
+## 🤖 최종 통합 모델 (22 params, 0 fudge)
 
 ```
 mass/inertia/CoM (15): M_base=1.152 M_thigh=0.949 M_calf=0.906 M_p=1.411 M_c=0.944
@@ -68,6 +75,8 @@ mass/inertia/CoM (15): M_base=1.152 M_thigh=0.949 M_calf=0.906 M_p=1.411 M_c=0.9
                         com_dx_calf=-0.010 arm_knee=0.020
 friction (4):          fv_hip=0.787 fv_knee=0.127 fc_hip=0.095 fc_knee=0.524
 contact (2):           solref_tc=0.00217 imp0=0.371
+joint flex (1) ★:      stiff_knee=1.15 (springref=0; stiff_hip=0 무의미)
+integrator:            jump=implicitfast, sit2stand=implicitfast
 q_offset:              ZERO
 ```
 → `code/goal19/goal19_final_model.json`
@@ -86,10 +95,12 @@ q_offset:              ZERO
 - [Phase 8 — untested axes ablation (완전성)](phase_8/index.md)
 - [Phase 9 — Stribeck friction (DROP, torque ceiling 확인)](phase_9/index.md)
 - [Phase 10 — LODO cross-validation ★ (일반화 입증, ratio 1.04)](phase_10/index.md)
+- **Phase 11 ★★ — knee 관절 유연성 재발견 (tau_scale-free, "측정 한계" 결론 정정)** ← 재검증 핵심
 
-## 🚧 미해결 (구조적, 사용자 결정 필요)
+## 🚧 진행 중 / 남은 이슈
 
-- **점프 절대 높이**: tau_scale(금지) 허용 또는 tendon/spring 에너지 물리 추가 필요.
+- **contact 재최적화 (진행 중)**: knee flex가 GRF chatter 재유발 → (stiff_knee, solref_tc, imp0, m_foot_ex) 결합 재최적화로 GRF smooth + height 유지.
+- **점프 절대 높이 잔여**: knee flex로 h_ratio 0.44→0.67(0424), 0.49→0.70(0602)까지 회복. 완전(0.9+)엔 추가 여지 (mass 재분배, flex 미세조정).
 - **sit2stand_gnd q-tracking**: 발산은 잡았으나 real squat 재현 안 됨 (Mode A GND 한계).
 
 ## 🔗 Repository / Data

@@ -97,6 +97,9 @@ BASE_Z_INIT_OFF = 0.0   # additive offset to BASE_Z_INIT
 JUMP_INTEGRATOR = "implicitfast"  # ADOPTED (re-open): RK4 chattered on stiff contact; implicitfast smooths GRF, total 15182->15121
 IMP1_OVERRIDE = None        # solimp max impedance (None=use IMP1_G). higher=firmer contact
 SOLIMP_WIDTH_OVERRIDE = None  # solimp width (None=IMP_MID_G). wider=smoother transition
+# Joint flex / transmission compliance (GOAL10 tau_scale-free precedent: hip 0.0999, knee 1.0854, springref=0)
+STIFF_HIP = 0.0    # hip joint stiffness Nm/rad (parallel elastic; springref=0 -> assists extension from crouch)
+STIFF_KNEE = 0.0   # knee joint stiffness Nm/rad
 
 
 def _fric_str():
@@ -170,11 +173,11 @@ def build_xml_jump_6d(arm_hip, arm_knee):
     <inertial pos="0 0 0" mass="{M_base:.6f}" diaginertia="0.005 0.005 0.005"/>
     <geom type="box" size="0.06 0.03 0.025" contype="0" conaffinity="0"/>
     <body name="thigh" pos="0 0 -0.025">
-      <joint name="hip" type="hinge" armature="{arm_hip:.8f}" damping="{FV_HIP:.8f}" frictionloss="{FC_HIP:.8f}" stiffness="0" springref="0"/>
+      <joint name="hip" type="hinge" armature="{arm_hip:.8f}" damping="{FV_HIP:.8f}" frictionloss="{FC_HIP:.8f}" stiffness="{STIFF_HIP:.6f}" springref="0"/>
       <inertial pos="0 0 {ctz:.5f}" mass="{Mt:.5f}" diaginertia="{It:.6f} {It:.6f} 0.0002"/>
       <geom type="capsule" size="0.02" fromto="0 0 0 0 0 -{L1_VAL}" contype="1" conaffinity="1"/>
       <body name="calf" pos="0 0 -{L1_VAL}">
-        <joint name="knee" type="hinge" armature="{arm_knee:.8f}" damping="{FV_KNEE:.8f}" frictionloss="{FC_KNEE:.8f}" stiffness="0" springref="0"/>
+        <joint name="knee" type="hinge" armature="{arm_knee:.8f}" damping="{FV_KNEE:.8f}" frictionloss="{FC_KNEE:.8f}" stiffness="{STIFF_KNEE:.6f}" springref="0"/>
         <inertial pos="0 0 {ccz:.5f}" mass="{Mc2:.5f}" diaginertia="{Ic2:.6f} {Ic2:.6f} 0.00005"/>
         <geom type="capsule" size="0.015" fromto="0 0 0 0 0 -{L2_VAL}" contype="1" conaffinity="1"/>
         <geom name="foot" class="foot" type="cylinder" size="{FOOT_RADIUS:.4f} {FOOT_HALF_LEN:.4f}" pos="0 0 -{L2_VAL}" euler="90 0 0"/>
@@ -210,11 +213,11 @@ def build_xml_sit2stand_air_6d(arm_hip, arm_knee):
     <inertial pos="0 0 0" mass="{M_base:.6f}" diaginertia="0.005 0.005 0.005"/>
     <geom type="box" size="0.06 0.03 0.025" contype="0" conaffinity="0"/>
     <body name="thigh" pos="0 0 -0.025">
-      <joint name="hip" type="hinge" armature="{arm_hip:.8f}" damping="{FV_HIP:.8f}" frictionloss="{FC_HIP:.8f}"/>
+      <joint name="hip" type="hinge" armature="{arm_hip:.8f}" damping="{FV_HIP:.8f}" frictionloss="{FC_HIP:.8f}" stiffness="{STIFF_HIP:.6f}" springref="0"/>
       <inertial pos="0 0 {ctz:.5f}" mass="{Mt:.5f}" diaginertia="{It:.6f} {It:.6f} 0.0002"/>
       <geom type="capsule" size="0.02" fromto="0 0 0 0 0 -{L1_VAL}" contype="0" conaffinity="0"/>
       <body name="calf" pos="0 0 -{L1_VAL}">
-        <joint name="knee" type="hinge" armature="{arm_knee:.8f}" damping="{FV_KNEE:.8f}" frictionloss="{FC_KNEE:.8f}"/>
+        <joint name="knee" type="hinge" armature="{arm_knee:.8f}" damping="{FV_KNEE:.8f}" frictionloss="{FC_KNEE:.8f}" stiffness="{STIFF_KNEE:.6f}" springref="0"/>
         <inertial pos="0 0 {ccz:.5f}" mass="{Mc2:.5f}" diaginertia="{Ic2:.6f} {Ic2:.6f} 0.00005"/>
         <geom type="capsule" size="0.015" fromto="0 0 0 0 0 -{L2_VAL}" contype="0" conaffinity="0"/>
         <geom name="foot" class="foot" type="cylinder" size="{FOOT_RADIUS:.4f} {FOOT_HALF_LEN:.4f}" pos="0 0 -{L2_VAL}" euler="90 0 0"/>
@@ -251,11 +254,11 @@ def build_xml_sit2stand_gnd_6d(arm_hip, arm_knee):
     <inertial pos="0 0 0" mass="{M_base:.6f}" diaginertia="0.005 0.005 0.005"/>
     <geom type="box" size="0.06 0.03 0.025" contype="0" conaffinity="0"/>
     <body name="thigh" pos="0 0 -0.025">
-      <joint name="hip" type="hinge" armature="{arm_hip:.8f}" damping="{FV_HIP:.8f}" frictionloss="{FC_HIP:.8f}"/>
+      <joint name="hip" type="hinge" armature="{arm_hip:.8f}" damping="{FV_HIP:.8f}" frictionloss="{FC_HIP:.8f}" stiffness="{STIFF_HIP:.6f}" springref="0"/>
       <inertial pos="0 0 {ctz:.5f}" mass="{Mt:.5f}" diaginertia="{It:.6f} {It:.6f} 0.0002"/>
       <geom type="capsule" size="0.02" fromto="0 0 0 0 0 -{L1_VAL}" contype="0" conaffinity="0"/>
       <body name="calf" pos="0 0 -{L1_VAL}">
-        <joint name="knee" type="hinge" armature="{arm_knee:.8f}" damping="{FV_KNEE:.8f}" frictionloss="{FC_KNEE:.8f}"/>
+        <joint name="knee" type="hinge" armature="{arm_knee:.8f}" damping="{FV_KNEE:.8f}" frictionloss="{FC_KNEE:.8f}" stiffness="{STIFF_KNEE:.6f}" springref="0"/>
         <inertial pos="0 0 {ccz:.5f}" mass="{Mc2:.5f}" diaginertia="{Ic2:.6f} {Ic2:.6f} 0.00005"/>
         <geom type="capsule" size="0.015" fromto="0 0 0 0 0 -{L2_VAL}" contype="0" conaffinity="0"/>
         <geom name="foot" class="foot" type="cylinder" size="{FOOT_RADIUS:.4f} {FOOT_HALF_LEN:.4f}" pos="0 0 -{L2_VAL}" euler="90 0 0"/>
