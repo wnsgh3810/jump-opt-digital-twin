@@ -44,7 +44,8 @@ LOADERS = {"jump_position_0421": S.load_jump_position,
 # Same file layout as 0424 (hip.xlsx/knee.xlsx/GRF.xlsx/Real Data.txt) => reuse load_one_trial.
 DATA_ROOT = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
 MARCH = [
-    ("jump_0319", DATA_ROOT / "26.03.19/position", ["NO_TR_JUMP"]),
+    # jump_0319 NO_TR_JUMP EXCLUDED (user 2026-07-05): confirmed data outlier — fit spent
+    # ~16% of score on it yet q2 stayed 0.33 (10x others); different posture; h_real unparseable.
     ("jump_0324", DATA_ROOT / "26.03.24/Jump/Jump_No_Tr", ["P40_D0.7", "P60_D1.5", "P100_D3"]),
 ]
 
