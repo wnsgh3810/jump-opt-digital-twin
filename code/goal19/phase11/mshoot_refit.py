@@ -25,13 +25,17 @@ BASE = np.array(FM["mass_15d"]); FR = FM["friction"]; CT = FM["contact"]; FL = F
 OUT = REPO / "code/goal19/phase11/mshoot_refit_best.json"
 
 # name, mass_15d idx (int) or tag, warm, lo, hi
+# v4: thigh/4-bar group WIDENED (v3 boundary cluster = 4-bar mass lumping; user CAD
+# assembly-error hypothesis). Physical basis: 4-bar links/pins/l_i mechanism mounted on
+# the thigh side — thigh CoM can sit lower (linkage hangs toward knee), P link heavier,
+# calf lighter than CAD lumping assumed.
 SPEC = [
     ("M_base",   0, BASE[0], 0.60, 1.40), ("M_thigh", 1, BASE[1], 0.60, 1.40),
-    ("M_calf",   2, BASE[2], 0.45, 1.40), ("M_p",     3, BASE[3], 0.60, 1.50),
+    ("M_calf",   2, BASE[2], 0.30, 1.40), ("M_p",     3, BASE[3], 0.60, 2.00),
     ("M_c",      4, BASE[4], 0.55, 1.50), ("I_thigh", 6, BASE[6], 0.40, 1.80),
     ("I_calf",   7, BASE[7], 0.40, 1.80), ("I_p",     8, BASE[8], 0.40, 1.80),
     ("I_c",      9, BASE[9], 0.40, 1.80),
-    ("com_dz_th", 10, BASE[10], -0.090, 0.050), ("com_dx_th", 11, BASE[11], -0.050, 0.050),
+    ("com_dz_th", 10, BASE[10], -0.150, 0.050), ("com_dx_th", 11, BASE[11], -0.100, 0.050),
     ("com_dz_ca", 12, BASE[12], -0.090, 0.050), ("com_dx_ca", 13, BASE[13], -0.050, 0.050),
     ("arm_knee", 14, BASE[14], 0.003, 0.025),
     ("m_foot",   "mf", FM["m_foot_ex"], 0.00, 0.35),
