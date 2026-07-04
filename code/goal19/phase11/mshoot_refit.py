@@ -47,6 +47,16 @@ NAMES = [s[0] for s in SPEC]
 X0 = np.array([np.clip(s[2], s[3], s[4]) for s in SPEC])
 LOb = np.array([s[3] for s in SPEC]); HIb = np.array([s[4] for s in SPEC])
 
+# warm-start from previous mshoot best if compatible (v2 run: March data added)
+if OUT.exists():
+    try:
+        _pb = json.load(open(OUT, encoding="utf-8"))
+        if _pb.get("names") == NAMES:
+            X0 = np.clip(np.array(_pb["x"]), LOb, HIb)
+            print("warm-start from previous mshoot best", flush=True)
+    except Exception:
+        pass
+
 
 def set_params(x):
     d = dict(zip(NAMES, x)); xm = BASE.copy()

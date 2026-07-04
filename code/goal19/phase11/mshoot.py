@@ -40,6 +40,23 @@ LOADERS = {"jump_position_0421": S.load_jump_position,
            "jump_0424": S.load_jump_0424,
            "jump_0602": S.load_jump_0602}
 
+# ── March jumps (user 2026-07-05: include; not in canonical 31-exp) ──────────
+# Same file layout as 0424 (hip.xlsx/knee.xlsx/GRF.xlsx/Real Data.txt) => reuse load_one_trial.
+DATA_ROOT = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+MARCH = [
+    ("jump_0319", DATA_ROOT / "26.03.19/position", ["NO_TR_JUMP"]),
+    ("jump_0324", DATA_ROOT / "26.03.24/Jump/Jump_No_Tr", ["P40_D0.7", "P60_D1.5", "P100_D3"]),
+]
+
+
+def load_march(tdir, trial):
+    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal12/data_loaders")
+    from load_combined_15trial import load_one_trial
+    td = load_one_trial(Path(tdir), trial, fallback_h=0.85)
+    if float(td["h_real"]) > 3.0:      # cm logged instead of m (0324 P100_D3: 74.00)
+        td["h_real"] = np.float64(float(td["h_real"]) / 100.0)
+    return td
+
 _PREP = {}   # cache: key -> prepped trial dict (FK base, windows) — param-independent
 
 
@@ -144,6 +161,21 @@ def evaluate_all(arm_hip, arm_knee):
         sc = 0.0; nw = 0; acc = np.zeros(4)
         for sub in subs:
             td = loader(sub)
+            pp = get_prep((ds, sub), td, mj, True)
+            wins = eval_windows(mj, pp)
+            sc += window_score(wins); nw += len(wins)
+            for w in wins:
+                acc += [w["rq1"], w["rq2"], w["rdq1"], w["rdq2"]]
+        total += sc
+        per_ds[ds] = dict(score=sc, n=nw, mean=acc / max(nw, 1))
+    # March jumps
+    for ds, tdir, subs in MARCH:
+        sc = 0.0; nw = 0; acc = np.zeros(4)
+        for sub in subs:
+            try:
+                td = load_march(tdir, sub)
+            except Exception:
+                continue
             pp = get_prep((ds, sub), td, mj, True)
             wins = eval_windows(mj, pp)
             sc += window_score(wins); nw += len(wins)
