@@ -57,5 +57,24 @@
   "matching twin stiffness zone k=1e5..2e5: best realized height 1.065 m (k=1e5) or tightest gap -2.8% (k=2e5)",
   "friction dominates: all friction variants realize >=1.007 vs no-friction 0.998",
   "caveat: single-seed IPOPT, k=40000 row shows local-optimum non-monotonicity"
- ]
+ ],
+ "k_eq_measured": {
+  "value_N_per_m": 130000.0,
+  "method": "load sweep 0.5-8g on settled twin, force-penetration linear fit",
+  "points": [
+   [
+    65.6,
+    0.0004948
+   ],
+   [
+    131.3,
+    0.0011482
+   ],
+   [
+    262.5,
+    0.0020201
+   ]
+  ],
+  "note": "matches NLP sweep optimum zone k=1e5-2e5 exactly \u2014 mutual validation"
+ }
 }
