@@ -1,0 +1,61 @@
+{
+ "note": "G20 NLP contact-model sweep: all with identified G20 friction (JF_HIP=0.488, JF_KNEE=0.0141); replayed open-loop (tau only) into fourbar twin",
+ "rows": [
+  {
+   "contact": "soft_alpha a=0.85 k=5000 b=20 (legacy)",
+   "h_pred": 1.122,
+   "twin": 1.051,
+   "gap_pct": -6.4
+  },
+  {
+   "contact": "soft a=1.0 k=5000 b=20",
+   "h_pred": 1.138,
+   "twin": 1.055,
+   "gap_pct": -7.3
+  },
+  {
+   "contact": "soft a=1.0 k=15000 b=45",
+   "h_pred": 1.174,
+   "twin": 1.061,
+   "gap_pct": -9.6
+  },
+  {
+   "contact": "soft a=1.0 k=40000 b=90",
+   "h_pred": 1.149,
+   "twin": 1.007,
+   "gap_pct": -12.4
+  },
+  {
+   "contact": "soft a=1.0 k=100000 b=150",
+   "h_pred": 1.127,
+   "twin": 1.065,
+   "gap_pct": -5.5
+  },
+  {
+   "contact": "soft a=1.0 k=200000 b=250",
+   "h_pred": 1.064,
+   "twin": 1.035,
+   "gap_pct": -2.8
+  },
+  {
+   "contact": "hard (complementarity)",
+   "h_pred": 0.94,
+   "twin": 0.971,
+   "gap_pct": 3.3
+  },
+  {
+   "contact": "NO-FRICTION reference (soft_alpha k=5000)",
+   "h_pred": 1.16,
+   "twin": 0.998,
+   "gap_pct": -14.0
+  }
+ ],
+ "conclusions": [
+  "Contact model sets SIGN and SIZE of transfer gap",
+  "soft under-stiff -> optimizer exploits contact spring energy -> overprediction",
+  "hard -> conservative, twin overdelivers +3.3% but lowest realized height 0.971",
+  "matching twin stiffness zone k=1e5..2e5: best realized height 1.065 m (k=1e5) or tightest gap -2.8% (k=2e5)",
+  "friction dominates: all friction variants realize >=1.007 vs no-friction 0.998",
+  "caveat: single-seed IPOPT, k=40000 row shows local-optimum non-monotonicity"
+ ]
+}
