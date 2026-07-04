@@ -1,0 +1,21 @@
+RAIL_FRICTION = 0.0    # [N·s/m] 레일 점성 마찰
+JOINT_FRICTION = 0.0  # replaced by per-joint below (G20)   # [Nm·s/rad] 관절 점성 마찰
+            -RAIL_FRICTION * dz_v,
+            -JOINT_FRICTION * dth1,
+            -JOINT_FRICTION * dth2,
+        tau1_input_k = U_tau[0, k] + JOINT_FRICTION * V[1, k]
+        tau2_input_k = U_tau[1, k] + JOINT_FRICTION * V[2, k]
+    tau1_input_arr = u_tau_val[0,:] + JOINT_FRICTION * v_val[1,:]
+    tau2_input_arr = u_tau_val[1,:] + JOINT_FRICTION * v_val[2,:]
+    interp_data['tau_1_input'][-1] = u_tau_val[0, -1] + JOINT_FRICTION * v_val[1, -1]
+    interp_data['tau_2_input'][-1] = u_tau_val[1, -1] + JOINT_FRICTION * v_val[2, -1]
+    tau1_input_arr = u_tau_val[0,:] + JOINT_FRICTION * v_val[1,:]
+    tau2_input_arr = u_tau_val[1,:] + JOINT_FRICTION * v_val[2,:]
+    E_fric_joint = _trap(JOINT_FRICTION * v_val[1,:]**2 + JOINT_FRICTION * v_val[2,:]**2, t_val)
+    E_fric_rail = _trap(RAIL_FRICTION * v_val[0,:]**2, t_val)
+    tau1_input = u_tau_val[0,:] + JOINT_FRICTION * v_val[1,:]
+    tau2_input = u_tau_val[1,:] + JOINT_FRICTION * v_val[2,:]
+    axes4[1].plot(t_val, JOINT_FRICTION * v_val[1,:], 'b-', lw=1.5, label='Hip friction torque')
+    axes4[1].plot(t_val, JOINT_FRICTION * v_val[2,:], 'r-', lw=1.5, label='Knee friction torque')
+    axes4[1].plot(t_val, RAIL_FRICTION * v_val[0,:], 'k--', lw=1.5, label='Rail friction force')
+    P_fric = JOINT_FRICTION * v_val[1,:]**2 + JOINT_FRICTION * v_val[2,:]**2 + RAIL_FRICTION * v_val[0,:]**2
