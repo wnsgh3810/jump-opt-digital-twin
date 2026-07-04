@@ -1,0 +1,73 @@
+{
+  "model": "G20 four-bar explicit digital twin (2026-07-05 marathon)",
+  "structure": "parallelogram 4-bar knee transmission: crank(C link, CAD 0.656kg incl CVT l_i adjuster, hip-anchored on thigh) -> coupler(P link, CAD 0.137kg) -> calf rocker; <connect solref 0.0008 1>; encoder=crank; calf carries only M2+foot",
+  "identification": "multiple shooting (0.1s windows, measured-state resets, pure tau_real replay, no PD/gains) on 24 jumps (0324/0421/0424/0602) + sit2stand_gnd; 0422 excluded (external-PD loop, inconsistent torque); 0319 NO_TR excluded (data outlier)",
+  "validation": "held-out full-trajectory replay + camera height; LODO; window-size robustness",
+  "params": {
+    "M_base": 1.047666,
+    "M_thigh": 1.101366,
+    "M_calf": 0.918462,
+    "M_p": 1.718525,
+    "M_c": 0.824438,
+    "I_thigh": 0.686847,
+    "I_calf": 1.15556,
+    "com_dz_th": 0.05876,
+    "com_dz_ca": 0.036226,
+    "arm_knee": 0.003485,
+    "m_foot": 0.086516,
+    "stiff_knee": 1.134608,
+    "solref_tc": 0.005986,
+    "imp0": 0.370841,
+    "fv_hip": 0.487998,
+    "fv_knee": 0.014074,
+    "fc_hip": 0.168843,
+    "fc_knee": 0.057414,
+    "o1_0319": -0.088944,
+    "o2_0319": 0.101205,
+    "o1_0324": -0.043552,
+    "o2_0324": 0.13937,
+    "o1_0421": -0.083862,
+    "o2_0421": -0.058976,
+    "o1_0424": 0.063318,
+    "o2_0424": 0.030538
+  },
+  "offsets_deg": {
+    "o1_0319": -5.1,
+    "o2_0319": 5.8,
+    "o1_0324": -2.5,
+    "o2_0324": 7.99,
+    "o1_0421": -4.8,
+    "o2_0421": -3.38,
+    "o1_0424": 3.63,
+    "o2_0424": 1.75
+  },
+  "dropped_axes": {
+    "stribeck": "-1.7% < 2% gate",
+    "residual_actuator_poly": "LODO fails (fold B +0.8%, fold C c=0)",
+    "SEA_series": "worse than rigid at all k; knee compliance is PARALLEL (stiff_knee)",
+    "round2_widened": "flat-direction overfit, held-out worse"
+  },
+  "heldout_h_ratio": {
+    "jump_0424": 0.878,
+    "jump_0602": 0.941,
+    "jump_0324": 0.925,
+    "jump_0421": "1.16 (open-loop divergent, reference only)"
+  },
+  "window_rmse": {
+    "q2_deg": "1.2-1.5 uniform",
+    "dq2": "0.83-1.00"
+  },
+  "cad_constants": {
+    "M1": 0.91281,
+    "M2": 0.23704,
+    "M_C_crank": 0.65601,
+    "M_P_coupler": 0.13657,
+    "R1": 0.05646,
+    "R2": 0.05884,
+    "RC": 0.02069,
+    "RP": 0.13258,
+    "L1": 0.25,
+    "L2": 0.25,
+    "LC_l_i": 0.03
+  }
+}

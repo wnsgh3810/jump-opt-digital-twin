@@ -187,6 +187,7 @@ def run_jump_sim_fourbar(model, td):
     N = int((S.T_SETTLE + T_motion + S.T_AFTER) / dt) + 1
     t_log = np.arange(N) * dt - S.T_SETTLE
     q2c = np.zeros(N); dq2c = np.zeros(N); q1a = np.zeros(N); dq1a = np.zeros(N); bz = np.zeros(N)
+    grf = np.zeros(N)
     for k in range(N):
         tc = k * dt
         if tc < S.T_SETTLE:
@@ -206,9 +207,15 @@ def run_jump_sim_fourbar(model, td):
         q1a[k] = d.qpos[1]; dq1a[k] = d.qvel[1]
         q2c[k] = d.qpos[2]; dq2c[k] = d.qvel[2]     # crank = encoder
         bz[k] = d.qpos[0]
+        gz = 0.0
+        for c in range(d.ncon):
+            cf = np.zeros(6)
+            mujoco.mj_contactForce(model, d, c, cf)
+            gz += (d.contact[c].frame.reshape(3, 3).T @ cf[:3])[2]
+        grf[k] = gz
         if abs(d.qpos[0]) > 5.0:
             return None
-    return dict(t=t_log, q1=q1a, dq1=dq1a, q2=q2c, dq2=dq2c, base_z=bz)
+    return dict(t=t_log, q1=q1a, dq1=dq1a, q2=q2c, dq2=dq2c, base_z=bz, grf_z=grf)
 
 
 def validate_fulltraj(arm_knee, scales, offs=None):

@@ -34,8 +34,19 @@ TMP = Path(tempfile.mkdtemp(prefix="anim_v3_"))
 
 
 def main():
-    best = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
-    d = R.set_params(np.array(best["x"]))
+    fbj = REPO / "code/goal19/phase11/fourbar_refit_best.json"
+    if fbj.exists():
+        import mshoot_fourbar as FB
+        best = json.load(open(fbj, encoding="utf-8"))
+        d = dict(zip(best["names"], best["x"]))
+        S.FV_HIP = d["fv_hip"]; S.FV_KNEE = d["fv_knee"]; S.FC_HIP = d["fc_hip"]; S.FC_KNEE = d["fc_knee"]
+        S.SOLREF_TC_LOCK = d["solref_tc"]; S.IMP0_LOCK = d["imp0"]
+        S.STIFF_HIP = 0.0; S.STIFF_KNEE = d["stiff_knee"]; S.SPRINGREF_KNEE = 0.0
+        globals()["_FB"] = (FB, d)
+    else:
+        best = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
+        d = R.set_params(np.array(best["x"]))
+        globals()["_FB"] = None
     xml = S.build_xml_jump_6d(0.0, d["arm_knee"])
     xml_path = TMP / "leg_v3.xml"
     xml_path.write_text(xml, encoding="utf-8")
@@ -47,11 +58,20 @@ def main():
             jobs.append((mds, sub, MS.load_march(tdir, sub)))
     print(f"rendering {len(jobs)} jump anims with CANONICAL make_anim_universal_colored...")
     model = mujoco.MjModel.from_xml_string(xml)
+    fb = globals().get("_FB")
+    mfb = mujoco.MjModel.from_xml_string(fb[0].build_xml_fourbar_jump(fb[1]["arm_knee"], fb[1])) if fb else None
     for ds, sub, td in jobs:
         try:
-            log = S.run_jump_sim(model, td, 0, 0, motor_tm=0.0)
-            if log is None:
-                print(f"  {ds}/{sub}: sim FAIL"); continue
+            if fb:
+                fl = fb[0].run_jump_sim_fourbar(mfb, td)
+                if fl is None:
+                    print(f"  {ds}/{sub}: sim FAIL"); continue
+                log = dict(t=fl["t"], q=np.column_stack([fl["base_z"], fl["q1"], fl["q2"]]),
+                           grf_z=fl["grf_z"])
+            else:
+                log = S.run_jump_sim(model, td, 0, 0, motor_tm=0.0)
+                if log is None:
+                    print(f"  {ds}/{sub}: sim FAIL"); continue
             npz_path = TMP / f"{ds}_{sub}.npz".replace("/", "_")
             np.savez(npz_path, t=log["t"], q=log["q"], grf_z=log["grf_z"])
             gif = OUT_DIR / f"{ds}_{sub}.gif".replace("/", "_")

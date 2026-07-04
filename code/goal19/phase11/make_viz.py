@@ -53,12 +53,39 @@ def measured_fk_base(td, m, d, fg):
     return t, bz, np.gradient(bz, t)
 
 
+FOURBAR = None   # set to dict(params) to use the four-bar final model as sim source
+
+
 def one_trial(ds, sub, ap, td=None):
     if td is None:
         td = LOADERS[ds](sub)
-    xml = S.build_xml_jump_6d(ap["arm_hip"], ap["arm_knee"])
-    m = mujoco.MjModel.from_xml_string(xml)
-    log = S.run_jump_sim(m, td, 0, 0, motor_tm=0.0)
+    if FOURBAR is not None:
+        import mshoot_fourbar as FB
+        d = FOURBAR
+        mfb = mujoco.MjModel.from_xml_string(FB.build_xml_fourbar_jump(d["arm_knee"], d))
+        fl = FB.run_jump_sim_fourbar(mfb, td)
+        if fl is None:
+            return None
+        n = len(fl["t"])
+        tr0 = np.asarray(td["t"])
+        tau1i = np.interp(np.clip(fl["t"], 0, tr0[-1]), tr0, -np.asarray(td["tau1_real"]))
+        tau2i = np.interp(np.clip(fl["t"], 0, tr0[-1]), tr0, -np.asarray(td["tau2_real"]))
+        log = dict(t=fl["t"], q=np.column_stack([fl["base_z"], fl["q1"], fl["q2"]]),
+                   dq=np.column_stack([np.gradient(fl["base_z"], fl["t"]), fl["dq1"], fl["dq2"]]),
+                   tau_app=np.column_stack([tau1i, tau2i]), grf_z=fl["grf_z"])
+        # calibrated real (per-date offsets)
+        offk = {"jump_0324": ("o1_0324", "o2_0324"), "jump_position_0421": ("o1_0421", "o2_0421"),
+                "jump_0424": ("o1_0424", "o2_0424")}
+        if ds in offk:
+            td = dict(td)
+            td["q1"] = np.asarray(td["q1"]) + d[offk[ds][0]]
+            td["q2"] = np.asarray(td["q2"]) + d[offk[ds][1]]
+        xml = S.build_xml_jump_6d(ap["arm_hip"], ap["arm_knee"])  # FK helper model only
+        m = mujoco.MjModel.from_xml_string(xml)
+    else:
+        xml = S.build_xml_jump_6d(ap["arm_hip"], ap["arm_knee"])
+        m = mujoco.MjModel.from_xml_string(xml)
+        log = S.run_jump_sim(m, td, 0, 0, motor_tm=0.0)
     if log is None:
         return None
     fg = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, "foot")
@@ -111,10 +138,20 @@ def one_trial(ds, sub, ap, td=None):
 
 
 def main():
-    # v3 multiple-shooting model (mshoot_refit_best.json)
-    best = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
-    d = R.set_params(np.array(best["x"]))
-    ap = dict(arm_hip=0.0, arm_knee=d["arm_knee"])
+    global FOURBAR
+    fbj = REPO / "code/goal19/phase11/fourbar_refit_best.json"
+    if fbj.exists():
+        best = json.load(open(fbj, encoding="utf-8"))
+        d = dict(zip(best["names"], best["x"]))
+        S.FV_HIP = d["fv_hip"]; S.FV_KNEE = d["fv_knee"]; S.FC_HIP = d["fc_hip"]; S.FC_KNEE = d["fc_knee"]
+        S.SOLREF_TC_LOCK = d["solref_tc"]; S.IMP0_LOCK = d["imp0"]
+        S.STIFF_HIP = 0.0; S.STIFF_KNEE = d["stiff_knee"]; S.SPRINGREF_KNEE = 0.0
+        FOURBAR = d
+        ap = dict(arm_hip=0.0, arm_knee=d["arm_knee"])
+    else:
+        best = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
+        d = R.set_params(np.array(best["x"]))
+        ap = dict(arm_hip=0.0, arm_knee=d["arm_knee"])
     jumps = [(ds, sub, None) for ds, sub, isj in list_experiments()
              if isj and ds in LOADERS]
     for mds, tdir, subs in MS.MARCH:
