@@ -30,7 +30,7 @@ OUT = REPO / "code/goal19/phase11/fourbar_refit_best.json"
 V3 = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
 V3D = dict(zip(V3["names"], V3["x"]))
 DOFF = json.load(open(REPO / "code/goal19/phase11/dateoff_best.json"))["offs"]  # ±5° best
-OLIM = np.deg2rad(8.0)
+OLIM = np.deg2rad(12.0)
 
 # name, warm, lo, hi
 SPEC = [
@@ -38,11 +38,11 @@ SPEC = [
     ("M_calf",   1.0, 0.50, 1.60), ("M_p",     1.0, 0.40, 2.50),
     ("M_c",      1.0, 0.40, 1.60), ("I_thigh", 1.0, 0.40, 1.80),
     ("I_calf",   1.0, 0.40, 1.80),
-    ("com_dz_th", 0.0, -0.06, 0.06), ("com_dz_ca", 0.0, -0.06, 0.06),
+    ("com_dz_th", 0.0, -0.10, 0.10), ("com_dz_ca", 0.0, -0.10, 0.10),
     ("arm_knee", V3D["arm_knee"], 0.002, 0.025),
     ("m_foot",   V3D["m_foot"], 0.00, 0.30),
     ("stiff_knee", V3D["stiff_knee"], 0.00, 4.50),
-    ("solref_tc", V3D["solref_tc"], 0.0018, 0.0060),
+    ("solref_tc", V3D["solref_tc"], 0.0018, 0.0100),
     ("imp0",     V3D["imp0"], 0.08, 0.45),
     ("fv_hip",   V3D["fv_hip"], 0.05, 1.30),
     ("fv_knee",  V3D["fv_knee"], 0.00, 0.70),
@@ -56,6 +56,14 @@ SPEC = [
 NAMES = [s[0] for s in SPEC]
 X0 = np.array([np.clip(s[1], s[2], s[3]) for s in SPEC])
 LOb = np.array([s[2] for s in SPEC]); HIb = np.array([s[3] for s in SPEC])
+if OUT.exists():
+    try:
+        _pb = json.load(open(OUT, encoding="utf-8"))
+        if _pb.get("names") == NAMES:
+            X0 = np.clip(np.array(_pb["x"]), LOb, HIb)
+            print("warm-start from previous fourbar best", flush=True)
+    except Exception:
+        pass
 
 # ---- prep (serial models, geometry identical; cached once) ------------------
 _serial_jump = None
@@ -128,7 +136,7 @@ def main():
         m = v["mean"]
         print(f"   WARM {ds:<20} q1={m[0]:.4f} q2={m[1]:.4f} dq1={m[2]:.2f} dq2={m[3]:.2f}", flush=True)
     x0n = (X0 - LOb) / (HIb - LOb)
-    es = cma.CMAEvolutionStrategy(x0n, 0.18, {"bounds": [0, 1], "maxfevals": 400,
+    es = cma.CMAEvolutionStrategy(x0n, 0.18, {"bounds": [0, 1], "maxfevals": 300,
                                               "popsize": 16, "seed": 23, "verbose": -9})
     best = dict(obj=float(o0), x=[float(v) for v in X0], names=NAMES)
     gen = 0

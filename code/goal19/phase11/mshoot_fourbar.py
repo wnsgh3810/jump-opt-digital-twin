@@ -172,6 +172,79 @@ def score_fourbar(arm_knee, scales=None):
     return total, per
 
 
+def run_jump_sim_fourbar(model, td):
+    """Full-trajectory Mode A replay on the 4-bar model (held-out validation).
+    Mirrors S.run_jump_sim: settle PD on hip+crank, then tau_real replay, log h."""
+    t_real = td["t"]
+    tau_h_in = -np.asarray(td["tau1_real"]); tau_k_in = -np.asarray(td["tau2_real"])
+    sq1, sq2 = S.Q1_MU_INIT, S.Q2_MU_INIT
+    d = mujoco.MjData(model)
+    d.qpos[:] = [S.BASE_Z_INIT + S.BASE_Z_INIT_OFF, sq1, sq2, -sq2, sq2]
+    d.qvel[:] = 0.0
+    mujoco.mj_forward(model, d)
+    dt = model.opt.timestep
+    T_motion = float(t_real[-1])
+    N = int((S.T_SETTLE + T_motion + S.T_AFTER) / dt) + 1
+    t_log = np.arange(N) * dt - S.T_SETTLE
+    q2c = np.zeros(N); dq2c = np.zeros(N); q1a = np.zeros(N); dq1a = np.zeros(N); bz = np.zeros(N)
+    for k in range(N):
+        tc = k * dt
+        if tc < S.T_SETTLE:
+            th = S.SETTLE_KP * (sq1 - d.qpos[1]) + S.SETTLE_KD * (0 - d.qvel[1])
+            tk = S.SETTLE_KP * (sq2 - d.qpos[2]) + S.SETTLE_KD * (0 - d.qvel[2])
+        elif tc < S.T_SETTLE + T_motion:
+            tm = tc - S.T_SETTLE
+            th = float(np.interp(tm, t_real, tau_h_in))
+            tk = float(np.interp(tm, t_real, tau_k_in))
+        else:
+            th = tk = 0.0
+        d.ctrl[:] = [th, tk]
+        try:
+            mujoco.mj_step(model, d)
+        except Exception:
+            return None
+        q1a[k] = d.qpos[1]; dq1a[k] = d.qvel[1]
+        q2c[k] = d.qpos[2]; dq2c[k] = d.qvel[2]     # crank = encoder
+        bz[k] = d.qpos[0]
+        if abs(d.qpos[0]) > 5.0:
+            return None
+    return dict(t=t_log, q1=q1a, dq1=dq1a, q2=q2c, dq2=dq2c, base_z=bz)
+
+
+def validate_fulltraj(arm_knee, scales, offs=None):
+    """Held-out: full replay per jump dataset -> q/dq RMSE + h_ratio. offs: canonical per-date."""
+    model = mujoco.MjModel.from_xml_string(build_xml_fourbar_jump(arm_knee, scales))
+    offs = offs or {}
+    from collections import defaultdict
+    G = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0])
+    groups = []
+    for ds in MS.LOADERS:
+        subs = [sub for d2, sub, isj in list_experiments() if d2 == ds]
+        groups.append((ds, subs, MS.LOADERS[ds]))
+    for ds, tdir, subs in MS.MARCH:
+        groups.append((ds, subs, lambda s, _t=tdir: MS.load_march(_t, s)))
+    for ds, subs, loader in groups:
+        o1, o2 = offs.get(ds, (0.0, 0.0))
+        for sub in subs:
+            td = loader(sub)
+            log = run_jump_sim_fourbar(model, td)
+            if log is None:
+                continue
+            tr = np.asarray(td["t"])
+            mk = (log["t"] >= 0) & (log["t"] <= tr[-1])
+            q1s = np.interp(tr, log["t"][mk], (-log["q1"] - np.pi / 2)[mk])
+            q2s = np.interp(tr, log["t"][mk], (-log["q2"])[mk])
+            dq1s = np.interp(tr, log["t"][mk], (-log["dq1"])[mk])
+            dq2s = np.interp(tr, log["t"][mk], (-log["dq2"])[mk])
+            r = lambda a, b: float(np.sqrt(np.mean((a - b) ** 2)))
+            g = G[ds]
+            g[0] += r(q1s, td["q1"] + o1); g[1] += r(q2s, td["q2"] + o2)
+            g[2] += r(dq1s, td["dq1"]); g[3] += r(dq2s, td["dq2"])
+            g[4] += float(log["base_z"].max()); g[5] += float(td["h_real"]); g[6] += 1
+    return {ds: dict(q1=g[0]/g[6], q2=g[1]/g[6], dq1=g[2]/g[6], dq2=g[3]/g[6],
+                     h_ratio=g[4]/g[5]) for ds, g in G.items() if g[6]}
+
+
 if __name__ == "__main__":
     best = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
     d = R.set_params(np.array(best["x"]))   # sets v3 friction/contact/stiff in S
