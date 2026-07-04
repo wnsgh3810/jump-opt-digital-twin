@@ -56,6 +56,9 @@ def load_march(tdir, trial):
     td = load_one_trial(Path(tdir), trial, fallback_h=0.85)
     if float(td["h_real"]) > 3.0:      # cm logged instead of m (0324 P100_D3: 74.00)
         td["h_real"] = np.float64(float(td["h_real"]) / 100.0)
+    n = min(len(td[k]) for k in ("t", "q1", "q2", "dq1", "dq2", "tau1_real", "tau2_real", "grf_z"))
+    for k in ("t", "q1", "q2", "dq1", "dq2", "tau1_real", "tau2_real", "grf_z"):
+        td[k] = td[k][:n]              # P100_D3: grf 158 vs motor 157
     return td
 
 _PREP = {}   # cache: key -> prepped trial dict (FK base, windows) — param-independent

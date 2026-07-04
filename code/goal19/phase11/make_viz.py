@@ -32,8 +32,12 @@ OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else (REPO / "code/goal19/phase11/v
 OUT.mkdir(parents=True, exist_ok=True)
 FM = json.load(open(REPO / "code/goal19/goal19_final_model.json", encoding="utf-8"))
 
-LOADERS = {"jump_0424": S.load_jump_0424, "jump_0602": S.load_jump_0602,
-           "jump_position_0421": S.load_jump_position, "jump_torque_0422": S.load_jump_torque}
+import mshoot as MS
+import mshoot_refit as R
+
+LOADERS = {"jump_position_0421": S.load_jump_position,
+           "jump_0424": S.load_jump_0424, "jump_0602": S.load_jump_0602}
+# 0422 excluded (external-PD, bad torque); 0319 excluded (data outlier) — per user.
 
 
 def measured_fk_base(td, m, d, fg):
@@ -49,8 +53,9 @@ def measured_fk_base(td, m, d, fg):
     return t, bz, np.gradient(bz, t)
 
 
-def one_trial(ds, sub, ap):
-    td = LOADERS[ds](sub)
+def one_trial(ds, sub, ap, td=None):
+    if td is None:
+        td = LOADERS[ds](sub)
     xml = S.build_xml_jump_6d(ap["arm_hip"], ap["arm_knee"])
     m = mujoco.MjModel.from_xml_string(xml)
     log = S.run_jump_sim(m, td, 0, 0, motor_tm=0.0)
@@ -106,13 +111,20 @@ def one_trial(ds, sub, ap):
 
 
 def main():
-    ap = apply_final()
-    jumps = [(ds, sub) for ds, sub, isj in list_experiments() if isj]
-    print(f"generating {len(jumps)} jump trial figures + summary ...")
+    # v3 multiple-shooting model (mshoot_refit_best.json)
+    best = json.load(open(REPO / "code/goal19/phase11/mshoot_refit_best.json", encoding="utf-8"))
+    d = R.set_params(np.array(best["x"]))
+    ap = dict(arm_hip=0.0, arm_knee=d["arm_knee"])
+    jumps = [(ds, sub, None) for ds, sub, isj in list_experiments()
+             if isj and ds in LOADERS]
+    for mds, tdir, subs in MS.MARCH:
+        for sub in subs:
+            jumps.append((mds, sub, MS.load_march(tdir, sub)))
+    print(f"generating {len(jumps)} jump trial figures + summary (v3 model)...")
     res = []
-    for ds, sub in jumps:
+    for ds, sub, td in jumps:
         try:
-            r = one_trial(ds, sub, ap)
+            r = one_trial(ds, sub, ap, td=td)
         except Exception as e:
             print(f"  {ds}/{sub}: ERROR {e}"); r = None
         if r:
