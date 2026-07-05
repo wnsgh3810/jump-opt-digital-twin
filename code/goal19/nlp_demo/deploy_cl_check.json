@@ -1,0 +1,60 @@
+{
+ "s0.70": {
+  "openloop_h": 0.836,
+  "nominal": {
+   "h": 0.7667576037737177,
+   "rmse_q1_deg": 1.3624535244944005,
+   "rmse_q2_deg": 1.061890560313275,
+   "peak_tau1": 6.480142383355835,
+   "peak_tau2": 13.401013519568947
+  },
+  "alpha_kp019": {
+   "h": 0.7311620036715281,
+   "rmse_q1_deg": 3.2341710888130097,
+   "rmse_q2_deg": 4.214915482709377,
+   "peak_tau1": 7.4281896009773,
+   "peak_tau2": 11.586775298726355
+  }
+ },
+ "s0.85": {
+  "openloop_h": 0.957,
+  "nominal": {
+   "h": 0.8599255098158797,
+   "rmse_q1_deg": 1.396128024458004,
+   "rmse_q2_deg": 1.047416330289183,
+   "peak_tau1": 8.370333697730144,
+   "peak_tau2": 16.079576160383965
+  },
+  "alpha_kp019": {
+   "h": 0.8306335713262758,
+   "rmse_q1_deg": 2.889603561200416,
+   "rmse_q2_deg": 3.5784859176521135,
+   "peak_tau1": 9.548648051139203,
+   "peak_tau2": 14.291698199710828
+  }
+ },
+ "s1.00": {
+  "openloop_h": 1.063,
+  "nominal": {
+   "h": 0.9536770954130275,
+   "rmse_q1_deg": 1.4045359122092897,
+   "rmse_q2_deg": 1.0121028361488351,
+   "peak_tau1": 10.269153603089658,
+   "peak_tau2": 18.0
+  },
+  "alpha_kp019": {
+   "h": 0.9358025090928115,
+   "rmse_q1_deg": 2.6178465004403306,
+   "rmse_q2_deg": 3.0836943589580663,
+   "peak_tau1": 11.714362582207983,
+   "peak_tau2": 17.050864698644155
+  }
+ },
+ "probes_s1.00": {
+  "hold_until_takeoff_30ms": 0.954,
+  "hold_60ms": 0.954,
+  "kp150_kd2.2_3.0": 0.968,
+  "kp150_hold30": 0.97
+ },
+ "interpretation": "CL loss (~10cm) is structural: PD pins the twin to the NLP reference kinematics; twin executing tau* open-loop deviates beneficially. Knee saturated -> PD has no positive authority; kd dissipates. Honest deployment expectation: first-shot PD+ff ~0.95-0.97m (>= current real best), upper bound 1.06 via low-gain ff emphasis or iterative refinement (ILC) / re-solving TO on the MuJoCo twin directly."
+}
