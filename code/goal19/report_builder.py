@@ -25,6 +25,7 @@ def b64(p):
 n = len(res)
 mean_ratio = sum(r["h_sim"]/r["h_real"] for r in res)/n
 hsum = b64(VIZ / "height_summary.png")
+env_png = b64(VIZ / "nlp_envelope_check.png") if (VIZ / "nlp_envelope_check.png").exists() else ""
 
 GROUPS = [
     ("jump_0324", "3월 점프 (26.03.24)", "AK 내부 MIT PD, dq_des=0 · 3 trials"),
@@ -314,6 +315,15 @@ NLP 스윕이 경험적으로 찾은 최적 강성대(k=1e5–2e5)와 정확히 
 +식별 마찰 −6.4%/1.051m → +접촉 k_eq 매칭 −4.4%/1.063m (실현 높이 총 +6.5cm)</b>.
 물리 충실도를 한 단계 올릴 때마다 예측 일관성과 실물 성과가 함께 올라감 = 프로젝트 명제의 3단 실증.
 실무 지침: <b>NLP 접촉 k_c ≈ 1.3×10⁵ N/m + 식별 마찰 포함</b>.</p></div>
+<div class="finding"><h3>실전 헤드룸: 다음 실험에서 약 +14 cm 기대</h3>
+<p>같은 트윈, 같은 τ≤18 Nm에서 사과-사과 비교: 실측 최고 트라이얼(0602 90_0.75_90_2, 카메라 0.980m)의
+τ replay → 트윈 0.929m vs <b>NLP 최적 τ* → 트윈 1.063m = +13.4 cm (+14.4%)</b>.
+카메라 스케일 환산 시 0.98 → <b>약 1.12 m</b>. 실행 가능성(T-N) 검증: knee는 NLP가 18 Nm 한계를
+전 속도대에서 타는 bang-bang 형태인데 <b>실 로봇이 이미 21.1 Nm·29.6 rad/s까지 실증</b>한 범위 내
+(60점 중 2점만 +0.2 Nm 초과 = 무시 가능). hip은 13.5 Nm ≤ 18 스펙 내지만 8–14 rad/s 고속대에서
+역대 trial이 안 써본 영역을 적극 사용 — <b>optimizer의 추가 높이는 주로 "미개척 hip 사용"에서 나옴</b>.
+다음 실험 권장: 최적 궤적을 점진 스케일(70%→100%)로 재생하며 hip 추종을 확인.</p></div>
+{f'<figure class="summary"><img src="{env_png}" alt="envelope check"></figure>' if env_png else ''}
 </div></section>
 
 <section class="block"><div class="wrap">
