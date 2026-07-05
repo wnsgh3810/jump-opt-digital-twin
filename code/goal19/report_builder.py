@@ -133,7 +133,7 @@ footer{{border-top:1px solid var(--border);padding:26px 0 46px;color:var(--faint
 <div class="vcard"><div class="k"><span class="dot good"></span>창 예측 (fit metric)</div><div class="v">q2 1.2–1.5°</div><div class="n">0.1s open-loop 창, 4개 날짜 전부 균일. dq2 0.83–1.00 rad/s.</div></div>
 <div class="vcard"><div class="k"><span class="dot good"></span>점프 높이 (held-out)</div><div class="v">88–94%</div><div class="n">0424 0.878 · 0602 0.941 · 0324 0.925. 목적함수에 h 없이 달성. 여정 시작점은 73–77%.</div></div>
 <div class="vcard"><div class="k"><span class="dot good"></span>구조 발견</div><div class="v">4절링크 명시</div><div class="n">crank 0.656kg lumping 해소 — fitting 0회 pure CAD로 이전 최적 모델에 근접.</div></div>
-<div class="vcard"><div class="k"><span class="dot good"></span>목적 폐루프 실증</div><div class="v">gap −14→−6.4%</div><div class="n">식별 마찰을 NLP에 넣자 예측-실현 gap 절반 + 점프 5.3cm 상승 (§7).</div></div>
+<div class="vcard"><div class="k"><span class="dot good"></span>목적 폐루프 실증</div><div class="v">gap −14→−4.4%</div><div class="n">NLP에 식별 마찰 + k_eq 접촉 매칭 → gap 1/3로, 실현 점프 +6.5cm (§7).</div></div>
 <div class="vcard"><div class="k"><span class="dot off"></span>GRF</div><div class="v">제외</div><div class="n">로드셀 비선형 + 3/4월 캘리브레이션 오류 — 표시만, fit 안 함.</div></div>
 </div></div></header>
 
@@ -295,7 +295,8 @@ NLP dynamics에 추가: h_pred 1.122 → 트윈 <b>1.051</b> (<b>gap −6.4%</b>
 <tr><td class="m">soft k=5000, α=1</td><td class="m num">1.138</td><td class="m num">1.055</td><td class="m num">−7.3%</td></tr>
 <tr><td class="m">soft k=15000</td><td class="m num">1.174</td><td class="m num">1.061</td><td class="m num">−9.6%</td></tr>
 <tr><td class="m">soft k=40000</td><td class="m num">1.149</td><td class="m num">1.007</td><td class="m num">−12.4%</td></tr>
-<tr><td class="m"><b>soft k=100000</b></td><td class="m num">1.127</td><td class="m num"><b>1.065 (최고)</b></td><td class="m num">−5.5%</td></tr>
+<tr><td class="m">soft k=100000</td><td class="m num">1.127</td><td class="m num">1.065</td><td class="m num">−5.5%</td></tr>
+<tr><td class="m"><b>soft k=130000 = k_eq 실측 ★권장</b></td><td class="m num">1.112</td><td class="m num"><b>1.063</b></td><td class="m num"><b>−4.4%</b></td></tr>
 <tr><td class="m">soft k=200000</td><td class="m num">1.064</td><td class="m num">1.035</td><td class="m num"><b>−2.8% (최소)</b></td></tr>
 <tr><td class="m">hard (상보성)</td><td class="m num">0.940</td><td class="m num">0.971</td><td class="m num"><b>+3.3%</b> (트윈이 초과 달성)</td></tr>
 <tr><td class="m">— 무마찰 기준 (soft k=5000)</td><td class="m num">1.160</td><td class="m num">0.998</td><td class="m num">−14.0%</td></tr>
@@ -308,7 +309,11 @@ MIT의 결론(arXiv 2404.15096)과 일치. ※주의: 단일 seed IPOPT라 k=400
 <p>트윈(solref 0.006 / imp0 0.371)에 하중 스윕(0.5–8 g)을 가해 힘–침투 기울기를 직접 측정:
 <b>k_eq ≈ 1.3×10⁵ N/m</b> (65.6N→0.49mm · 131N→1.15mm · 262N→2.02mm 선형 fit).
 NLP 스윕이 경험적으로 찾은 최적 강성대(k=1e5–2e5)와 정확히 일치 — 두 실험이 서로를 검증.
-실무 지침이 정량화됨: <b>NLP 접촉 k_c ≈ 1.3×10⁵ N/m + 식별 마찰 포함</b>.</p></div>
+정확히 k_c=k_eq에서 재실행한 완결판: <b>h_pred 1.112 → 트윈 1.063, gap −4.4%</b> —
+실현 높이 최고 수준과 gap 개선을 동시 달성. <b>최종 체인: 무마찰 −14.0%/0.998m →
++식별 마찰 −6.4%/1.051m → +접촉 k_eq 매칭 −4.4%/1.063m (실현 높이 총 +6.5cm)</b>.
+물리 충실도를 한 단계 올릴 때마다 예측 일관성과 실물 성과가 함께 올라감 = 프로젝트 명제의 3단 실증.
+실무 지침: <b>NLP 접촉 k_c ≈ 1.3×10⁵ N/m + 식별 마찰 포함</b>.</p></div>
 </div></section>
 
 <section class="block"><div class="wrap">
@@ -334,7 +339,7 @@ NLP 스윕이 경험적으로 찾은 최적 강성대(k=1e5–2e5)와 정확히 
 <p class="body">① NLP dynamics는 <b>4-bar 명시 모델</b>을 사용 (CasADi 이식 시 parallelogram은 1:1이므로
 serial+등가관성으로 축약 가능: knee 등가 armature ≈ arm_knee + IC + M_C·R_C², calf엔 M2+foot만).
 ② T-N 토크 한계(AK80-9 V2: peak 18 Nm) 제약 필수 — optimizer는 한계에서 놉니다.
-③ <b>NLP에 식별 마찰 포함 + 접촉을 트윈 강성대에 매칭</b> (§7 실증: gap −14→−2.8~−6.4%, 실현높이 +5.3cm).
+③ <b>NLP에 식별 마찰 포함 + 접촉 k_c ≈ k_eq = 1.3×10⁵ N/m 매칭</b> (§7 실증: gap −14→−4.4%, 실현높이 +6.5cm).
 ④ 남은 높이 6–12% under-prediction은 안전측 — 필요시 readout 보정계수로만 처리(동역학 fudge 금지).
 ⑤ 새 실험 세션은 자체 q-offset 캘리브레이션 1회로 대응. ⑥ 준정적 동작(느린 hold)은 트윈 유효범위 밖 —
 점프/s2s 같은 동적 task에만 사용. ⑦ 근본 개선의 다음 단계는 새 데이터:

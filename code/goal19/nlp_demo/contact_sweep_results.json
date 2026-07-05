@@ -38,6 +38,12 @@
    "gap_pct": -2.8
   },
   {
+   "contact": "soft a=1.0 k=130000 b=180 (= k_eq measured, RECOMMENDED)",
+   "h_pred": 1.112,
+   "twin": 1.063,
+   "gap_pct": -4.4
+  },
+  {
    "contact": "hard (complementarity)",
    "h_pred": 0.94,
    "twin": 0.971,
@@ -76,5 +82,6 @@
    ]
   ],
   "note": "matches NLP sweep optimum zone k=1e5-2e5 exactly \u2014 mutual validation"
- }
+ },
+ "final_chain": "no-friction -14.0%/0.998m -> +identified friction -6.4%/1.051m -> +contact matched to measured k_eq -4.4%/1.063m (realized height +6.5cm total)"
 }

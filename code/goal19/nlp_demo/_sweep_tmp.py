@@ -18,10 +18,10 @@ if hasattr(sys.stdout, "reconfigure"):
 # ============================================================
 # Contact Model 선택 가이드
 # ============================================================
-CONTACT_MODEL = 'hard'   # 'hard' | 'alpha' | 'soft' | 'soft_alpha'
-ALPHA         = 0.85    # soft_alpha: body가 느끼는 GRF 비율 (alpha 불필요)
-K_C           = 5000   # [N/m]   접촉 스프링 강성
-B_C           = 20     # [N·s/m] 접촉 감쇠계수
+CONTACT_MODEL = 'soft_alpha'   # 'hard' | 'alpha' | 'soft' | 'soft_alpha'
+ALPHA         = 1.0    # soft_alpha: body가 느끼는 GRF 비율 (alpha 불필요)
+K_C           = 130000   # [N/m]   접촉 스프링 강성
+B_C           = 180     # [N·s/m] 접촉 감쇠계수
 RAIL_FRICTION = 0.0    # [N·s/m] 레일 점성 마찰
 JOINT_FRICTION = 0.0   # [Nm·s/rad] 관절 점성 마찰
 # ★ 최종 파라미터 (3600개 sweep, 입력토크sat + z_kin높이 + 입력에너지, score=6):
