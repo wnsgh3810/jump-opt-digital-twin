@@ -334,6 +334,14 @@ NLP 스윕이 경험적으로 찾은 최적 강성대(k=1e5–2e5)와 정확히 
 <p style="margin-top:8px;color:var(--muted);font-size:14px">85% 예산만으로 이미 현 실측 최고 수준(트윈 0.957 vs 실측최고 replay 0.929).
 파일: <code>nlp_demo/deploy/</code> — t·q_des·dq_des·τ_ff CSV (로봇 canonical 규약) + README(게인 kp=90/kd=0.75·2.0, 프로토콜, 안전수칙).
 최적 궤적 canonical 애니메이션: <code>anim_final/nlp_optimal_jump.gif</code>.</p></div>
+<div class="finding drop"><h3>배포 사전 검증 (closed-loop MIT PD+ff) — 정직한 기대치 보정</h3>
+<p>실 배포와 동일 조건(kp90/kd0.75·2.0 + τ_ff, ±18Nm 클립)으로 트윈에서 closed-loop 재생:
+100% 예산에서 <b>0.954m</b> (open-loop 1.063 대비 −10.9cm), 추종은 1.0–1.4°로 양호.
+원인은 구조적 — PD가 트윈을 NLP 참조 운동학에 고정해 트윈 동역학의 유리한 편차를 제동하고,
+knee가 18Nm 포화라 PD의 +방향 보정 여력이 0 (참조 연장 hold 무효과, kp150도 +1.4cm뿐).
+α_kp=0.19(펌웨어 불확실성) 시 0.936m. <b>1차 시도 정직한 기대: 0.95–0.97m ≈ 현 실측 최고 동급 이상</b>;
+상한 1.06m은 저게인 ff-위주 재생, 반복 보정(ILC), 또는 MuJoCo 트윈 위 직접 TO(contact-implicit)로 접근.
+<code>deploy_cl_check.json</code>.</p></div>
 {f'<figure class="summary"><img src="{env_png}" alt="envelope check"></figure>' if env_png else ''}
 </div></section>
 
