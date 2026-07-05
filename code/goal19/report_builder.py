@@ -323,6 +323,17 @@ NLP 스윕이 경험적으로 찾은 최적 강성대(k=1e5–2e5)와 정확히 
 (60점 중 2점만 +0.2 Nm 초과 = 무시 가능). hip은 13.5 Nm ≤ 18 스펙 내지만 8–14 rad/s 고속대에서
 역대 trial이 안 써본 영역을 적극 사용 — <b>optimizer의 추가 높이는 주로 "미개척 hip 사용"에서 나옴</b>.
 다음 실험 권장: 최적 궤적을 점진 스케일(70%→100%)로 재생하며 hip 추종을 확인.</p></div>
+<div class="finding"><h3>배포 패키지 완성 — 로봇에 바로 넣을 수 있는 CSV 3종</h3>
+<p>τ 예산 70/85/100%로 <b>각각 재최적화</b>(단순 스케일링은 궤적-토크 일관성 파괴)한 사다리.
+<b>준최대 궤적은 거의 완벽 전이</b> — gap은 100% 한계에서만 열림:</p>
+<div class="tablewrap"><table><thead><tr><th>예산</th><th>NLP 예측</th><th>트윈 실현</th><th>gap</th><th>peak τ (hip/knee)</th><th>stance</th></tr></thead><tbody>
+<tr><td class="m">70% (12.6 Nm)</td><td class="m num">0.824</td><td class="m num">0.836</td><td class="m num">+1.5%</td><td class="m num">9.2 / 12.6</td><td class="m num">248 ms</td></tr>
+<tr><td class="m">85% (15.3 Nm)</td><td class="m num">0.966</td><td class="m num">0.957</td><td class="m num">−0.9%</td><td class="m num">11.3 / 15.3</td><td class="m num">209 ms</td></tr>
+<tr><td class="m">100% (18.0 Nm)</td><td class="m num">1.112</td><td class="m num">1.063</td><td class="m num">−4.4%</td><td class="m num">13.5 / 18.0</td><td class="m num">184 ms</td></tr>
+</tbody></table></div>
+<p style="margin-top:8px;color:var(--muted);font-size:14px">85% 예산만으로 이미 현 실측 최고 수준(트윈 0.957 vs 실측최고 replay 0.929).
+파일: <code>nlp_demo/deploy/</code> — t·q_des·dq_des·τ_ff CSV (로봇 canonical 규약) + README(게인 kp=90/kd=0.75·2.0, 프로토콜, 안전수칙).
+최적 궤적 canonical 애니메이션: <code>anim_final/nlp_optimal_jump.gif</code>.</p></div>
 {f'<figure class="summary"><img src="{env_png}" alt="envelope check"></figure>' if env_png else ''}
 </div></section>
 
