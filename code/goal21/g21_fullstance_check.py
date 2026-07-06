@@ -63,10 +63,13 @@ def run_config(name, xd):
     ap = _AP
     m = mujoco.MjModel.from_xml_string(S.build_xml_jump_6d(ap["arm_hip"], ap["arm_knee"]))
     rows = []
+    jobs = []
     for ds in ("jump_0424", "jump_0602"):
-        subs = [sub for d2, sub, isj in list_experiments() if d2 == ds]
-        for sub in subs:
-            td = MS.LOADERS[ds](sub)
+        jobs += [(ds, sub, MS.LOADERS[ds](sub)) for d2, sub, isj in list_experiments() if d2 == ds]
+    for ds, tdir, subs in MS.MARCH:      # 0324: NOT in fs objective -> out-of-sample full-traj
+        jobs += [(ds, sub, MS.load_march(tdir, sub)) for sub in subs]
+    if True:
+        for ds, sub, td in jobs:
             pp = MS.get_prep((ds, sub), td, m, True)
             t = pp["t"]
             i0, ito = stance_range(td, t)
@@ -101,10 +104,12 @@ if __name__ == "__main__":
     for name, xd in configs:
         rows = run_config(name, xd)
         allr[name] = rows
-        mq2 = np.mean([r["rq2"] for r in rows]); mdq2 = np.mean([r["rdq2"] for r in rows])
-        mwhip = np.mean([r["whip"] for r in rows]); mvto = np.mean([r["vto"] for r in rows])
-        mapex = np.mean([r["apex"] for r in rows])
-        print(f"[{name:>12}] q2 {mq2:.4f} rad | dq2 {mdq2:.3f} | whip x{mwhip:.3f} | "
-              f"vto {mvto:.3f} m/s | apex +{mapex:.3f} m", flush=True)
+        for dsn in ("jump_0424", "jump_0602", "jump_0324"):
+            rs = [r for r in rows if r["ds"] == dsn]
+            if not rs:
+                continue
+            print(f"[{name:>12}] {dsn:<10} q2 {np.mean([r['rq2'] for r in rs]):.4f} | "
+                  f"dq2 {np.mean([r['rdq2'] for r in rs]):.3f} | whip x{np.mean([r['whip'] for r in rs]):.3f} | "
+                  f"vto {np.mean([r['vto'] for r in rs]):.3f} | apex +{np.mean([r['apex'] for r in rs]):.3f}", flush=True)
     json.dump(allr, open(REPO / "code/goal21/fullstance_check.json", "w"), indent=1)
     print("saved fullstance_check.json")

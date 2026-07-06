@@ -29,3 +29,36 @@ BEST iter 76: obj=5.7492  c=4.928 vs=1.162 w=0.350 c_hip=0.589 fc_knee=0.503 fv_
 BEST iter 88: obj=5.7411  c=4.838 vs=1.097 w=0.357 c_hip=0.550 fc_knee=0.582 fv_knee=0.136 fc_hip=0.014 fv_hip=0.061
 BEST iter 93: obj=5.7374  c=4.990 vs=1.138 w=0.367 c_hip=0.607 fc_knee=0.473 fv_knee=0.143 fc_hip=0.034 fv_hip=0.001
 BEST iter 105: obj=5.7323  c=4.860 vs=1.163 w=0.363 c_hip=0.609 fc_knee=0.505 fv_knee=0.146 fc_hip=0.048 fv_hip=0.001
+BEST iter 120: obj=5.7315  c=4.767 vs=1.151 w=0.363 c_hip=0.615 fc_knee=0.505 fv_knee=0.151 fc_hip=0.042 fv_hip=0.001
+BEST iter 122: obj=5.7308  c=4.849 vs=1.116 w=0.361 c_hip=0.612 fc_knee=0.485 fv_knee=0.168 fc_hip=0.031 fv_hip=0.010
+BEST iter 128: obj=5.7308  c=4.746 vs=1.166 w=0.370 c_hip=0.614 fc_knee=0.524 fv_knee=0.145 fc_hip=0.037 fv_hip=0.001
+BEST iter 132: obj=5.7289  c=4.774 vs=1.158 w=0.362 c_hip=0.622 fc_knee=0.530 fv_knee=0.153 fc_hip=0.036 fv_hip=0.001
+BEST iter 137: obj=5.7264  c=4.760 vs=1.125 w=0.362 c_hip=0.615 fc_knee=0.505 fv_knee=0.159 fc_hip=0.025 fv_hip=0.004
+BEST iter 144: obj=5.7258  c=4.766 vs=1.137 w=0.368 c_hip=0.622 fc_knee=0.519 fv_knee=0.162 fc_hip=0.024 fv_hip=0.001
+BEST iter 160: obj=5.7249  c=4.881 vs=1.119 w=0.365 c_hip=0.613 fc_knee=0.489 fv_knee=0.161 fc_hip=0.021 fv_hip=0.001
+BEST iter 167: obj=5.7245  c=4.825 vs=1.123 w=0.365 c_hip=0.614 fc_knee=0.497 fv_knee=0.162 fc_hip=0.022 fv_hip=0.001
+BEST iter 173: obj=5.7243  c=4.856 vs=1.113 w=0.367 c_hip=0.611 fc_knee=0.496 fv_knee=0.163 fc_hip=0.016 fv_hip=0.001
+BEST iter 184: obj=5.7238  c=4.891 vs=1.110 w=0.367 c_hip=0.611 fc_knee=0.491 fv_knee=0.163 fc_hip=0.012 fv_hip=0.001
+BEST iter 192: obj=5.7237  c=4.865 vs=1.112 w=0.366 c_hip=0.611 fc_knee=0.494 fv_knee=0.162 fc_hip=0.015 fv_hip=0.001
+BEST iter 201: obj=5.7236  c=4.859 vs=1.113 w=0.366 c_hip=0.612 fc_knee=0.494 fv_knee=0.162 fc_hip=0.015 fv_hip=0.001
+BEST iter 202: obj=5.7233  c=4.878 vs=1.111 w=0.367 c_hip=0.611 fc_knee=0.492 fv_knee=0.162 fc_hip=0.013 fv_hip=0.001
+BEST iter 221: obj=5.7232  c=4.878 vs=1.111 w=0.367 c_hip=0.611 fc_knee=0.492 fv_knee=0.162 fc_hip=0.013 fv_hip=0.001
+BEST iter 245: obj=5.7228  c=4.949 vs=1.161 w=0.377 c_hip=0.661 fc_knee=0.470 fv_knee=0.164 fc_hip=0.001 fv_hip=0.006
+BEST iter 249: obj=5.7195  c=4.963 vs=1.173 w=0.379 c_hip=0.520 fc_knee=0.471 fv_knee=0.166 fc_hip=0.012 fv_hip=0.007
+BEST iter 250: obj=5.7137  c=5.005 vs=1.205 w=0.385 c_hip=0.414 fc_knee=0.460 fv_knee=0.167 fc_hip=0.011 fv_hip=0.009
+BEST iter 254: obj=5.7132  c=4.888 vs=1.208 w=0.386 c_hip=0.506 fc_knee=0.495 fv_knee=0.165 fc_hip=0.001 fv_hip=0.001
+BEST iter 255: obj=5.7128  c=4.868 vs=1.243 w=0.393 c_hip=0.440 fc_knee=0.511 fv_knee=0.167 fc_hip=0.001 fv_hip=0.001
+BEST iter 258: obj=5.7107  c=4.970 vs=1.290 w=0.399 c_hip=0.425 fc_knee=0.455 fv_knee=0.167 fc_hip=0.001 fv_hip=0.005
+BEST iter 260: obj=5.7039  c=4.904 vs=1.272 w=0.395 c_hip=0.316 fc_knee=0.473 fv_knee=0.165 fc_hip=0.003 fv_hip=0.001
+BEST iter 261: obj=5.6960  c=4.882 vs=1.327 w=0.403 c_hip=0.143 fc_knee=0.474 fv_knee=0.166 fc_hip=0.007 fv_hip=0.001
+BEST iter 269: obj=5.6910  c=4.987 vs=1.420 w=0.425 c_hip=0.000 fc_knee=0.448 fv_knee=0.166 fc_hip=0.001 fv_hip=0.007
+BEST iter 286: obj=5.6874  c=4.885 vs=1.410 w=0.422 c_hip=0.028 fc_knee=0.473 fv_knee=0.169 fc_hip=0.002 fv_hip=0.001
+BEST iter 288: obj=5.6868  c=4.997 vs=1.427 w=0.433 c_hip=0.023 fc_knee=0.458 fv_knee=0.167 fc_hip=0.001 fv_hip=0.003
+BEST iter 303: obj=5.6860  c=4.966 vs=1.430 w=0.424 c_hip=0.002 fc_knee=0.449 fv_knee=0.169 fc_hip=0.002 fv_hip=0.005
+BEST iter 314: obj=5.6846  c=4.931 vs=1.442 w=0.430 c_hip=0.000 fc_knee=0.455 fv_knee=0.166 fc_hip=0.001 fv_hip=0.004
+BEST iter 337: obj=5.6833  c=4.944 vs=1.437 w=0.434 c_hip=0.003 fc_knee=0.458 fv_knee=0.164 fc_hip=0.001 fv_hip=0.003
+BEST iter 350: obj=5.6829  c=4.924 vs=1.448 w=0.436 c_hip=0.000 fc_knee=0.459 fv_knee=0.165 fc_hip=0.001 fv_hip=0.002
+BEST iter 351: obj=5.6816  c=4.910 vs=1.458 w=0.439 c_hip=0.000 fc_knee=0.464 fv_knee=0.163 fc_hip=0.001 fv_hip=0.001
+BEST iter 358: obj=5.6811  c=4.937 vs=1.456 w=0.442 c_hip=0.002 fc_knee=0.466 fv_knee=0.163 fc_hip=0.001 fv_hip=0.001
+DONE obj=5.6811 (canonical 6.0)  saved stribeck_refit_best.json
+  jump_position_0421:0.914  jump_0424:0.709  jump_0602:0.864  jump_0324:0.682  s2s_gnd:0.467  s2s_air:0.874  fs_0424:0.594  fs_0602:0.576
