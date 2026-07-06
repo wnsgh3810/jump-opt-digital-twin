@@ -60,3 +60,12 @@ q offset, 4-bar compliance, **레일 마찰**(신규 축) 포함. sit2stand_gnd�
   사다리 붕괴: η = 1 − a/|τ|, a≈0.9Nm = **canonical fc_knee 0.988과 독립 수렴** (교차 검증).
   fc_knee 스윕: 대칭 상수는 s2s(원함 ~2.0)와 점프(원함 ~1.0) 상충. 방향 분리 실패
   (push-off와 s2s 기립이 같은 신전 방향) → 속도 분리(Stribeck 초과항) duel 진행.
+- 2026-07-06 (자율 연장 P4 완결):
+  ① **창-단독 목적 게이밍 증명** — v1 refit이 창 전 그룹 30%+ 개선하며 full-stance 2.4배
+  악화. 하이브리드(창6+full-stance2)로 재설계 → v2: 창·full-stance 동시 개선
+  (dq2 −42~54%, whip 0.54→0.73/0.95/0.87, out-of-sample 0324 포함).
+  ② serial 최적 마찰 재배분: knee = fc 0.47 + Stribeck(c 4.94/vs 1.46/w 0.44),
+  hip ≈ 무마찰 (canonical hip 점성 0.71이 push-off 파워 흡수 = under-jump 부분 원인).
+  ③ **4-bar 포팅 8구성 전부 기각 (+28~57%)** — serial의 Stribeck은 명시적 4-bar 구조의
+  대리물. 4-bar canonical은 그대로 유지 (구조 결정의 독립 검증).
+  ④ 적용처 = CasADi NLP serial 모델 (smooth 항). η사다리 재해석 필요(구조 오차 vs 산일).
