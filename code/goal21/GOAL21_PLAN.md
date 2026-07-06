@@ -28,7 +28,11 @@ q offset, 4-bar compliance, **레일 마찰**(신규 축) 포함. sit2stand_gnd�
 - 링크별 base inertial params (m, m·c, I) — thigh/calf(+crank/coupler는 4-bar 기하 고정 후 lumping 재도출)
 - 관절 점성+쿨롱 (hip/knee), **레일 쿨롱** f_rail·sign(dz) (base 방정식/투영에 등장)
 - q offset (소각도 선형화로 회귀에 포함 가능, ±2° 물리 제약)
-- 가중: ddq 노이즈 추정 기반 (savgol + 주파수 가중), whip 구간 별도 분석
+- ★ **ddq 미사용 확정 (사용자 우려 07-06 → 검증 완료)**: 적분형(모멘텀) 회귀 —
+  ∫τdt = [M(q)dq]₂−[M(q)dq]₁ + ∫(C+G+마찰)dt, 우변에 q·dq만. 실측 노이즈 바닥
+  (air 정지 구간): q 0.0054°, dq 0.053 rad/s, τ 0.014 Nm → 모멘텀-창 SNR = 37(최악: air
+  0.5Nm/30ms) ~ 3400(점프 15Nm/100ms). 창 길이 영역별 가변(air 100ms/점프 30-50ms),
+  whip 구간은 추정 하향가중 + 잔차 지도 전용 (4중 기각 잔차의 거주지 — 관찰 대상)
 
 ## 2단계 (잔차 지도 이후, 비선형)
 - 4-bar compliance (connect 강성), stiction(비평활), 발 미끄러짐, 접촉 순응
