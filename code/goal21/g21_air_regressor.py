@@ -67,7 +67,10 @@ def theta_from_model(m):
     Mt, Mc2 = m.body_mass[bt], m.body_mass[bc]
     r1, r2 = -m.body_ipos[bt][2], -m.body_ipos[bc][2]
     It, Ic2 = m.body_inertia[bt][1], m.body_inertia[bc][1]   # Iyy (rotation about y)
-    arm_hip, arm_knee = m.dof_armature[0], m.dof_armature[1]
+    jh = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, "hip")
+    jk = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, "knee")
+    arm_hip = m.dof_armature[m.jnt_dofadr[jh]]
+    arm_knee = m.dof_armature[m.jnt_dofadr[jk]]
     A = It + Mt * r1 ** 2 + Mc2 * L1 ** 2 + arm_hip
     D = Ic2 + Mc2 * r2 ** 2
     B = Mc2 * L1 * r2
