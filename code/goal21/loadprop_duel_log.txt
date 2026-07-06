@@ -1,0 +1,7 @@
+beta=0.3 vs=1.0  TOTAL=23909   jump_position_0421:3672  jump_0424:7474  jump_0602:3887  jump_0324:3930  sit2stand_gnd:4946
+beta=0.3 vs=2.0  TOTAL=23540   jump_position_0421:3476  jump_0424:7731  jump_0602:3935  jump_0324:3973  sit2stand_gnd:4425
+beta=0.5 vs=1.0  TOTAL=22886   jump_position_0421:3486  jump_0424:7646  jump_0602:3952  jump_0324:3942  sit2stand_gnd:3861
+beta=0.5 vs=2.0  TOTAL=23234   jump_position_0421:3192  jump_0424:8178  jump_0602:4106  jump_0324:4067  sit2stand_gnd:3690
+beta=0.7 vs=1.0  TOTAL=22793   jump_position_0421:3293  jump_0424:7906  jump_0602:4052  jump_0324:3991  sit2stand_gnd:3551
+beta=0.7 vs=2.0  TOTAL=24094   jump_position_0421:3051  jump_0424:8738  jump_0602:4352  jump_0324:4236  sit2stand_gnd:3716
+saved loadprop_duel.json

@@ -1,0 +1,7 @@
+warm-start from previous mshoot best
+c=2.5 vs=1.0  DUEL=22662  AIR=170354   jump_position_0421:3589  jump_0424:7601  jump_0602:4010  jump_0324:3929  sit2stand_gnd:3533
+c=3.5 vs=1.0  DUEL=22888  AIR=127301   jump_position_0421:3449  jump_0424:7797  jump_0602:4102  jump_0324:3932  sit2stand_gnd:3608
+c=4.5 vs=1.0  DUEL=23235  AIR=112992   jump_position_0421:3345  jump_0424:8016  jump_0602:4202  jump_0324:3944  sit2stand_gnd:3728
+c=3.0 vs=0.7  DUEL=22628  AIR=171877   jump_position_0421:3624  jump_0424:7579  jump_0602:4020  jump_0324:3929  sit2stand_gnd:3476
+c=3.0 vs=1.5  DUEL=22926  AIR=124398   jump_position_0421:3392  jump_0424:7867  jump_0602:4104  jump_0324:3947  sit2stand_gnd:3616
+saved refined stribeck_duel.json

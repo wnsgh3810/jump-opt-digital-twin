@@ -1,0 +1,10 @@
+c=1.0 vs=1.0  TOTAL=24160   jump_position_0421:3791  jump_0424:7414  jump_0602:3889  jump_0324:3937  sit2stand_gnd:5129
+c=1.0 vs=2.0  TOTAL=23661   jump_position_0421:3711  jump_0424:7481  jump_0602:3903  jump_0324:3942  sit2stand_gnd:4625
+c=1.0 vs=4.0  TOTAL=23576   jump_position_0421:3653  jump_0424:7630  jump_0602:3938  jump_0324:3974  sit2stand_gnd:4381
+c=2.0 vs=1.0  TOTAL=22879   jump_position_0421:3659  jump_0424:7521  jump_0602:3965  jump_0324:3930  sit2stand_gnd:3803
+c=2.0 vs=2.0  TOTAL=22800   jump_position_0421:3504  jump_0424:7717  jump_0602:4013  jump_0324:3950  sit2stand_gnd:3615
+c=2.0 vs=4.0  TOTAL=23232   jump_position_0421:3407  jump_0424:8066  jump_0602:4115  jump_0324:4038  sit2stand_gnd:3607
+c=3.0 vs=1.0  TOTAL=22699   jump_position_0421:3518  jump_0424:7695  jump_0602:4055  jump_0324:3930  sit2stand_gnd:3501
+c=3.0 vs=2.0  TOTAL=23124   jump_position_0421:3310  jump_0424:8029  jump_0602:4148  jump_0324:3979  sit2stand_gnd:3658
+c=3.0 vs=4.0  TOTAL=23963   jump_position_0421:3218  jump_0424:8570  jump_0602:4337  jump_0324:4136  sit2stand_gnd:3701
+saved stribeck_duel.json
