@@ -16,6 +16,14 @@ q offset, 4-bar compliance, **레일 마찰**(신규 축) 포함. sit2stand_gnd�
    투영 방정식 (contact force 소거). 투영 방향의 정보만 사용
 3. jump 비행 직전 whip 구간: foot 접촉 이완 → 취급 주의 (잔차 지도의 관심 영역)
 
+## GRF-프리 보장 (사용자 확정 07-06: q/dq/τ/h만 맞추면 됨)
+- GRF는 fit에 0% — ① s2s_air는 무접촉이라 식에 GRF 자체가 없음, ② 스탠스는 구속 투영으로
+  접촉력 항을 수학적으로 소거 (측정도 fitting도 불필요)
+- GRF 유일 용도 = 이륙 이벤트 감지 (문턱 통과, 캘리브레이션 무관; FK 발높이로 대체 가능)
+- q/dq/τ = 회귀 본체 (샘플별 τ 잔차 최소화) · h = held-out 심판 (G20과 동일 철학)
+- 한계 명시: 접촉 강성(solref/imp0)은 회귀 식별 불가 → q/dq 창 fit에서 이월 (현행도 GRF 아닌
+  q/dq로 식별된 것); 발 μ는 약식별 → 슬립은 모델 아닌 투영-잔차 스파이크 감지기로 취급(1단계)
+
 ## 모델 항 (1단계: 선형)
 - 링크별 base inertial params (m, m·c, I) — thigh/calf(+crank/coupler는 4-bar 기하 고정 후 lumping 재도출)
 - 관절 점성+쿨롱 (hip/knee), **레일 쿨롱** f_rail·sign(dz) (base 방정식/투영에 등장)
