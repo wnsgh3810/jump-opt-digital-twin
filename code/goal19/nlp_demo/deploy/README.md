@@ -19,6 +19,12 @@ Start from the best executed trial's gains: **kp=90, kd=0.75 (hip) / kp=90, kd=2
 2. `s0.85`, then `s1.00`. Expected best-case apex (camera scale): ~1.12 m vs current best 0.980 m.
 3. After each: compare measured q/dq/tau vs the CSV — deviations localize model error (feed back into twin).
 
+## Pre-flight check (CRITICAL)
+- **Verify dq_des is actually transmitted to the motors** before the first run. On 03.19/03.24/04.21 a
+  code bug silently sent dq_des=0 while logging the planned values — if that happens with these CSVs,
+  the kd term becomes pure braking (-kd*dq) during extension and the jump will underperform badly.
+  Quick check: command a slow sine on dq_des with kp=0, kd>0 and confirm the joint follows.
+
 ## Safety
 - Torque ff is within AK80-9 V2 peak (18 Nm) at every sample; knee rides the limit (bang-bang) — expect saturation flags at 100%.
 - Trajectories end at takeoff; after `t_end` command zero torque + flight posture hold (PD on landing pose).
