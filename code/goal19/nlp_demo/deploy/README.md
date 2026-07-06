@@ -23,6 +23,7 @@ Start from the best executed trial's gains: **kp=90, kd=0.75 (hip) / kp=90, kd=2
 - **Verify dq_des is actually transmitted to the motors** before the first run. On 03.19/03.24/04.21 a
   code bug silently sent dq_des=0 while logging the planned values — if that happens with these CSVs,
   the kd term becomes pure braking (-kd*dq) during extension and the jump will underperform badly.
+  (User confirmed the bug was fixed from 04.24 onward — this is a quick sanity confirmation, not an expected failure.)
   Quick check: command a slow sine on dq_des with kp=0, kd>0 and confirm the joint follows.
 
 ## Safety
