@@ -1,0 +1,31 @@
+warm-start from previous mshoot best
+BASE (2s): jump_position_0421:3911  jump_0424:7386  jump_0602:3861  jump_0324:3947  s2s_gnd:8281  s2s_air:207436  fs_0424:2470  fs_0602:931
+BASE expected: 0421 3911 / 0424 7386 / 0602 3861 / 0324 3947 / gnd 8281 / air 207436
+warm-start from previous mshoot best
+BEST iter 1: obj=7.6351  c=3.000 vs=1.000 w=0.150 c_hip=0.200 fc_knee=0.988 fv_knee=0.362 fc_hip=0.095 fv_hip=0.713
+warm-start from previous mshoot best
+warm-start from previous mshoot best
+warm-start from previous mshoot best
+BEST iter 10: obj=7.1595  c=3.200 vs=1.087 w=0.168 c_hip=0.287 fc_knee=1.076 fv_knee=0.242 fc_hip=0.110 fv_hip=0.763
+BEST iter 11: obj=6.6702  c=3.300 vs=1.131 w=0.176 c_hip=0.331 fc_knee=1.120 fv_knee=0.122 fc_hip=0.117 fv_hip=0.788
+warm-start from previous mshoot best
+BEST iter 17: obj=6.5829  c=3.136 vs=1.121 w=0.223 c_hip=0.370 fc_knee=0.971 fv_knee=0.179 fc_hip=0.083 fv_hip=0.648
+BEST iter 18: obj=6.1966  c=3.204 vs=1.182 w=0.260 c_hip=0.455 fc_knee=0.962 fv_knee=0.088 fc_hip=0.047 fv_hip=0.616
+BEST iter 20: obj=6.1141  c=3.234 vs=1.208 w=0.237 c_hip=0.493 fc_knee=0.959 fv_knee=0.048 fc_hip=0.140 fv_hip=0.601
+BEST iter 23: obj=6.0934  c=3.924 vs=1.022 w=0.225 c_hip=0.355 fc_knee=0.885 fv_knee=0.022 fc_hip=0.113 fv_hip=0.682
+BEST iter 32: obj=6.0924  c=3.217 vs=1.072 w=0.265 c_hip=0.463 fc_knee=0.784 fv_knee=0.034 fc_hip=0.115 fv_hip=0.549
+BEST iter 37: obj=6.0398  c=3.694 vs=1.168 w=0.234 c_hip=0.417 fc_knee=1.064 fv_knee=0.049 fc_hip=0.096 fv_hip=0.460
+warm-start from previous mshoot best
+BEST iter 41: obj=6.0020  c=3.524 vs=1.149 w=0.266 c_hip=0.468 fc_knee=0.939 fv_knee=0.001 fc_hip=0.092 fv_hip=0.572
+BEST iter 47: obj=5.9903  c=3.633 vs=1.053 w=0.249 c_hip=0.417 fc_knee=0.957 fv_knee=0.001 fc_hip=0.137 fv_hip=0.573
+BEST iter 48: obj=5.9192  c=3.867 vs=1.117 w=0.275 c_hip=0.477 fc_knee=0.807 fv_knee=0.042 fc_hip=0.106 fv_hip=0.468
+BEST iter 49: obj=5.8553  c=4.194 vs=1.141 w=0.299 c_hip=0.520 fc_knee=0.669 fv_knee=0.055 fc_hip=0.100 fv_hip=0.363
+warm-start from previous mshoot best
+BEST iter 62: obj=5.8154  c=4.452 vs=1.154 w=0.324 c_hip=0.507 fc_knee=0.790 fv_knee=0.052 fc_hip=0.046 fv_hip=0.199
+BEST iter 63: obj=5.7848  c=4.862 vs=1.204 w=0.362 c_hip=0.552 fc_knee=0.706 fv_knee=0.079 fc_hip=0.001 fv_hip=0.012
+BEST iter 70: obj=5.7727  c=5.000 vs=1.109 w=0.332 c_hip=0.569 fc_knee=0.590 fv_knee=0.116 fc_hip=0.047 fv_hip=0.065
+BEST iter 74: obj=5.7655  c=5.258 vs=1.121 w=0.364 c_hip=0.535 fc_knee=0.520 fv_knee=0.108 fc_hip=0.036 fv_hip=0.020
+BEST iter 76: obj=5.7492  c=4.928 vs=1.162 w=0.350 c_hip=0.589 fc_knee=0.503 fv_knee=0.123 fc_hip=0.050 fv_hip=0.001
+BEST iter 88: obj=5.7411  c=4.838 vs=1.097 w=0.357 c_hip=0.550 fc_knee=0.582 fv_knee=0.136 fc_hip=0.014 fv_hip=0.061
+BEST iter 93: obj=5.7374  c=4.990 vs=1.138 w=0.367 c_hip=0.607 fc_knee=0.473 fv_knee=0.143 fc_hip=0.034 fv_hip=0.001
+BEST iter 105: obj=5.7323  c=4.860 vs=1.163 w=0.363 c_hip=0.609 fc_knee=0.505 fv_knee=0.146 fc_hip=0.048 fv_hip=0.001
