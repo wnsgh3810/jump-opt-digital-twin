@@ -1,0 +1,35 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE: habs:0.6 w_0421:2655.0 w_0424:3475.4 fs_0424:1222.6 w_0602:2724.6 fs_0602:551.0 w_0324:1743.8 fs_0324:457.6 w_s2s:3788.7
+BEST nev=34 obj=7.8464 ho=1.511 [0min] s_rc=0.960 s_ic=1.196 s_rp=1.020 s_ip=1.215 d_cpin=0.000 d_kneep=0.002
+BEST nev=56 obj=7.7343 ho=1.154 [0min] s_rc=1.138 s_ic=1.024 s_rp=0.990 s_ip=1.224 d_cpin=0.000 d_kneep=0.001
+BEST nev=134 obj=7.6447 ho=1.837 [0min] s_rc=1.069 s_ic=1.322 s_rp=1.060 s_ip=1.237 d_cpin=0.000 d_kneep=0.000
+BEST nev=185 obj=7.5269 ho=1.584 [0min] s_rc=1.058 s_ic=1.014 s_rp=1.083 s_ip=0.938 d_cpin=0.000 d_kneep=0.001
+BEST nev=304 obj=7.4601 ho=1.292 [1min] s_rc=0.944 s_ic=1.198 s_rp=1.097 s_ip=0.953 d_cpin=0.001 d_kneep=0.002
+BEST nev=890 obj=7.4418 ho=1.398 [2min] s_rc=0.991 s_ic=1.005 s_rp=1.026 s_ip=1.016 d_cpin=0.005 d_kneep=0.004
+BEST nev=1032 obj=7.3940 ho=1.396 [2min] s_rc=1.185 s_ic=0.862 s_rp=0.976 s_ip=1.302 d_cpin=0.001 d_kneep=0.002
+BEST nev=1089 obj=7.3694 ho=1.576 [2min] s_rc=1.210 s_ic=1.141 s_rp=1.030 s_ip=1.167 d_cpin=0.000 d_kneep=0.004
+BEST nev=1119 obj=7.3655 ho=1.352 [2min] s_rc=1.218 s_ic=0.995 s_rp=1.078 s_ip=0.993 d_cpin=0.003 d_kneep=0.003
+P13 DONE nev=1120  selected: obj=7.4692 ho=0.939
+linkage params: s_rc=1.2216 s_ic=1.1629 s_rp=1.0566 s_ip=1.1140 d_cpin=0.0012 d_kneep=0.0037
+M_p 1.822 -> 2.409   M_c 0.708 -> 0.785
