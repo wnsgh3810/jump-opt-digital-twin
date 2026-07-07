@@ -44,9 +44,12 @@ def build_model(x32):
 x_e = np.array(json.load(open(REPO / "code/goal21/fourbar_honest_canonical.json"))["x"])
 x_f = np.array(json.load(open(Path(__file__).parent / "fourbar_p13f_candidate.json"))["x"])
 x_g = np.array(json.load(open(Path(__file__).parent / "p3_dqw300.json"))["selected"]["x"])
-MODELS = [("P13e (현 canonical)", build_model(x_e)),
-          ("P13f (dq-가중 150)", build_model(x_f)),
-          ("P13g (dq-가중 300)", build_model(x_g))]
+x_h = np.array(json.load(open(Path(__file__).parent / "fourbar_p13h_candidate.json"))["x"])
+# P13h는 계측 보정(sens_delay=-1.5ms) 전제 — replay 시 τ(t+1.5ms)
+MODELS = [("P13e (현 canonical)", build_model(x_e), 0.0),
+          ("P13f (dq-가중 150)", build_model(x_f), 0.0),
+          ("P13g (dq-가중 300)", build_model(x_g), 0.0),
+          ("P13h (계측보정 ★추천)", build_model(x_h), -0.0015)]
 dd_e = MODELS[0][1][1]
 
 index = []
@@ -59,8 +62,14 @@ for tr_ in P12._G["trials"]:
     trt = np.asarray(td["t"])
     fig, ax = plt.subplots(2, 3, figsize=(14.5, 7.4))
     hs = []
-    for nm, (m, _) in MODELS:
-        lg = FB.run_jump_sim_fourbar(m, td)
+    for nm, (m, _), sd in MODELS:
+        td_in = td
+        if sd != 0.0:
+            tt = np.asarray(td["t"])
+            td_in = dict(td)
+            td_in["tau1_real"] = np.interp(tt - sd, tt, np.asarray(td["tau1_real"]))
+            td_in["tau2_real"] = np.interp(tt - sd, tt, np.asarray(td["tau2_real"]))
+        lg = FB.run_jump_sim_fourbar(m, td_in)
         if lg is None:
             print("crash", ds, sub, nm, flush=True)
             continue
