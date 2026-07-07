@@ -1,0 +1,59 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE(물리클램프 시작점): habs:2.0 w_0421:2898.6 w_0424:5137.2 fs_0424:2825.9 w_0602:2930.8 fs_0602:1381.4 w_0324:2808.0 fs_0324:886.8 w_s2s:5642.2
+BEST nev=1 obj=6.5937 ho=0.494 Mc=0.704 Mth=1.079 fvh=0.625 [0min]
+BEST nev=6 obj=6.1121 ho=0.631 Mc=0.650 Mth=1.075 fvh=0.676 [0min]
+BEST nev=30 obj=5.9511 ho=0.496 Mc=0.692 Mth=1.080 fvh=0.363 [0min]
+BEST nev=36 obj=5.8391 ho=0.556 Mc=0.681 Mth=1.078 fvh=0.462 [0min]
+BEST nev=68 obj=5.8291 ho=0.407 Mc=0.684 Mth=1.074 fvh=0.603 [0min]
+BEST nev=70 obj=5.7013 ho=0.516 Mc=0.708 Mth=1.080 fvh=0.402 [0min]
+BEST nev=112 obj=5.6428 ho=0.431 Mc=0.658 Mth=1.064 fvh=0.332 [0min]
+BEST nev=119 obj=5.6403 ho=0.388 Mc=0.707 Mth=1.072 fvh=0.525 [0min]
+BEST nev=135 obj=5.6022 ho=0.431 Mc=0.715 Mth=1.076 fvh=0.497 [0min]
+BEST nev=171 obj=5.5324 ho=0.445 Mc=0.712 Mth=1.079 fvh=0.349 [0min]
+BEST nev=323 obj=5.5143 ho=0.471 Mc=0.618 Mth=1.080 fvh=0.454 [1min]
+BEST nev=667 obj=5.4733 ho=0.453 Mc=0.561 Mth=1.073 fvh=0.418 [1min]
+BEST nev=703 obj=5.4643 ho=0.409 Mc=0.519 Mth=1.080 fvh=0.415 [2min]
+BEST nev=731 obj=5.4513 ho=0.433 Mc=0.501 Mth=1.079 fvh=0.398 [2min]
+BEST nev=795 obj=5.4291 ho=0.406 Mc=0.547 Mth=1.075 fvh=0.349 [2min]
+BEST nev=845 obj=5.3999 ho=0.463 Mc=0.551 Mth=1.080 fvh=0.187 [2min]
+BEST nev=967 obj=5.3808 ho=0.385 Mc=0.517 Mth=1.071 fvh=0.293 [2min]
+BEST nev=1049 obj=5.3569 ho=0.376 Mc=0.509 Mth=1.079 fvh=0.362 [2min]
+BEST nev=1081 obj=5.3490 ho=0.375 Mc=0.594 Mth=1.054 fvh=0.156 [2min]
+BEST nev=1115 obj=5.3425 ho=0.375 Mc=0.454 Mth=1.078 fvh=0.353 [2min]
+BEST nev=1117 obj=5.3372 ho=0.411 Mc=0.548 Mth=1.059 fvh=0.291 [2min]
+P13e DONE nev=1420  selected: obj=5.3372 ho=0.411
+질량 회계: 다리 1.720 kg + base 1.480 kg = 3.2 kg
+  M_thigh     1.0589
+  M_calf      0.9840
+  M_c         0.5484
+  m_foot      0.0100
+  fv_hip      0.2909
+  fc_hip      0.0138
+  fv_knee     0.0200
+  fc_knee     0.0129
+  stiff_knee  1.2690
+  com_dz_th   0.0300
+  com_dz_ca   0.0005
+  arm_knee    0.0055
+  offsets(deg): {'o1_0319': -2.14, 'o2_0319': 0.41, 'o1_0324': -1.61, 'o2_0324': 3.0, 'o1_0421': -2.0, 'o2_0421': -2.88, 'o1_0424': 2.96, 'o2_0424': 2.91}
