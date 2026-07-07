@@ -38,7 +38,15 @@ def build_xml_fourbar_flip(arm_knee, scales=None):
     I1 = B.I1_VAL * i_th
     Mc2, ccz, Ic2 = FB.calf_inertial(s_ca, m_foot, dz_ca, i_ca)
     MP = B.M_P_CAD * s_p; MC = B.M_C_CAD * s_c
-    sr = S._solref_str(); si = S._solimp_str(); Mb = S._base_mass()
+    sr = S._solref_str(); si = S._solimp_str()
+    # 07-08 fix: s_b was read-but-unused in ALL fourbar builders (dead param!).
+    # TOTAL_MASS mode: base mass derived so the whole robot equals the scale
+    # measurement (user 07-08: total 3.2 kg).
+    s_b = sc.get("M_base", 1.0) if sc else 1.0
+    if sc and sc.get("TOTAL_MASS"):
+        Mb = float(sc["TOTAL_MASS"]) - (M1 + Mc2 + MP + MC)
+    else:
+        Mb = S._base_mass() * s_b
     return f"""<mujoco model="fourbar_flip">
 <option cone="{S.CONE}" impratio="{S.IMPRATIO}" gravity="0 0 -9.81" timestep="{S.DT}" integrator="{S.JUMP_INTEGRATOR}"/>
 <default><default class="leg">
