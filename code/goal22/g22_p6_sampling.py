@@ -19,10 +19,21 @@ import g21_p13_linkage as P13
 NK = 10                    # 노트/관절
 T_PUSH = 0.184238
 TAU_LIM = 18.0
+DQ_MAX = 38.0              # AK80-9 V2 물리 속도 한계 근사 [rad/s]
+P_MAX = 450.0              # 기계적 파워 한계 근사 [W]
+W_NL = 59.7                # no-load speed 570rpm@48V -> rad/s (CubeMars spec)
+W_KNEE_PT = 20.0           # 이 속도까지 peak 18Nm 가용, 이후 W_NL까지 선형 강하
+
+
+def tau_avail(w):
+    """AK80-9 토크-속도 봉투 (선형 근사): (20rad/s,18Nm)->(59.7,0). rated 9Nm@40.8 재현."""
+    if w <= W_KNEE_PT:
+        return TAU_LIM
+    return max(0.0, TAU_LIM * (W_NL - w) / (W_NL - W_KNEE_PT))
 T_SETTLE = 0.4
 T_FLIGHT = 0.9
 CSV = REPO / "code/goal19/nlp_demo/deploy/jump_optimal_s1.00_taulim18.0Nm.csv"
-OUT = Path(__file__).parent / "p6_sampling.json"
+OUT = Path(__file__).parent / ("p6_sampling_env.json" if "--env" in sys.argv else "p6_sampling.json")
 _L = {}
 
 
@@ -74,7 +85,7 @@ def rollout(args):
         tsrc, h1, h2 = tk, x[:NK], x[NK:]
     rng = np.random.default_rng(seed) if ic_eps else None
     N = int((T_SETTLE + T_PUSH + T_FLIGHT) / dt)
-    h_apex = 0.0; pen_tau = 0.0
+    h_apex = 0.0; pen_tau = 0.0; pen_env = 0.0
     for k in range(N):
         tc = k * dt
         if tc < T_SETTLE:
@@ -86,6 +97,9 @@ def rollout(args):
             tm = tc - T_SETTLE
             t1 = float(np.interp(tm, tsrc, h1)); t2 = float(np.interp(tm, tsrc, h2))
             pen_tau += (max(0.0, abs(t1) - TAU_LIM) ** 2 + max(0.0, abs(t2) - TAU_LIM) ** 2) * dt
+            # 토크-속도 봉투 포화 (물리로 내장 — 벌점 아님)
+            av1 = tau_avail(abs(float(d.qvel[1]))); av2 = tau_avail(abs(float(d.qvel[2])))
+            t1 = float(np.clip(t1, -av1, av1)); t2 = float(np.clip(t2, -av2, av2))
             th, tk_ = -t1, -t2                       # canonical -> mj
         else:
             th = tk_ = 0.0
@@ -98,12 +112,15 @@ def rollout(args):
             return 10.0, 0.0, 99.0
         if tc >= T_SETTLE:
             h_apex = max(h_apex, float(d.qpos[0]))
+        if T_SETTLE <= tc < T_SETTLE + T_PUSH:
+            # 과신전 하드스톱만 벌점 (속도/파워는 tau_avail 포화가 물리로 처리)
+            pen_env += 200.0 * max(0.0, 0.05 - float(d.qpos[2])) ** 2 * dt
     if isinstance(x, tuple):
         sm = 0.0
     else:
         sm = float(np.sum(np.diff(h1) ** 2) + np.sum(np.diff(h2) ** 2))
-    cost = -h_apex + 50.0 * pen_tau + 2e-4 * sm
-    return float(cost), float(h_apex), float(pen_tau)
+    cost = -h_apex + 50.0 * pen_tau + 30.0 * pen_env + 2e-4 * sm
+    return float(cost), float(h_apex), float(pen_tau + pen_env)
 
 
 def _re_mass_xml(eps):
@@ -138,7 +155,7 @@ def run_cma(pool, x0, budget):
     return best[1], hist, nev
 
 
-def run_mppi(pool, x0, budget, lam=0.3, sigma=1.5, pop=60):
+def run_mppi(pool, x0, budget, lam=0.05, sigma=2.0, pop=60):
     x = x0.copy(); hist = []; nev = 0
     rng = np.random.default_rng(7)
     iters = budget // pop
