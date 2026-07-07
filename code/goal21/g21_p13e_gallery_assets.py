@@ -8,6 +8,8 @@ warnings.filterwarnings("ignore")
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.rcParams["font.family"] = "Malgun Gothic"
+plt.rcParams["axes.unicode_minus"] = False
 import mujoco
 
 REPO = Path(__file__).resolve().parents[2]
@@ -61,39 +63,46 @@ for ds, subs, loader in groups:
         td = loader(sub)
         tr = np.asarray(td["t"])
         logs = []
-        for nm, m in [("P10 (유령질량 249g)", m10), ("P13e (정직물리)", m13)]:
+        for nm, m in [("P13e (정직물리)", m13)]:
             lg = FB.run_jump_sim_fourbar(m, td)
             if lg is None:
                 print("crash", ds, sub, nm); break
             logs.append((nm, lg))
-        if len(logs) < 2:
+        if len(logs) < 1:
             continue
-        fig, ax = plt.subplots(2, 2, figsize=(11, 7.2))
+        fig, ax = plt.subplots(2, 3, figsize=(14.5, 7.4))
         for nm, lg in logs:
-            mk = lg["t"] >= -0.05
-            ax[0, 0].plot(lg["t"][mk], np.degrees(-lg["q2"][mk]), lw=1.3, label=nm)
-            ax[0, 1].plot(lg["t"][mk], -lg["dq2"][mk], lw=1.3, label=nm)
+            mk = (lg["t"] >= -0.05) & (lg["t"] <= tr[-1] + 0.01)
+            ax[0, 0].plot(lg["t"][mk], np.degrees(-lg["q1"][mk] - np.pi / 2), lw=1.3, label=nm)
+            ax[0, 1].plot(lg["t"][mk], np.degrees(-lg["q2"][mk]), lw=1.3, label=nm)
+            ax[0, 2].plot(lg["t"][mk], lg["grf_z"][mk], lw=1.3, label=nm)
             ax[1, 0].plot(lg["t"][mk], -lg["dq1"][mk], lw=1.3, label=nm)
-            ax[1, 1].plot(lg["t"][mk], lg["base_z"][mk], lw=1.3, label=nm)
-        ax[0, 0].plot(tr, np.degrees(np.asarray(td["q2"]) + o2), ls="--", lw=1.7, label="실측 (+P13e off)")
-        ax[0, 1].plot(tr, np.asarray(td["dq2"]), ls="--", lw=1.7, label="실측")
+            ax[1, 1].plot(lg["t"][mk], -lg["dq2"][mk], lw=1.3, label=nm)
+            ax[1, 2].plot(lg["t"][mk], lg["base_z"][mk], lw=1.3, label=nm)
+        ax[0, 0].plot(tr, np.degrees(np.asarray(td["q1"]) + o1), ls="--", lw=1.7, label="실측 (+off)")
+        ax[0, 1].plot(tr, np.degrees(np.asarray(td["q2"]) + o2), ls="--", lw=1.7, label="실측 (+off)")
+        grf_r = np.asarray(td.get("grf_z", []))
+        if len(grf_r) == len(tr):
+            ax[0, 2].plot(tr, grf_r, ls="--", lw=1.7, label="실측")
         ax[1, 0].plot(tr, np.asarray(td["dq1"]), ls="--", lw=1.7, label="실측")
+        ax[1, 1].plot(tr, np.asarray(td["dq2"]), ls="--", lw=1.7, label="실측")
         hr = float(td.get("h_real", np.nan))
         if np.isfinite(hr):
-            ax[1, 1].axhline(hr, ls=":", lw=1.1)
-            ax[1, 1].text(0.02, hr, f" h_real {hr:.2f}", va="bottom", fontsize=8)
-        ax[0, 0].set_ylabel("q2 knee [deg]"); ax[0, 1].set_ylabel("dq2 knee [rad/s]")
-        ax[1, 0].set_ylabel("dq1 hip [rad/s]"); ax[1, 1].set_ylabel("base z [m]")
+            ax[1, 2].axhline(hr, ls=":", lw=1.1)
+            ax[1, 2].text(0.02, hr, f" h_real {hr:.2f}", va="bottom", fontsize=8)
+        ax[0, 0].set_ylabel("q1 hip [deg]"); ax[0, 1].set_ylabel("q2 knee [deg]")
+        ax[0, 2].set_ylabel("GRF z [N]")
+        ax[1, 0].set_ylabel("dq1 hip [rad/s]"); ax[1, 1].set_ylabel("dq2 knee [rad/s]")
+        ax[1, 2].set_ylabel("base z [m]")
         for a in ax.flat:
-            a.grid(alpha=0.3); a.set_xlabel("t [s]")
+            a.grid(alpha=0.3); a.set_xlabel("t [s]"); a.set_xlim(-0.05, tr[-1] + 0.01)
         ax[0, 0].legend(fontsize=7.5)
-        fig.suptitle(f"{ds} / {sub} — full-replay (유령질량 vs 정직물리)")
+        fig.suptitle(f"{ds} / {sub} — P13e 정직물리 full-replay (실측 구간)")
         fig.tight_layout()
         png = OUT / "png" / f"{ds}__{sub}.png"
         fig.savefig(png, dpi=110); plt.close(fig)
         index.append(dict(ds=ds, sub=str(sub), png=png.name,
-                          h10=float(logs[0][1]["base_z"].max()),
-                          h13=float(logs[1][1]["base_z"].max()),
+                          h13=float(logs[0][1]["base_z"].max()),
                           h_real=hr if np.isfinite(hr) else None))
         print("done", ds, sub, flush=True)
 json.dump(index, open(OUT / "index.json", "w"), indent=1)
