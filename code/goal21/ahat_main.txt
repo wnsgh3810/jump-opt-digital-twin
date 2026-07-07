@@ -1,0 +1,49 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[sanity] inversion max |tau_recon - tau_stored| = 3.55e-15 Nm (PASS)
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE(paper): jump_position_0421:2992 jump_0424:3422 fs_0424:1360 jump_0602:2733 fs_0602:577 jump_0324:1696 fs_0324:488 s2s_gnd_0319:4142
+BASE expect: 0421 2992 / 0424 3422 / 0602 2733 / 0324 1696 / s2s 4142 / fs 1360 577 488
+A-BEST nev=1 obj=6.9008 ho=1.832  a0=0.210 a1=1.125 a2=0.000 a3_h=0.004 a4_h=0.049 a3_k=0.234 a4_k=0.033
+A-BEST nev=4 obj=6.8628 ho=1.879  a0=-0.037 a1=1.234 a2=0.001 a3_h=0.337 a4_h=0.051 a3_k=0.348 a4_k=0.030
+A-BEST nev=6 obj=6.6786 ho=1.848  a0=0.008 a1=1.188 a2=0.001 a3_h=0.101 a4_h=0.088 a3_k=0.243 a4_k=0.012
+A-BEST nev=7 obj=6.6380 ho=1.796  a0=-0.021 a1=1.166 a2=0.001 a3_h=0.154 a4_h=0.056 a3_k=0.281 a4_k=-0.001
+A-BEST nev=152 obj=6.5902 ho=1.965  a0=-0.030 a1=1.151 a2=0.001 a3_h=0.234 a4_h=0.089 a3_k=0.441 a4_k=-0.047
+A-BEST nev=159 obj=6.5707 ho=2.152  a0=-0.106 a1=1.186 a2=0.001 a3_h=0.151 a4_h=0.089 a3_k=0.365 a4_k=-0.043
+A-BEST nev=219 obj=6.5525 ho=2.519  a0=-0.032 a1=1.211 a2=0.001 a3_h=0.084 a4_h=0.071 a3_k=0.479 a4_k=-0.050
+A-BEST nev=233 obj=6.4968 ho=2.229  a0=-0.150 a1=1.210 a2=0.001 a3_h=0.177 a4_h=0.044 a3_k=0.455 a4_k=-0.034
+A-BEST nev=286 obj=6.4934 ho=1.950  a0=-0.372 a1=1.234 a2=0.001 a3_h=0.109 a4_h=0.008 a3_k=0.416 a4_k=-0.014
+A-BEST nev=318 obj=6.4813 ho=2.028  a0=-0.281 a1=1.213 a2=0.001 a3_h=0.207 a4_h=0.011 a3_k=0.450 a4_k=-0.033
+A-BEST nev=319 obj=6.4532 ho=2.175  a0=-0.392 a1=1.213 a2=0.001 a3_h=0.377 a4_h=0.022 a3_k=0.405 a4_k=-0.047
+A-BEST nev=354 obj=6.4490 ho=2.338  a0=-0.368 a1=1.242 a2=0.001 a3_h=0.311 a4_h=-0.009 a3_k=0.456 a4_k=-0.050
+A-BEST nev=360 obj=6.4368 ho=2.098  a0=-0.393 a1=1.237 a2=0.001 a3_h=0.263 a4_h=0.048 a3_k=0.486 a4_k=-0.034
+STAGE-A DONE obj=6.4368 (paper 7.0)
+B-BEST nev=799 obj=6.3396 ho=1.746 [1min]
+B-BEST nev=887 obj=6.3162 ho=1.960 [1min]
+B-BEST nev=939 obj=6.2733 ho=2.378 [1min]
+B-BEST nev=1342 obj=6.2527 ho=2.772 [2min]
+B-BEST nev=1395 obj=6.2002 ho=2.537 [2min]
+B-BEST nev=1486 obj=6.1636 ho=2.891 [2min]
+B-BEST nev=1514 obj=6.1501 ho=2.386 [2min]
+B-BEST nev=1530 obj=6.1337 ho=2.716 [2min]
+B-BEST nev=1543 obj=6.1056 ho=2.605 [2min]
+STAGE-B DONE obj=6.1056 (paper-canonical 7.0)
