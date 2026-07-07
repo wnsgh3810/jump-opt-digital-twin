@@ -1,0 +1,35 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE(P13-selected): habs:0.3 w_0421:2637.4 w_0424:3411.5 fs_0424:1083.3 w_0602:2735.1 fs_0602:610.7 w_0324:1747.4 fs_0324:429.8 w_s2s:3905.7
+BEST nev=802 obj=7.9667 ho=1.491 M_p=3.453 dzth=0.113 fck=0.027 o2_0324=11.3deg [1min]
+BEST nev=920 obj=7.8382 ho=1.741 M_p=3.612 dzth=0.120 fck=0.003 o2_0324=12.0deg [2min]
+P13b DONE nev=1220  selected: obj=8.0651 ho=0.786
+rail check (widened axes):
+  M_p           3.2268  (bound-pos 0.69)
+  com_dz_th     0.0876  (bound-pos 0.63)
+  arm_knee      0.0015  (bound-pos 0.04)
+  fc_knee       0.0270  (bound-pos 0.02)
+  o2_0324       0.1837  (bound-pos 0.81)
+  o1_0421      -0.0832  (bound-pos 0.36)
+  o2_0424       0.1677  (bound-pos 0.78)
+linkage: s_rc=1.204 s_ic=1.113 s_rp=1.101 s_ip=1.231 d_cpin=0.000 d_kneep=0.006
