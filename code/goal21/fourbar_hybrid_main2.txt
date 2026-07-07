@@ -1,0 +1,54 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE: jump_position_0421:2992 jump_0424:3422 jump_0602:2733 jump_0324:1696 s2s_gnd_0319:4142 fs_0424:1360 fs_0602:577 fs_0324:488
+BEST nev=624 obj=6.9710 (canonical 7.0)  fs0324(heldout)=2.529  [2min]
+BEST nev=631 obj=6.9500 (canonical 7.0)  fs0324(heldout)=2.046  [2min]
+BEST nev=664 obj=6.8853 (canonical 7.0)  fs0324(heldout)=1.578  [2min]
+BEST nev=746 obj=6.8387 (canonical 7.0)  fs0324(heldout)=1.347  [3min]
+BEST nev=749 obj=6.7944 (canonical 7.0)  fs0324(heldout)=1.362  [3min]
+BEST nev=752 obj=6.7926 (canonical 7.0)  fs0324(heldout)=1.288  [3min]
+BEST nev=754 obj=6.7834 (canonical 7.0)  fs0324(heldout)=0.987  [3min]
+BEST nev=757 obj=6.7625 (canonical 7.0)  fs0324(heldout)=1.452  [3min]
+BEST nev=811 obj=6.7245 (canonical 7.0)  fs0324(heldout)=1.863  [3min]
+BEST nev=828 obj=6.6719 (canonical 7.0)  fs0324(heldout)=1.479  [3min]
+BEST nev=992 obj=6.6665 (canonical 7.0)  fs0324(heldout)=1.927  [3min]
+BEST nev=1053 obj=6.6622 (canonical 7.0)  fs0324(heldout)=1.900  [4min]
+BEST nev=1073 obj=6.6548 (canonical 7.0)  fs0324(heldout)=1.942  [4min]
+BEST nev=1088 obj=6.6412 (canonical 7.0)  fs0324(heldout)=2.110  [4min]
+BEST nev=1089 obj=6.6294 (canonical 7.0)  fs0324(heldout)=1.913  [4min]
+BEST nev=1139 obj=6.6034 (canonical 7.0)  fs0324(heldout)=1.566  [4min]
+BEST nev=1198 obj=6.6003 (canonical 7.0)  fs0324(heldout)=1.945  [4min]
+BEST nev=1217 obj=6.5912 (canonical 7.0)  fs0324(heldout)=1.801  [4min]
+BEST nev=1269 obj=6.5298 (canonical 7.0)  fs0324(heldout)=1.843  [4min]
+BEST nev=1345 obj=6.5290 (canonical 7.0)  fs0324(heldout)=1.893  [5min]
+BEST nev=1377 obj=6.5043 (canonical 7.0)  fs0324(heldout)=1.809  [5min]
+BEST nev=1398 obj=6.4831 (canonical 7.0)  fs0324(heldout)=1.834  [5min]
+DONE obj=6.4831 (canonical 7.0) nev=1520 saved fourbar_hybrid_best.json
+  jump_position_0421     rel 0.935
+  jump_0424              rel 0.983
+  jump_0602              rel 0.973
+  jump_0324              rel 0.953
+  s2s_gnd_0319           rel 0.960
+  fs_0424                rel 0.808
+  fs_0602                rel 0.871
+  fs_0324                rel 1.834

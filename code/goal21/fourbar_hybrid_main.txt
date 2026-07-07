@@ -1,0 +1,35 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE: jump_position_0421:2992 jump_0424:3422 jump_0602:2733 jump_0324:1696 s2s_gnd_0319:4142 fs_0424:1360 fs_0602:577 fs_0324:488
+BEST nev=23 obj=6.9617 (canonical 7.0)  fs0324(heldout)=1.103  [0min]
+BEST nev=206 obj=6.8315 (canonical 7.0)  fs0324(heldout)=1.356  [1min]
+BEST nev=270 obj=6.8138 (canonical 7.0)  fs0324(heldout)=2.196  [1min]
+DONE obj=6.8138 (canonical 7.0) nev=320 saved fourbar_hybrid_best.json
+  jump_position_0421     rel 1.071
+  jump_0424              rel 0.987
+  jump_0602              rel 1.049
+  jump_0324              rel 0.980
+  s2s_gnd_0319           rel 0.961
+  fs_0424                rel 0.809
+  fs_0602                rel 0.956
+  fs_0324                rel 2.196
