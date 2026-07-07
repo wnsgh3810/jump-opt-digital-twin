@@ -113,6 +113,12 @@ def eval_flip(x):
 def main():
     import multiprocessing as mp
     import cma
+    maxfev = int(sys.argv[1]) if len(sys.argv) > 1 else 600
+    sigma = float(sys.argv[2]) if len(sys.argv) > 2 else 0.05
+    tag = sys.argv[3] if len(sys.argv) > 3 else ""
+    global OUT
+    if tag:
+        OUT = REPO / f"code/goal21/fourbar_flip_result_{tag}.json"
     winit()
     GH = _G["GH"]; FR = GH._G["FR"]
     can = json.load(open(REPO / "code/goal19/phase11/fourbar_refit_best.json", encoding="utf-8"))
@@ -142,8 +148,15 @@ def main():
             sum(r[g] / base[g] for g in G7), r["fs_0324"] / base["fs_0324"])
 
     LOb, HIb = FR.LOb, FR.HIb
-    es = cma.CMAEvolutionStrategy(((x_can - LOb) / (HIb - LOb)).tolist(), 0.05,
-                                  {"bounds": [0, 1], "maxfevals": 600, "popsize": 20,
+    x0w = x_can
+    prev = REPO / "code/goal21/fourbar_flip_result.json"
+    if tag and prev.exists():
+        pj = json.load(open(prev))
+        if pj.get("selected"):
+            x0w = np.array(pj["selected"]["x"])
+            print("warm-start from P10 selected", flush=True)
+    es = cma.CMAEvolutionStrategy(((x0w - LOb) / (HIb - LOb)).tolist(), sigma,
+                                  {"bounds": [0, 1], "maxfevals": maxfev, "popsize": 20,
                                    "seed": 21, "verbose": -9})
     cands = []
     best = dict(obj=float(o0), ho=float(r0["fs_0324"] / base["fs_0324"]), x=x_can.tolist())
