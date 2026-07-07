@@ -1,0 +1,52 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE(물리클램프 시작점): habs:0.6 w_0421:2580.2 w_0424:3830.4 fs_0424:1506.2 w_0602:2635.6 fs_0602:620.6 w_0324:2574.8 fs_0324:446.4 w_s2s:4030.2
+BEST nev=4 obj=7.8684 ho=0.767 Mc=0.659 Mth=1.079 fvh=0.562 [0min]
+BEST nev=212 obj=7.8673 ho=0.787 Mc=0.769 Mth=1.064 fvh=0.694 [0min]
+BEST nev=239 obj=7.8424 ho=0.848 Mc=0.718 Mth=1.080 fvh=0.672 [0min]
+BEST nev=284 obj=7.7797 ho=0.891 Mc=0.679 Mth=1.079 fvh=0.678 [1min]
+BEST nev=291 obj=7.7786 ho=0.835 Mc=0.728 Mth=1.074 fvh=0.424 [1min]
+BEST nev=425 obj=7.7348 ho=0.830 Mc=0.720 Mth=1.078 fvh=0.479 [1min]
+BEST nev=462 obj=7.7329 ho=1.019 Mc=0.680 Mth=1.073 fvh=0.609 [1min]
+BEST nev=501 obj=7.6674 ho=1.057 Mc=0.833 Mth=1.080 fvh=0.554 [1min]
+BEST nev=620 obj=7.6605 ho=0.841 Mc=0.742 Mth=1.065 fvh=0.574 [1min]
+BEST nev=892 obj=7.6090 ho=0.911 Mc=0.857 Mth=1.045 fvh=0.502 [2min]
+BEST nev=987 obj=7.5513 ho=0.891 Mc=0.804 Mth=1.080 fvh=0.576 [2min]
+BEST nev=1143 obj=7.5054 ho=0.906 Mc=0.775 Mth=1.076 fvh=0.521 [2min]
+BEST nev=1208 obj=7.4773 ho=0.822 Mc=0.831 Mth=1.063 fvh=0.490 [2min]
+BEST nev=1297 obj=7.4690 ho=0.938 Mc=0.888 Mth=1.068 fvh=0.511 [2min]
+P13d DONE nev=1320  selected: obj=7.4690 ho=0.938
+질량 회계: 다리 2.111 kg + base 1.089 kg = 3.2 kg
+  M_thigh     1.0683
+  M_calf      0.9736
+  M_c         0.8882
+  m_foot      0.1722
+  fv_hip      0.5107
+  fc_hip      0.0417
+  fv_knee     0.0592
+  fc_knee     0.0016
+  stiff_knee  0.9555
+  com_dz_th   0.0857
+  com_dz_ca   -0.0707
+  arm_knee    0.0044
+  offsets(deg): {'o1_0319': -0.71, 'o2_0319': 2.85, 'o1_0324': -2.14, 'o2_0324': 3.0, 'o1_0421': -2.98, 'o2_0421': -1.17, 'o1_0424': 3.0, 'o2_0424': 3.0}
