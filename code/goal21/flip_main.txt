@@ -1,0 +1,51 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[sanity] flipped-loop closure residual = 1.11e-16 m (PASS)
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+STAGE0 flipped @ canonical params: obj=7.7346 (orig-phase 7.0)
+  0421:0.935  0424:1.094  0602:0.987  0324:1.073  0319:0.923  0424:1.280  0602:1.442  heldout:0.705
+BEST nev=1 obj=7.6163 ho=0.996 [0min]
+BEST nev=7 obj=7.2126 ho=0.714 [0min]
+BEST nev=15 obj=7.1728 ho=0.716 [0min]
+BEST nev=16 obj=7.1633 ho=0.916 [0min]
+BEST nev=25 obj=7.1357 ho=0.658 [0min]
+BEST nev=26 obj=6.9718 ho=1.613 [0min]
+BEST nev=63 obj=6.8150 ho=1.656 [0min]
+BEST nev=84 obj=6.7880 ho=1.960 [0min]
+BEST nev=109 obj=6.7146 ho=1.298 [0min]
+BEST nev=127 obj=6.7074 ho=1.714 [0min]
+BEST nev=189 obj=6.6158 ho=1.656 [1min]
+BEST nev=270 obj=6.5937 ho=1.987 [1min]
+BEST nev=552 obj=6.5887 ho=1.717 [2min]
+BEST nev=555 obj=6.5184 ho=1.529 [2min]
+BEST nev=611 obj=6.4737 ho=1.619 [2min]
+STAGE1 done nev=620. selected: obj=6.6976 ho=0.938
+mass drift (canonical -> flip-refit):
+  M_p          1.7185 ->   1.8222
+  M_c          0.8244 ->   0.7078
+  M_thigh      1.1014 ->   1.0127
+  M_calf       0.9185 ->   0.8705
+  com_dz_th    0.0588 ->   0.0940
+  com_dz_ca    0.0362 ->   0.0308
+  stiff_knee   1.1346 ->   0.9779
+  fv_hip       0.4880 ->   0.4732
+saved fourbar_flip_result.json
