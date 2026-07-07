@@ -1,3 +1,11 @@
+# =============================================================================
+# !! 2026-07-07 위상 경고 (PHASE WARNING) !!
+# 이 파일의 build_xml_fourbar_jump()는 crank가 정강이와 "평행"인 구(잘못된)위상.
+# 실물 + 사용자 CAD식(기계정밀도 검증)은 crank/rocker가 "정강이 반대방향"(무릎 위/뒤).
+# 새 작업은 반드시 code/goal21/g21_fourbar_flip.py::build_xml_fourbar_flip 사용.
+# 정본 문서: code/goal21/FOURBAR_STRUCTURE_CANONICAL.md
+# (이 파일은 G20-A~P9 재현용으로만 보존)
+# =============================================================================
 """G20-A — EXPLICIT four-bar knee transmission (closed kinematic loop).
 
 The real robot drives the knee through a parallelogram 4-bar (l_i = LC = 30mm crank).
