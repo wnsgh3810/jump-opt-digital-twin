@@ -1,0 +1,57 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[sanity] flipped-loop closure residual = 1.11e-16 m (PASS)
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+STAGE0 flipped @ canonical params: obj=7.7346 (orig-phase 7.0)
+  0421:0.935  0424:1.094  0602:0.987  0324:1.073  0319:0.923  0424:1.280  0602:1.442  heldout:0.705
+warm-start from P10 selected
+BEST nev=6 obj=7.1245 ho=0.822 [0min]
+BEST nev=12 obj=7.0702 ho=1.847 [0min]
+BEST nev=19 obj=6.6059 ho=1.528 [0min]
+BEST nev=453 obj=6.5863 ho=1.743 [2min]
+BEST nev=607 obj=6.5442 ho=1.996 [2min]
+BEST nev=751 obj=6.5395 ho=1.999 [2min]
+BEST nev=762 obj=6.5108 ho=1.808 [3min]
+BEST nev=824 obj=6.5083 ho=1.629 [3min]
+BEST nev=938 obj=6.4769 ho=1.696 [3min]
+BEST nev=1003 obj=6.4744 ho=1.573 [3min]
+BEST nev=1076 obj=6.4693 ho=2.086 [4min]
+BEST nev=1099 obj=6.4645 ho=1.826 [4min]
+BEST nev=1141 obj=6.4352 ho=1.995 [4min]
+BEST nev=1191 obj=6.4343 ho=1.786 [4min]
+BEST nev=1216 obj=6.3891 ho=1.977 [4min]
+BEST nev=1254 obj=6.3829 ho=1.943 [4min]
+BEST nev=1271 obj=6.3659 ho=1.768 [4min]
+BEST nev=1358 obj=6.3641 ho=1.677 [4min]
+BEST nev=1463 obj=6.3637 ho=1.616 [5min]
+BEST nev=1500 obj=6.3631 ho=1.837 [5min]
+STAGE1 done nev=1520. selected: obj=6.5772 ho=0.927
+mass drift (canonical -> flip-refit):
+  M_p          1.7185 ->   2.0304
+  M_c          0.8244 ->   0.5339
+  M_thigh      1.1014 ->   1.0511
+  M_calf       0.9185 ->   0.8918
+  com_dz_th    0.0588 ->   0.0807
+  com_dz_ca    0.0362 ->   0.0457
+  stiff_knee   1.1346 ->   0.9753
+  fv_hip       0.4880 ->   0.4812
+saved fourbar_flip_result_v2.json
