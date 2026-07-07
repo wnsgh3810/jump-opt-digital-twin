@@ -1,0 +1,73 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE(P10-selected, flipped): habs:0.6 w_0421:2655.0 w_0424:3475.4 fs_0424:1222.6 w_0602:2724.6 fs_0602:551.0 w_0324:1743.8 fs_0324:457.6 w_s2s:3788.7
+A-BEST nev=1 obj=7.9699 ho=1.487 habs=1.069 [0min]
+A-BEST nev=24 obj=7.7164 ho=1.046 habs=0.607 [0min]
+A-BEST nev=126 obj=7.6377 ho=1.370 habs=0.693 [0min]
+A-BEST nev=173 obj=7.6342 ho=1.198 habs=0.564 [0min]
+A-BEST nev=179 obj=7.6246 ho=1.433 habs=0.593 [0min]
+A-BEST nev=305 obj=7.6180 ho=1.900 habs=0.704 [1min]
+A-BEST nev=315 obj=7.5982 ho=1.151 habs=0.478 [1min]
+A-BEST nev=343 obj=7.5703 ho=1.856 habs=0.684 [1min]
+A-BEST nev=390 obj=7.5686 ho=1.172 habs=0.571 [1min]
+A-BEST nev=514 obj=7.5662 ho=1.827 habs=0.589 [1min]
+A-BEST nev=524 obj=7.5429 ho=1.339 habs=0.630 [1min]
+A-BEST nev=544 obj=7.5199 ho=1.465 habs=0.536 [1min]
+A-BEST nev=591 obj=7.4941 ho=1.403 habs=0.586 [1min]
+A-BEST nev=605 obj=7.4605 ho=1.487 habs=0.511 [1min]
+A-BEST nev=669 obj=7.4341 ho=1.076 habs=0.430 [1min]
+A-BEST nev=738 obj=7.4314 ho=1.513 habs=0.553 [1min]
+A-BEST nev=905 obj=7.4171 ho=1.326 habs=0.557 [2min]
+A-BEST nev=913 obj=7.4125 ho=1.143 habs=0.634 [2min]
+A-BEST nev=945 obj=7.3682 ho=1.131 habs=0.528 [2min]
+A-BEST nev=965 obj=7.3656 ho=1.355 habs=0.578 [2min]
+A-BEST nev=979 obj=7.3527 ho=1.255 habs=0.511 [2min]
+A-BEST nev=998 obj=7.3375 ho=1.254 habs=0.510 [2min]
+A-BEST nev=1198 obj=7.3238 ho=1.597 habs=0.585 [2min]
+A-BEST nev=1204 obj=7.2936 ho=1.730 habs=0.561 [2min]
+STAGE-A done nev=1220: selected obj=7.4312 ho=0.947 habs=0.491
+
+STAGE-B axis re-validation (ref obj=8.0 at Stage-A winner):
+  connect_solref=0.0003: obj=8.0000 ho=1.000 habs=1.000 
+  connect_solref=0.002: obj=9.1773 ho=0.832 habs=0.863 
+  connect_solref=0.005: obj=15.7914 ho=0.875 habs=2.293 
+  connect_solref=0.012: obj=39.4316 ho=3.059 habs=10.683 
+  arm_hip=0.001: obj=8.0051 ho=0.980 habs=0.982 
+  arm_hip=0.0035: obj=8.0619 ho=0.932 habs=0.972 
+  arm_hip=0.008: obj=8.2967 ho=0.873 habs=1.089 
+  motor_tm=0.004: obj=9.6932 ho=0.871 habs=1.203 
+  motor_tm=0.008: obj=11.2861 ho=0.787 habs=1.247 
+  motor_tm=0.016: obj=14.1098 ho=0.773 habs=1.753 
+  sens_delay=-0.004: obj=8.8932 ho=1.143 habs=1.435 
+  sens_delay=-0.002: obj=8.0442 ho=1.071 habs=1.073 
+  sens_delay=0.002: obj=8.7658 ho=0.945 habs=1.143 
+  sens_delay=0.004: obj=9.8961 ho=0.887 habs=1.330 
+  strib_knee=1.0: obj=8.8041 ho=0.867 habs=1.044 
+  strib_knee=2.0: obj=9.8982 ho=0.835 habs=1.374 
+  strib_knee=3.0: obj=11.0875 ho=0.880 habs=1.895 
+  foot_dz=-0.005: obj=10.4148 ho=1.306 habs=1.202 
+  foot_dz=0.005: obj=8.8134 ho=0.869 habs=0.887 
+  foot_dz=0.01: obj=10.9354 ho=0.847 habs=0.975 
+  mu_floor=0.6: obj=12.9538 ho=1.014 habs=4.425 
+  mu_floor=1.5: obj=8.0676 ho=1.011 habs=0.999 
+P12 DONE — saved p12_stageA.json / p12_axes.json
