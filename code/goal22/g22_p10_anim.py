@@ -43,6 +43,11 @@ def build_fourbar_model():
     # 링키지가 보이도록 crank/coupler 캡슐 반경 살짝 확대 (시각 전용)
     xml = xml.replace('type="capsule" size="0.008"', 'type="capsule" size="0.010"')
     xml = xml.replace('type="capsule" size="0.006"', 'type="capsule" size="0.009"')
+    # l_o(rocker) 시각화: calf 강체의 무릎 위/뒤 30mm 연장 — connect 앵커까지의 링크 (시각 전용)
+    xml = xml.replace('<geom type="capsule" size="0.015" fromto="0 0 0 0 0 -0.25"',
+                      '<geom name="rocker_vis" type="capsule" size="0.010" '
+                      'fromto="0 0 0 0 0 0.03" contype="0" conaffinity="0"/>'
+                      '<geom type="capsule" size="0.015" fromto="0 0 0 0 0 -0.25"', 1)
     # ── canonical(leg.xml) 시각 요소 이식: 스카이박스/체커 바닥/헤드라이트/방향광 ──
     visual_assets = (
         '<asset>'
@@ -65,6 +70,9 @@ def build_fourbar_model():
             continue
         if gname == "foot":
             model.geom_rgba[gid] = LINK_RGBA["foot"]; model.geom_matid[gid] = -1
+            continue
+        if gname == "rocker_vis":                      # l_o — crank(l_i)와 동일 강조색
+            model.geom_rgba[gid] = LINK_RGBA["crank"]; model.geom_matid[gid] = -1
             continue
         if bname in LINK_RGBA:
             model.geom_rgba[gid] = LINK_RGBA[bname]; model.geom_matid[gid] = -1
