@@ -34,6 +34,10 @@ T_SETTLE = 0.4
 T_AFTER = 0.6
 OFFK = {"jump_0324": ("o1_0324", "o2_0324"), "jump_position_0421": ("o1_0421", "o2_0421"),
         "jump_0424": ("o1_0424", "o2_0424")}
+# 드라이버 전류 한계 (소프트웨어 PD 클립 아님 — 사용자 07-09 확인).
+# 데이터 관측치: raw currentTorque의 게인-무관 천장 (세션별 드라이버 설정 상이).
+CUR_CAP = {"jump_0324": 18.8, "jump_position_0421": 29.0,
+           "jump_0424": 34.8, "jump_0602": 35.5}
 _L = {}
 
 
@@ -121,7 +125,9 @@ def run_cl(ds, d, gains, use_ff_knee, use_dqdes):
             c2 = kp2 * (np.interp(tm, t, qd2) - q2c) + kd2 * (np.interp(tm, t, dqd2) - v2c)
             if use_ff_knee:
                 c2 += np.interp(tm, t, d["tdes2"])
-        # 하드클립 제거 (사용자 07-09): a_hat 모델에 포화항 내장 — 이중계산 방지
+        # PD 소프트웨어 클립 없음 (사용자 07-09 확인) — 단 드라이버 전류 한계는 물리로 존재
+        cap = CUR_CAP.get(ds, 35.0)
+        c1 = float(np.clip(c1, -cap, cap)); c2 = float(np.clip(c2, -cap, cap))
         s1 = float(paper_a_hat(np.array([c1]), np.array([v1c]))[0])
         s2 = float(paper_a_hat(np.array([c2]), np.array([v2c]))[0])
         md.ctrl[:] = [-s1, -s2]
