@@ -173,13 +173,13 @@ def fig_trial(ds, sub, d, L, m, tag):
     o1, o2 = L["o"]
     tp1 = np.interp(t - SD, t, d["tau1_paper"]); tp2 = np.interp(t - SD, t, d["tau2_paper"])
     fig, ax = plt.subplots(2, 3, figsize=(14.5, 7))
-    # [0,0] q 합침
-    ax[0, 0].plot(L["t"][mk], np.degrees(L["q1"][mk] - o1), lw=1.3, label="q1 sim")
-    ax[0, 0].plot(t, np.degrees(d["q1"]), lw=1.3, label="q1 real")
-    ax[0, 0].plot(L["t"][mk], np.degrees(L["q2"][mk] - o2), lw=1.3, label="q2 sim")
-    ax[0, 0].plot(t, np.degrees(d["q2"]), lw=1.3, label="q2 real")
-    ax[0, 0].plot(t, np.degrees(d["qd1"]), ls="--", lw=1.1, label="q1_des")
-    ax[0, 0].plot(t, np.degrees(d["qd2"]), ls="--", lw=1.1, label="q2_des")
+    # [0,0] q 합침 — 기본 3색만 (사용자 07-09): 파랑=sim, 주황=real, 초록=q_des
+    ax[0, 0].plot(L["t"][mk], np.degrees(L["q1"][mk] - o1), "C0", lw=1.3, label="q1 sim")
+    ax[0, 0].plot(t, np.degrees(d["q1"]), "C1", lw=1.3, label="q1 real")
+    ax[0, 0].plot(L["t"][mk], np.degrees(L["q2"][mk] - o2), "C0", lw=1.3, label="q2 sim")
+    ax[0, 0].plot(t, np.degrees(d["q2"]), "C1", lw=1.3, label="q2 real")
+    ax[0, 0].plot(t, np.degrees(d["qd1"]), "C2--", lw=1.1, label="q_des")
+    ax[0, 0].plot(t, np.degrees(d["qd2"]), "C2--", lw=1.1, label="_nolegend_")
     ax[0, 0].set_ylabel("q [deg]")
     # [0,1] dq1 / [0,2] dq2
     ax[0, 1].plot(L["t"][mk], L["dq1"][mk], lw=1.3, label="sim")
