@@ -43,6 +43,19 @@ def build_fourbar_model():
     # 링키지가 보이도록 crank/coupler 캡슐 반경 살짝 확대 (시각 전용)
     xml = xml.replace('type="capsule" size="0.008"', 'type="capsule" size="0.010"')
     xml = xml.replace('type="capsule" size="0.006"', 'type="capsule" size="0.009"')
+    # ── canonical(leg.xml) 시각 요소 이식: 스카이박스/체커 바닥/헤드라이트/방향광 ──
+    visual_assets = (
+        '<asset>'
+        '<texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>'
+        '<texture type="2d" name="groundplane" builtin="checker" mark="edge" '
+        'rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>'
+        '<material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>'
+        '</asset>'
+        '<visual><headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/></visual>')
+    xml = xml.replace('<worldbody>', visual_assets + '\n<worldbody>\n  '
+                      '<light pos="0 0 1.5" dir="0 0 -1" directional="true"/>', 1)
+    xml = xml.replace('<geom name="floor" size="0 0 0.05" type="plane"',
+                      '<geom name="floor" size="0 0 0.05" type="plane" material="groundplane"', 1)
     model = mujoco.MjModel.from_xml_string(xml)
     for gid in range(model.ngeom):
         bid = int(model.geom_bodyid[gid])
@@ -58,7 +71,7 @@ def build_fourbar_model():
     return model
 
 
-def render_jump_cl(model, npz_path, out_gif, label):
+def render_jump_cl(model, npz_path, out_gif, label, h_real=None):
     d = np.load(npz_path)
     t = d["t"]; q1c = d["q1"]; q2c = d["q2"]; bz = d["bz"]
     m = t >= -0.05
@@ -88,7 +101,9 @@ def render_jump_cl(model, npz_path, out_gif, label):
             MA._draw_text_outlined(dr, (10, 70), f"base_z = {bz[i]*100:>5.1f} cm", MA.FONT, fill="#00ffff")
             MA._draw_text_outlined(dr, (10, 100), f"hip  = {np.degrees(q1m):+6.1f}", MA.FONT, fill="#00ff00")
             MA._draw_text_outlined(dr, (10, 130), f"knee = {np.degrees(q2m):+6.1f}", MA.FONT, fill="#ff8800")
-            MA._draw_text_outlined(dr, (10, 160), f"h_apex = {h_apex:.3f} m", MA.FONT, fill="#ffff00")
+            MA._draw_text_outlined(dr, (10, 160), f"h_sim  = {h_apex:.3f} m", MA.FONT, fill="#ffff00")
+            if h_real is not None and np.isfinite(h_real):
+                MA._draw_text_outlined(dr, (10, 190), f"h_real = {h_real:.3f} m", MA.FONT, fill="#ff66ff")
             frames.append(img)
     frames[0].save(str(out_gif), save_all=True, append_images=frames[1:],
                    duration=MA.DURATION_MS, loop=0, optimize=False)
@@ -96,12 +111,17 @@ def render_jump_cl(model, npz_path, out_gif, label):
 
 
 def main():
+    import json as _json
     model = build_fourbar_model()
+    cl = _json.load(open(Path(__file__).parent / "p10_cl.json"))
     files = sorted(TRAJ.glob("*.npz"))
-    print(f"{len(files)} trajs (4-bar 렌더)", flush=True)
+    print(f"{len(files)} trajs (4-bar 렌더, canonical 배경/조명)", flush=True)
     for f in files:
-        name = f.stem
-        n = render_jump_cl(model, f, GIFD / (name + ".gif"), name.replace("__", " / "))
+        name = f.stem                       # ds__sub__tag
+        ds, sub, tag = name.split("__")
+        hr = (cl.get(f"{ds}/{sub}", {}).get("label") or {}).get("h_real")
+        n = render_jump_cl(model, f, GIFD / (name + ".gif"), name.replace("__", " / "),
+                           h_real=hr)
         print("gif", name, n, "frames", flush=True)
     print("DONE", flush=True)
 

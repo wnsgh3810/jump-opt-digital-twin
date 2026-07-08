@@ -127,9 +127,10 @@ def run_cl(ds, d, gains, use_ff_knee, use_dqdes):
             c2 = kp2 * (np.interp(tm, t, qd2) - q2c) + kd2 * (np.interp(tm, t, dqd2) - v2c)
             if use_ff_knee:
                 c2 += np.interp(tm, t, d["tdes2"])
-        # PD 소프트웨어 클립 없음 (사용자 07-09 확인) — 단 드라이버 전류 한계는 물리로 존재
-        cap = CUR_CAP.get(ds, 35.0)
-        c1 = float(np.clip(c1, -cap, cap)); c2 = float(np.clip(c2, -cap, cap))
+        # 캡/클립 전혀 없음 (사용자 07-09 최종): PD 커맨드 -> a_hat만.
+        # 데이터의 |raw| 천장 ~35.5(속도 무관 평탄)는 하드웨어 전류 한계로 추정되나
+        # 정체 미확정(R-Link 설정 확인 대기) — sim에 인위 반영하지 않음.
+        c1 = float(c1); c2 = float(c2)
         s1 = float(paper_a_hat(np.array([c1]), np.array([v1c]))[0])
         s2 = float(paper_a_hat(np.array([c2]), np.array([v2c]))[0])
         md.ctrl[:] = [-s1, -s2]
