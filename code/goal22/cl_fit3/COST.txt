@@ -1,0 +1,8 @@
+[fit3 — q1/dq2 우선 + tau 감시 (cl_fit3/fit3_run.py)]
+
+cost = sum_s w_s * [ sum_ch W_ch * min(RMSE_ch,s / BASE_ch,s, 10) / sum_ch W_ch ] / sum_s w_s
+
+- 구간 가중 w_s: fit2와 동일 (early 0.5 / push 2.0 / flight 1.0)
+- 채널 가중 W_ch: q1=3, dq2=3, q2=1, dq1=1, tau1=1, tau2=1
+- BASE: label 런 = 1.0 (fit2와 동일)
+- tau 채널 유지하되 상대 가중 낮음 -> 널비율 79~94%로 일부 회귀

@@ -1,0 +1,9 @@
+[fit4 — tau 채널 제거 + q1/dq2 우선 (cl_fit4/fit4_run.py)]
+
+cost = sum_s w_s * [ sum_ch W_ch * min(RMSE_ch,s / BASE_ch,s, 10) / sum_ch W_ch ] / sum_s w_s
+
+- 구간 가중 w_s: fit2/3과 동일 (early 0.5 / push 2.0 / flight 1.0)
+- 채널: q1, q2, dq1, dq2 만 (tau1/tau2 제외 — fit1처럼 상태만)
+- 채널 가중 W_ch: q1=3, dq2=3, q2=1, dq1=1
+- BASE: label 런 = 1.0
+- 예상: tau 감시가 없으므로 널 방향 재분배 자유 -> 상태는 좋아지되 tau 파형 왜곡 가능

@@ -1,0 +1,9 @@
+[fit2 — 균형 게인-적합 (cl_fit2/fit2_run.py)]
+
+cost = sum_s w_s * mean_ch [ min( RMSE_ch,s / BASE_ch,s , 10 ) ] / sum_s w_s
+
+- 구간 s: early(모션온셋 전) w=0.5 / push(온셋~이륙) w=2.0 / flight w=1.0
+- 채널 ch: q1, q2, dq1, dq2, tau1, tau2  (6채널 동일가중)
+- BASE_ch,s: 같은 trial의 label 런 RMSE (p13_phases.json) -> label = 1.0 기준
+- tau 채널 포함 -> 널 드리프트 봉쇄 (78~99% -> 19~69%)
+- 게인 4개 log Nelder-Mead, init=라벨, maxfev 160

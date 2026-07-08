@@ -1,0 +1,8 @@
+[fit1 — 원조 게인-적합 (g22_p10_cl.py 내 'fit' 변형, 결과 p10_cl.json gains_fit)]
+
+cost = 100*(RMSE_q1 + RMSE_q2) + 10*(RMSE_dq1 + RMSE_dq2)
+
+- 구간: 실측 전 구간 단일 (구간 가중 없음)
+- 정규화: 없음 (절대 RMSE 합) -> dq2의 절대값이 커서 사실상 dq2 지배
+- tau 채널: 없음 -> 스탠스 널 방향 게인 드리프트 자유 (hip tau 폭파의 원인)
+- 게인 4개 (hip kp/kd, knee kp/kd) log-공간 Nelder-Mead, init=라벨
