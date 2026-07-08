@@ -65,6 +65,11 @@ def load_trial_xlsx(ds, root, sub):
     knee = read_joint(root / sub / "knee.xlsx")
     n = min(len(hip["Time"]), len(knee["Time"]))
     t = hip["Time"][:n] - hip["Time"][0]
+    try:
+        grf = pd.read_excel(root / sub / "GRF.xlsx")["Current_GRF"].values.astype(float)
+        grf_real = grf[:n] if len(grf) >= n else None
+    except Exception:
+        grf_real = None
     d = dict(t=t)
     for nm, src in [("1", hip), ("2", knee)]:
         d["q" + nm] = src["currentAngle"][:n]
@@ -75,6 +80,7 @@ def load_trial_xlsx(ds, root, sub):
         d["tdes" + nm] = src["desiredTorque"][:n]
     d["tau1_paper"] = paper_a_hat(d["traw1"], d["dq1"])
     d["tau2_paper"] = paper_a_hat(d["traw2"], d["dq2"])
+    d["grf_real"] = grf_real
     return d
 
 
@@ -115,7 +121,7 @@ def run_cl(ds, d, gains, use_ff_knee, use_dqdes):
             c2 = kp2 * (np.interp(tm, t, qd2) - q2c) + kd2 * (np.interp(tm, t, dqd2) - v2c)
             if use_ff_knee:
                 c2 += np.interp(tm, t, d["tdes2"])
-        c1 = float(np.clip(c1, -18, 18)); c2 = float(np.clip(c2, -18, 18))
+        # 하드클립 제거 (사용자 07-09): a_hat 모델에 포화항 내장 — 이중계산 방지
         s1 = float(paper_a_hat(np.array([c1]), np.array([v1c]))[0])
         s2 = float(paper_a_hat(np.array([c2]), np.array([v2c]))[0])
         md.ctrl[:] = [-s1, -s2]
@@ -160,34 +166,46 @@ def metrics(ds, d, L):
 
 
 def fig_trial(ds, sub, d, L, m, tag):
+    """패널 순서 (사용자 07-09): q(합침), dq1, dq2 / tau_hip, tau_knee, GRF(실측 포함).
+    q_des만 점선, 나머지 전부 실선. ASCII-safe 라벨."""
     t = d["t"]
     mk = (L["t"] >= -0.02) & (L["t"] <= t[-1] + 0.01)
     o1, o2 = L["o"]
     tp1 = np.interp(t - SD, t, d["tau1_paper"]); tp2 = np.interp(t - SD, t, d["tau2_paper"])
     fig, ax = plt.subplots(2, 3, figsize=(14.5, 7))
-    ax[0, 0].plot(L["t"][mk], L["sh1"][mk], lw=1.3, label="sim shaft τ")
-    ax[0, 0].plot(t, tp1, ls="--", lw=1.5, label="실측 paper τ (−1.5ms)")
-    ax[0, 0].set_ylabel("hip τ [Nm]")
-    ax[0, 1].plot(L["t"][mk], L["sh2"][mk], lw=1.3, label="sim shaft τ")
-    ax[0, 1].plot(t, tp2, ls="--", lw=1.5, label="실측 paper τ (−1.5ms)")
-    ax[0, 1].set_ylabel("knee τ [Nm]")
-    ax[0, 2].plot(L["t"][mk], L["grf"][mk], lw=1.3, label="sim GRF")
-    ax[0, 2].set_ylabel("GRF z [N]")
-    ax[1, 0].plot(L["t"][mk], np.degrees(L["q1"][mk] - o1), lw=1.3, label="sim")
-    ax[1, 0].plot(t, np.degrees(d["q1"]), ls="--", lw=1.5, label="실측")
-    ax[1, 0].plot(t, np.degrees(d["qd1"]), ls=":", lw=1.2, label="q_des")
-    ax[1, 0].set_ylabel("q1 [deg]")
-    ax[1, 1].plot(L["t"][mk], np.degrees(L["q2"][mk] - o2), lw=1.3, label="sim")
-    ax[1, 1].plot(t, np.degrees(d["q2"]), ls="--", lw=1.5, label="실측")
-    ax[1, 1].plot(t, np.degrees(d["qd2"]), ls=":", lw=1.2, label="q_des")
-    ax[1, 1].set_ylabel("q2 [deg]")
-    ax[1, 2].plot(L["t"][mk], L["dq2"][mk], lw=1.3, label="sim dq2")
-    ax[1, 2].plot(t, d["dq2"], ls="--", lw=1.5, label="실측 dq2")
-    ax[1, 2].set_ylabel("dq2 [rad/s]")
+    # [0,0] q 합침
+    ax[0, 0].plot(L["t"][mk], np.degrees(L["q1"][mk] - o1), lw=1.3, label="q1 sim")
+    ax[0, 0].plot(t, np.degrees(d["q1"]), lw=1.3, label="q1 real")
+    ax[0, 0].plot(L["t"][mk], np.degrees(L["q2"][mk] - o2), lw=1.3, label="q2 sim")
+    ax[0, 0].plot(t, np.degrees(d["q2"]), lw=1.3, label="q2 real")
+    ax[0, 0].plot(t, np.degrees(d["qd1"]), ls="--", lw=1.1, label="q1_des")
+    ax[0, 0].plot(t, np.degrees(d["qd2"]), ls="--", lw=1.1, label="q2_des")
+    ax[0, 0].set_ylabel("q [deg]")
+    # [0,1] dq1 / [0,2] dq2
+    ax[0, 1].plot(L["t"][mk], L["dq1"][mk], lw=1.3, label="sim")
+    ax[0, 1].plot(t, d["dq1"], lw=1.3, label="real")
+    ax[0, 1].set_ylabel("dq1 hip [rad/s]")
+    ax[0, 2].plot(L["t"][mk], L["dq2"][mk], lw=1.3, label="sim")
+    ax[0, 2].plot(t, d["dq2"], lw=1.3, label="real")
+    ax[0, 2].set_ylabel("dq2 knee [rad/s]")
+    # [1,0] tau hip / [1,1] tau knee
+    ax[1, 0].plot(L["t"][mk], L["sh1"][mk], lw=1.3, label="sim shaft tau")
+    ax[1, 0].plot(t, tp1, lw=1.3, label="real paper tau (-1.5ms)")
+    ax[1, 0].set_ylabel("hip tau [Nm]")
+    ax[1, 1].plot(L["t"][mk], L["sh2"][mk], lw=1.3, label="sim shaft tau")
+    ax[1, 1].plot(t, tp2, lw=1.3, label="real paper tau (-1.5ms)")
+    ax[1, 1].set_ylabel("knee tau [Nm]")
+    # [1,2] GRF (sim + 실측)
+    ax[1, 2].plot(L["t"][mk], L["grf"][mk], lw=1.3, label="sim")
+    if d.get("grf_real") is not None:
+        ax[1, 2].plot(t, d["grf_real"], lw=1.3, label="real")
+    ax[1, 2].set_ylabel("GRF z [N]")
     for a in ax.flat:
         a.grid(alpha=0.3); a.legend(fontsize=7); a.set_xlabel("t [s]")
+    hr = m.get("h_real", float("nan"))
     fig.suptitle(f"{ds}/{sub} [{tag}] — 폐루프 PD 재현 (P13h)  "
-                 f"τ RMSE hip {m['tau1']:.2f} / knee {m['tau2']:.2f} Nm · h_sim {m['h']:.2f}")
+                 f"tau RMSE hip {m['tau1']:.2f} / knee {m['tau2']:.2f} Nm · "
+                 f"h_sim {m['h']:.2f} m / h_real {hr:.2f} m")
     fig.tight_layout()
     fig.savefig(PNGD / f"{ds}__{sub}__{tag}.png", dpi=100)
     plt.close(fig)

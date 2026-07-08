@@ -138,15 +138,15 @@ def main():
             continue
         L, t, f1, f2, qd2 = figs[plant]
         mk = (L["t"] >= -0.02) & (L["t"] <= t[-1] + 0.02)
-        ax[0, col].plot(L["t"][mk] * 1e3, L["tau1"][mk], lw=1.3, label="τ 인가 (PD+ff)")
-        ax[0, col].plot(t * 1e3, f1, ls="--", lw=1.5, label="τ* 계획")
-        ax[0, col].set_title(f"hip — {nm}"); ax[0, col].set_ylabel("τ [Nm]")
-        ax[1, col].plot(L["t"][mk] * 1e3, L["tau2"][mk], lw=1.3, label="τ 인가 (PD+ff)")
-        ax[1, col].plot(t * 1e3, f2, ls="--", lw=1.5, label="τ* 계획")
-        ax[1, col].set_title(f"knee — {nm}"); ax[1, col].set_ylabel("τ [Nm]")
+        ax[0, col].plot(L["t"][mk] * 1e3, L["tau1"][mk], lw=1.3, label="tau 인가 (PD+ff)")
+        ax[0, col].plot(t * 1e3, f1, lw=1.3, label="tau* 계획")
+        ax[0, col].set_title(f"hip — {nm}"); ax[0, col].set_ylabel("tau [Nm]")
+        ax[1, col].plot(L["t"][mk] * 1e3, L["tau2"][mk], lw=1.3, label="tau 인가 (PD+ff)")
+        ax[1, col].plot(t * 1e3, f2, lw=1.3, label="tau* 계획")
+        ax[1, col].set_title(f"knee — {nm}"); ax[1, col].set_ylabel("tau [Nm]")
     for a in ax.flat:
         a.grid(alpha=0.3); a.legend(fontsize=8); a.set_xlabel("t [ms]")
-    fig.suptitle("실험 B — 최적화 τ* vs PD+ff 폐루프 인가 τ (deploy s0.85, 게인 120/2.2·150/2.5)")
+    fig.suptitle("실험 B — 최적화 tau* vs PD+ff 폐루프 인가 tau (deploy s0.85, 게인 120/2.2·150/2.5)")
     fig.tight_layout()
     fig.savefig(SCR / "g22_cl_gallery" / "expB_selfconsistency.png", dpi=115)
     json.dump(res, open(OUT, "w"), indent=1)
