@@ -1,0 +1,4 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[학습 FIR 커맨드층 in sim CL] FIT 39.6%  0424:37 0429:48 0602:26 0421:41
+  [비교] α-스택 38.1% (0324 제외 시 동일 가중), softsat 42.6%
