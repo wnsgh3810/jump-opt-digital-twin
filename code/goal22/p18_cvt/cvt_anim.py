@@ -15,10 +15,12 @@ import p14_judge as J
 
 C16 = json.load(open(HERE.parent / "p16_structure/fourbar_p16_candidate.json"))
 X = np.array(C16["x"]); REF = float(C16["x"][36])
-TRAJD = HERE / "traj"
+V2 = len(sys.argv) > 1 and sys.argv[1] == "v2"
+TRAJD = HERE / ("traj_v2" if V2 else "traj")
 DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_cvt_0429_results")
-(DST / "gif").mkdir(parents=True, exist_ok=True)
-RES = json.load(open(HERE / "cvt_results.json"))
+GIFD = DST / ("gif_v2" if V2 else "gif")
+GIFD.mkdir(parents=True, exist_ok=True)
+RES = json.load(open(HERE / ("cvt_results_v2.json" if V2 else "cvt_results.json")))
 
 LINK_RGBA = dict(MA.REF_RGBA)
 LINK_RGBA["crank"] = (0.85, 0.45, 0.10, 1.0)
@@ -124,7 +126,7 @@ def main():
         name = f.stem
         sub, mode = name.rsplit("__", 1)
         hr = RES.get(f"{sub}/{mode}", {}).get("h_real", float("nan"))
-        render(model, z, DST / "gif" / (name + ".gif"), f"0429 {sub} [{mode}]", hr)
+        render(model, z, GIFD / (name + ".gif"), f"0429 {sub} [{mode}]", hr)
         print("gif", name, flush=True)
     print("DONE", flush=True)
 
