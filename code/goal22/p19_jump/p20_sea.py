@@ -145,7 +145,12 @@ def cl_run_sea(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, alphas, preload,
         qp5 = qpos_from_crank(1.0, sq1, sq2, l_i)[0]
     else:
         qp5 = [1.0, sq1, sq2, -sq2, sq2]
-    md.qpos[:5] = qp5; md.qpos[5] = sq2
+    jr = mj.mj_name2id(model, mj.mjtObj.mjOBJ_JOINT, "rotor2_j")
+    ir = int(model.jnt_qposadr[jr])          # rotor qpos 인덱스 (이름 조회 — cvt 트리 순서 안전)
+    idx5 = [i for i in range(model.nq) if i != ir][:5]
+    for a, b in zip(idx5, qp5):
+        md.qpos[a] = b
+    md.qpos[ir] = sq2
     mj.mj_forward(model, md)
     fg = mj.mj_name2id(model, mj.mjtObj.mjOBJ_GEOM, "foot")
     bz0 = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
@@ -158,8 +163,8 @@ def cl_run_sea(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, alphas, preload,
     for k in range(N):
         tc = tl[k]
         q1c = -md.qpos[1] - np.pi / 2
-        q2c = -md.qpos[5]                       # ★ 엔코더 = rotor
-        v1c = -md.qvel[1]; v2c = -md.qvel[5]
+        q2c = -md.qpos[ir]                      # ★ 엔코더 = rotor (이름 조회 인덱스)
+        v1c = -md.qvel[1]; v2c = -md.qvel[ir]
         if tc < 0:
             c1 = S.SETTLE_KP * (qd1[0] - q1c) - S.SETTLE_KD * v1c
             c2 = S.SETTLE_KP * (qd2[0] - q2c) - S.SETTLE_KD * v2c
@@ -179,7 +184,7 @@ def cl_run_sea(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, alphas, preload,
             return None
         if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
             return None
-        L["q1"][k] = -md.qpos[1] - np.pi / 2; L["q2"][k] = -md.qpos[5]
+        L["q1"][k] = -md.qpos[1] - np.pi / 2; L["q2"][k] = -md.qpos[ir]
         L["sh1"][k] = s1; L["sh2"][k] = s2; L["bz"][k] = md.qpos[0]
     L["t"] = tl
     return L

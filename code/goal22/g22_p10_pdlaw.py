@@ -68,9 +68,17 @@ def regress(d):
     return out
 
 
-rows = {}
-print(f"{'trial':28s} jt {'label':>10s}  {'V1 kp/kd(R2)':>24s}  {'V2 kp/kd(R2)':>24s}  cff  sat")
-for ds, (root, subs) in SETS.items():
+if OUT.exists() and OUT.stat().st_size > 100:
+    rows = json.load(open(OUT))          # 캐시 사용 (다중 워커 write 레이스 방지)
+    _CACHED = True
+else:
+    _CACHED = False
+    rows = {}
+if _CACHED:
+    pass
+else:
+    print(f"{'trial':28s} jt {'label':>10s}  {'V1 kp/kd(R2)':>24s}  {'V2 kp/kd(R2)':>24s}  cff  sat")
+for ds, (root, subs) in (SETS.items() if not _CACHED else []):
     for sub in subs:
         lg = label_gains(ds, sub)
         for j, fn in [(1, "hip.xlsx"), (2, "knee.xlsx")]:
@@ -85,5 +93,10 @@ for ds, (root, subs) in SETS.items():
                   f"{v1['kp']:7.1f}/{v1['kd']:5.2f}({v1['r2']:.3f})  "
                   f"{v2['kp']:7.1f}/{v2['kd']:5.2f}({v2['r2']:.3f})  "
                   f"{v3['cff']:+.3f}  {r['n_sat']:3d}  <-{best}", flush=True)
-json.dump(rows, open(OUT, "w"), indent=1)
-print("saved", OUT.name)
+if not _CACHED:
+    import os, tempfile
+    fd, tmp = tempfile.mkstemp(dir=str(OUT.parent), suffix=".tmp")
+    with os.fdopen(fd, "w") as f:
+        json.dump(rows, f, indent=1)
+    os.replace(tmp, OUT)                 # 원자적 교체
+    print("saved", OUT.name)
