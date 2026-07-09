@@ -1,0 +1,8 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+SOFT-SAT 전역 (α 세션 캘리브레이션 없음!) — c -> a·s·tanh(c/s), 지연 8ms
+  전역해: a=0.919 s=38.5 raw → no-cvt FIT 20.2%
+  [비교] 라벨+클립: 51%대 / α세션보정+클립: 18.8% / 학습(세션별): 16.8%
+  jump_0424               23.6%
+  jump_0602               21.1%
+  jump_position_0421      14.1%

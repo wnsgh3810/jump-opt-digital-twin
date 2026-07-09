@@ -1,0 +1,17 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+LEARN 커맨드층 (릿지 FIR + 비선형): 세션내 leave-one-trial-out
+  jump_0424              j1  학습 커맨드층 floor  22.5%
+  jump_0424              j2  학습 커맨드층 floor  20.4%
+  jump_0602              j1  학습 커맨드층 floor  16.0%
+  jump_0602              j2  학습 커맨드층 floor  20.1%
+  jump_position_0421     j1  학습 커맨드층 floor  13.2%
+  jump_position_0421     j2  학습 커맨드층 floor   8.6%
+  jump_0429              j1  학습 커맨드층 floor  48.9%
+  jump_0429              j2  학습 커맨드층 floor  29.6%
+
+[비교: α+지연+클립 floor → 학습 floor (관절 평균)]
+  jump_0424               25.2% →  21.4%
+  jump_0602               19.5% →  18.1%
+  jump_position_0421      11.7% →  10.9%
+  jump_0429               47.5% →  39.2%
