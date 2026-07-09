@@ -1,0 +1,19 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+DQ 채널 스케일 검증 (dq 로그가 dq/dt(q)와 일치하는가) — V-range 오염 검사
+  jump_0424              j1: scale(dq_log/dq_num) = 0.998
+  jump_0424              j2: scale(dq_log/dq_num) = 0.995
+  jump_0602              j1: scale(dq_log/dq_num) = 0.999
+  jump_0602              j2: scale(dq_log/dq_num) = 1.005
+  jump_0429              j1: scale(dq_log/dq_num) = 1.000
+  jump_0429              j2: scale(dq_log/dq_num) = 1.001
+  jump_position_0421     j1: scale(dq_log/dq_num) = 0.996
+  jump_position_0421     j2: scale(dq_log/dq_num) = 1.001
+GAIN-법칙: trial τ-갭 vs knee kp 라벨 (α-스택 rows)
+  knee kp   0~99 : τ-갭 평균  30.5%  (n=14)
+  knee kp 100~199: τ-갭 평균  34.9%  (n=6)
+  knee kp 200~349: τ-갭 평균  47.0%  (n=6)
+  knee kp 350~600: τ-갭 평균  52.4%  (n=5)
+  상관 r = 0.70
+BOOT 부트스트랩 (P19 vs P16, FIT trials 페어드)
+  개선량 26.3%p, 95% CI [18.7, 37.0]%p, P(개선>0) = 1.000

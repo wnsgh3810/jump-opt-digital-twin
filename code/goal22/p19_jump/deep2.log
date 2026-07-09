@@ -1,0 +1,18 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+ASYM a_hat A3 (신전/굴곡 비대칭) — 바닥 기준
+  A3+=0.269 A3-=0.269: floor 28.7%
+  A3+=0.403 A3-=0.269: floor 28.9%
+  A3+=0.269 A3-=0.403: floor 28.7%
+  A3+=0.537 A3-=0.134: floor 29.1%
+  A3+=0.134 A3-=0.537: floor 28.5%
+FREQ 재구성 잔차 스펙트럼 (α층, 세션 평균 — 대역별 파워 비율)
+Traceback (most recent call last):
+  File "<stdin>", line 62, in <module>
+  File "C:\Users\junho\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\numpy\_core\fromnumeric.py", line 3824, in mean
+    return _methods._mean(a, axis=axis, dtype=dtype,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\junho\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\numpy\_core\_methods.py", line 116, in _mean
+    arr = asanyarray(a)
+          ^^^^^^^^^^^^^
+ValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (9,) + inhomogeneous part.
