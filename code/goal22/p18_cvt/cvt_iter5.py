@@ -36,6 +36,9 @@ def run_cellA(args):
                 hold2=diag["hold2"], **m)
 
 
+SEA_TC = [0.0008]
+
+
 def build_flip_variant(x32, ref, spring_at):
     """평행사변형(flip, body-connect) 모델에 스프링 배치 적용."""
     import re
@@ -57,6 +60,8 @@ def build_flip_variant(x32, ref, spring_at):
         xml = xml.replace(mkn.group(0),
                           f'<joint name="knee" type="hinge" damping="{mkn.group(1)}" '
                           f'stiffness="{dd["stiff_knee"]:.6f}" springref="{ref:.5f}"/>')
+    xml = xml.replace('body2="calf" anchor="0 0 -0.25" solref="0.0008 1"',
+                      f'body2="calf" anchor="0 0 -0.25" solref="{SEA_TC[0]:.5f} 1"')
     return mj.MjModel.from_xml_string(xml), dd
 
 

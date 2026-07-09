@@ -20,6 +20,7 @@ import cvt_core as CC
 import p14_judge as J
 
 SD = -0.0015
+SEA_TC = [0.0008]   # 루프 폐쇄 컴플라이언스 (P20)
 T_SETTLE, T_AFTER, T_BLEND = 0.4, 0.6, 0.02
 C16 = json.load(open(HERE.parent / "p16_structure/fourbar_p16_candidate.json"))
 X = np.array(C16["x"])
@@ -75,7 +76,8 @@ def build_cvt2(l_i, spring_at="crank", fric_at="crank", x32=None, ref=None):
     xml = xml.replace('<joint name="knee" type="hinge" damping=',
                       '<site name="rocker" pos="0 0 0.03" size="0.003"/><joint name="knee" type="hinge" damping=')
     xml = xml.replace('<equality>',
-                      '<equality>\n  <connect site1="ctip" site2="rocker" solref="0.0008 1"/>')
+                      f'<equality>\n  <connect site1="ctip" site2="rocker" '
+                      f'solref="{SEA_TC[0]:.5f} 1"/>')
     return mj.MjModel.from_xml_string(xml), dd
 
 
