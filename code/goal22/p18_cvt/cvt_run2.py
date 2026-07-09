@@ -88,7 +88,8 @@ def fk_bz(model, dta, q1m, qc, l_i):
     return 1.0 - float(dta.geom_xpos[fg][2]) + S.FOOT_RADIUS
 
 
-def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0):
+def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0, preload=0.0, cap=None):
+    """preload: 플랜트측 무릎 보조 토크(canonical, 명령 로그 제외). cap: 공급 천장(shaft Nm)."""
     mj = J._P["mj"]; S = J._P["S"]
     t = d["t"]
     q1r = d["q1"] + o1; q2r = d["q2"] + o2      # 오프셋: 모델각 = 측정각 + o
@@ -140,7 +141,10 @@ def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0):
             s2 = float(J.ahat(A, np.array([float(c2)]), np.array([v2c]))[0])
         if tc > t[-1]:
             s1 = s2 = 0.0
-        dta.ctrl[:] = [-s1, -s2]
+        a1, a2 = s1, s2
+        if cap is not None:
+            a1 = float(np.clip(a1, -cap, cap)); a2 = float(np.clip(a2, -cap, cap))
+        dta.ctrl[:] = [-a1, -(a2 + preload)]
         try:
             mj.mj_step(model, dta)
         except Exception:
