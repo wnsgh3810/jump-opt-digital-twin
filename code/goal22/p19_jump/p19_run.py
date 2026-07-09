@@ -14,7 +14,7 @@ ALPH = CMD["alphas"]
 
 
 def cl_run(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, preload,
-           o1=0.0, o2=0.0):
+           o1=0.0, o2=0.0, softsat=None):
     """커맨드 층 포함 CL. 반환 로그 dict."""
     mj = P.J._P["mj"]; S = P.J._P["S"]
     t = d["t"]
@@ -58,7 +58,11 @@ def cl_run(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, preload,
                 c2 += np.interp(tm_, t, d["tdes2"])
             c1f += al * (c1 - c1f); c2f += al * (c2 - c2f)   # 토크 추종 지연
             c1, c2 = c1f, c2f
-        c1 = float(np.clip(c1, -CLIP, CLIP)); c2 = float(np.clip(c2, -CLIP, CLIP))
+        if softsat is not None:
+            a_g, s_g = softsat
+            c1 = float(a_g * s_g * np.tanh(c1 / s_g)); c2 = float(a_g * s_g * np.tanh(c2 / s_g))
+        else:
+            c1 = float(np.clip(c1, -CLIP, CLIP)); c2 = float(np.clip(c2, -CLIP, CLIP))
         s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
         md.ctrl[:] = [-s1, -(s2 + preload)]
@@ -107,7 +111,7 @@ def all_trials():
 TRIALS = None
 
 
-def eval_stack(x32, ref, sp, A, preload30, tm, use_alpha=True, q_off_0429=(0.0548, -0.0524)):
+def eval_stack(x32, ref, sp, A, preload30, tm, use_alpha=True, q_off_0429=(0.0548, -0.0524), softsat=None):
     global TRIALS
     if TRIALS is None:
         TRIALS = all_trials()
@@ -116,18 +120,20 @@ def eval_stack(x32, ref, sp, A, preload30, tm, use_alpha=True, q_off_0429=(0.054
     rows = []
     for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in TRIALS:
         alphas = ALPH.get(ds, [1, 1, 1, 1]) if use_alpha else [1, 1, 1, 1]
+        if softsat is not None:
+            alphas = [1, 1, 1, 1]
         if is_cvt:
             if model_c is None:
                 model_c, _ = P.build_cvt(x32, ref, sp, l_i)
             L = cl_run(model_c, True, l_i, d, gains, dqon, ffk, A, tm, alphas, 0.0,
-                       o1=q_off_0429[0], o2=q_off_0429[1])
+                       o1=q_off_0429[0], o2=q_off_0429[1], softsat=softsat)
         else:
             dd = dict(zip(P.J._P["FR"].NAMES, np.asarray(x32)[:26]))
             k1, k2 = P.J.OFFK.get(ds, (None, None))
             o1 = dd.get(k1, 0.0) if k1 else 0.0
             o2 = dd.get(k2, 0.0) if k2 else 0.0
             L = cl_run(model_f, False, l_i, d, gains, dqon, ffk, A, tm, alphas,
-                       preload30, o1=o1, o2=o2)
+                       preload30, o1=o1, o2=o2, softsat=softsat)
         if L is None:
             rows.append(dict(ds=ds, sub=sub, g=2.5, q2=9.9))
             continue

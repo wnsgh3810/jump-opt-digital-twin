@@ -1,0 +1,22 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[0429 바닥 vs τ채널 스큐 보정 (라벨 게인, α 없음!)]
+  skew +0ms: floor 84.3%
+  skew +2ms: floor 85.4%
+  skew +4ms: floor 87.4%
+  skew +6ms: floor 90.0%
+  skew +8ms: floor 92.9%
+Traceback (most recent call last):
+  File "<stdin>", line 43, in <module>
+  File "C:\Users\junho\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\scipy\optimize\_minimize.py", line 772, in minimize
+    res = _minimize_neldermead(fun, x0, args, callback, bounds=bounds,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\junho\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\scipy\optimize\_optimize.py", line 851, in _minimize_neldermead
+    fsim[k] = func(sim[k])
+              ^^^^^^^^^^^^
+  File "C:\Users\junho\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\scipy\optimize\_optimize.py", line 560, in function_wrapper
+    fx = function(np.copy(x), *(wrapper_args + args))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<stdin>", line 43, in <lambda>
+  File "<stdin>", line 21, in floor_0429
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()

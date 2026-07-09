@@ -1,0 +1,4 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[α-스택 (cma3, 세션당 4파라미터)] FIT 38.1% HO 35.7%  0324:36 0424:35 0429:45 0602:36 0421:34
+[무캘리브레이션 (cma7, softsat 전역)] FIT 42.6% HO 39.7%  0324:40 0424:34 0429:61 0602:31 0421:36

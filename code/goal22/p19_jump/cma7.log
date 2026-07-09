@@ -1,0 +1,59 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+x0: CL 0.4313 | ModeA w_0421=2623 w_0424=3671 w_0602=2486 fs_0424=1047 fs_0602=421 habs=0 | 0429 62.7
+x0 J = 1.0000 (정의상 1.0)
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BEST nev=587 J=0.9988 stiff=0.625 ref=1.5 pre30=2.26 fv_hip=0.817 fc_hip=0.0306 fv_knee=0.056 fc_knee=0.0396 solref=0.0102 imp0=0.544 arm_knee=0.00656 M_c=0.822 I_th=0.505 I_ca=1.56 dz_th=0.0662 dz_ca=0.0498 tm=8.06e-06 o1_429=0.0772 o2_429=-0.0516 a_g=0.891 s_g=51.1 [3.1m]
+BEST nev=602 J=0.9969 stiff=0.671 ref=1.5 pre30=2.25 fv_hip=0.762 fc_hip=0.0239 fv_knee=0.063 fc_knee=0.0372 solref=0.00862 imp0=0.491 arm_knee=0.00731 M_c=0.769 I_th=0.504 I_ca=1.66 dz_th=0.0514 dz_ca=0.0497 tm=0.000112 o1_429=0.0854 o2_429=-0.054 a_g=0.866 s_g=49.8 [3.2m]
+BEST nev=637 J=0.9953 stiff=0.627 ref=1.56 pre30=2.25 fv_hip=0.783 fc_hip=0.0356 fv_knee=0.0554 fc_knee=0.0299 solref=0.0103 imp0=0.516 arm_knee=0.00683 M_c=0.774 I_th=0.505 I_ca=1.65 dz_th=0.0629 dz_ca=0.0491 tm=0.00063 o1_429=0.0876 o2_429=-0.0439 a_g=0.893 s_g=48.2 [3.3m]
+BEST nev=712 J=0.9949 stiff=0.631 ref=1.51 pre30=2.24 fv_hip=0.759 fc_hip=0.0411 fv_knee=0.0598 fc_knee=0.0327 solref=0.00893 imp0=0.466 arm_knee=0.00733 M_c=0.773 I_th=0.502 I_ca=1.73 dz_th=0.0694 dz_ca=0.0497 tm=4.19e-05 o1_429=0.0856 o2_429=-0.0449 a_g=0.893 s_g=49.3 [3.7m]
+BEST nev=727 J=0.9941 stiff=0.62 ref=1.53 pre30=2.3 fv_hip=0.742 fc_hip=0.0329 fv_knee=0.0602 fc_knee=0.0334 solref=0.00917 imp0=0.489 arm_knee=0.00712 M_c=0.799 I_th=0.503 I_ca=1.88 dz_th=0.0627 dz_ca=0.0499 tm=0.000155 o1_429=0.0895 o2_429=-0.0423 a_g=0.888 s_g=48.9 [3.8m]
+BEST nev=844 J=0.9937 stiff=0.576 ref=1.5 pre30=2.41 fv_hip=0.733 fc_hip=0.0563 fv_knee=0.0569 fc_knee=0.0144 solref=0.00801 imp0=0.433 arm_knee=0.00743 M_c=0.703 I_th=0.501 I_ca=1.83 dz_th=0.0587 dz_ca=0.0486 tm=4.97e-05 o1_429=0.0899 o2_429=-0.0496 a_g=0.902 s_g=45.1 [4.4m]
+BEST nev=857 J=0.9936 stiff=0.543 ref=1.5 pre30=2.4 fv_hip=0.704 fc_hip=0.0424 fv_knee=0.0721 fc_knee=0.0137 solref=0.00665 imp0=0.441 arm_knee=0.00654 M_c=0.689 I_th=0.528 I_ca=1.78 dz_th=0.0623 dz_ca=0.0487 tm=0.000255 o1_429=0.0889 o2_429=-0.0512 a_g=0.883 s_g=45.5 [4.4m]
+BEST nev=865 J=0.9927 stiff=0.523 ref=1.5 pre30=2.44 fv_hip=0.695 fc_hip=0.0493 fv_knee=0.0651 fc_knee=0.00962 solref=0.00686 imp0=0.416 arm_knee=0.00752 M_c=0.705 I_th=0.517 I_ca=1.79 dz_th=0.0668 dz_ca=0.05 tm=0.00012 o1_429=0.0899 o2_429=-0.0463 a_g=0.867 s_g=46.8 [4.5m]
+BEST nev=883 J=0.9925 stiff=0.651 ref=1.51 pre30=2.36 fv_hip=0.732 fc_hip=0.0604 fv_knee=0.0671 fc_knee=0.00428 solref=0.00658 imp0=0.411 arm_knee=0.00736 M_c=0.733 I_th=0.516 I_ca=1.75 dz_th=0.0546 dz_ca=0.0496 tm=0.000131 o1_429=0.0885 o2_429=-0.0481 a_g=0.883 s_g=46.1 [4.6m]
+BEST nev=894 J=0.9921 stiff=0.561 ref=1.51 pre30=2.35 fv_hip=0.74 fc_hip=0.0613 fv_knee=0.0682 fc_knee=0.00583 solref=0.00575 imp0=0.378 arm_knee=0.00718 M_c=0.695 I_th=0.517 I_ca=1.79 dz_th=0.0658 dz_ca=0.042 tm=3.57e-05 o1_429=0.0888 o2_429=-0.0484 a_g=0.877 s_g=48.1 [4.6m]
+BEST nev=912 J=0.9903 stiff=0.556 ref=1.55 pre30=2.43 fv_hip=0.708 fc_hip=0.0781 fv_knee=0.0685 fc_knee=0.0104 solref=0.00445 imp0=0.342 arm_knee=0.00693 M_c=0.745 I_th=0.504 I_ca=1.82 dz_th=0.0583 dz_ca=0.0496 tm=0.000963 o1_429=0.0897 o2_429=-0.052 a_g=0.915 s_g=44.3 [4.8m]
+BEST nev=997 J=0.9884 stiff=0.437 ref=1.56 pre30=2.64 fv_hip=0.739 fc_hip=0.0899 fv_knee=0.0562 fc_knee=5.03e-05 solref=0.00345 imp0=0.294 arm_knee=0.00718 M_c=0.654 I_th=0.5 I_ca=1.79 dz_th=0.0625 dz_ca=0.0493 tm=0.000578 o1_429=0.0899 o2_429=-0.0559 a_g=0.883 s_g=48.6 [5.2m]
+BEST nev=1139 J=0.9884 stiff=0.484 ref=1.63 pre30=2.62 fv_hip=0.846 fc_hip=0.0895 fv_knee=0.0452 fc_knee=0.003 solref=0.00334 imp0=0.273 arm_knee=0.00687 M_c=0.609 I_th=0.501 I_ca=1.84 dz_th=0.0552 dz_ca=0.05 tm=0.00128 o1_429=0.087 o2_429=-0.0618 a_g=0.898 s_g=46.4 [5.9m]
+BEST nev=1184 J=0.9880 stiff=0.425 ref=1.65 pre30=2.66 fv_hip=0.79 fc_hip=0.0807 fv_knee=0.0473 fc_knee=0.0033 solref=0.00331 imp0=0.269 arm_knee=0.0067 M_c=0.632 I_th=0.503 I_ca=1.84 dz_th=0.0574 dz_ca=0.0499 tm=0.00102 o1_429=0.0868 o2_429=-0.0578 a_g=0.9 s_g=46.2 [6.1m]
+BEST nev=1222 J=0.9872 stiff=0.459 ref=1.68 pre30=2.64 fv_hip=0.811 fc_hip=0.0807 fv_knee=0.0492 fc_knee=0.00297 solref=0.00287 imp0=0.261 arm_knee=0.00677 M_c=0.615 I_th=0.502 I_ca=1.88 dz_th=0.0576 dz_ca=0.0489 tm=0.000745 o1_429=0.0888 o2_429=-0.058 a_g=0.893 s_g=45.3 [6.3m]
+BEST nev=1225 J=0.9871 stiff=0.427 ref=1.62 pre30=2.67 fv_hip=0.78 fc_hip=0.0741 fv_knee=0.0532 fc_knee=0.0032 solref=0.00266 imp0=0.248 arm_knee=0.0068 M_c=0.639 I_th=0.509 I_ca=1.85 dz_th=0.0603 dz_ca=0.0499 tm=0.000829 o1_429=0.0895 o2_429=-0.0559 a_g=0.885 s_g=47 [6.3m]
+BEST nev=1244 J=0.9868 stiff=0.444 ref=1.63 pre30=2.63 fv_hip=0.803 fc_hip=0.0735 fv_knee=0.0497 fc_knee=0.00274 solref=0.00284 imp0=0.256 arm_knee=0.00672 M_c=0.653 I_th=0.515 I_ca=1.88 dz_th=0.06 dz_ca=0.0498 tm=0.000857 o1_429=0.088 o2_429=-0.0579 a_g=0.887 s_g=46.7 [6.4m]
+BEST nev=1281 J=0.9864 stiff=0.449 ref=1.64 pre30=2.65 fv_hip=0.824 fc_hip=0.0711 fv_knee=0.0489 fc_knee=0.000133 solref=0.00288 imp0=0.258 arm_knee=0.00676 M_c=0.629 I_th=0.516 I_ca=1.82 dz_th=0.0587 dz_ca=0.05 tm=0.000686 o1_429=0.0888 o2_429=-0.0602 a_g=0.875 s_g=47.2 [6.6m]
+BEST nev=1380 J=0.9864 stiff=0.448 ref=1.66 pre30=2.69 fv_hip=0.816 fc_hip=0.0845 fv_knee=0.0469 fc_knee=0.00048 solref=0.00282 imp0=0.25 arm_knee=0.00666 M_c=0.607 I_th=0.5 I_ca=1.86 dz_th=0.0534 dz_ca=0.0497 tm=0.000884 o1_429=0.0829 o2_429=-0.06 a_g=0.879 s_g=46.6 [7.1m]
+BEST nev=1387 J=0.9861 stiff=0.477 ref=1.65 pre30=2.66 fv_hip=0.817 fc_hip=0.0825 fv_knee=0.0477 fc_knee=0.000794 solref=0.00287 imp0=0.255 arm_knee=0.00672 M_c=0.607 I_th=0.5 I_ca=1.86 dz_th=0.0563 dz_ca=0.0492 tm=0.000852 o1_429=0.0832 o2_429=-0.0592 a_g=0.88 s_g=47.3 [7.1m]
+BEST nev=1422 J=0.9860 stiff=0.472 ref=1.68 pre30=2.62 fv_hip=0.818 fc_hip=0.083 fv_knee=0.0474 fc_knee=9.92e-06 solref=0.00247 imp0=0.235 arm_knee=0.00664 M_c=0.597 I_th=0.502 I_ca=1.88 dz_th=0.0538 dz_ca=0.0481 tm=0.00102 o1_429=0.0837 o2_429=-0.0593 a_g=0.893 s_g=47.8 [7.3m]
+BEST nev=1428 J=0.9856 stiff=0.449 ref=1.67 pre30=2.68 fv_hip=0.824 fc_hip=0.0825 fv_knee=0.0469 fc_knee=0.000147 solref=0.00241 imp0=0.235 arm_knee=0.00659 M_c=0.597 I_th=0.502 I_ca=1.88 dz_th=0.0537 dz_ca=0.0485 tm=0.00079 o1_429=0.0842 o2_429=-0.0598 a_g=0.885 s_g=48 [7.3m]
+BEST nev=1460 J=0.9850 stiff=0.467 ref=1.68 pre30=2.61 fv_hip=0.798 fc_hip=0.081 fv_knee=0.0496 fc_knee=9.17e-05 solref=0.00235 imp0=0.23 arm_knee=0.00691 M_c=0.611 I_th=0.5 I_ca=1.86 dz_th=0.0553 dz_ca=0.0495 tm=0.000759 o1_429=0.0856 o2_429=-0.0575 a_g=0.88 s_g=49.1 [7.5m]
+BEST nev=1499 J=0.9849 stiff=0.479 ref=1.66 pre30=2.6 fv_hip=0.8 fc_hip=0.0808 fv_knee=0.0493 fc_knee=0.000102 solref=0.00243 imp0=0.237 arm_knee=0.00685 M_c=0.611 I_th=0.501 I_ca=1.84 dz_th=0.0541 dz_ca=0.0497 tm=0.000517 o1_429=0.0858 o2_429=-0.0539 a_g=0.88 s_g=49 [7.7m]
+BEST nev=1520 J=0.9848 stiff=0.474 ref=1.67 pre30=2.6 fv_hip=0.785 fc_hip=0.0768 fv_knee=0.0508 fc_knee=0.000138 solref=0.00259 imp0=0.23 arm_knee=0.0069 M_c=0.608 I_th=0.501 I_ca=1.87 dz_th=0.0533 dz_ca=0.049 tm=0.000814 o1_429=0.0832 o2_429=-0.0574 a_g=0.881 s_g=49.4 [7.8m]
+BEST nev=1635 J=0.9848 stiff=0.434 ref=1.63 pre30=2.65 fv_hip=0.779 fc_hip=0.0747 fv_knee=0.0515 fc_knee=0.00077 solref=0.00243 imp0=0.229 arm_knee=0.00682 M_c=0.618 I_th=0.503 I_ca=1.84 dz_th=0.0589 dz_ca=0.05 tm=0.00067 o1_429=0.0868 o2_429=-0.0565 a_g=0.872 s_g=50.6 [8.4m]
+BEST nev=1769 J=0.9847 stiff=0.465 ref=1.63 pre30=2.61 fv_hip=0.768 fc_hip=0.0809 fv_knee=0.0539 fc_knee=0.00324 solref=0.00221 imp0=0.209 arm_knee=0.00705 M_c=0.616 I_th=0.504 I_ca=1.88 dz_th=0.0587 dz_ca=0.05 tm=0.000715 o1_429=0.0858 o2_429=-0.0589 a_g=0.867 s_g=50 [9.1m]
+BEST nev=1778 J=0.9846 stiff=0.448 ref=1.63 pre30=2.61 fv_hip=0.767 fc_hip=0.0814 fv_knee=0.0541 fc_knee=0.00264 solref=0.00208 imp0=0.207 arm_knee=0.00691 M_c=0.621 I_th=0.505 I_ca=1.87 dz_th=0.0583 dz_ca=0.05 tm=0.000815 o1_429=0.0848 o2_429=-0.0596 a_g=0.863 s_g=49.8 [9.1m]
+BEST nev=1886 J=0.9845 stiff=0.467 ref=1.65 pre30=2.56 fv_hip=0.757 fc_hip=0.0826 fv_knee=0.0568 fc_knee=0.00234 solref=0.002 imp0=0.184 arm_knee=0.00707 M_c=0.611 I_th=0.5 I_ca=1.84 dz_th=0.0608 dz_ca=0.05 tm=0.000818 o1_429=0.0872 o2_429=-0.0584 a_g=0.874 s_g=49.3 [9.7m]
+BEST nev=1986 J=0.9844 stiff=0.477 ref=1.67 pre30=2.49 fv_hip=0.733 fc_hip=0.0803 fv_knee=0.0557 fc_knee=0.00215 solref=0.00205 imp0=0.191 arm_knee=0.00713 M_c=0.603 I_th=0.5 I_ca=1.81 dz_th=0.06 dz_ca=0.0498 tm=0.000675 o1_429=0.0854 o2_429=-0.0566 a_g=0.869 s_g=49.7 [10.2m]
+BEST nev=2000 J=0.9843 stiff=0.483 ref=1.64 pre30=2.49 fv_hip=0.734 fc_hip=0.0794 fv_knee=0.0562 fc_knee=0.00177 solref=0.00208 imp0=0.206 arm_knee=0.00707 M_c=0.615 I_th=0.5 I_ca=1.84 dz_th=0.0606 dz_ca=0.0499 tm=0.000676 o1_429=0.0858 o2_429=-0.054 a_g=0.871 s_g=49.6 [10.2m]
+BEST nev=2050 J=0.9843 stiff=0.503 ref=1.65 pre30=2.46 fv_hip=0.725 fc_hip=0.083 fv_knee=0.0573 fc_knee=0.000961 solref=0.00207 imp0=0.195 arm_knee=0.00722 M_c=0.601 I_th=0.5 I_ca=1.83 dz_th=0.0573 dz_ca=0.0499 tm=0.000721 o1_429=0.0863 o2_429=-0.0565 a_g=0.869 s_g=49.9 [10.5m]
+BEST nev=2056 J=0.9840 stiff=0.504 ref=1.64 pre30=2.49 fv_hip=0.748 fc_hip=0.0811 fv_knee=0.0539 fc_knee=0.000418 solref=0.00211 imp0=0.197 arm_knee=0.00723 M_c=0.604 I_th=0.5 I_ca=1.83 dz_th=0.0577 dz_ca=0.0499 tm=0.000805 o1_429=0.0873 o2_429=-0.0581 a_g=0.869 s_g=49.9 [10.6m]
+BEST nev=2141 J=0.9837 stiff=0.506 ref=1.64 pre30=2.51 fv_hip=0.759 fc_hip=0.0798 fv_knee=0.0547 fc_knee=9.94e-06 solref=0.00213 imp0=0.204 arm_knee=0.00712 M_c=0.614 I_th=0.5 I_ca=1.86 dz_th=0.0565 dz_ca=0.0498 tm=0.000705 o1_429=0.0862 o2_429=-0.0561 a_g=0.864 s_g=50.6 [11.0m]
+CMA7 DONE nev=2210 J=0.9837 [11.3m]
