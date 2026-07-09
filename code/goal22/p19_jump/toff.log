@@ -1,0 +1,7 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[푸시 종료(무릎 τ 하강 교차) 타이밍: sim − real, ms]
+  jump_0424              평균   -0.9ms  (σ 2.3, n=9)
+  jump_0429              평균   +7.6ms  (σ 3.7, n=10)
+  jump_0602              평균   -6.0ms  (σ 2.3, n=6)
+  jump_position_0421     평균   -0.7ms  (σ 1.5, n=6)
