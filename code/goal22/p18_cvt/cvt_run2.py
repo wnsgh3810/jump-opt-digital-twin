@@ -57,14 +57,21 @@ def build_cvt2(l_i, spring_at="crank", fric_at="crank", x32=None, ref=None):
                       '<joint name="cpin" type="hinge"/><site name="ctip" pos="0 0 -0.25" size="0.003"/>')
     xml = xml.replace('<joint name="cpin" type="hinge" damping=',
                       '<site name="ctip" pos="0 0 -0.25" size="0.003"/><joint name="cpin" type="hinge" damping=')
-    # calf 무릎 힌지: 배치 옵션 반영
-    knee_attrs = 'damping="0.001"'
+    # calf 무릎 힌지: 배치 옵션 반영 — 기존 damping(fitted d_kneep)은 보존, 속성 추가
+    mkn = re.search(r'<joint name="knee" type="hinge" damping="([0-9.eE+-]+)"/>', xml)
+    assert mkn, "knee joint line not found"
+    extra = ""
     if fric_at == "calf":
-        knee_attrs = f'damping="{dd["fv_knee"]:.6f}" frictionloss="{dd["fc_knee"]:.6f}"'
+        extra += f' frictionloss="{dd["fc_knee"]:.6f}"'
+        dmp = float(mkn.group(1)) + dd["fv_knee"]
+    else:
+        dmp = float(mkn.group(1))
     if spring_at == "calf":
-        knee_attrs += f' stiffness="{dd["stiff_knee"]:.6f}" springref="{ref:.5f}"'
-    xml = xml.replace('<joint name="knee" type="hinge" damping="0.001"/>',
-                      f'<joint name="knee" type="hinge" {knee_attrs}/>')
+        extra += f' stiffness="{dd["stiff_knee"]:.6f}" springref="{ref:.5f}"'
+    xml = xml.replace(mkn.group(0),
+                      f'<joint name="knee" type="hinge" damping="{dmp:.6f}"{extra}/>')
+    if spring_at == "calf":
+        assert f'stiffness="{dd["stiff_knee"]:.6f}"' in xml
     xml = xml.replace('<joint name="knee" type="hinge" damping=',
                       '<site name="rocker" pos="0 0 0.03" size="0.003"/><joint name="knee" type="hinge" damping=')
     xml = xml.replace('<equality>',
