@@ -1,0 +1,4 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[블렌딩 20ms (현행)] score 64.7 | 초기(0~50ms) GRF 피크 평균 110N | n=10
+[블렌딩 제거 (순수 재생)] score 63.0 | 초기(0~50ms) GRF 피크 평균 110N | n=10

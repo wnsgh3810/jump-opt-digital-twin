@@ -21,7 +21,10 @@ import p14_judge as J
 
 SD = -0.0015
 SEA_TC = [0.0008]   # 루프 폐쇄 컴플라이언스 (P20)
-T_SETTLE, T_AFTER, T_BLEND = 0.4, 0.6, 0.02
+# T_BLEND: v1의 t=0 계단 킥(당시 평형 갭 −3.5Nm) 완충용이었으나, 스프링 정체 규명 후
+# 갭이 ~0.1Nm로 줄어 불필요해짐 → 0 (데이터 구간은 실측 토크 그대로 — 2026-07-13 사용자 지적).
+# 검증: 제거 시 킥 없음 (초기 GRF 피크 동일), score 64.7→63.0 미세 개선.
+T_SETTLE, T_AFTER, T_BLEND = 0.4, 0.6, 0.0
 C16 = json.load(open(HERE.parent / "p16_structure/fourbar_p16_candidate.json"))
 X = np.array(C16["x"])
 A = np.array(C16["x"][32:36])
