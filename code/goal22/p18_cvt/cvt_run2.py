@@ -93,8 +93,10 @@ def fk_bz(model, dta, q1m, qc, l_i):
     return 1.0 - float(dta.geom_xpos[fg][2]) + S.FOOT_RADIUS
 
 
-def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0, preload=0.0, cap=None):
-    """preload: 플랜트측 무릎 보조 토크(canonical, 명령 로그 제외). cap: 공급 천장(shaft Nm)."""
+def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0, preload=0.0, cap=None,
+            alphas=None, clip_raw=None):
+    """preload: 플랜트측 무릎 보조 토크(canonical, 명령 로그 제외). cap: 공급 천장(shaft Nm).
+    alphas: CL 실효 게인 스케일 [ap1, ad1, ap2, ad2] (P19 커맨드층). clip_raw: raw 명령 클립(±)."""
     mj = J._P["mj"]; S = J._P["S"]
     t = d["t"]
     q1r = d["q1"] + o1; q2r = d["q2"] + o2      # 오프셋: 모델각 = 측정각 + o
@@ -117,6 +119,8 @@ def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0, preload=0.0, cap=No
     kp1 = kd1 = kp2 = kd2 = 0.0
     if gains:
         kp1, kd1, kp2, kd2 = gains
+        if alphas is not None:
+            kp1 *= alphas[0]; kd1 *= alphas[1]; kp2 *= alphas[2]; kd2 *= alphas[3]
     hold1 = hold2 = 0.0
     for k in range(N):
         tc = tl[k]
@@ -142,6 +146,9 @@ def sim_run(model, d, l_i, mode, gains=None, o1=0.0, o2=0.0, preload=0.0, cap=No
             tm = min(tc, t[-1])
             c1 = kp1 * (np.interp(tm, t, d["qd1"]) + o1 - q1c) + kd1 * (0.0 - v1c)
             c2 = kp2 * (np.interp(tm, t, d["qd2"]) + o2 - q2c) + kd2 * (0.0 - v2c)
+            if clip_raw is not None:
+                c1 = float(np.clip(c1, -clip_raw, clip_raw))
+                c2 = float(np.clip(c2, -clip_raw, clip_raw))
             s1 = float(J.ahat(A, np.array([float(c1)]), np.array([v1c]))[0])
             s2 = float(J.ahat(A, np.array([float(c2)]), np.array([v2c]))[0])
         if tc > t[-1]:

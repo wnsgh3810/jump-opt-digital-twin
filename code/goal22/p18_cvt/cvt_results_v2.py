@@ -60,7 +60,8 @@ def fig_trial(sub, d, L, m, tag, l_i):
     ax[1, 2].set_ylabel("GRF z [N]")
     for a_ in ax.flat:
         a_.grid(alpha=0.3); a_.legend(fontsize=7); a_.set_xlabel("t [s]")
-    fig.suptitle(f"26.04.29/{sub} [{tag} FINAL P18b, l_i={l_i*1000:.1f}mm] — "
+    extra = " · 실효게인 α+클립 반영" if tag == "CL" else ""
+    fig.suptitle(f"26.04.29/{sub} [{tag} FINAL P18b, l_i={l_i*1000:.1f}mm{extra}] — "
                  f"q2 RMSE {m['q2']:.3f} rad · dq2 {m['dq2']:.2f} · "
                  f"h_sim {m['h']:.2f} / h_real {m['h_real']:.2f} m")
     fig.tight_layout()
@@ -76,7 +77,10 @@ def run_one(args):
     x32 = np.array(X37[:32]); x32[11] = max(STIFF, 1e-6)
     model, _ = build_cvt2(d["l_i"], "calf", "crank", x32=x32, ref=REF)
     gains = label_gains_429(sub) if mode == "CL" else None
-    L, _ = sim_run(model, d, d["l_i"], mode, gains=gains, o1=O1Q, o2=O2Q)
+    # CL은 P19 커맨드층 반영: 실효 게인 α (데이터 전용 적합, p19_cmdlayer) + raw 클립 ±35.5
+    ALPHA_0429 = [1.18, 0.37, 1.58, 0.93]
+    kw = dict(alphas=ALPHA_0429, clip_raw=35.5) if mode == "CL" else {}
+    L, _ = sim_run(model, d, d["l_i"], mode, gains=gains, o1=O1Q, o2=O2Q, **kw)
     if L is None:
         return dict(sub=sub, mode=mode, err="CRASH")
     m = metrics2(d, L, O1Q, O2Q)

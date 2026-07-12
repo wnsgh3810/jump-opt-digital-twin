@@ -1,0 +1,43 @@
+warm-start from previous mshoot best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+60_0.75_60_2        /A  q2 0.084 dq2 2.12 h 0.973/0.960
+60_1.5_60_1.5       /A  q2 0.041 dq2 2.57 h 0.969/0.990
+90_0.75_90_2        /A  q2 0.120 dq2 2.78 h 1.034/1.000
+60_1.5_60_1.5       /CL q2 0.079 dq2 2.71 h 1.036/0.990
+90_1.5_90_2.5       /A  q2 0.139 dq2 2.90 h 1.036/1.000
+60_0.75_60_2        /CL q2 0.090 dq2 3.09 h 1.040/0.960
+120_2_120_2         /A  q2 0.097 dq2 2.60 h 1.037/1.000
+90_1.5_90_2.5       /CL q2 0.064 dq2 3.21 h 1.079/1.000
+120_2_120_2         /CL q2 0.041 dq2 2.24 h 1.080/1.000
+90_0.75_90_2        /CL q2 0.040 dq2 2.34 h 1.088/1.000
+120_2.2_150_2.5     /A  q2 0.107 dq2 2.99 h 1.028/0.990
+120_2.2_150_2.5     /CL q2 0.060 dq2 2.42 h 1.066/0.990
+120_2.2_200_2.8     /A  q2 0.096 dq2 2.90 h 1.012/0.960
+150_2.2_250_3       /A  q2 0.167 dq2 5.11 h 1.021/0.970
+120_2.2_200_2.8     /CL q2 0.068 dq2 2.50 h 1.052/0.960
+150_2.2_350_3.5     /A  q2 0.201 dq2 6.33 h 1.018/0.950
+150_2.2_350_3.5     /CL q2 0.047 dq2 2.37 h 1.048/0.950
+150_2.2_250_3       /CL q2 0.045 dq2 2.32 h 1.066/0.970
+150_2.2_500_4       /A  q2 0.109 dq2 4.22 h 1.019/0.930
+150_2.2_500_4       /CL q2 0.062 dq2 2.57 h 1.036/0.930
+[A 평균] score 76.9 q2 0.116 dq2 3.45 h 1.015/0.975
+[CL 평균] score 87.5 q2 0.060 dq2 2.58 h 1.059/0.975
+saved cvt_results_v2.json
