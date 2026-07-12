@@ -42,4 +42,8 @@ python code/bench/bench.py list | stack
 - GIF는 goal18_CANONICAL 규격으로만 (새 렌더러 금지) — cvt_anim.py가 상속 실례.
 - GIF 텍스트 오버레이는 `bench/render_kit.draw_overlay`만 (표준 7필드: trial/t/base_z/hip/knee/h_sim/h_real
   + **l_i 상시 표기** — 사용자 선호 2026-07-13). CL 렌더/그래프는 커맨드층(α+클립) 반영 필수 (훅이 경고).
+- **sim vs real 트라이얼 그래프는 `bench/render_kit.fig_trial_std`만** (png_v2 규격 = cvt_results_v2 출처,
+  2×3: q(deg)+q_des/dq1/dq2/hipτ/kneeτ/GRF). 새 그림 포맷 발명 금지 — 지표는 `cvt_run2.metrics2` 재사용 (훅이 경고).
+- 일반 원칙: **새 러너/그림/지표 함수를 쓰기 전에 정본(cl_run·sim_run·metrics2·render_kit)을 import** —
+  기준 코드가 있으면 그걸 쓰고, 없을 때만 새로 만들어 bench에 정본화.
 - 커밋: 발견 단위로 즉시, 메시지에 수치 포함 (사용자 선호: 자동 커밋).

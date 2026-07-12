@@ -138,40 +138,23 @@ def sr_plot(ax, ts, ys, tr_, yr, lab_s, lab_r):
     ax.grid(alpha=0.3); ax.legend(fontsize=7)
 
 
-def fig_trial(ds, sub, d, L, mode, m, o_rm, out):
-    """트라이얼 그림: [τ_hip, τ_knee(crank), q, GRF] (A는 τ 대신 dq)."""
+def make_fig(ds, sub, d, L, mode, l_i, o1, o2, hr, out, cl_note=" · 실효게인 α+클립 반영"):
+    """표준 그림 생성 — 지표=cvt_run2.metrics2(기준), 그림=render_kit.fig_trial_std(png_v2 규격)."""
+    import cvt_run2 as CR
+    d2 = dict(d)
+    d2.setdefault("h_real", hr)
+    if not np.isfinite(d2.get("h_real", float("nan"))):
+        d2["h_real"] = float(hr)
+    A_save = CR.A.copy(); CR.A = np.asarray(A, float)   # 주입 후 복원 (repo 규약)
+    try:
+        m = CR.metrics2(d2, L, o1, o2)
+    finally:
+        CR.A = A_save
     t = d["t"]
     tp1 = np.interp(t - P.SD, t, P.J.ahat(A, d["traw1"], d["dq1"]))
     tp2 = np.interp(t - P.SD, t, P.J.ahat(A, d["traw2"], d["dq2"]))
-    f = lambda a: np.interp(t, L["t"], a)
-    fig, ax = plt.subplots(2, 2, figsize=(12.5, 7.5))
-    if mode == "CL":
-        sr_plot(ax[0, 0], t[m], f(L["sh1"])[m], t[m], tp1[m], "hip τ sim(축)", "hip τ 실측(paper)")
-        sr_plot(ax[0, 1], t[m], f(L["sh2"])[m], t[m], tp2[m], "knee(crank) τ sim", "knee τ 실측(paper)")
-        ax[0, 0].set_ylabel("shaft τ [Nm]")
-        g1 = np.sqrt(np.mean((f(L["sh1"]) - tp1)[m] ** 2)) / max(np.sqrt(np.mean(tp1[m] ** 2)), 0.3)
-        g2 = np.sqrt(np.mean((f(L["sh2"]) - tp2)[m] ** 2)) / max(np.sqrt(np.mean(tp2[m] ** 2)), 0.3)
-        note = f"τ-갭 hip {100*g1:.0f}% knee {100*g2:.0f}%"
-    else:
-        sr_plot(ax[0, 0], t[m], f(L["dq1"])[m], t[m], d["dq1"][m], "hip dq sim", "hip dq 실측(raw)")
-        sr_plot(ax[0, 1], t[m], f(L["dq2"])[m], t[m], d["dq2"][m], "knee dq sim", "knee dq 실측(raw)")
-        ax[0, 0].set_ylabel("dq [rad/s]")
-        note = "τ replay (실측 τ 입력)"
-    sr_plot(ax[1, 0], t[m], f(L["q1"])[m] - o_rm[0], t[m], d["q1"][m], "hip q sim", "hip q 실측")
-    sr_plot(ax[1, 0], t[m], f(L["q2"])[m] - o_rm[1], t[m], d["q2"][m], "knee(crank) q sim", "knee q 실측")
-    ax[1, 0].set_ylabel("q [rad]"); ax[1, 0].set_xlabel("t [s]")
-    gm = L["t"] >= -0.05     # settle 초기 과도로 y축 스케일 낭비 방지
-    if d.get("grf_real") is not None:
-        sr_plot(ax[1, 1], L["t"][gm], L["grf"][gm], t, d["grf_real"], "GRF sim", "GRF 실측(로드셀)")
-    else:
-        ax[1, 1].plot(L["t"][gm], L["grf"][gm], lw=1.2, label="GRF sim")
-        ax[1, 1].grid(alpha=0.3); ax[1, 1].legend(fontsize=7)
-    ax[1, 1].set_ylabel("GRF z [N]"); ax[1, 1].set_xlabel("t [s]")
-    ax[1, 1].set_xlim(-0.05, t[-1] + 0.15)
-    fig.suptitle(f"{ds}/{sub} [{mode}] — P19 스택 (A=Paper, 커맨드층 반영) · {note}")
-    fig.tight_layout()
-    fig.savefig(out, dpi=110)
-    plt.close(fig)
+    RK.fig_trial_std(out, f"{ds}/{sub}", d2, L, m, mode, l_i, tp1, tp2,
+                     o1q=o1, o2q=o2, model_tag="P19", cl_note=cl_note)
 
 
 ANIM = {}
@@ -253,8 +236,8 @@ def do_jumps():
                 print(f"CRASH {ds}/{sub} [{mode}]", flush=True)
                 results.append((ds, sub, mode, "CRASH"))
                 continue
-            o_rm = (o1, o2) if is_cvt else (0.0, 0.0)   # 심판 관례: 0429만 q 오프셋 제거
-            fig_trial(ds, sub, d, L, mode, m, o_rm, sd / "png" / f"{sub}__{mode}.png")
+            make_fig(ds, sub, d, L, mode, l_i, o1, o2, hr,
+                     sd / "png" / f"{sub}__{mode}.png")
             save_npz(sd / "traj" / f"{sub}__{mode}.npz", L,
                      l_i=l_i, ds=ds, sub=sub, mode=mode, h_real=hr)
             results.append((ds, sub, mode, "OK"))
@@ -292,7 +275,8 @@ def do_s2s():
         md = mj.MjData(model)
         N = int(t[-1] / dt)
         tl = np.arange(N) * dt
-        L = {k: np.zeros(N) for k in ["q1", "q2", "bz", "grf"]}
+        L = {k: np.zeros(N) for k in ["q1", "q2", "dq1", "dq2", "sh1", "sh2",
+                                      "bz", "grf"]}
         ridx = 0
         for k in range(N):
             tc = tl[k]
@@ -302,8 +286,9 @@ def do_s2s():
                 md.qpos[:] = [pp["bz"][i0], pp["q1m"][i0], q2, -q2, q2]
                 md.qvel[:] = [pp["vbz"][i0], pp["dq1m"][i0], dq2, -dq2, dq2]
                 mj.mj_forward(model, md)
-            md.ctrl[:] = [float(np.interp(tc, t, pp["tau_h"])),
-                          float(np.interp(tc, t, pp["tau_k"]))]
+            c1 = float(np.interp(tc, t, pp["tau_h"]))
+            c2 = float(np.interp(tc, t, pp["tau_k"]))
+            md.ctrl[:] = [c1, c2]
             try:
                 mj.mj_step(model, md)
             except Exception:
@@ -311,6 +296,8 @@ def do_s2s():
             if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
                 break
             L["q1"][k] = -md.qpos[1] - np.pi / 2; L["q2"][k] = -md.qpos[2]
+            L["dq1"][k] = -md.qvel[1]; L["dq2"][k] = -md.qvel[2]
+            L["sh1"][k] = -c1; L["sh2"][k] = -c2     # 측정좌표 축토크 (ctrl 부호 반전)
             L["bz"][k] = md.qpos[0]
             gz = 0.0
             for ci in range(md.ncon):
@@ -319,27 +306,52 @@ def do_s2s():
                 gz += (md.contact[ci].frame.reshape(3, 3).T @ cf[:3])[2]
             L["grf"][k] = gz
         L["t"] = tl
-        q1m_ms = -pp["q1m"] - np.pi / 2; q2m_ms = -pp["q2m"]   # MJ→측정좌표
-        fig, ax = plt.subplots(3, 1, figsize=(12.5, 9), sharex=True)
-        sr_plot(ax[0], tl, L["q1"], t, q1m_ms, "hip q sim", "hip q 실측")
-        sr_plot(ax[0], tl, L["q2"], t, q2m_ms, "knee q sim", "knee q 실측")
-        ax[0].set_ylabel("q [rad]")
-        sr_plot(ax[1], tl, L["bz"], t, pp["bz"], "base z sim", "base z 실측")
-        ax[1].set_ylabel("base z [m]")
-        ax[2].plot(tl, L["grf"], lw=1.2, label="GRF sim")
-        ax[2].grid(alpha=0.3); ax[2].legend(fontsize=8)
-        ax[2].set_ylabel("GRF z [N]"); ax[2].set_xlabel("t [s]")
-        for i0 in rs_i[::10]:
-            for a_ in ax:
-                a_.axvline(t[i0], lw=0.5, alpha=0.25)
-        fig.suptitle(f"s2s_gnd_0319/{sub} [A, mshoot 창 리셋 replay] — P19 스택 "
-                     f"(점프 전용 fit — s2s는 참고용, 세로선=리셋 10개마다 1개)")
-        fig.tight_layout()
-        fig.savefig(sd / "png" / f"{sub}__A.png", dpi=110)
-        plt.close(fig)
+        # 의사-d (측정좌표 변환) — 표준 그림/지표 입력용
+        d_ps = dict(t=t, q1=-pp["q1m"] - np.pi / 2, q2=-pp["q2m"],
+                    dq1=-pp["dq1m"], dq2=-pp["dq2m"],
+                    traw1=tr["raw1"], traw2=tr["raw2"],
+                    grf_real=None, h_real=float("nan"))
+        make_fig("s2s_gnd_0319 (mshoot 창 리셋 replay)", sub, d_ps, L, "A",
+                 0.030, 0.0, 0.0, float("nan"), sd / "png" / f"{sub}__A.png")
         save_npz(sd / "traj" / f"{sub}__A.npz", L, l_i=0.030, ds="s2s_gnd_0319",
                  sub=sub, mode="A", h_real=float("nan"))
         print(f"png s2s/{sub} [A]", flush=True)
+
+
+def regen_pngs():
+    """기존 traj npz에서 그림만 표준 규격으로 재생성 (재시뮬 없음, s2s_0319 제외)."""
+    if R.TRIALS is None:
+        R.TRIALS = R.all_trials()
+    dd = dict(zip(P.J._P["FR"].NAMES, X32[:26]))
+    tri = {(ds, str(sub)): (d, is_cvt) for ds, sub, d, g_, dq_, ff_, m_, is_cvt, li_
+           in R.TRIALS}
+    import s2s_0604 as S0
+    for ds_dir in sorted(ROOT.iterdir()):
+        tj = ds_dir / "traj"
+        if not tj.is_dir() or ds_dir.name == "s2s_gnd_0319":
+            continue
+        for f in sorted(tj.glob("*.npz")):
+            z = np.load(f, allow_pickle=True)
+            L = {k: z[k] for k in ("t", "q1", "q2", "dq1", "dq2", "sh1", "sh2",
+                                   "bz", "grf")}
+            ds = str(z["ds"]); sub = str(z["sub"]); mode = str(z["mode"])
+            l_i = float(z["l_i"]); hr = float(z["h_real"])
+            out = ds_dir / "png" / (f.stem + ".png")
+            if ds.startswith("s2s_0604"):
+                grp = ds.replace("s2s_0604_", "")
+                d = S0.load_0604(grp, sub)
+                make_fig(f"s2s_0604/{grp}", sub, d, L, mode, l_i, 0.0, 0.0, hr,
+                         out, cl_note=" · 회귀 실효게인 (P18c)")
+            else:
+                d, is_cvt = tri[(ds, sub)]
+                if is_cvt:
+                    o1, o2 = QOFF if mode == "CL" else QOFF_A429
+                else:
+                    k1, k2 = P.J.OFFK.get(ds, (None, None))
+                    o1 = dd.get(k1, 0.0) if k1 else 0.0
+                    o2 = dd.get(k2, 0.0) if k2 else 0.0
+                make_fig(ds, sub, d, L, mode, l_i, o1, o2, hr, out)
+            print("png", f.stem, flush=True)
 
 
 def do_gifs():
