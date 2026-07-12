@@ -1,0 +1,10 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+SCAN 접촉 파라미터 (전체 10-trial, 기준 solref=0.0102 imp0=0.491)
+  기준                        딥    29  score  64.4
+  solref 0.0051            딥    32  score  68.4
+  solref 0.0204            딥    28  score  61.6
+  solref 0.0306            딥    35  score  60.8
+  imp0 0.15                딥    28  score  62.7
+  imp0 0.30                딥    29  score  62.2
+  imp0 0.55                딥    29  score  65.3

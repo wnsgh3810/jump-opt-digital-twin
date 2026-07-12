@@ -1,0 +1,11 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+SCAN 초기 GRF 딥 축들 (저게인 5-trial, 딥[N] | score 가드)
+  기준                      딥    36  score  63.6
+  o2 -0.57deg            딥    42  score  63.6
+  o2 -0.29deg            딥    36  score  63.5
+  o2 +0.29deg            딥    36  score  63.6
+  o2 +0.57deg            딥    36  score  63.8
+  settle 0.8s               딥    36  score  63.6
+  springref -0.1          딥    36  score  63.6
+  springref +0.1          딥    36  score  63.6
