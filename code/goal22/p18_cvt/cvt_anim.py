@@ -10,6 +10,8 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
 import make_anim as MA
+sys.path.insert(0, str(HERE.parent.parent / "bench"))
+import render_kit as RK
 from cvt_core import build_cvt
 import p14_judge as J
 
@@ -104,13 +106,11 @@ def render(model, z, out, label, h_real):
             ren.update_scene(data, camera=cam)
             img = Image.fromarray(ren.render())
             dr = ImageDraw.Draw(img)
-            MA._draw_text_outlined(dr, (10, 10), f"trial = {label}", MA.FONT, fill="white")
-            MA._draw_text_outlined(dr, (10, 40), f"t = {t[i]*1000:>6.0f} ms", MA.FONT)
-            MA._draw_text_outlined(dr, (10, 70), f"base_z = {bz[i]*100:>5.1f} cm", MA.FONT, fill="#00ffff")
-            MA._draw_text_outlined(dr, (10, 100), f"l_i = {float(z['l_i'])*1000:.1f} mm (CVT)", MA.FONT, fill="#ffaa00")
-            MA._draw_text_outlined(dr, (10, 130), f"h_sim  = {h_apex:.3f} m", MA.FONT, fill="#ffff00")
-            if h_real == h_real:
-                MA._draw_text_outlined(dr, (10, 160), f"h_real = {h_real:.3f} m", MA.FONT, fill="#ff66ff")
+            RK.draw_overlay(dr, MA, label, t[i] * 1000, bz_cm=bz[i] * 100,
+                            hip_deg=float(np.degrees(q1[i])),
+                            knee_deg=float(np.degrees(qc[i])),
+                            h_sim=h_apex, h_real=h_real,
+                            l_i_mm=float(z["l_i"]) * 1000)
             frames.append(img)
     frames[0].save(str(out), save_all=True, append_images=frames[1:],
                    duration=MA.DURATION_MS, loop=0, optimize=False)

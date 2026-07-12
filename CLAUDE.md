@@ -40,4 +40,6 @@ python code/bench/bench.py list | stack
 ## 결과물 관례
 - 그림/GIF 결과 폴더: `C:/Users/junho/Desktop/jump_opt/g22_<이름>_results/` (repo에 대용량 바이너리 커밋 금지)
 - GIF는 goal18_CANONICAL 규격으로만 (새 렌더러 금지) — cvt_anim.py가 상속 실례.
+- GIF 텍스트 오버레이는 `bench/render_kit.draw_overlay`만 (표준 7필드: trial/t/base_z/hip/knee/h_sim/h_real
+  + **l_i 상시 표기** — 사용자 선호 2026-07-13). CL 렌더/그래프는 커맨드층(α+클립) 반영 필수 (훅이 경고).
 - 커밋: 발견 단위로 즉시, 메시지에 수치 포함 (사용자 선호: 자동 커밋).
