@@ -1,0 +1,10 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+후보: P19 FINAL (cma3) — jump tau-fidelity (2026-07-10)
+  jump_0324              τ-갭  35.7%  q2 0.206  (n=3.0)
+  jump_0424              τ-갭  34.9%  q2 0.051  (n=9.0)
+  jump_0429              τ-갭  44.8%  q2 0.096  (n=10.0)
+  jump_0602              τ-갭  35.6%  q2 0.029  (n=6.0)
+  jump_position_0421     τ-갭  34.1%  q2 0.044  (n=6.0)
+  FIT 38.1%  |  held-out(0324) 35.7%
+  저장 지표 38.1% 대비: REPRODUCED
