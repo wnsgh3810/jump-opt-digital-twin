@@ -1,6 +1,8 @@
 {
- "current": null,
- "changelog": [],
+ "current": "p19",
+ "changelog": [
+  "- 2026-07-12: **p19** 승격 (FIT 38.1% / HO 35.7%) — τ-fidelity 마라톤 최종 (커맨드층 포함 3계층). 사용자 승격 확정 2026-07-12 (이전: 없음)"
+ ],
  "candidates": {
   "p13f": {
    "path": "code/goal22/fourbar_p13f_candidate.json",
@@ -35,20 +37,24 @@
   "p16": {
    "path": "code/goal22/p16_structure/fourbar_p16_candidate.json",
    "judge": "p14",
-   "status": "CANDIDATE",
-   "note": "P14+springref free — 직전 canonical (07-09)"
+   "status": "SUPERSEDED",
+   "note": "P14+springref free — 직전 canonical (07-09) — 직전 canonical, Mode A/구세대 비교 기준점"
   },
   "p18b": {
    "path": "code/goal22/p18_cvt/fourbar_p18b_candidate.json",
    "judge": "p19",
-   "status": "CANDIDATE",
-   "note": "스프링 정체 규명 + 프리로드 (07-09)"
+   "status": "SUPERSEDED",
+   "note": "스프링 정체 규명 + 프리로드 (07-09) — 발견(스프링 배치·프리로드)은 P19에 계승"
   },
   "p19": {
-   "path": "code/goal22/p19_jump/fourbar_p19_candidate.json",
+   "path": "code\\goal22\\p19_jump\\fourbar_p19_candidate.json",
    "judge": "p19",
-   "status": "CANDIDATE",
-   "note": "τ-fidelity 마라톤 최종 cma3 (07-10)"
+   "metric_full": 0.38074858117463867,
+   "heldout": 0.35696626765842016,
+   "metric_push": 0.22875387330969604,
+   "status": "CURRENT",
+   "promoted": "2026-07-12",
+   "note": "τ-fidelity 마라톤 최종 (커맨드층 포함 3계층). 사용자 승격 확정 2026-07-12"
   }
  }
 }
