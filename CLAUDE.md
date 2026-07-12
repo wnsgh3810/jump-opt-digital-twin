@@ -14,7 +14,8 @@ code/
 │   ├─ p14_ahat/     p14_judge.py = 이중 심판 (Mode A 창 + CL τ-채널, winit() 트라이얼 캐시)
 │   ├─ p16_structure/ P16 후보 + springref 패치 (p16a_spring.build_with_ref)
 │   ├─ p18_cvt/      CVT(l_i 가변) 빌더/러너 (cvt_core, cvt_run2) + P18b 후보
-│   └─ p19_jump/     τ-fidelity 심판/러너 (p19_judge, p19_run, 커맨드층 p19_cmdlayer.json) + P19 후보
+│   ├─ p19_jump/     τ-fidelity 심판/러너 (p19_judge, p19_run, 커맨드층 p19_cmdlayer.json) + P19 후보
+│   └─ p20_rise/     pre30 해체 마라톤 (PLAN/HYPOTHESES, exp 프로브, 노션 빌더)
 └─ goal19/           GOAL19 유산 (참조용)
 ```
 
