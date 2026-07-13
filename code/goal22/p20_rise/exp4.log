@@ -1,0 +1,18 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+A s2s/0 done
+A s2s/1 done
+A s2s/2 done
+B 0604 cvt/no_load done
+B 0604 cvt/load_2.5 done
+B 0604 cvt/load_5 done
+B 0604 no_cvt/no_load done
+
+[검사 A] s2s 내려갈 때(v<0) λ* +1.01±0.10 (n=13) | 올라갈 때(v>0) λ* +1.04±0.13 (n=12)
+  → 부호 반전이면 운동마찰형 / 동일 부호면 하중-지지형(정지마찰 흡수)
+
+[검사 B] 0604 같은 세션 — 저속 기준선 vs 부하/l_i
+  B_0604_cvt_load_2.5        λ* +2.09±0.14 (n=2, ⟨|Iq|⟩ 6.9A)
+  B_0604_cvt_load_5          λ* +3.77±0.23 (n=2, ⟨|Iq|⟩ 8.8A)
+  B_0604_cvt_no_load         λ* +1.02±0.26 (n=3, ⟨|Iq|⟩ 3.8A)
+  B_0604_no_cvt_no_load      λ* +0.71±0.20 (n=3, ⟨|Iq|⟩ 5.2A)
