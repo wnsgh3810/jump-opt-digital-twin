@@ -18,7 +18,7 @@ HERE = Path(__file__).parent
 REPO = HERE.parent.parent
 G22 = REPO / "code" / "goal22"
 for p in (G22 / "p19_jump", G22 / "p18_cvt", G22 / "p14_ahat",
-          G22 / "p16_structure", G22, REPO / "code" / "goal21"):
+          G22 / "p16_structure", G22 / "p20_rise", G22, REPO / "code" / "goal21"):
     sys.path.insert(0, str(p))
 
 sys.path.insert(0, str(HERE))
@@ -113,3 +113,20 @@ def eval_p14(cand):
     out = {**{k: float(v) for k, v in r["A"].items()},
            "C": float(r["C"]), "Cg": float(r["Cg"])}
     return out
+
+
+def eval_p20(cand):
+    """P20 2층 러너 심판 (준정적 게이트 어시스트 + 무릎측 동적층) — 지표 v3 동일."""
+    ensure_init()
+    import p19_judge as P
+    import p19_run as R
+    import p20_run as P20
+    x32, v, sp, qoff = _p19_args(cand)
+    p20 = cand.get("p20", {})
+    rows = P20.eval_stack20(x32, v[1], sp, P.A_PAPER, v[15],
+                            c=p20.get("c_qs", 0.25), v0=p20.get("v0", 6.0),
+                            Cd=p20.get("C_dyn", 2.5), q_off_0429=qoff)
+    s = R.summarize(rows)
+    return dict(summary={k: list(map(float, val)) for k, val in s.items()},
+                fit=float(s["FIT"][0]), heldout=float(s["jump_0324"][0]),
+                rows=rows)

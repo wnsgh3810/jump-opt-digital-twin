@@ -2,7 +2,7 @@
 """bench — 디지털 트윈 후보 평가/비교/승격 CLI (사고의 외골격).
 
 사용 (cwd 무관):
-  python code/bench/bench.py eval <candidate.json> [--judge p19|modea|p14] [--tol 0.005]
+  python code/bench/bench.py eval <candidate.json> [--judge p19|p20|modea|p14] [--tol 0.005]
   python code/bench/bench.py compare <a.json> <b.json> [...]
   python code/bench/bench.py promote <candidate.json> --note "..." [--force]
   python code/bench/bench.py list
@@ -66,7 +66,7 @@ def do_eval(path, judge="p19", tol=0.005, quiet=False):
         if not quiet:
             print("[modea] " + " ".join(f"{k}={v:.0f}" for k, v in r.items()))
         return {"judge": "modea", **r}
-    r = A.eval_p19(cand)
+    r = A.eval_p20(cand) if judge == "p20" else A.eval_p19(cand)
     if not quiet:
         print(f"후보: {cand.get('CANDIDATE', path)}")
         for ds, (g, q2, n) in sorted(r["summary"].items()):
@@ -81,7 +81,7 @@ def do_eval(path, judge="p19", tol=0.005, quiet=False):
         verdict = "REPRODUCED" if drift <= tol else f"DRIFT(Δ{100*drift:.2f}%p)"
         if not quiet:
             print(f"  저장 지표 {100*float(stored):.1f}% 대비: {verdict}")
-    return {"judge": "p19", "fit": r["fit"], "heldout": r["heldout"],
+    return {"judge": judge, "fit": r["fit"], "heldout": r["heldout"],
             "summary": r["summary"], "verdict": verdict}
 
 
@@ -147,7 +147,8 @@ def do_promote(path, note, force=False):
     cand = A.load_candidate(path)
     key = cand_key(cand, path)
     print(f"승격 심사: {key} ({path})")
-    r = do_eval(path, judge="p19")
+    import safe as _s
+    r = do_eval(path, judge=_s.read_json(path).get("judge", "p19"))
     # 게이트 1: 재현 (저장 지표 있으면)
     if r["verdict"] and r["verdict"].startswith("DRIFT") and not force:
         print(f"거부: 저장 지표와 불일치 {r['verdict']} — 원인 규명 전 승격 불가 (--force로 무시 가능)")
@@ -194,10 +195,10 @@ def main():
     ap = argparse.ArgumentParser(prog="bench")
     sub = ap.add_subparsers(dest="cmd", required=True)
     e = sub.add_parser("eval"); e.add_argument("path")
-    e.add_argument("--judge", default="p19", choices=["p19", "modea", "p14"])
+    e.add_argument("--judge", default="p19", choices=["p19", "p20", "modea", "p14"])
     e.add_argument("--tol", type=float, default=0.005)
     c = sub.add_parser("compare"); c.add_argument("paths", nargs="+")
-    c.add_argument("--judge", default="p19", choices=["p19", "modea", "p14"])
+    c.add_argument("--judge", default="p19", choices=["p19", "p20", "modea", "p14"])
     p = sub.add_parser("promote"); p.add_argument("path")
     p.add_argument("--note", default=""); p.add_argument("--force", action="store_true")
     sub.add_parser("list")
