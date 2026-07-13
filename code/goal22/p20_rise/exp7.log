@@ -1,0 +1,22 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+0429/60_0.75_60_2 done
+0429/60_1.5_60_1.5 done
+0429/90_0.75_90_2 done
+0429/90_1.5_90_2.5 done
+0429/120_2_120_2 done
+0429/120_2.2_150_2.5 done
+0429/120_2.2_200_2.8 done
+0429/150_2.2_250_3 done
+0429/150_2.2_350_3.5 done
+0429/150_2.2_500_4 done
+jump_0602/150_2.2_500_5 done
+jump_0602/120_2_120_2 done
+jump_0424/150_2.2_350_3.5 done
+jump_0424/120_2_120_2 done
+
+세션              저속(|dq|<5) λ*    고속(|dq|>10) λ*  n
+jump_0429            +1.51±0.80          +1.59±2.21  (16/35)
+jump_0602            +1.90±0.95          +2.41±0.93  (7/2)
+jump_0424            +2.43±0.87           +nan±0.00  (7/0)
+saved C:\Users\junho\Desktop\jump_opt\g22_p20_results\exp7_429_lambda.png
