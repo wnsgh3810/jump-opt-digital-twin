@@ -1,0 +1,35 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+x0: CL 38.9% | 점프창 538.2 | s2s 1484.1
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BEST nev=2 J=0.9748 stiff=0.635 ref=1.55 fv_hip=0.437 fc_hip=0.0362 fv_knee=0.103 fc_knee=0.0428 solref=0.00839 imp0=0.477 arm_knee=0.00659 M_c=0.586 I_th=0.763 I_ca=1.45 dz_th=0.0607 dz_ca=0.0481 tm=0.00218 c_qs=0.316 v0=5.81 [0.1m]
+BEST nev=4 J=0.9693 stiff=0.829 ref=1.51 fv_hip=0.068 fc_hip=0.00906 fv_knee=0.123 fc_knee=0.00406 solref=0.0113 imp0=0.469 arm_knee=0.00569 M_c=0.857 I_th=0.636 I_ca=1.43 dz_th=0.0625 dz_ca=0.0458 tm=0.000141 c_qs=0.228 v0=3.45 [0.1m]
+BEST nev=26 J=0.9488 stiff=0.74 ref=1.57 fv_hip=0.0785 fc_hip=0.0598 fv_knee=0.0999 fc_knee=0.00269 solref=0.00665 imp0=0.35 arm_knee=0.00775 M_c=0.781 I_th=0.594 I_ca=1.43 dz_th=0.0684 dz_ca=0.0497 tm=0.000209 c_qs=0.272 v0=6.41 [0.2m]
+BEST nev=71 J=0.9060 stiff=0.835 ref=1.66 fv_hip=0.0788 fc_hip=4.39e-06 fv_knee=0.0979 fc_knee=0.0478 solref=0.00294 imp0=0.231 arm_knee=0.00919 M_c=0.732 I_th=0.672 I_ca=1.22 dz_th=0.0204 dz_ca=0.0338 tm=0.00157 c_qs=0.208 v0=7.86 [0.5m]
+BEST nev=136 J=0.8970 stiff=0.787 ref=1.85 fv_hip=0.141 fc_hip=0.0187 fv_knee=0.124 fc_knee=0.0617 solref=0.00564 imp0=0.414 arm_knee=0.0096 M_c=0.731 I_th=0.709 I_ca=1.18 dz_th=0.0332 dz_ca=0.0366 tm=0.00039 c_qs=0.232 v0=11.1 [1.0m]
+BEST nev=177 J=0.8892 stiff=0.776 ref=1.91 fv_hip=0.0684 fc_hip=0.0574 fv_knee=0.101 fc_knee=0.076 solref=0.00727 imp0=0.554 arm_knee=0.0119 M_c=0.911 I_th=0.678 I_ca=1.34 dz_th=0.0311 dz_ca=0.0103 tm=0.000134 c_qs=0.258 v0=14.1 [1.2m]
+BEST nev=240 J=0.8815 stiff=0.817 ref=1.62 fv_hip=0.142 fc_hip=0.025 fv_knee=0.104 fc_knee=0.0739 solref=0.0109 imp0=0.644 arm_knee=0.0108 M_c=0.804 I_th=0.554 I_ca=1.3 dz_th=0.0384 dz_ca=0.0454 tm=5.22e-05 c_qs=0.192 v0=14.3 [1.6m]
+BEST nev=264 J=0.8787 stiff=0.959 ref=1.6 fv_hip=0.0746 fc_hip=0.0524 fv_knee=0.0846 fc_knee=0.0952 solref=0.00558 imp0=0.523 arm_knee=0.0117 M_c=0.819 I_th=0.582 I_ca=1.45 dz_th=0.0378 dz_ca=0.0363 tm=0.000198 c_qs=0.149 v0=14.6 [1.8m]
+BEST nev=267 J=0.8687 stiff=0.994 ref=1.57 fv_hip=0.13 fc_hip=0.0411 fv_knee=0.0813 fc_knee=0.0928 solref=0.00846 imp0=0.616 arm_knee=0.011 M_c=0.839 I_th=0.626 I_ca=1.18 dz_th=0.026 dz_ca=0.0242 tm=0.000135 c_qs=0.149 v0=13.9 [1.8m]
+BEST nev=287 J=0.8664 stiff=1.03 ref=1.51 fv_hip=0.0507 fc_hip=0.0461 fv_knee=0.0592 fc_knee=0.0897 solref=0.00957 imp0=0.494 arm_knee=0.00743 M_c=0.696 I_th=0.846 I_ca=1.32 dz_th=0.0463 dz_ca=0.0264 tm=1.01e-06 c_qs=0.089 v0=13.9 [1.9m]
+BEST nev=290 J=0.8653 stiff=0.977 ref=1.58 fv_hip=0.326 fc_hip=0.0289 fv_knee=0.0462 fc_knee=0.0901 solref=0.0085 imp0=0.512 arm_knee=0.00864 M_c=0.752 I_th=0.724 I_ca=1.38 dz_th=0.0308 dz_ca=0.0304 tm=5.78e-06 c_qs=0.164 v0=13.1 [2.0m]
+BEST nev=356 J=0.8624 stiff=0.977 ref=1.78 fv_hip=0.253 fc_hip=0.0459 fv_knee=0.0587 fc_knee=0.11 solref=0.00531 imp0=0.466 arm_knee=0.00873 M_c=0.753 I_th=0.716 I_ca=1.29 dz_th=0.0438 dz_ca=0.05 tm=0.000317 c_qs=0.11 v0=14.9 [2.4m]
+BEST nev=367 J=0.8608 stiff=1.12 ref=1.77 fv_hip=0.254 fc_hip=0.0107 fv_knee=0.0458 fc_knee=0.116 solref=0.00736 imp0=0.445 arm_knee=0.00613 M_c=0.725 I_th=0.812 I_ca=1.17 dz_th=0.0495 dz_ca=0.0492 tm=3.45e-05 c_qs=0.0547 v0=14.9 [2.5m]
+P20 CMA DONE nev=405 J=0.8608 [2.7m]
