@@ -33,7 +33,8 @@ a_hat(Paper) = A0·GR·KT·Iq − A1·GR·|Iq|Iq − A2·sgn(v) − A3·|Iq|·sg
 |---|---|---|---|
 | 0 | 골든 재현 (bench eval p19) | golden_repro.log | ✅ REPRODUCED 38.1/35.7 |
 | 1 | 형태 판별: 기준선(고정)+δ·{A1,A3,visc} 그리드 + hip 채널 스캔 + s2s 무해성 + 0429 교차 | p20_exp1.py | 진행 |
-| 2 | 승자 형태 정밀 적합 (δ+기준선 동시, CMA) + CL 통합 (cl_run A2 확장) | — | 대기 |
+| 2 | 언랩 감사 (144 fig 무언랩 재수출 + 자동 대조) | batch_export_no_unwrap.m, unwrap_audit.py | ✅ 기각 — 푸시 구간 언랩 정상 (REJECTED #27) |
+| 2b | 링키지 탄성 스캔 (폐루프 연결 강성 1-파라미터, 0429 교차 게이트) | — | 다음 |
 | 3 | TR_JUMP(19.5mm, 26.03.19) 로더 + 독립 검증 (토크 랩 주의) | — | 대기 |
 | 4 | bench 게이트 → p20 후보 승격 판단 | — | 대기 |
 

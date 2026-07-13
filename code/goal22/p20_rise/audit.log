@@ -1,0 +1,152 @@
+26.02.24\9Nm_feedforward/knee  max|τ|  10.7 shift   4 frac_bad 127 잔존점프  0 의심   0  ← FLAG
+26.02.24\9Nm_position/knee  max|τ|  17.4 shift  24 frac_bad 123 잔존점프 11 의심   0  ← FLAG
+26.03.09\tau_Jump_ground\data/knee  max|τ|  11.8 shift   2 frac_bad  58 잔존점프  0 의심   0  ← FLAG
+26.03.11\jump_noTr_position/knee  max|τ|  17.9 shift  10 frac_bad 137 잔존점프  9 의심  11  ← FLAG
+26.03.11\jump_noTr_tau/knee  max|τ|  10.6 shift  20 frac_bad 279 잔존점프  0 의심   0  ← FLAG
+26.03.11\jump_Tr_position/knee  max|τ|  17.9 shift  14 frac_bad  87 잔존점프  4 의심   1  ← FLAG
+26.03.11\jump_Tr_tau/knee  max|τ|  11.5 shift   2 frac_bad  95 잔존점프  0 의심   0  ← FLAG
+26.03.11\sit2stand_noTr_chirp_Air/knee  max|τ|   3.0 shift   0 frac_bad 14618 잔존점프  0 의심   0  ← FLAG
+26.03.11\sit2stand_noTr_chirp_GND/knee  max|τ|  18.0 shift  80 frac_bad 106791 잔존점프 22 의심   0  ← FLAG
+26.03.19\position\NO_TR_JUMP/knee  max|τ|  27.8 shift   2 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.03.19\position\sit2stand_air/knee  max|τ|   1.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.19\position\sit2stand_gnd/knee  max|τ|  26.7 shift  22 frac_bad   0 잔존점프  0 의심   0
+26.03.19\position\TR_JUMP/knee  max|τ|  36.8 shift   2 frac_bad   0 잔존점프  0 의심  21  ← FLAG
+26.03.19\tau\no_tr_tau/knee  max|τ|  17.9 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.19\tau\tr_tau/knee  max|τ|  22.7 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_No_Tr\P100_D3/knee  max|τ|  18.7 shift  18 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_No_Tr\P40_D0.7/knee  max|τ|  18.5 shift  20 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_No_Tr\P60_D1.5/knee  max|τ|  17.9 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P100_D1.5/knee  max|τ|  23.3 shift   4 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P100_D3/knee  max|τ|  23.0 shift   6 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P40_D0.7/knee  max|τ|  22.6 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P60_D0.7/knee  max|τ|  23.6 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P60_D1.5/knee  max|τ|  22.7 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P10_D0/knee  max|τ|   2.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P10_D1/knee  max|τ|   1.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P20_D1/knee  max|τ|   1.2 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P30_D1/knee  max|τ|   1.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P60_D1.5_P60_D2/knee  max|τ|   1.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P100_D0.75_P100_D2/knee  max|τ|  25.9 shift   6 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P200_D1.5_P200_D4/knee  max|τ|  19.9 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P60_D0.75_P60_D2/knee  max|τ|  29.0 shift   4 frac_bad   0 잔존점프  0 의심   3  ← FLAG
+26.04.21\Position Control\P70_D0.75_P70_D2/knee  max|τ|  25.7 shift   4 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P80_D0.75_P80_D2/knee  max|τ|  28.8 shift   2 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.04.21\Position Control\P90_D0.75_P90_D2/knee  max|τ|  25.9 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.04.22\Torque Control\P100_D3/knee  max|τ|  18.6 shift  10 frac_bad   0 잔존점프  0 의심   0
+26.04.22\Torque Control\P40_D0.7/knee  max|τ|  19.0 shift  20 frac_bad   0 잔존점프  0 의심   0
+26.04.22\Torque Control\P70_D2/knee  max|τ|  17.7 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\120_2.2_150_2.5/knee  max|τ|  27.4 shift   3 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.04.24\120_2.2_200_2.8/knee  max|τ|  26.2 shift   7 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.04.24\120_2_120_2/knee  max|τ|  28.5 shift   5 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.04.24\150_2.2_250_3/knee  max|τ|  26.1 shift   9 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.04.24\150_2.2_350_3.5/knee  max|τ|  26.3 shift   5 frac_bad   0 잔존점프  0 의심   1  ← FLAG
+26.04.24\150_2.2_500_4/knee  max|τ|  28.5 shift   5 frac_bad   0 잔존점프  0 의심   2  ← FLAG
+26.04.24\60_0.75_60_2/knee  max|τ|  34.7 shift   2 frac_bad   0 잔존점프  1 의심   2  ← FLAG
+26.04.24\60_1.5_60_1.5/knee  max|τ|  32.9 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.04.24\90_0.75_90_2/knee  max|τ|  33.3 shift   6 frac_bad   0 잔존점프  0 의심   0
+26.04.29\120_2.2_150_2.5/knee  max|τ|  35.1 shift   3 frac_bad   0 잔존점프  1 의심   2  ← FLAG
+26.04.29\120_2.2_200_2.8/knee  max|τ|  35.6 shift   3 frac_bad   0 잔존점프  1 의심   2  ← FLAG
+26.04.29\120_2_120_2/knee  max|τ|  35.1 shift   3 frac_bad   0 잔존점프  1 의심   5  ← FLAG
+26.04.29\150_2.2_250_3/knee  max|τ|  36.0 shift   3 frac_bad   0 잔존점프  1 의심   3  ← FLAG
+26.04.29\150_2.2_350_3.5/knee  max|τ|  35.9 shift   3 frac_bad   0 잔존점프  1 의심   2  ← FLAG
+26.04.29\150_2.2_500_4/knee  max|τ|  36.1 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.04.29\60_0.75_60_2/knee  max|τ|  34.9 shift   4 frac_bad   0 잔존점프  1 의심   6  ← FLAG
+26.04.29\60_1.5_60_1.5/knee  max|τ|  34.8 shift   2 frac_bad   0 잔존점프  1 의심   6  ← FLAG
+26.04.29\90_0.75_90_2/knee  max|τ|  35.2 shift   3 frac_bad   0 잔존점프  1 의심   5  ← FLAG
+26.04.29\90_1.5_90_2.5/knee  max|τ|  34.9 shift   6 frac_bad   0 잔존점프  1 의심   6  ← FLAG
+26.05.20\P100_D0.7_Pos0.1/knee  max|τ|   6.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.05.20\P100_D0.7_Pos0.2/knee  max|τ|  17.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.05.20\P100_D0.7_Pos0.4/knee  max|τ|  36.7 shift   1 frac_bad   0 잔존점프  1 의심   0  ← FLAG
+26.05.20\P100_D0.7_Pos0.6/knee  max|τ|  43.5 shift   1 frac_bad   0 잔존점프  1 의심   0  ← FLAG
+26.05.20\P100_D0.7_Pos1/knee  max|τ|  42.8 shift   1 frac_bad   0 잔존점프  1 의심   0  ← FLAG
+26.06.02\position\120_2_120_2/knee  max|τ|  34.0 shift   2 frac_bad   0 잔존점프  1 의심   7  ← FLAG
+26.06.02\position\150_2.2_250_3/knee  max|τ|  32.5 shift   3 frac_bad   0 잔존점프  1 의심   3  ← FLAG
+26.06.02\position\150_2.2_500_5/knee  max|τ|  34.3 shift   6 frac_bad   0 잔존점프  1 의심   5  ← FLAG
+26.06.02\position\60_0.75_60_2/knee  max|τ|  35.4 shift   2 frac_bad   0 잔존점프  1 의심  10  ← FLAG
+26.06.02\position\60_1.5_60_1.5/knee  max|τ|  35.3 shift   4 frac_bad   0 잔존점프  0 의심  10  ← FLAG
+26.06.02\position\90_0.75_90_2/knee  max|τ|  35.5 shift   2 frac_bad   0 잔존점프  1 의심   8  ← FLAG
+26.06.04\cvt\load_2.5/knee  max|τ|  15.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.04\cvt\load_5/knee  max|τ|  37.8 shift   4 frac_bad   0 잔존점프  0 의심   0
+26.06.04\cvt\no_load/knee  max|τ|   6.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.04\no_cvt\no_load/knee  max|τ|   9.5 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.02.24\9Nm_feedforward/hip   max|τ|  10.7 shift   4 frac_bad 112 잔존점프  0 의심   0  ← FLAG
+26.02.24\9Nm_position/hip   max|τ|  10.3 shift   6 frac_bad 126 잔존점프  0 의심   0  ← FLAG
+26.03.09\tau_Jump_ground\data/hip   max|τ|   9.7 shift   2 frac_bad  58 잔존점프  0 의심   0  ← FLAG
+26.03.11\jump_noTr_position/hip   max|τ|   6.4 shift   0 frac_bad 143 잔존점프  0 의심   0  ← FLAG
+26.03.11\jump_noTr_tau/hip   max|τ|   9.4 shift  12 frac_bad 265 잔존점프  0 의심   0  ← FLAG
+26.03.11\jump_Tr_position/hip   max|τ|  17.9 shift   6 frac_bad  91 잔존점프  2 의심   1  ← FLAG
+26.03.11\jump_Tr_tau/hip   max|τ|   9.7 shift   4 frac_bad  92 잔존점프  0 의심   0  ← FLAG
+26.03.11\sit2stand_noTr_chirp_Air/hip   max|τ|   2.9 shift   0 frac_bad 63849 잔존점프  0 의심   0  ← FLAG
+26.03.11\sit2stand_noTr_chirp_GND/hip   max|τ|  10.6 shift   2 frac_bad 93290 잔존점프  0 의심   0  ← FLAG
+26.03.19\position\NO_TR_JUMP/hip   max|τ|  12.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.19\position\sit2stand_air/hip   max|τ|   3.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.19\position\sit2stand_gnd/hip   max|τ|   9.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.19\position\TR_JUMP/hip   max|τ|  24.1 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.03.19\tau\no_tr_tau/hip   max|τ|  11.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.19\tau\tr_tau/hip   max|τ|  14.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_No_Tr\P100_D3/hip   max|τ|  13.7 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_No_Tr\P40_D0.7/hip   max|τ|  13.8 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_No_Tr\P60_D1.5/hip   max|τ|  10.9 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P100_D1.5/hip   max|τ|  17.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P100_D3/hip   max|τ|  17.7 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P40_D0.7/hip   max|τ|  13.2 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P60_D0.7/hip   max|τ|  16.8 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\Jump\Jump_Tr\P60_D1.5/hip   max|τ|  16.2 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P10_D0/hip   max|τ|   3.6 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P10_D1/hip   max|τ|   1.6 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P20_D1/hip   max|τ|   1.8 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P30_D1/hip   max|τ|   2.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.03.24\sit2stand\sit2stand_P60_D1.5_P60_D2/hip   max|τ|   2.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P100_D0.75_P100_D2/hip   max|τ|  12.5 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P200_D1.5_P200_D4/hip   max|τ|  11.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P60_D0.75_P60_D2/hip   max|τ|  15.5 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P70_D0.75_P70_D2/hip   max|τ|  14.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P80_D0.75_P80_D2/hip   max|τ|  13.9 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.21\Position Control\P90_D0.75_P90_D2/hip   max|τ|  11.7 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.22\Torque Control\P100_D3/hip   max|τ|  16.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.22\Torque Control\P40_D0.7/hip   max|τ|   8.8 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.22\Torque Control\P70_D2/hip   max|τ|  14.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\120_2.2_150_2.5/hip   max|τ|  12.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\120_2.2_200_2.8/hip   max|τ|  12.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\120_2_120_2/hip   max|τ|  11.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\150_2.2_250_3/hip   max|τ|  12.7 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\150_2.2_350_3.5/hip   max|τ|  12.5 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\150_2.2_500_4/hip   max|τ|  12.8 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\60_0.75_60_2/hip   max|τ|   9.6 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\60_1.5_60_1.5/hip   max|τ|  10.7 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.24\90_0.75_90_2/hip   max|τ|   7.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\120_2.2_150_2.5/hip   max|τ|  10.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\120_2.2_200_2.8/hip   max|τ|  12.0 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\120_2_120_2/hip   max|τ|  13.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\150_2.2_250_3/hip   max|τ|  12.8 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\150_2.2_350_3.5/hip   max|τ|  14.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\150_2.2_500_4/hip   max|τ|  14.9 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\60_0.75_60_2/hip   max|τ|  12.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\60_1.5_60_1.5/hip   max|τ|  16.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\90_0.75_90_2/hip   max|τ|  13.9 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.04.29\90_1.5_90_2.5/hip   max|τ|  13.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.02\position\120_2_120_2/hip   max|τ|   9.6 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.02\position\150_2.2_250_3/hip   max|τ|  15.3 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.02\position\150_2.2_500_5/hip   max|τ|  21.9 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.06.02\position\60_0.75_60_2/hip   max|τ|  17.2 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.02\position\60_1.5_60_1.5/hip   max|τ|  19.5 shift   2 frac_bad   0 잔존점프  0 의심   0
+26.06.02\position\90_0.75_90_2/hip   max|τ|  12.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.04\cvt\load_2.5/hip   max|τ|   6.1 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.04\cvt\load_5/hip   max|τ|   8.5 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.04\cvt\no_load/hip   max|τ|   3.2 shift   0 frac_bad   0 잔존점프  0 의심   0
+26.06.04\no_cvt\no_load/hip   max|τ|   2.4 shift   0 frac_bad   0 잔존점프  0 의심   0
+
+=== 세션 요약 (knee) ===
+26.02.24   trial   2 | branch shift 합   28 | 비정수 250 | 잔존점프  11 | desired 의심    0
+26.03.09   trial   1 | branch shift 합    2 | 비정수  58 | 잔존점프   0 | desired 의심    0
+26.03.11   trial   6 | branch shift 합  126 | 비정수 122007 | 잔존점프  35 | desired 의심   12
+26.03.19   trial   6 | branch shift 합   28 | 비정수   0 | 잔존점프   0 | desired 의심   22
+26.03.24   trial  13 | branch shift 합   54 | 비정수   0 | 잔존점프   0 | desired 의심    0
+26.04.21   trial   6 | branch shift 합   20 | 비정수   0 | 잔존점프   0 | desired 의심    4
+26.04.22   trial   3 | branch shift 합   30 | 비정수   0 | 잔존점프   0 | desired 의심    0
+26.04.24   trial   9 | branch shift 합   44 | 비정수   0 | 잔존점프   1 | desired 의심    9
+26.04.29   trial  10 | branch shift 합   32 | 비정수   0 | 잔존점프   9 | desired 의심   37
+26.05.20   trial   5 | branch shift 합    3 | 비정수   0 | 잔존점프   3 | desired 의심    0
+26.06.02   trial   6 | branch shift 합   19 | 비정수   0 | 잔존점프   5 | desired 의심   43
+26.06.04   trial   4 | branch shift 합    4 | 비정수   0 | 잔존점프   0 | desired 의심    0
+DONE
