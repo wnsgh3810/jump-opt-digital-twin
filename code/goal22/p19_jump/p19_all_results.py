@@ -45,6 +45,7 @@ DSDIR = {"jump_0324": "jump_0324_heldout", "jump_position_0421": "jump_position_
          "jump_0429": "jump_0429_cvt"}
 # Mode A 0429 q-오프셋 (p19_cma2.modeA_429 프로토콜 = P18b 값)
 QOFF_A429 = (3.14 * np.pi / 180, -3.0 * np.pi / 180)
+MODEL_TAG = "P19"
 
 
 def run_any(model, is_cvt, l_i, d, mode, gains, dqon, ffk, alphas, preload, o1, o2):
@@ -154,7 +155,7 @@ def make_fig(ds, sub, d, L, mode, l_i, o1, o2, hr, out, cl_note=" · 실효게�
     tp1 = np.interp(t - P.SD, t, P.J.ahat(A, d["traw1"], d["dq1"]))
     tp2 = np.interp(t - P.SD, t, P.J.ahat(A, d["traw2"], d["dq2"]))
     RK.fig_trial_std(out, f"{ds}/{sub}", d2, L, m, mode, l_i, tp1, tp2,
-                     o1q=o1, o2q=o2, model_tag="P19", cl_note=cl_note)
+                     o1q=o1, o2q=o2, model_tag=MODEL_TAG, cl_note=cl_note)
 
 
 ANIM = {}

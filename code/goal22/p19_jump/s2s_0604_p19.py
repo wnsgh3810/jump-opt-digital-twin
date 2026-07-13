@@ -42,9 +42,9 @@ def main():
             if L is None:
                 print(f"CRASH {name} [{mode}]", flush=True)
                 continue
-            m = np.ones_like(d["t"], dtype=bool)
-            B.fig_trial(f"s2s_0604/{grp}", sub, d, L, mode, m, (0.0, 0.0),
-                        SD / "png" / f"{name}__{mode}.png")
+            B.make_fig(f"s2s_0604/{grp}", sub, d, L, mode, d["l_i"], 0.0, 0.0,
+                       float("nan"), SD / "png" / f"{name}__{mode}.png",
+                       cl_note=" · 회귀 실효게인 (P18c)")
             B.save_npz(SD / "traj" / f"{name}__{mode}.npz", L, l_i=d["l_i"],
                        ds=f"s2s_0604_{grp}", sub=sub, mode=mode,
                        h_real=float("nan"))
