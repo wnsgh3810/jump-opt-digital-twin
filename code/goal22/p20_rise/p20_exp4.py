@@ -40,7 +40,7 @@ def fk_bz(model, data, q1mj, qcmj, l_i, qk_prev):
     return 1.0 - float(data.geom_xpos[fg][2]) + S.FOOT_RADIUS, qk, qp
 
 
-def win_scan(model, d, l_i, starts, W, o1=0.0, o2=0.0):
+def win_scan(model, d, l_i, starts, W, o1=0.0, o2=0.0, lam_base=0.0, lam_grid=None):
     """각 창 t0에서 λ 그리드 스캔 → (t0, dq_signed, |Iq|평균, λ*) 목록."""
     t = d["t"]
     th = np.interp(t - P.SD, t, P.J.ahat(E.A, d["traw1"], d["dq1"]))
@@ -65,8 +65,10 @@ def win_scan(model, d, l_i, starts, W, o1=0.0, o2=0.0):
         qk2, qp2, _ = closure(float(qcmj[i0]) + 1e-4, l_i, qks[i0])
         r_ = (qk2 - qks[i0]) / 1e-4; gp = (qp2 - qps[i0]) / 1e-4
         dqc = -d["dq2"][i0]
+        lg = LGRID if lam_grid is None else np.asarray(lam_grid, float)
         scores = []
-        for lam in LGRID:
+        for lam in lg:
+            tk_l = tk0 + lam_base + lam
             data.qpos[:] = [bz[i0], q1mj[i0], qcmj[i0], qps[i0], qks[i0]]
             data.qvel[:] = [vbz[i0], -d["dq1"][i0], dqc, gp * dqc, r_ * dqc]
             mj.mj_forward(model, data)
@@ -77,7 +79,7 @@ def win_scan(model, d, l_i, starts, W, o1=0.0, o2=0.0):
             for k in range(nst):
                 tc = t0 + k * dt
                 data.ctrl[:] = [-float(np.interp(tc, t, th)),
-                                -float(np.interp(tc, t, tk0) + lam)]
+                                -float(np.interp(tc, t, tk_l))]
                 try:
                     mj.mj_step(model, data)
                 except Exception:
@@ -97,12 +99,13 @@ def win_scan(model, d, l_i, starts, W, o1=0.0, o2=0.0):
         if np.isnan(scores).any() or (scores.max() - scores.min()) / max(scores.min(), 1e-9) < 0.02:
             continue
         i = int(np.argmin(scores))
-        if i in (0, len(LGRID) - 1):
-            ls = float(LGRID[i])
+        if i in (0, len(lg) - 1):
+            ls = float(lg[i])
         else:
             a, b, c = scores[i - 1], scores[i], scores[i + 1]
             den = a - 2 * b + c
-            ls = float(LGRID[i] + np.clip(0.5 * (a - c) / den if abs(den) > 1e-12 else 0, -1, 1) * 0.5)
+            step = float(lg[1] - lg[0])
+            ls = float(lg[i] + np.clip(0.5 * (a - c) / den if abs(den) > 1e-12 else 0, -1, 1) * step)
         wm = (t >= t0) & (t <= t1)
         iq = float(np.mean(np.abs((CF / (GR * KT)) * d["traw2"][wm])))
         out.append(dict(t0=float(t0), dq=float(d["dq2"][i0]), iq=iq, lam=ls))

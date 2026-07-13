@@ -46,7 +46,7 @@ def fk_bz_cvt(model, data, q1mj, qcmj, l_i, qk_prev):
     return 1.0 - float(data.geom_xpos[fg][2]) + S.FOOT_RADIUS, qk, qp
 
 
-def win_lam_429(model, d, l_i, lam):
+def win_lam_429(model, d, l_i, lam, lam_base=0.0):
     """0429 stance 창 점수 (λ 보정) — closure 리셋 + FK-bz."""
     t = d["t"]
     toff = takeoff_time(t, d["grf_real"])
@@ -64,6 +64,8 @@ def win_lam_429(model, d, l_i, lam):
     vbz = np.gradient(bz, t)
     dt = model.opt.timestep
     out = []
+    tk_l = tk + lam_base + lam
+    tk_l0 = th
     starts = np.arange(0.02, max(toff - 0.05, 0.03), 0.015)
     for t0 in starts:
         i0 = int(np.searchsorted(t, t0))
@@ -83,8 +85,8 @@ def win_lam_429(model, d, l_i, lam):
         ok = True
         for k in range(nst):
             tc = t0 + k * dt
-            data.ctrl[:] = [-float(np.interp(tc, t, th)),
-                            -float(np.interp(tc, t, tk) + lam)]
+            data.ctrl[:] = [-float(np.interp(tc, t, tk_l0)) if False else -float(np.interp(tc, t, th)),
+                            -float(np.interp(tc, t, tk_l))]
             try:
                 mj.mj_step(model, data)
             except Exception:
