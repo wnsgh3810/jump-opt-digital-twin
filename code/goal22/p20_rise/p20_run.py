@@ -59,7 +59,7 @@ def lam_input_vec(d, is_cvt, l_i, c=C_QS, v0=V0, Cd=C_DYN):
 
 
 def cl_run20(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas,
-             c_qs=C_QS, v0=V0, Cd=C_DYN, o1=0.0, o2=0.0):
+             c_qs=C_QS, v0=V0, Cd=C_DYN, o1=0.0, o2=0.0, preload=0.0):
     """커맨드층 포함 CL + P20 2층 플랜트 보정. (p19_run.cl_run 세대 교체본)"""
     mj = P.J._P["mj"]; S = P.J._P["S"]
     t = d["t"]
@@ -84,7 +84,7 @@ def cl_run20(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas,
     dt = model.opt.timestep
     N = int((P.J.T_SETTLE + t[-1] + P.J.T_AFTER) / dt)
     tl = np.arange(N) * dt - P.J.T_SETTLE
-    L = {k: np.zeros(N) for k in ["q1", "q2", "sh1", "sh2", "bz"]}
+    L = {k: np.zeros(N) for k in ["q1", "q2", "dq1", "dq2", "sh1", "sh2", "bz"]}
     c1f = c2f = 0.0
     al = dt / max(tm, dt)
     for k in range(N):
@@ -110,7 +110,7 @@ def cl_run20(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas,
         s2_qs = c_qs * s2 * float(gate(v2c, v0))
         vk = float(md.qvel[dof_knee])
         dyn = Cd * (1.0 - gate(vk, v0)) * float(np.tanh(s2 / 2.0))
-        md.ctrl[:] = [-s1, -(s2 + s2_qs)]
+        md.ctrl[:] = [-s1, -(s2 + s2_qs + preload)]
         md.qfrc_applied[dof_knee] = -dyn
         try:
             mj.mj_step(model, md)
@@ -119,6 +119,7 @@ def cl_run20(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas,
         if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
             return None
         L["q1"][k] = -md.qpos[1] - np.pi / 2; L["q2"][k] = -md.qpos[2]
+        L["dq1"][k] = -md.qvel[1]; L["dq2"][k] = -md.qvel[2]
         L["sh1"][k] = s1; L["sh2"][k] = s2; L["bz"][k] = md.qpos[0]
     L["t"] = tl
     return L
