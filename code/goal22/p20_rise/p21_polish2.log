@@ -1,0 +1,67 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BEST nev=1 J=10.6471 fv_hip=0.627 fc_hip=0.101 c_qs=0.258 v0=36.9 stiff=0.758 ref=1.66 [0.2m]
+BEST nev=8 J=7.9420 fv_hip=0.363 fc_hip=0.149 c_qs=0.149 v0=40 stiff=0.874 ref=1.74 [0.2m]
+BEST nev=25 J=6.9619 fv_hip=0.387 fc_hip=0.11 c_qs=0.161 v0=40 stiff=0.967 ref=1.51 [0.4m]
+BEST nev=28 J=6.7355 fv_hip=0.316 fc_hip=0.15 c_qs=0.134 v0=39.7 stiff=1.01 ref=1.54 [0.4m]
+BEST nev=51 J=6.7101 fv_hip=0.466 fc_hip=0.142 c_qs=0.167 v0=39.9 stiff=1.01 ref=1.58 [0.7m]
+BEST nev=55 J=6.3883 fv_hip=0.342 fc_hip=0.1 c_qs=0.144 v0=31.5 stiff=1.01 ref=1.5 [0.7m]
+BEST nev=70 J=6.2392 fv_hip=0.372 fc_hip=0.128 c_qs=0.123 v0=33.7 stiff=1.13 ref=1.52 [0.9m]
+BEST nev=79 J=6.1003 fv_hip=0.374 fc_hip=0.143 c_qs=0.094 v0=39.9 stiff=1.31 ref=1.64 [1.0m]
+BEST nev=142 J=6.0837 fv_hip=0.395 fc_hip=0.106 c_qs=0.128 v0=35.5 stiff=1.15 ref=1.6 [1.8m]
+BEST nev=161 J=6.0568 fv_hip=0.417 fc_hip=0.124 c_qs=0.129 v0=37.6 stiff=1.18 ref=1.5 [2.0m]
+BEST nev=252 J=6.0350 fv_hip=0.366 fc_hip=0.126 c_qs=0.12 v0=37.3 stiff=1.17 ref=1.55 [3.1m]
+BEST nev=300 J=6.0261 fv_hip=0.398 fc_hip=0.142 c_qs=0.11 v0=39.8 stiff=1.25 ref=1.68 [3.5m]
+BEST nev=304 J=6.0086 fv_hip=0.35 fc_hip=0.12 c_qs=0.107 v0=40 stiff=1.22 ref=1.51 [3.6m]
+BEST nev=369 J=5.9928 fv_hip=0.388 fc_hip=0.127 c_qs=0.117 v0=39.2 stiff=1.21 ref=1.53 [4.3m]
+BEST nev=388 J=5.9801 fv_hip=0.37 fc_hip=0.122 c_qs=0.109 v0=39.1 stiff=1.23 ref=1.59 [4.5m]
+BEST nev=394 J=5.9606 fv_hip=0.37 fc_hip=0.122 c_qs=0.112 v0=38.6 stiff=1.22 ref=1.53 [4.6m]
+BEST nev=398 J=5.9348 fv_hip=0.375 fc_hip=0.121 c_qs=0.113 v0=40 stiff=1.22 ref=1.54 [4.6m]
+BEST nev=491 J=5.9248 fv_hip=0.373 fc_hip=0.113 c_qs=0.114 v0=40 stiff=1.2 ref=1.5 [5.8m]
+BEST nev=593 J=5.9236 fv_hip=0.382 fc_hip=0.102 c_qs=0.113 v0=39.4 stiff=1.23 ref=1.5 [7.0m]
+BEST nev=603 J=5.9232 fv_hip=0.368 fc_hip=0.0996 c_qs=0.111 v0=40 stiff=1.21 ref=1.52 [7.1m]
+BEST nev=624 J=5.9195 fv_hip=0.371 fc_hip=0.0978 c_qs=0.111 v0=40 stiff=1.21 ref=1.51 [7.3m]
+BEST nev=637 J=5.9125 fv_hip=0.376 fc_hip=0.0909 c_qs=0.111 v0=39.9 stiff=1.22 ref=1.52 [7.4m]
+BEST nev=641 J=5.9099 fv_hip=0.381 fc_hip=0.0922 c_qs=0.112 v0=39.6 stiff=1.23 ref=1.55 [7.5m]
+BEST nev=655 J=5.9090 fv_hip=0.368 fc_hip=0.0906 c_qs=0.109 v0=39.8 stiff=1.23 ref=1.59 [7.7m]
+BEST nev=659 J=5.9083 fv_hip=0.379 fc_hip=0.0943 c_qs=0.112 v0=39.8 stiff=1.22 ref=1.53 [7.7m]
+BEST nev=665 J=5.9041 fv_hip=0.373 fc_hip=0.0853 c_qs=0.11 v0=40 stiff=1.22 ref=1.59 [7.8m]
+BEST nev=685 J=5.8914 fv_hip=0.371 fc_hip=0.0742 c_qs=0.109 v0=39.7 stiff=1.22 ref=1.63 [8.0m]
+BEST nev=800 J=5.8811 fv_hip=0.368 fc_hip=0.0655 c_qs=0.109 v0=40 stiff=1.22 ref=1.7 [9.3m]
+BEST nev=817 J=5.8788 fv_hip=0.369 fc_hip=0.0582 c_qs=0.109 v0=39.8 stiff=1.22 ref=1.72 [9.5m]
+BEST nev=839 J=5.8774 fv_hip=0.369 fc_hip=0.0628 c_qs=0.109 v0=40 stiff=1.22 ref=1.71 [9.7m]
+BEST nev=844 J=5.8759 fv_hip=0.367 fc_hip=0.0497 c_qs=0.11 v0=39.9 stiff=1.21 ref=1.78 [9.8m]
+BEST nev=856 J=5.8748 fv_hip=0.366 fc_hip=0.0489 c_qs=0.109 v0=39.8 stiff=1.21 ref=1.79 [10.0m]
+BEST nev=861 J=5.8700 fv_hip=0.367 fc_hip=0.0478 c_qs=0.11 v0=39.8 stiff=1.21 ref=1.81 [10.1m]
+BEST nev=882 J=5.8694 fv_hip=0.369 fc_hip=0.0429 c_qs=0.109 v0=39.9 stiff=1.22 ref=1.83 [10.3m]
+BEST nev=899 J=5.8686 fv_hip=0.369 fc_hip=0.0413 c_qs=0.109 v0=39.9 stiff=1.21 ref=1.85 [10.4m]
+BEST nev=909 J=5.8625 fv_hip=0.369 fc_hip=0.0324 c_qs=0.109 v0=39.9 stiff=1.21 ref=1.89 [10.5m]
+BEST nev=912 J=5.8525 fv_hip=0.367 fc_hip=0.0249 c_qs=0.108 v0=39.9 stiff=1.22 ref=1.96 [10.7m]
+BEST nev=926 J=5.8372 fv_hip=0.368 fc_hip=0.00725 c_qs=0.108 v0=39.8 stiff=1.22 ref=2.07 [10.8m]
+BEST nev=948 J=5.8368 fv_hip=0.371 fc_hip=0.000456 c_qs=0.109 v0=39.9 stiff=1.21 ref=2.1 [11.0m]
+BEST nev=965 J=5.8339 fv_hip=0.367 fc_hip=0.00453 c_qs=0.108 v0=39.9 stiff=1.22 ref=2.16 [11.2m]
+BEST nev=1039 J=5.8335 fv_hip=0.368 fc_hip=0.00391 c_qs=0.109 v0=39.9 stiff=1.21 ref=2.21 [12.0m]
+BEST nev=1045 J=5.8332 fv_hip=0.369 fc_hip=0.000131 c_qs=0.109 v0=40 stiff=1.21 ref=2.21 [12.2m]
+BEST nev=1064 J=5.8327 fv_hip=0.371 fc_hip=0.00113 c_qs=0.109 v0=39.9 stiff=1.21 ref=2.23 [12.4m]
+BEST nev=1069 J=5.8321 fv_hip=0.375 fc_hip=0.00116 c_qs=0.108 v0=40 stiff=1.22 ref=2.21 [12.4m]
+BEST nev=1077 J=5.8294 fv_hip=0.374 fc_hip=0.000239 c_qs=0.108 v0=40 stiff=1.22 ref=2.2 [12.5m]
+BEST nev=1086 J=5.8275 fv_hip=0.375 fc_hip=5.43e-06 c_qs=0.108 v0=40 stiff=1.22 ref=2.16 [12.6m]
+BEST nev=1140 J=5.8254 fv_hip=0.377 fc_hip=0.000727 c_qs=0.107 v0=39.8 stiff=1.23 ref=2.12 [13.2m]
+BEST nev=1210 J=5.8252 fv_hip=0.378 fc_hip=7.89e-05 c_qs=0.108 v0=39.6 stiff=1.23 ref=2.12 [14.0m]
+POLISH DONE nev=1210 J=5.8252 [14.0m]
