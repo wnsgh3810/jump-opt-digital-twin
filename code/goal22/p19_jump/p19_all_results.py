@@ -46,6 +46,7 @@ DSDIR = {"jump_0324": "jump_0324_heldout", "jump_position_0421": "jump_position_
 # Mode A 0429 q-오프셋 (p19_cma2.modeA_429 프로토콜 = P18b 값)
 QOFF_A429 = (3.14 * np.pi / 180, -3.0 * np.pi / 180)
 MODEL_TAG = "P19"
+C_QSG, V0G = 0.0, 6.0    # 부하비례 어시스트 층 (p21계 후보용, 기본 0=P19 거동)
 
 
 def run_any(model, is_cvt, l_i, d, mode, gains, dqon, ffk, alphas, preload, o1, o2):
@@ -105,7 +106,8 @@ def run_any(model, is_cvt, l_i, d, mode, gains, dqon, ffk, alphas, preload, o1, 
             c1 = float(np.clip(c1f, -CLIP, CLIP)); c2 = float(np.clip(c2f, -CLIP, CLIP))
             s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
             s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
-        md.ctrl[:] = [-s1, -(s2 + preload)]
+        s2_qs = C_QSG * s2 / (1.0 + (v2c / V0G) ** 2)
+        md.ctrl[:] = [-s1, -(s2 + s2_qs + preload)]
         try:
             mj.mj_step(model, md)
         except Exception:
@@ -267,7 +269,8 @@ def do_s2s():
         # tau_h/tau_k는 부호 반전본을 ctrl에 직결 (p14_judge.eval_modeA 패턴)
         t = tr["pp"]["t"]
         th = -P.J.ahat(A, tr["raw1"], tr["v1"])
-        tk = -(P.J.ahat(A, tr["raw2"], tr["v2"]) + PRE30)
+        ahk = P.J.ahat(A, tr["raw2"], tr["v2"])
+        tk = -(ahk + PRE30 + C_QSG * ahk / (1.0 + (tr["v2"] / V0G) ** 2))
         ppv = dict(tr["pp"], tau_h=np.interp(t - P.SD, t, th),
                    tau_k=np.interp(t - P.SD, t, tk))
         pp = P12._G["sv"](ppv, o1, o2)
