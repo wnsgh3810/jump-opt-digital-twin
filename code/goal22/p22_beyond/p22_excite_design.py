@@ -632,6 +632,11 @@ def main():
         f"설계 σ_min 유효 {sa['smin'] * np.sqrt(N_REP_30MIN):.1f} Nm "
         f"(조합 불확실도 ≈ {NOISE / (sa['smin'] * np.sqrt(N_REP_30MIN)) * 100:.1f}% 스케일)")
 
+    vis30 = int((ea * np.sqrt(N_REP_30MIN) > NOISE).sum())
+    say(f"30분 반복(×√{N_REP_30MIN}) 시 가시방향: {vis30}/{r} "
+        f"(최저 방향 {ea.min():.3f}×{np.sqrt(N_REP_30MIN):.1f}"
+        f"={ea.min() * np.sqrt(N_REP_30MIN):.2f} Nm)")
+
     say("\n방향별 여기량 [Nm] (비행·l_i=30 구조기저 SVD 방향, σ>0.4=식별가능):")
     newly = []
     for jj in range(r):
@@ -691,7 +696,7 @@ def main():
     jmeta["dir_excite"] = dict(designed=[float(x) for x in ea],
                                naive=[float(x) for x in eb],
                                jump=[float(x) for x in ec],
-                               newly=[int(j) for j in newly])
+                               newly=[int(j) for j in newly], vis30=vis30)
     jmeta["dir_names"] = [B.pretty_combo(Vt_r[jj], B.PNAMES, 4) for jj in range(r)]
     jmeta["caps"] = dict(vcap=list(VCAP), acap=ACAP, margin=MARGIN, T0=T0, NH=NH, FS=FS,
                          noise=NOISE, nrep30=N_REP_30MIN)
@@ -789,6 +794,8 @@ def write_report(jm, combos):
     A("")
     A(f"- 30분 = {N_REP_30MIN}주기 반복 → 유효 σ_min ≈ {sa['smin']:.2f}×√{N_REP_30MIN} = "
       f"**{eff:.1f} Nm** → 최약 베이스 조합의 상대 불확실도 ≈ {NOISE / eff * 100:.1f}% (스케일 단위).")
+    A(f"- 가시방향 수는 **1주기 기준** 표기 — {N_REP_30MIN}회 반복이면 설계 궤적은 "
+      f"{jm['dir_excite'].get('vis30', '?')}/{r} 전부 가시 (최저 방향도 ×√{N_REP_30MIN}≈13.4배 증폭).")
     A(f"- 캐리지를 **클램프로 고정**하고 돌릴 경우(ddbz=0 회귀자): σ_min={sl['smin']:.3f}, "
       f"cond={sl['cond']:.1f} — 두 모드 모두 커버됨.")
     A("")

@@ -34,3 +34,46 @@ warm-start from previous fourbar best
 [opt] 목적 1회 평가 7.1 ms (기준 σ_min=0.000)
 [opt] DE(seed=22): σ_min=0.067  (89s, nfev=82432)
 [opt] DE(seed=202): σ_min=0.062  (90s, nfev=82432)
+[opt] NM 폴리시 후: σ_min=0.067
+
+[평가] 정확 빌드 (100 Hz × 1주기)
+  [(a) 설계] Y 구축: rows=2000, cols=55, 1s
+  [(b) 나이브] Y 구축: rows=2000, cols=55, 1s
+
+궤적                                   rows     σ_min  σ_min@2k행       cond     가시방향(>0.4Nm)     마찰독립(평균)
+(a) 설계 (DE+NM)                       2000     0.067      0.067      460.2       11/13        0.976
+(b) 나이브 0.5Hz 사인                     2000     0.000      0.000 2761444008980.3       11/13        1.000
+(c) 점프 실데이터(스탠스行)                    3714     2.080      1.526      192.3       13/13        0.417
+(참고) 설계궤적·캐리지고정(ddbz=0) 회귀자: σ_min=0.302 cond=240.1
+30분 반복 효과: 180회 → σ ×√180=13.4 → 설계 σ_min 유효 0.9 Nm (조합 불확실도 ≈ 44.7% 스케일)
+
+방향별 여기량 [Nm] (비행·l_i=30 구조기저 SVD 방향, σ>0.4=식별가능):
+  D01 설계=      4.6  나이브=        9  점프=      222  +0.863·thigh.Iyy +0.284·calf.hx +0.264·calf.Iyy +0.199·thigh.hz
+  D02 설계=     5.08  나이브=     3.97  점프=     98.8  +0.811·calf.Iyy +0.383·calf.hx -0.311·thigh.Iyy +0.226·arm_knee
+  D03 설계=     3.54  나이브=      2.8  점프=       54  +0.969·calf.hz -0.163·calf.Iyy -0.092·coupler.hz +0.089·calf.hx
+  D04 설계=     14.7  나이브=     22.4  점프=     77.1  +0.997·fv_hip
+  D05 설계=     2.83  나이브=      1.9  점프=      191  -0.766·calf.hx +0.393·arm_knee +0.321·thigh.hz +0.319·calf.Iyy
+  D06 설계=     1.22  나이브=     1.35  점프=      244  -0.850·thigh.hz -0.255·calf.hx +0.234·calf.m +0.218·thigh.Iyy
+  D07 설계=     26.3  나이브=     14.3  점프=      210  -0.994·fv_knee -0.107·fc_knee
+  D08 설계=     1.07  나이브=    0.399  점프=     96.7  +0.830·arm_knee -0.361·calf.Iyy +0.297·thigh.hx +0.278·calf.hx
+  D09 설계=    0.347  나이브=    0.513  점프=      247  +0.925·thigh.hx -0.242·arm_knee -0.164·calf.hx +0.154·thigh.Iyy
+  D10 설계=    0.244  나이브=    0.234  점프=      140  -0.866·crank.hz -0.317·coupler.m -0.280·coupler.hz -0.180·base.m
+  D11 설계=     4.25  나이브=     4.53  점프=     21.4  -0.916·crank.hx +0.305·coupler.hx -0.246·fc_knee
+  D12 설계=     16.7  나이브=     17.8  점프=     22.2  -0.963·fc_knee +0.234·crank.hx +0.104·fv_knee -0.078·coupler.hx
+  D13 설계=     8.86  나이브=     8.71  점프=      6.6  -1.000·fc_hip
+
+[검증] 설계 궤적 (CSV 그리드 전 샘플)
+  [설계] 관절범위(hip): PASS  [-1.297,-0.284] ⊂ [-1.297,-0.283]
+  [설계] 관절범위(crank): PASS  [+0.554,+2.549] ⊂ [+0.554,+2.551]
+  [설계] 속도상한: PASS  max|dq1|=1.33≤8.0, max|dqc|=3.13≤12.0
+  [설계] 가속상한: PASS  max|ddq|=9.8≤200.0
+  [설계] 시작/끝 정지 dq(0)=dq(T0)=0: PASS  |dq(0)|=2.2e-16
+  [설계] 4-bar 폐쇄 유효(전 샘플): PASS  max잔차=2.2e-15
+  [설계] 무릎각(=crank) 방문범위 내: PASS  평행사변형 qk=qc → 허벅지-정강이 충돌각 실측범위 내
+  [설계] 자기충돌 없음(전 샘플): PASS  접촉수=0
+[출력] CSV 저장: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p22_beyond\p22_excite_traj.csv (1000행, 100Hz, 1주기 — 로봇에서 루프 재생)
+[출력] 그림 저장: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p22_beyond\p22_excite_traj.png
+[출력] 캐시 저장: p22_excite_cache.npz, p22_excite_cache.json
+[출력] 보고서 저장: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p22_beyond\p22_excite_report.md
+
+총 221s
