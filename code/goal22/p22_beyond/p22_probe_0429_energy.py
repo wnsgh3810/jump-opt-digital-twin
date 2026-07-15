@@ -141,6 +141,15 @@ def main():
                             + thresh_pw(d["traw2"], d["dq2"], 30.0), t_lo)
         Kth33 = T3.win_upto(t, thresh_pw(d["traw1"], d["dq1"], 33.0)
                             + thresh_pw(d["traw2"], d["dq2"], 33.0), t_lo)
+        # 보조 커널: 점성 과대판독 (Paper a_hat엔 점성항 없음) 유령일 = b·∫dq² dt
+        Kv = T3.win_upto(t, d["dq1"] ** 2 + d["dq2"] ** 2, t_lo)
+        # 속도-bin 별 knee 일 점유 (>30 rad/s 는 0429 전용 대역 — H1/H2 교락 정량화)
+        bv2 = []
+        mwin = t <= t_lo
+        dtu = float(np.median(np.diff(t)))
+        for lo, hi in zip(BEDGE[:-1], BEDGE[1:]):
+            mb = mwin & (np.abs(d["dq2"]) >= lo) & (np.abs(d["dq2"]) < hi)
+            bv2.append(float(np.sum(pw2[mb]) * dtu))
         # ── E_req (T3 규약 재계산 + 대조) ──
         model = T3.model_of(is_cvt, l_i)
         md = MJ.MjData(model)
@@ -197,6 +206,7 @@ def main():
             b2=[float(x) for x in b2], b1=[float(x) for x in b1],
             med_raw2=med2, med_raw1=med1,
             K=float(K), Kth30=float(Kth30), Kth33=float(Kth33),
+            Kv=float(Kv), bv2=[float(x) for x in bv2],
             E_req=float(E_req), rho=float(rho), bz0=float(bz0),
             bz_npz0=float(bz_npz0), h_real=h_real,
             ke_t3=float(ke_t3), t_cross=t_cross, cum=cum, chk=chk, **h3))
@@ -293,6 +303,27 @@ def main():
               f"무변속 이동% {['%s:%+.1f' % (k.split('_')[-1], v) for k, v in line.items()]}  "
               f"0429 잔차(보정후) 평균 {np.mean(res_after):+.2f} J")
 
+    # ── 보조: 속도-지수 과대판독 (점성 b·dq 누락 가설, H1의 속도판 변형) ──
+    print("\n--- 보조: 속도-지수 과대판독 b·∫dq²dt (Paper a_hat 점성항 부재) ---")
+    Kv_c = np.array([r_["Kv"] for r_ in cvt])
+    b_star = float(np.sum(Kv_c * res) / np.sum(Kv_c ** 2))
+    print(f"b* (LS, 0429 잔차 기준) = {b_star:.4f} Nm·s/rad")
+    visc = {"b_star": b_star}
+    for ds in CROSS_DS:
+        rs = [r_ for r_ in rows if r_["ds"] == ds]
+        rho0 = np.array([r_["rho"] for r_ in rs])
+        drho = np.array([-b_star * r_["Kv"] / r_["E_req"] for r_ in rs])
+        visc[ds] = float(100 * (drho / rho0).mean())
+        print(f"  {ds:22s} rho 이동 {visc[ds]:+.1f}%  (Kv평균 {np.mean([r_['Kv'] for r_ in rs]):.0f})")
+    print("\n--- 속도-bin 별 knee 일 점유 (|dq2| rad/s bin — >30 은 0429 전용 대역) ---")
+    dqshare = {}
+    for ds in sorted(set(r_["ds"] for r_ in rows)):
+        rs = [r_ for r_ in rows if r_["ds"] == ds]
+        tot = sum(r_["W2"] for r_ in rs)
+        sh = [sum(r_["bv2"][k] for r_ in rs) / tot for k in range(3)]
+        dqshare[ds] = sh
+        print(f"  {ds:20s} " + "  ".join(f"{BLBL[k]}:{sh[k]:6.1%}" for k in range(3)))
+
     # ════ T3: H3 감사 ════
     print("\n=== T3. H3 감사 (0429 규약 독립 재확인) ===")
     print(f"{'sub':18s} {'bz0':>6s} {'bz_npz':>6s} {'d[cm]':>5s} {'h_npz':>5s} {'h_txt':>5s} "
@@ -372,6 +403,7 @@ def main():
         bin_shares=binsum,
         s_star=s_star, s_per_trial={r_["sub"]: r_["s_i"] for r_ in cvt},
         cross_check=xchk, threshold_variant=thr,
+        viscous_variant=visc, dq_bin_shares=dqshare,
         ke_correction=dict(ke_t3_mean=float(np.mean([r_["ke_t3"] for r_ in cvt])),
                            ke_cvt_mean=float(np.mean([r_["ke_cvt"] for r_ in cvt])),
                            ke_par_knee_mean=float(np.mean([r_["ke_par_knee"] for r_ in cvt]))),
