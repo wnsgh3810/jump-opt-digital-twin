@@ -22,6 +22,12 @@ def main():
     import p22_eval as E
     ck = safe.read_json(HERE / "p22_nsga_ckpt.json")
     X = np.array(ck["X"], float)
+    import os
+    if os.environ.get("P22_FREEZE", "0") == "1":
+        # 동결 세그먼트의 개체군: 동결 유전자는 진화 중 무의미 — 평가 전 동일 오버라이드
+        import p22_nsga as NS
+        X = np.array([NS._apply_freeze(x) for x in X])
+        print("[P22_FREEZE] gate check applies the same freeze override", flush=True)
     F = np.array(ck["F"], float)
     G = np.array(ck["G"], float)
     feas = (G <= 0).all(axis=1)
