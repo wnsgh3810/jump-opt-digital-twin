@@ -121,6 +121,9 @@ def eval_raw(v):
         return None
 
 
+DQ_CAP = 1.00 if os.environ.get("P22_DQ_STRICT", "0") == "1" else 1.02
+
+
 def normalize(r, anch, suba, hs0):
     """원시 성분 → (목적 2, 제약 6). 실패(None)는 대형 페널티."""
     if r is None:
@@ -128,7 +131,7 @@ def normalize(r, anch, suba, hs0):
     f1 = r["CL"] / anch["CL"]
     f2 = float(np.mean([r["OLDQ"].get(ds, 9.9) / suba[ds] for ds in SUBSET]))
     jw6 = 0.5 * r["J6J"] / anch["J6J"] + 0.5 * r["J6C"] / anch["J6C"]
-    g = [r["DQ"] / anch["DQ"] - 1.02,
+    g = [r["DQ"] / anch["DQ"] - DQ_CAP,
          r["JW2"] / anch["JW2"] - 1.05,
          jw6 - 1.05,
          r["S2S"] / anch["S2S"] - 1.05,
