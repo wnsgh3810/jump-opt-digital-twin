@@ -126,8 +126,11 @@ def cl_run20(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas,
 
 
 def eval_stack20(x32, ref, sp, A, tm, c=C_QS, v0=V0, Cd=C_DYN,
-                 use_alpha=True, q_off_0429=(0.0548, -0.0524)):
-    """p19_run.eval_stack 세대 교체본 — cl_run20 + 지표 v3(gap_v3) 그대로."""
+                 use_alpha=True, q_off_0429=(0.0548, -0.0524), preload=0.0):
+    """p19_run.eval_stack 세대 교체본 — cl_run20 + 지표 v3(gap_v3) 그대로.
+
+    preload: 무변속 세션 전용 무릎 프리로드 (P22 심판이 후보 pre30을 전달;
+    기본 0.0 = 기존 p20 심판 거동 불변 — p20/p20b/p20c/p21 REPRODUCED 보존)."""
     if R.TRIALS is None:
         R.TRIALS = R.all_trials()
     model_f, _ = P.build_flip(x32, ref, sp)
@@ -146,7 +149,7 @@ def eval_stack20(x32, ref, sp, A, tm, c=C_QS, v0=V0, Cd=C_DYN,
             o1 = dd.get(k1, 0.0) if k1 else 0.0
             o2 = dd.get(k2, 0.0) if k2 else 0.0
             L = cl_run20(model_f, False, l_i, d, gains, dqon, ffk, A, tm, alphas,
-                         c_qs=c, v0=v0, Cd=Cd, o1=o1, o2=o2)
+                         c_qs=c, v0=v0, Cd=Cd, o1=o1, o2=o2, preload=preload)
         if L is None:
             rows.append(dict(ds=ds, sub=sub, g=2.5, q2=9.9))
             continue

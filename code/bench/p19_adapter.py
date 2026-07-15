@@ -130,3 +130,24 @@ def eval_p20(cand):
     return dict(summary={k: list(map(float, val)) for k, val in s.items()},
                 fit=float(s["FIT"][0]), heldout=float(s["jump_0324"][0]),
                 rows=rows)
+
+
+def eval_p22(cand):
+    """P22 심판 — p20 러너 + pre30(preload=x[2], 무변속 전용) 적용.
+
+    p21_cma.cl_metrics(P22 NSGA 내부 심판)와 동일 규약 + held-out 포함.
+    p20 심판과의 차이는 preload 하나 — p20 세대 후보(pre30≈0)에는 수치 동일."""
+    ensure_init()
+    import p19_judge as P
+    import p19_run as R
+    import p20_run as P20
+    x32, v, sp, qoff = _p19_args(cand)
+    p20 = cand.get("p20", {})
+    rows = P20.eval_stack20(x32, v[1], sp, P.A_PAPER, v[15],
+                            c=p20.get("c_qs", 0.25), v0=p20.get("v0", 6.0),
+                            Cd=p20.get("C_dyn", 0.0), q_off_0429=qoff,
+                            preload=float(v[2]))
+    s = R.summarize(rows)
+    return dict(summary={k: list(map(float, val)) for k, val in s.items()},
+                fit=float(s["FIT"][0]), heldout=float(s["jump_0324"][0]),
+                rows=rows)
