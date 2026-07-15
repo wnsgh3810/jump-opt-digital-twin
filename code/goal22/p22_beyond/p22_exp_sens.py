@@ -42,7 +42,7 @@ def norm(res, anch):
 
 def main():
     E.ensure_init()
-    anch = json.load(open(HERE / "p22_eval_anchors.json"))
+    anch = safe.read_json(HERE / "p22_eval_anchors.json")
     x19 = RB.x19_vec()
     out = {}
     print("variant | CL DQ JW2 J6 S2S O6 OLDQ H | J_v5  (전부 P19=1.0 정규화)", flush=True)
