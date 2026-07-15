@@ -35,9 +35,31 @@ def main():
             keep.append(i)
     print(f"dedup 후 {len(keep)}개 → full evaluate + 엄격 게이트", flush=True)
     anch = safe.read_json(HERE / "p22_eval_anchors.json")
+
+    def ho_replay(v):
+        """진단 전용 (게이트 아님): held-out 0324 통짜 재생 dq2 RMSE. P19 아카이브 = 2.926."""
+        import p21_cma as C
+        import numpy as np
+        P, R = C._W["P"], C._W["R"]
+        v = np.asarray(v, float)
+        x32, sp = C.x32_of(v)
+        model_f, _ = P.build_flip(x32, v[1], sp)
+        dd = dict(zip(P.J._P["FR"].NAMES, np.asarray(x32)[:26]))
+        es = []
+        for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in R.TRIALS:
+            if ds != "jump_0324":
+                continue
+            k1, k2 = P.J.OFFK.get(ds, (None, None))
+            o1 = dd.get(k1, 0.0) if k1 else 0.0
+            o2 = dd.get(k2, 0.0) if k2 else 0.0
+            res = E.a_full(model_f, False, l_i, d, v, o1, o2, pre30=float(v[19]))
+            es.append(res[0] if res else 9.9)
+        return float(np.mean(es)) if es else float("nan")
+
     rows = []
     for n, i in enumerate(keep):
         r = E.evaluate(X[i])
+        r["HO_OLDQ"] = ho_replay(X[i])
         oldq = float(np.mean([r["OLDQ"][s] / anch["OLDQ"][s] for s in E.OLDQ_SESS]))
         jw6 = 0.5 * r["J6J"] / anch["J6J"] + 0.5 * r["J6C"] / anch["J6C"]
         gate = dict(CL=r["CL"] / anch["CL"], DQ=r["DQ"] / anch["DQ"],
@@ -49,10 +71,12 @@ def main():
         r.pop("OLDQ_trials", None)
         rows.append(dict(i=int(i), x=[float(a) for a in X[i]], F=[float(a) for a in F[i]],
                          gate={k: float(v) for k, v in gate.items()},
-                         PASS=bool(hard and soft), J_v5=r["J_v5"], full=r))
+                         PASS=bool(hard and soft), J_v5=r["J_v5"],
+                         HO_OLDQ=r["HO_OLDQ"], full=r))
         print(f"[{n}] i={i} " +
               " ".join(f"{k}={gate[k]:.3f}" for k in gate) +
-              f" J_v5={r['J_v5']:.4f} {'★PASS' if hard and soft else 'fail'}", flush=True)
+              f" J_v5={r['J_v5']:.4f} HOre={r['HO_OLDQ']:.2f}(P19 2.93) "
+              f"{'★PASS' if hard and soft else 'fail'}", flush=True)
     safe.atomic_json_write(HERE / "p22_gate_check.json", dict(gen=ck["gen"], rows=rows))
     npass = sum(r["PASS"] for r in rows)
     print(f"\n게이트 통과 {npass}/{len(rows)} — p22_gate_check.json 저장", flush=True)

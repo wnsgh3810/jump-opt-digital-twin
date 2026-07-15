@@ -83,11 +83,31 @@ def _sub_oldq_h(v):
 
 FULL_OLDQ = True   # 세그먼트 2+: 부분집합 근사 폐기 (3-trial이 0429 세션 내 일반화를 못 잡음)
 
+# 세그먼트 4+: 널스페이스 나사 동결 (Phase 1 판정 + p22a held-out 재생 악화 신호).
+# env P22_FREEZE=1 이면 {M_c, I_th, I_ca, dz_ca}를 P19 값에 고정 — 동결로도 게이트
+# 통과점이 남는지의 반증 시험. (지표 v5 불변 — 탐색 공간 조작일 뿐)
+import os
+FREEZE_ON = os.environ.get("P22_FREEZE", "0") == "1"
+FREEZE_IDX = [9, 10, 11, 13]          # NAMES: M_c, I_th, I_ca, dz_ca
+X19_REF = None                         # 지연 초기화 (워커 각자)
+
+
+def _apply_freeze(v):
+    global X19_REF
+    v = np.asarray(v, float).copy()
+    if FREEZE_ON:
+        if X19_REF is None:
+            import p22_rebase as RB
+            X19_REF = RB.x19_vec()
+        v[FREEZE_IDX] = X19_REF[FREEZE_IDX]
+    return v
+
 
 def eval_raw(v):
     """워커: 원시 성분 (정규화는 Prob이). 실패 시 None."""
     import p22_eval as E
     E.ensure_init()
+    v = _apply_freeze(v)
     try:
         jcl, jdq, jw02, (j6j, j6c), s2s, o6 = C.eval_parts(np.asarray(v, float))
         if FULL_OLDQ:
