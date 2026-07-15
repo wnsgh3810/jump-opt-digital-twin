@@ -81,13 +81,19 @@ def _sub_oldq_h(v):
     return sess, (float(np.mean(herr)) if herr else 1.0)
 
 
+FULL_OLDQ = True   # 세그먼트 2+: 부분집합 근사 폐기 (3-trial이 0429 세션 내 일반화를 못 잡음)
+
+
 def eval_raw(v):
     """워커: 원시 성분 (정규화는 Prob이). 실패 시 None."""
     import p22_eval as E
     E.ensure_init()
     try:
         jcl, jdq, jw02, (j6j, j6c), s2s, o6 = C.eval_parts(np.asarray(v, float))
-        sess, hsub = _sub_oldq_h(v)
+        if FULL_OLDQ:
+            sess, hsub, _ = E.oldq_h(v)
+        else:
+            sess, hsub = _sub_oldq_h(v)
         return dict(CL=float(jcl), DQ=float(jdq), JW2=float(jw02), J6J=float(j6j),
                     J6C=float(j6c), S2S=float(s2s), O6=float(o6),
                     OLDQ=sess, H=float(hsub))
@@ -170,16 +176,21 @@ def main():
 
     pool = mp.Pool(nproc, initializer=_winit)
 
-    # 부분집합 앵커: P19를 부분집합 러너로 1회 평가
     import p22_rebase as RB
-    x19 = RB.x19_vec()
-    a0 = pool.apply(eval_raw, (x19,))
-    assert a0 is not None, "anchor eval failed"
-    suba = {ds: a0["OLDQ"][ds] for ds in SUBSET}
-    hs0 = a0["H"]
-    print(f"sub-anchor OLdq: {suba}  H_sub: {hs0:.4f}", flush=True)
-    safe.atomic_json_write(HERE / "p22_nsga_subanchor.json",
-                           dict(OLDQ=suba, H=hs0, full=a0))
+    if FULL_OLDQ:
+        # 전체 25-trial 재생 = 정본 앵커 그대로
+        suba = dict(anch["OLDQ"])
+        hs0 = float(anch["H"])
+        print(f"full-anchor OLdq: {suba}  H: {hs0:.4f}", flush=True)
+    else:
+        x19 = RB.x19_vec()
+        a0 = pool.apply(eval_raw, (x19,))
+        assert a0 is not None, "anchor eval failed"
+        suba = {ds: a0["OLDQ"][ds] for ds in SUBSET}
+        hs0 = a0["H"]
+        print(f"sub-anchor OLdq: {suba}  H_sub: {hs0:.4f}", flush=True)
+        safe.atomic_json_write(HERE / "p22_nsga_subanchor.json",
+                               dict(OLDQ=suba, H=hs0, full=a0))
 
     runner = StarmapParallelization(pool.starmap)
     prob = Prob(anch=anch, suba=suba, hs0=hs0, runner=runner)
