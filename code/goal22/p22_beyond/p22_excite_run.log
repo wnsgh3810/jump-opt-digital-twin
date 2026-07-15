@@ -1,0 +1,36 @@
+====================================================================================================
+P22 여기 궤적 설계 — 공중(레일 현수) 30분 ID 세션
+====================================================================================================
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[init] MuJoCo/트라이얼 초기화 2s
+  [real(점프 스탠스)] Y 구축: rows=3714, cols=55, 4s
+[범위] 방문 범위 (모델좌표, rad):
+  jump_position_0421       hip[-1.266,-0.226]  crank[+0.744,+2.662]
+  jump_0424                hip[-1.353,-0.267]  crank[+0.444,+2.542]
+  jump_0602                hip[-1.315,-0.295]  crank[+0.536,+2.604]
+  jump_0429(정보만)           hip[-1.393,-0.340]  crank[+0.107,+3.091]
+  → envelope(마진 5%씩): hip[-1.297,-0.283] crank[+0.554,+2.551]
+  [basis(비행 l_i=30)] Y 구축: rows=3000, cols=55, 2s
+[기저] 비행(l_i=30) 구조 rank = 13 (Phase1: 자유 l_i=30 단독 13, 비행소거 +1)
+  마찰4+armature 열 pivot 포함: PASS
+   F01: thigh.Iyy +1·coupler.Iyy +0.0625·calf.m
+   F02: calf.Iyy +1·crank.Iyy
+   F03: calf.hz -0.12·coupler.hz
+   F04: fv_hip
+   F05: calf.hx +0.12·coupler.hx
+   F06: thigh.hz +1·coupler.hz +0.03069·base.m +0.03069·thigh.m -0.2193·calf.m +0.03069·crank.m
+   F07: fv_knee
+   F08: arm_knee
+   F09: thigh.hx +1·coupler.hx
+   F10: crank.hz +0.12·coupler.hz +0.002134·base.m +0.002134·thigh.m +0.002134·calf.m +0.03213·coupler.m
+   F11: fc_knee
+   F12: crank.hx -0.12·coupler.hx
+   F13: fc_hip
+  [surrogate 격자] Y 구축: rows=20172, cols=55, 11s
+[서로게이트] 격자 41×41, 충돌 셀 0/1681
+  [surro-검증] Y 구축: rows=80, cols=55, 0s
+[검증] 서로게이트 vs 정확 회귀자 (스케일드, 임의 40상태): 상대오차 6.21e-05 → PASS
+[opt] 목적 1회 평가 7.1 ms (기준 σ_min=0.000)
+[opt] DE(seed=22): σ_min=0.067  (89s, nfev=82432)
+[opt] DE(seed=202): σ_min=0.062  (90s, nfev=82432)
