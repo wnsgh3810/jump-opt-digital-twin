@@ -526,9 +526,10 @@ def main():
         f"(nf={ksp_nf:.2f}; 모델 stiff={R['stiff']:.3f}) — 경로 축퇴로 중력레버와 혼선, 참고만")
 
     # ── [6] 경로 준정적 프로파일 (헤드라인) ──
-    say(f"\n[6] s2s 경로 준정적 토크 프로파일 [Nm, 모델 프레임] — bin {NBIN}개")
+    say(f"\n[6] s2s 경로 준정적 토크 프로파일 [Nm, 모델 프레임] — bin {NBIN}개 (s 등간격)")
     say("    3원 대조: ①저속표본 중앙값(무가정 측정) ②적합복원(dq=0 외삽) ③모델")
-    qbin = np.quantile(s_path, np.linspace(0, 1, NBIN + 1))
+    lo, hi = np.percentile(s_path, [0.5, 99.5])
+    qbin = np.linspace(lo, hi, NBIN + 1)
     binid = np.clip(np.searchsorted(qbin, s_path, side="right") - 1, 0, NBIN - 1)
     poses = []
     bin_meta = []
@@ -596,10 +597,56 @@ def main():
     say("    경로 레버 dτ/ds [Nm/rad] (+절편 [Nm], s=PC1 좌표):")
     for nm, (sl, ic) in lever.items():
         say(f"      {nm:16s} 기울기 {sl:+8.3f}  절편 {ic:+7.3f}")
+    med1a = np.array([b["med1"] for b in bin_meta])
+    med2a = np.array([b["med2"] for b in bin_meta])
+    m1f, m2f = np.isfinite(med1a), np.isfinite(med2a)
+    say(f"    경로 RMSE(적합 기준선) [Nm]: 저속중앙 vs 적합 hip "
+        f"{rms((med1a - pf[0::2])[m1f]):.3f} (n={int(m1f.sum())}) / crank "
+        f"{rms((med2a - pf[1::2])[m2f]):.3f} (n={int(m2f.sum())})")
+    say(f"    경로 RMSE(모델): P19 hip(−qs) {rms((med1a - pm_no[0::2])[m1f]):.3f} · "
+        f"crank(−qs) {rms((med2a - pm_no[1::2])[m2f]):.3f} · "
+        f"crank(+qs) {rms((med2a - pm_qs[1::2])[m2f]):.3f}")
     if R.get("rm_b"):
-        say(f"    p22b 경로 RMSE 참고: hip(관성·마찰만) "
-            f"{rms(np.array([b['med1'] for b in bin_meta]) - pmb_no[0::2]):.3f} / "
-            f"crank(+qs) {rms(np.array([b['med2'] for b in bin_meta]) - pmb_qs[1::2]):.3f}")
+        say(f"    경로 RMSE(p22b): hip(−qs) {rms((med1a - pmb_no[0::2])[m1f]):.3f} · "
+            f"crank(−qs) {rms((med2a - pmb_no[1::2])[m2f]):.3f} · "
+            f"crank(+qs) {rms((med2a - pmb_qs[1::2])[m2f]):.3f}")
+
+    # ── [6b] 관절별 현상학 대조 (기계 독립 — fv/fc 트레이드오프 판별) ──
+    say("\n[6b] 관절별 현상학 LS (트리 기계 독립 검증): "
+        "m ≈ c0 + c1·s + c2·s² + fv·dq + fc·tanh(dq/0.02) + I·ddq")
+    pheno = {}
+    for j, nm, dqm, mm_ in ((0, "hip", None, None), (1, "crank", None, None)):
+        rmask = keep & (joint == j)
+        srow = np.repeat(s_path, 2)[rmask]
+        dqrow = (st["dq1"] if j == 0 else st["dqc"])
+        ddrow = (st["dd1"] if j == 0 else st["ddc"])
+        dqr = np.repeat(dqrow, 2)[rmask]
+        ddr = np.repeat(ddrow, 2)[rmask]
+        yr_ = y[rmask]
+        Xj = np.column_stack([np.ones_like(srow), srow, srow ** 2, dqr,
+                              np.tanh(dqr / 0.02), ddr])
+        cj, *_ = np.linalg.lstsq(Xj, yr_, rcond=None)
+        rj = yr_ - Xj @ cj
+        s2_ = np.sum(rj ** 2) / max(len(yr_) - 6, 1)
+        covj = s2_ * np.linalg.inv(Xj.T @ Xj)
+        sej = np.sqrt(np.diag(covj))
+        cvfc = float(covj[3, 4] / np.sqrt(covj[3, 3] * covj[4, 4]))
+        cdq = float(np.corrcoef(dqr, np.tanh(dqr / 0.02))[0, 1])
+        pheno[nm] = dict(c=[float(x) for x in cj], se=[float(x) for x in sej],
+                         resid=rms(rj), corr_fv_fc=cvfc, corr_dq_sgn=cdq)
+        say(f"    {nm:5s}: c0={cj[0]:+.3f}±{sej[0]:.3f}  c1={cj[1]:+.3f}±{sej[1]:.3f}  "
+            f"fv={cj[3]:+.3f}±{sej[3]:.3f}  fc={cj[4]:+.3f}±{sej[4]:.3f}  "
+            f"I={cj[5]:+.4f}±{sej[5]:.4f}  resid {rms(rj):.3f}")
+        say(f"           corr(dq,sgn)={cdq:+.2f}, corr(f̂v,f̂c)={cvfc:+.2f} → "
+            f"마찰합 τ_fric(0.5)={0.5 * cj[3] + cj[4]:+.3f} / "
+            f"τ_fric(1.5)={1.5 * cj[3] + cj[4]:+.3f} Nm (조건 좋은 조합)")
+    mfr = dict(hip=(R["dd26"]["fv_hip"], R["dd26"]["fc_hip"]),
+               crank=(R["dd26"]["fv_knee"] + R["dd6"]["d_cpin"] + R["dd6"]["d_kneep"],
+                      R["dd26"]["fc_knee"]))
+    for nm in ("hip", "crank"):
+        fv_, fc_ = mfr[nm]
+        say(f"    (모델 P19 {nm}: τ_fric(0.5)={0.5 * fv_ + fc_:+.3f} / "
+            f"τ_fric(1.5)={1.5 * fv_ + fc_:+.3f} Nm)")
 
     # ── [7] 마찰 (물리 단위 + nf) ──
     say("\n[7] 마찰·armature (회귀공간 값 — 빌더 매핑: fv=dof damping, fc=frictionloss"
@@ -716,6 +763,7 @@ def main():
         fold_err=float(fold_err),
         res_table={k: list(v) for k, v in res_table.items()},
         path_profile=path_tab, path_lever={k: list(v) for k, v in lever.items()},
+        pheno=pheno,
         cv={k: list(v) for k, v in cv.items()},
         cv_kvis=int(f_tr["kvis"]),
         sens=sens,
