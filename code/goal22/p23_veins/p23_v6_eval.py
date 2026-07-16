@@ -95,12 +95,14 @@ def j_v6_of(comp, a5, aff):
 
 
 def evaluate(v23, verbose=False, keep_rows=True):
-    """v23(22축) → 전 v6 성분 + J_v5/J_v6 + norm + gates. 동결 3축은 내부에서 강제."""
+    """v23(22축; SPRING_GATED면 23축 — 22축 입력은 T_SPR init 자동 패드) → 전 v6 성분 +
+    J_v5/J_v6 + norm + gates. 동결 3축은 내부에서 강제."""
     ensure_init()
     a5, aff, ffhip = anchors()
     t0 = time.time()
-    v = RU.apply_freeze(np.asarray(v23, float))
+    v = RU.apply_freeze(RU.pad23(np.asarray(v23, float)))
     law = RU.law_of(v)
+    spr = RU.spr_of(v)          # Phase 4b 게이트 스프링 (모드 OFF면 None)
     c_cvt = float(v[20]); d_dq = float(v[21])
     x32, sp = C.x32_of(v[:20])
     ref = float(v[1]); tm = float(v[14])
@@ -108,22 +110,25 @@ def evaluate(v23, verbose=False, keep_rows=True):
 
     model_f = RU.build_flip23(x32, ref, sp, d_dq)
     say("  CL/DQ (폐루프 20+10 trial) ...")
-    jcl, jdq = RU.cl_metrics23(v, x32, sp, law, c_cvt, d_dq, model_f=model_f)
+    jcl, jdq = RU.cl_metrics23(v, x32, sp, law, c_cvt, d_dq, spr=spr,
+                               model_f=model_f)
     say("  windows (JW02/JW06/S2S) ...")
-    jw02 = RU.windows23(model_f, x32, JDS, law)
-    j6j = RU.windows23(model_f, x32, JDS, law, W_override=0.6)
-    j6c = RU.win429_06_23(x32, sp, ref, law, c_cvt, d_dq)
-    s2s = RU.windows23(model_f, x32, ("s2s_gnd_0319",), law)
+    jw02 = RU.windows23(model_f, x32, JDS, law, spr=spr)
+    j6j = RU.windows23(model_f, x32, JDS, law, W_override=0.6, spr=spr)
+    j6c = RU.win429_06_23(x32, sp, ref, law, c_cvt, d_dq, spr=spr)
+    s2s = RU.windows23(model_f, x32, ("s2s_gnd_0319",), law, spr=spr)
     say("  0604 창 ...")
-    o6 = RU.score_0604_23(x32, sp, ref, law, c_cvt, d_dq)
+    o6 = RU.score_0604_23(x32, sp, ref, law, c_cvt, d_dq, spr=spr)
     say("  OLDQ/H (통짜 재생 25 trial) ...")
-    oldq, H, oldq_rows = RU.oldq_h23(v, x32, sp, law, c_cvt, d_dq, model_f=model_f)
+    oldq, H, oldq_rows = RU.oldq_h23(v, x32, sp, law, c_cvt, d_dq, spr=spr,
+                                     model_f=model_f)
     say("  CL_FF / OLDQ_FF (신규 FF 4 trial ×2) ...")
     clff, clff_rows = RU.cl_ff23(x32, sp, ref, tm, law, d_dq, ff_hip=ffhip,
-                                 model_f=model_f)
-    oldqff, oldqff_rows = RU.oldq_ff23(x32, sp, ref, law, d_dq, model_f=model_f)
+                                 spr=spr, model_f=model_f)
+    oldqff, oldqff_rows = RU.oldq_ff23(x32, sp, ref, law, d_dq, spr=spr,
+                                       model_f=model_f)
     say("  AIR (용접 14사이클) ...")
-    air, air_rows = RU.air23(x32, sp, ref, law, d_dq)
+    air, air_rows = RU.air23(x32, sp, ref, law, d_dq, spr=spr)
 
     comp = dict(CL=float(jcl), DQ=float(jdq), JW2=float(jw02), J6J=float(j6j),
                 J6C=float(j6c), S2S=float(s2s), O6=float(o6), OLDQ=oldq,

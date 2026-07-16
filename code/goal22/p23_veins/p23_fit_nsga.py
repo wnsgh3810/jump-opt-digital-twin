@@ -16,6 +16,9 @@
 
 시동: p23_fit_nsga.bat 더블클릭 (철칙 3). 인자: ngen nproc [pop].
 env: P23_DQ_RELAX=1 → DQ̂ 캡 1.02 (기본은 과제 명세 strict 1.00).
+     P23_SPRING_GATED=1 → Phase 4b 부하 연동 스프링 (벡터 23축, slot 22=T_SPR;
+       p23_v6_runners docstring 참조). 구 22축 ckpt 재개 시 T_SPR=init(2.0) 자동 패드.
+     P23_NSGA_TAG=<suffix> → ckpt/front 파일명 접미사 (스모크가 본 ckpt를 안 덮게).
 """
 import json
 import os
@@ -37,8 +40,9 @@ import p23_v6_runners as RU
 from pymoo.core.problem import ElementwiseProblem
 
 POP = 36                                  # argv[3]으로 재정의 가능 (스모크용)
-CKPT = HERE / "p23_fit_nsga_ckpt.json"
-OUT = HERE / "p23_fit_nsga_front.json"
+TAG = os.environ.get("P23_NSGA_TAG", "")  # 스모크/변형 실행이 본 ckpt를 안 덮게
+CKPT = HERE / f"p23_fit_nsga_ckpt{TAG}.json"
+OUT = HERE / f"p23_fit_nsga_front{TAG}.json"
 OLDQ_SESS = ("jump_0424", "jump_0602", "jump_0429")   # == p22_eval.OLDQ_SESS
 FF_SESS = ("jump_0422", "jump_0319tau")               # == p23_runners.FF_SESS
 DQ_CAP = 1.02 if os.environ.get("P23_DQ_RELAX", "0") == "1" else 1.00
@@ -85,7 +89,7 @@ class Prob(ElementwiseProblem):
     """모듈 레벨 (Windows spawn 피클링). 워커 전송 시 runner 제외 (p22_nsga 패턴)."""
 
     def __init__(self, a5=None, aff=None, runner=None):
-        super().__init__(n_var=22, n_obj=2, n_constr=6,
+        super().__init__(n_var=RU.NV23, n_obj=2, n_constr=6,
                          xl=RU.LO23, xu=RU.HI23, elementwise_runner=runner)
         self._a5 = a5
         self._aff = aff
@@ -140,7 +144,7 @@ def main():
     rng = np.random.default_rng(97)
     while len(X0) < max(POP // 2, len(sd)):
         b = sd[rng.integers(len(sd))]
-        X0.append(np.clip(b * (1 + 0.05 * rng.standard_normal(22)),
+        X0.append(np.clip(b * (1 + 0.05 * rng.standard_normal(RU.NV23)),
                           RU.LO23 + 1e-9, RU.HI23 - 1e-9))
     X0 = X0[:POP]
     if len(X0) < POP:
@@ -150,8 +154,18 @@ def main():
     if CKPT.exists():
         try:
             ck = safe.read_json(CKPT)
-            X0 = np.array(ck["X"], float)
+            Xc = np.array(ck["X"], float)
+            if RU.SPRING_GATED and Xc.shape[1] == RU.NV23 - 1:
+                # 구 22축 ckpt → T_SPR init 패드 (Phase 4b 재개 경로)
+                Xc = np.hstack([Xc, np.full((len(Xc), 1), RU.T_SPR0)])
+                print(f"ckpt 22-slot -> T_SPR={RU.T_SPR0} 패드 (SPRING_GATED 재개)",
+                      flush=True)
+            assert Xc.shape[1] == RU.NV23, \
+                f"ckpt 폭 {Xc.shape[1]} != NV23 {RU.NV23} (모드/파일 불일치)"
+            X0 = Xc
             print(f"resume from ckpt gen={ck['gen']} ({len(X0)} inds)", flush=True)
+        except AssertionError:
+            raise
         except Exception:
             pass
     pop0 = Population.new("X", X0)
