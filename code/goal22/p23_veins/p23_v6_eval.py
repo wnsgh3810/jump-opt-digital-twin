@@ -96,7 +96,9 @@ def j_v6_of(comp, a5, aff):
 
 def evaluate(v23, verbose=False, keep_rows=True):
     """v23(22축; SPRING_GATED면 23축 — 22축 입력은 T_SPR init 자동 패드) → 전 v6 성분 +
-    J_v5/J_v6 + norm + gates. 동결 3축은 내부에서 강제."""
+    J_v5/J_v6 + norm + gates. 동결 3축은 내부에서 강제.
+    P24_REFIT=1이면 26축 (23축 입력은 힙 3슬롯 자동 패드) — 힙 슬롯(23~25)은
+    apply_freeze가 RU.HIP에 주입하므로 이 함수는 추가 배선 불필요."""
     ensure_init()
     a5, aff, ffhip = anchors()
     t0 = time.time()

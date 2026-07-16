@@ -1,0 +1,22 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init done [2s] mode=golden NV23=26
+
+──── 연속성 시드 (p23a + B1=K1=0) — p23a 재현 기대 ────
+  stiff=+0.7486  ref=+2.1280  I_th=+0.5523  dz_th=+0.0612  LAW_A=-0.0946  LAW_V0=+7.2722  LAW_B=+0.6304  C_CVT=+0.3955  K_RISE=+0.1881  T_SPR=+2.9587  B1_HIP=+0.0000  V0_HIP=+3.3244  K1_HIP=+0.0000
+  J_v6=0.8976  J_v5=0.9415  gates_ALL=P  
+  norm: CL=0.963  DQ=0.994  JW2=1.019  JW6=0.900  S2S=0.373  O6=0.787  OLDQ=1.120  H=0.959  CLFF=0.995  OLDQFF=0.926  AIR=0.350
+  OLDQ replay vs P19 앵커: 0424=1.884/1.893✓  0602=1.327/1.255✗  0429=4.333/3.311✗
+  FF replay: 0422=2.359  0319tau=1.039  AIR=0.765  H_raw=0.0456
+  vs p23a: dJ_v6=+0.00e+00  norm 최대 상대편차=0.00e+00  GOLDEN OK
+
+──── as-is 패드 시드 (HIP ON, b1=-0.2608, K1=0) — 점수 변화 관측 ────
+  stiff=+0.7486  ref=+2.1280  I_th=+0.5523  dz_th=+0.0612  LAW_A=-0.0946  LAW_V0=+7.2722  LAW_B=+0.6304  C_CVT=+0.3955  K_RISE=+0.1881  T_SPR=+2.9587  B1_HIP=-0.2608  V0_HIP=+3.3244  K1_HIP=+0.0000
+  J_v6=1.1040  J_v5=0.9740  gates_ALL=F  OLDQFF=F
+  norm: CL=0.953  DQ=0.997  JW2=1.041  JW6=0.992  S2S=0.609  O6=0.862  OLDQ=1.418  H=0.556  CLFF=0.992  OLDQFF=2.458  AIR=0.351
+  OLDQ replay vs P19 앵커: 0424=2.746/1.893✗  0602=1.464/1.255✗  0429=5.416/3.311✗
+  FF replay: 0422=2.831  0319tau=3.916  AIR=0.766  H_raw=0.0264
+
+HO(연속성): CL=0.3479 (참조 0.3479)  재생=2.4869 (참조 2.9167)  reps=[3.979915454599489, 2.157042708118358, 1.3238124806224667]
+
+saved p24_refit_check.json [0.3m]

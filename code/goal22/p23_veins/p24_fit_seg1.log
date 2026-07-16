@@ -1,0 +1,116 @@
+v6 anchors OK (ff=knee+hip) | DQ cap 1.0 | pop 36 ngen 80 nproc 9
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+gen   1 feas  4/36 bestF1 0.9625 bestF2 0.9270 P19지배 1 [0.0m]
+gen   2 feas  8/36 bestF1 0.9607 bestF2 0.9270 P19지배 1 [0.4m]
+gen   3 feas 20/36 bestF1 0.9606 bestF2 0.9270 P19지배 1 [0.8m]
+gen   4 feas 36/36 bestF1 0.9606 bestF2 0.9270 P19지배 1 [1.1m]
+gen   5 feas 36/36 bestF1 0.9558 bestF2 0.9066 P19지배 5 [1.5m]
+gen   6 feas 36/36 bestF1 0.9542 bestF2 0.9054 P19지배 11 [1.9m]
+gen   7 feas 36/36 bestF1 0.9542 bestF2 0.8978 P19지배 17 [2.3m]
+gen   8 feas 36/36 bestF1 0.9534 bestF2 0.8978 P19지배 14 [2.6m]
+C:\Users\junho\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pymoo\operators\crossover\sbx.py:54: RuntimeWarning: invalid value encountered in power
+  betaq[mask] = np.power((rand * alpha), (1.0 / (eta + 1.0)))[mask]
+gen   9 feas 36/36 bestF1 0.9519 bestF2 0.8940 P19지배 18 [3.0m]
+gen  10 feas 36/36 bestF1 0.9514 bestF2 0.8928 P19지배 18 [3.4m]
+gen  11 feas 36/36 bestF1 0.9514 bestF2 0.8924 P19지배 19 [3.8m]
+gen  12 feas 36/36 bestF1 0.9501 bestF2 0.8924 P19지배 19 [4.2m]
+gen  13 feas 36/36 bestF1 0.9501 bestF2 0.8924 P19지배 21 [4.5m]
+gen  14 feas 36/36 bestF1 0.9501 bestF2 0.8924 P19지배 19 [4.9m]
+gen  15 feas 36/36 bestF1 0.9500 bestF2 0.8924 P19지배 23 [5.3m]
+gen  16 feas 36/36 bestF1 0.9500 bestF2 0.8924 P19지배 21 [5.7m]
+gen  17 feas 36/36 bestF1 0.9482 bestF2 0.8903 P19지배 23 [6.0m]
+gen  18 feas 36/36 bestF1 0.9482 bestF2 0.8903 P19지배 24 [6.4m]
+gen  19 feas 36/36 bestF1 0.9482 bestF2 0.8903 P19지배 25 [6.8m]
+gen  20 feas 36/36 bestF1 0.9482 bestF2 0.8903 P19지배 22 [7.2m]
+gen  21 feas 36/36 bestF1 0.9482 bestF2 0.8903 P19지배 22 [7.6m]
+gen  22 feas 36/36 bestF1 0.9480 bestF2 0.8903 P19지배 21 [7.9m]
+gen  23 feas 36/36 bestF1 0.9473 bestF2 0.8901 P19지배 18 [8.3m]
+gen  24 feas 36/36 bestF1 0.9461 bestF2 0.8901 P19지배 19 [8.7m]
+gen  25 feas 36/36 bestF1 0.9461 bestF2 0.8900 P19지배 18 [9.1m]
+gen  26 feas 36/36 bestF1 0.9461 bestF2 0.8900 P19지배 14 [9.4m]
+gen  27 feas 36/36 bestF1 0.9461 bestF2 0.8900 P19지배 18 [9.8m]
+gen  28 feas 36/36 bestF1 0.9461 bestF2 0.8886 P19지배 21 [10.2m]
+gen  29 feas 36/36 bestF1 0.9461 bestF2 0.8886 P19지배 18 [10.6m]
+gen  30 feas 36/36 bestF1 0.9455 bestF2 0.8886 P19지배 21 [11.0m]
+gen  31 feas 36/36 bestF1 0.9455 bestF2 0.8836 P19지배 22 [11.3m]
+gen  32 feas 36/36 bestF1 0.9455 bestF2 0.8836 P19지배 22 [11.7m]
+gen  33 feas 36/36 bestF1 0.9455 bestF2 0.8836 P19지배 22 [12.1m]
+gen  34 feas 36/36 bestF1 0.9455 bestF2 0.8836 P19지배 24 [12.5m]
+gen  35 feas 36/36 bestF1 0.9455 bestF2 0.8836 P19지배 22 [12.8m]
+gen  36 feas 36/36 bestF1 0.9455 bestF2 0.8827 P19지배 22 [13.2m]
+gen  37 feas 36/36 bestF1 0.9455 bestF2 0.8823 P19지배 20 [13.6m]
+gen  38 feas 36/36 bestF1 0.9451 bestF2 0.8823 P19지배 24 [14.0m]
+gen  39 feas 36/36 bestF1 0.9447 bestF2 0.8823 P19지배 21 [14.4m]
+gen  40 feas 36/36 bestF1 0.9443 bestF2 0.8823 P19지배 22 [14.7m]
+gen  41 feas 36/36 bestF1 0.9442 bestF2 0.8823 P19지배 22 [15.1m]
+gen  42 feas 36/36 bestF1 0.9442 bestF2 0.8823 P19지배 21 [15.5m]
+gen  43 feas 36/36 bestF1 0.9432 bestF2 0.8818 P19지배 21 [15.9m]
+gen  44 feas 36/36 bestF1 0.9432 bestF2 0.8669 P19지배 21 [16.3m]
+gen  45 feas 36/36 bestF1 0.9432 bestF2 0.8669 P19지배 19 [16.6m]
+gen  46 feas 36/36 bestF1 0.9432 bestF2 0.8669 P19지배 20 [17.0m]
+gen  47 feas 36/36 bestF1 0.9432 bestF2 0.8669 P19지배 20 [17.4m]
+gen  48 feas 36/36 bestF1 0.9431 bestF2 0.8656 P19지배 20 [17.8m]
+gen  49 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 19 [18.2m]
+gen  50 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 25 [18.5m]
+gen  51 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 19 [18.9m]
+gen  52 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 21 [19.3m]
+gen  53 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 23 [19.7m]
+gen  54 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 19 [20.1m]
+gen  55 feas 36/36 bestF1 0.9420 bestF2 0.8656 P19지배 20 [20.4m]
+gen  56 feas 36/36 bestF1 0.9414 bestF2 0.8641 P19지배 19 [20.8m]
+gen  57 feas 36/36 bestF1 0.9405 bestF2 0.8641 P19지배 16 [21.2m]
+gen  58 feas 36/36 bestF1 0.9405 bestF2 0.8641 P19지배 14 [21.6m]
+gen  59 feas 36/36 bestF1 0.9405 bestF2 0.8616 P19지배 18 [21.9m]
+gen  60 feas 36/36 bestF1 0.9401 bestF2 0.8616 P19지배 19 [22.3m]
+gen  61 feas 36/36 bestF1 0.9401 bestF2 0.8616 P19지배 20 [22.7m]
+gen  62 feas 36/36 bestF1 0.9401 bestF2 0.8605 P19지배 22 [23.1m]
+gen  63 feas 36/36 bestF1 0.9401 bestF2 0.8605 P19지배 19 [23.5m]
+gen  64 feas 36/36 bestF1 0.9399 bestF2 0.8605 P19지배 22 [23.8m]
+gen  65 feas 36/36 bestF1 0.9399 bestF2 0.8605 P19지배 22 [24.2m]
+gen  66 feas 36/36 bestF1 0.9387 bestF2 0.8605 P19지배 23 [24.6m]
+gen  67 feas 36/36 bestF1 0.9387 bestF2 0.8569 P19지배 25 [25.0m]
+gen  68 feas 36/36 bestF1 0.9387 bestF2 0.8566 P19지배 28 [25.4m]
+gen  69 feas 36/36 bestF1 0.9387 bestF2 0.8566 P19지배 26 [25.7m]
+gen  70 feas 36/36 bestF1 0.9387 bestF2 0.8566 P19지배 26 [26.1m]
+gen  71 feas 36/36 bestF1 0.9384 bestF2 0.8566 P19지배 23 [26.5m]
+gen  72 feas 36/36 bestF1 0.9380 bestF2 0.8548 P19지배 26 [26.9m]
+gen  73 feas 36/36 bestF1 0.9379 bestF2 0.8548 P19지배 21 [27.3m]
+gen  74 feas 36/36 bestF1 0.9379 bestF2 0.8548 P19지배 22 [27.6m]
+gen  75 feas 36/36 bestF1 0.9379 bestF2 0.8545 P19지배 25 [28.0m]
+gen  76 feas 36/36 bestF1 0.9379 bestF2 0.8545 P19지배 25 [28.4m]
+gen  77 feas 36/36 bestF1 0.9379 bestF2 0.8545 P19지배 25 [28.8m]
+gen  78 feas 36/36 bestF1 0.9379 bestF2 0.8545 P19지배 24 [29.2m]
+gen  79 feas 36/36 bestF1 0.9377 bestF2 0.8545 P19지배 23 [29.5m]
+gen  80 feas 36/36 bestF1 0.9377 bestF2 0.8539 P19지배 25 [29.9m]
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+front[1] F=[0.93768975 1.22747194] J_v6=0.9796 J_v5=0.9660 gates_ALL=False
+front[2] F=[0.93808115 1.22105565] J_v6=0.9754 J_v5=0.9667 gates_ALL=False
+front[3] F=[0.93864808 1.184089  ] J_v6=0.9614 J_v5=0.9529 gates_ALL=False
+front[4] F=[0.93869378 1.13001978] J_v6=0.9424 J_v5=0.9552 gates_ALL=False
+front[5] F=[0.93889989 1.12226247] J_v6=0.9412 J_v5=0.9424 gates_ALL=False
+front[6] F=[0.93922187 1.08698926] J_v6=0.9270 J_v5=0.9450 gates_ALL=False
+front[7] F=[0.93973154 1.06453994] J_v6=0.9237 J_v5=0.9546 gates_ALL=False
+front[8] F=[0.94025549 1.05808889] J_v6=0.9196 J_v5=0.9543 gates_ALL=False
+front[9] F=[0.94029593 1.05195133] J_v6=0.9182 J_v5=0.9555 gates_ALL=False
+front[10] F=[0.94079288 1.0209533 ] J_v6=0.9087 J_v5=0.9557 gates_ALL=False
+front[11] F=[0.94092529 1.00485874] J_v6=0.9051 J_v5=0.9556 gates_ALL=False
+front[12] F=[0.94296282 0.99851267] J_v6=0.9016 J_v5=0.9375 gates_ALL=False
+DONE [31.0m] -> p23_fit_nsga_front_p24.json

@@ -22,6 +22,10 @@ env: P23_DQ_RELAX=1 → DQ̂ 캡 1.02 (기본은 과제 명세 strict 1.00).
        [0.0, 0.30] init 0.216; dof_damping 델타 경로 비활성). 구 ckpt 재개 시
        slot 21이 새 bounds 밖이면 클립.
      P23_NSGA_TAG=<suffix> → ckpt/front 파일명 접미사 (스모크가 본 ckpt를 안 덮게).
+     P24_REFIT=1 → P24 재적합 (벡터 26축: +B1_HIP/V0_HIP/K1_HIP; 케이지 I_th 0.35↓·
+       C_CVT 1.0↑; 힙 층 벡터 지배 — p23_v6_runners P24 블록 참조). 시드 = MARATHON
+       P24 설계 7종 (seeds_p24): p23a 패드/연속성 쌍 + recon 최선셀×K1 + C_CVT 변형 +
+       콤보. 구 ckpt(22/23축)와 벡터 의미가 다름 — 반드시 새 TAG로 fresh 시작.
 """
 import json
 import os
@@ -110,8 +114,42 @@ class Prob(ElementwiseProblem):
 
 
 def seeds():
-    """P19+law, p22b+law (법칙 3축 = 측정 init, C_CVT=D_DQ=0)."""
+    """P19+law, p22b+law (법칙 3축 = 측정 init, C_CVT=D_DQ=0). P24_REFIT: 설계 시드 7종."""
+    if RU.P24_REFIT:
+        return seeds_p24()
     return [RU.v23_p19_law(), RU.v23_p22b_law()]
+
+
+def seeds_p24():
+    """MARATHON P24 설계 시드 (a~e) — 전부 p23a(23축) 기반 26축.
+    (a) p23a as-is 패드 (B1=-0.2608, V0=3.3244, K1=0 — HIP 층 ON이라 점수 변화 있음)
+    (b) p23a + B1=K1=0 = 힙 층 실효 0 → 진짜 연속성 시드 (p23a 수치 재현;
+        B1=0은 케이지 [-0.378,-0.144] 밖 — 초기 개체는 그대로 평가되고 자손은
+        연산자가 케이지로 회수하는 의도된 배치)
+    (c) recon 최선셀 (I_th 0.40, dz_th -0.015, b₁ lo=-0.3386) × K1 {0.1, 0.2}
+    (d) 카드 2 C_CVT {0.6, 0.8} 변형 (힙 실효 0 — 스캔 재현점: c0.6 = J_v6 0.8755)
+    (e) light+hip+cvt 콤보 (I_th 0.40, dz_th -0.015, b₁ -0.26, K1 0.15, C_CVT 0.6)"""
+    cand = safe.read_json(HERE / "fourbar_p23a_candidate.json")
+    base = RU.pad23(np.asarray(cand["x"], float))
+    iI, iZ = RU.NAMES23.index("I_th"), RU.NAMES23.index("dz_th")
+    iC = RU.NAMES23.index("C_CVT")
+    iB, iK1 = RU.NAMES23.index("B1_HIP"), RU.NAMES23.index("K1_HIP")
+    b1_lo = -0.2608 - 0.0778                       # 측정 CI 하단 (recon 'lo' 셀)
+    off = base.copy()
+    off[iB] = 0.0; off[iK1] = 0.0
+    S = [base, off]
+    for k1 in (0.1, 0.2):                          # (c)
+        s = base.copy()
+        s[iI], s[iZ], s[iB], s[iK1] = 0.40, -0.015, b1_lo, k1
+        S.append(s)
+    for cc in (0.6, 0.8):                          # (d)
+        s = off.copy()
+        s[iC] = cc
+        S.append(s)
+    s = base.copy()                                # (e)
+    s[iI], s[iZ], s[iB], s[iK1], s[iC] = 0.40, -0.015, -0.26, 0.15, 0.6
+    S.append(s)
+    return S
 
 
 def main():

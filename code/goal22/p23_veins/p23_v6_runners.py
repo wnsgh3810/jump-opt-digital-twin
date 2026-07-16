@@ -78,6 +78,10 @@
   창 평가: P12.eval_windows는 extra 훅이 qvel[2]만 받아 스프링(상태 q_knee + h_load(t)
   의존)을 못 실음 + 모델 속성도 아님(D_DQ와 다름) → eval_windows_g 동형 미러링.
 
+═══ P24: REFIT 모드 (env P24_REFIT=1, 기본 OFF 바이트 동일) — 아래 P24_REFIT 블록 주석 참조 ═══
+  벡터 26축 (23 + B1_HIP/V0_HIP/K1_HIP) + 케이지 교정 (I_th 하한 0.35, C_CVT 상한 1.0) +
+  HIP_LAW 강제 ON (힙 층 파라미터는 apply_freeze가 벡터→HIP dict 주입, 전 진입점 균일).
+
 이 모듈은 파일을 쓰지 않는다. 기존 파일 불변 — p20_run/p21_cma/p22_eval/p23_runners는
 import만 (골든 규약 함수를 문자 그대로 미러링, 변경점은 ★주석으로 표시).
 """
@@ -131,6 +135,33 @@ if SPRING_GATED:
     NAMES23 = NAMES23 + ["T_SPR"]
     LO23 = np.append(LO23, T_SPR_LO)
     HI23 = np.append(HI23, T_SPR_HI)
+
+# ── P24: REFIT 모드 (opt-in) — 벡터 26축 확장 + 케이지 교정 (MARATHON P24 설계 확정) ──
+#   env P24_REFIT=1 로만 켜짐 (import 시점, 기본 OFF = 바이트 동일 거동). ON이면:
+#   ① 벡터 23→26축: slot 23 B1_HIP [-0.378, -0.144] init -0.2608 (측정 95% CI×1.5 HARD —
+#      p24_hip_fit.json wire K2f b₁=-0.2608±0.0778), slot 24 V0_HIP [1.2, 6.5] init 3.3244,
+#      slot 25 K1_HIP [0.0, 0.30] init 0.0 — 힙 게이트-너머 상승항 (무릎 K_RISE 구조 미러:
+#      rise₁ = K1_HIP·dq₁·(1−g(|dq₁|; V0_HIP)); 카드 1 'H-수선' 가설 = 게이트 위에서
+#      힙 지지 소멸 직후 높이 붕괴 → 상승항이 인계).
+#   ② HIP_LAW 강제 ON — 힙 층 파라미터는 env/dict 대신 벡터 슬롯이 지배
+#      (apply_freeze가 평가 전 HIP dict에 주입 → evaluate/eval_p23 등 전 진입점 균일).
+#   ③ 케이지 교정 (근거 문서화 — MARATHON P24 프리플라이트 두 카드):
+#      · I_th 하한 0.55→0.35: Phase 1 공중 레버 측정 −0.0595 vs P19 모델 −0.196 (3.3×
+#        과대) + recon 격자 I_th 0.40 셀이 지상 재생 개선 실증 (0424 1.69/0602 1.27).
+#      · C_CVT 상한 0.4→1.0: 카드 2 — 0429 재생 4.33→2.63@c0.8 (P19 3.31 돌파), 무변속
+#        세계 비트 불변. 정직 노트: 에너지 감사상 c=0.4가 원장 잔차의 110%를 이미 소산 —
+#        c>0.6의 추가분은 비소산 결손의 대리 (레버 프로브 무소산 수렴과 합동).
+#      · dz_th 불변 [-0.12, 0.12] (측정 방향 이미 수용됨).
+P24_REFIT = os.environ.get("P24_REFIT", "0") == "1"
+B1_HIP0, V0_HIP0, K1_HIP0 = -0.2608, 3.3244, 0.0
+if P24_REFIT:
+    assert SPRING_GATED and RISE_GATED, \
+        "P24_REFIT은 p23a 구조(4b 스프링 + 4c 상승항) 위에서만 정의됨 — env 순서 확인"
+    NAMES23 = NAMES23 + ["B1_HIP", "V0_HIP", "K1_HIP"]
+    LO23 = np.append(LO23, [-0.378, 1.2, 0.0])
+    HI23 = np.append(HI23, [-0.144, 6.5, 0.30])
+    LO23[10] = 0.35          # I_th 케이지 (공중 레버 측정 근거 — 위 ③)
+    HI23[20] = 1.0           # C_CVT 케이지 (카드 2 — 0429 캡 해방)
 NV23 = len(NAMES23)
 
 # ── P24: HIP_LAW 모드 (opt-in) — 힙 부하-지지층 (P24 preflight 카드 1) ──
@@ -143,12 +174,14 @@ NV23 = len(NAMES23)
 #   env 오버라이드 가능 + 모듈 딕셔너리 HIP (in-process 그리드는 RU.HIP.update()).
 #   기본값 = p24_hip_fit.json wire (light-thigh 측정 적합 b₁=-0.2608±0.0778,
 #   v0₁=3.324±2.108, cap=15.66=적합 |τ̂₂| 창평균 최대 — 외삽 클램프).
-HIP_LAW = os.environ.get("P24_HIP_LAW", "0") == "1"
+#   P24_REFIT=1이면 강제 ON (힙 3슬롯이 벡터에 있으므로 층도 항상 활성 — apply_freeze 주입).
+HIP_LAW = P24_REFIT or os.environ.get("P24_HIP_LAW", "0") == "1"
 HIP = dict(a1=float(os.environ.get("P24_HIP_A1", "0.0")),
            b1=float(os.environ.get("P24_HIP_B1", "-0.2608")),
            v01=float(os.environ.get("P24_HIP_V01", "3.3244")),
            cap=float(os.environ.get("P24_HIP_CAP", "15.66")),
-           src=os.environ.get("P24_HIP_SRC", "knee"))
+           src=os.environ.get("P24_HIP_SRC", "knee"),
+           k1=float(os.environ.get("P24_HIP_K1", "0.0")))
 
 # 측정 법칙 init (p23_law_fit.json hold_gate.gate — 전 자릿수 그대로)
 LAW_A0 = -1.2212310538664326
@@ -174,15 +207,22 @@ def x19_20():
 
 
 def apply_freeze(v):
-    """동결 3축을 P19 값으로 강제 (탐색기가 무슨 값을 내든 평가 전 덮어씀)."""
+    """동결 3축을 P19 값으로 강제 (탐색기가 무슨 값을 내든 평가 전 덮어씀).
+    ★ P24_REFIT: 힙 슬롯(23~25)을 HIP dict에 주입 — evaluate/eval_p23 등 모든 평가
+    진입점이 apply_freeze를 지나므로 힙 층이 항상 벡터와 동기화됨 (프로세스-로컬,
+    ElementwiseProblem 워커는 개체 1개씩 순차 평가라 경합 없음)."""
     v = np.asarray(v, float).copy()
     v[FREEZE_IDX] = x19_20()[FREEZE_IDX]
+    if P24_REFIT and v.size == NV23:
+        HIP.update(b1=float(v[23]), v01=float(v[24]), k1=float(v[25]))
     return v
 
 
 def _ext23():
-    """확장 슬롯 init: [C_CVT, D_DQ|K_RISE] (+ [T_SPR0], gated 모드)."""
-    return [0.0, K_RISE0 if RISE_GATED else 0.0] + ([T_SPR0] if SPRING_GATED else [])
+    """확장 슬롯 init: [C_CVT, D_DQ|K_RISE] (+ [T_SPR0], gated 모드) (+ 힙 3슬롯, P24)."""
+    return ([0.0, K_RISE0 if RISE_GATED else 0.0]
+            + ([T_SPR0] if SPRING_GATED else [])
+            + ([B1_HIP0, V0_HIP0, K1_HIP0] if P24_REFIT else []))
 
 
 def v23_p19_law():
@@ -205,10 +245,14 @@ def law_of(v):
 
 
 def pad23(v):
-    """구 22축 벡터 → 현재 모드 길이 (gated면 T_SPR=init 패드) — 구 ckpt/진단 벡터 호환."""
+    """구 22축 벡터 → 현재 모드 길이 (gated면 T_SPR=init 패드) — 구 ckpt/진단 벡터 호환.
+    ★ P24_REFIT: 23축(p23a) 벡터는 힙 3슬롯 (B1 fit, V0 fit, K1=0)으로 패드 —
+    'p23a as-is + HIP 층 ON' 의미 (점수 변화 있음; 진짜 연속성은 B1=K1=0 시드)."""
     v = np.asarray(v, float)
     if SPRING_GATED and v.size == 22:
         v = np.append(v, T_SPR0)
+    if P24_REFIT and v.size == NV23 - 3:
+        v = np.concatenate([v, [B1_HIP0, V0_HIP0, K1_HIP0]])
     assert v.size == NV23, f"v23 길이 {v.size} (기대 {NV23}, SPRING_GATED={SPRING_GATED})"
     return v
 
@@ -287,19 +331,29 @@ def supp_vec(traw2, dq2, law):
 
 def hip_supp_scalar(s1, s2, v1):
     """P24 CL 온라인 힙 지지 — supp_scalar 미러. 부하 대리 x = |s2|(knee, 기본)|·|s1|(hip),
-    적합 범위 밖 클램프 (min(x, cap)). HIP_LAW=1 호출 전제."""
+    적합 범위 밖 클램프 (min(x, cap)). HIP_LAW=1 호출 전제.
+    ★ P24 상승항: + K1_HIP·dq₁·(1−g(|dq₁|; V0_HIP)) — 무릎 rise_term 구조 미러
+    (k1=0이면 수치 불변 — 카드 1 opt-in 층과 바이트 동일)."""
     x = min(abs(s2) if HIP["src"] == "knee" else abs(s1), HIP["cap"])
-    return HIP["a1"] + HIP["b1"] * x * float(gate_v(v1, HIP["v01"]))
+    out = HIP["a1"] + HIP["b1"] * x * float(gate_v(v1, HIP["v01"]))
+    if HIP["k1"]:
+        out += float(rise_term(v1, HIP["k1"], HIP["v01"]))
+    return out
 
 
 def hip_supp_vec(traw1, dq1, traw2, dq2):
-    """P24 재생/창용 힙 지지 벡터 — supp_vec 미러 (측정 트레이스, ahat = Paper 변환)."""
+    """P24 재생/창용 힙 지지 벡터 — supp_vec 미러 (측정 트레이스, ahat = Paper 변환).
+    ★ P24 상승항: 측정 dq₁ 트레이스로 폴드 (무릎 rise 트레이스 폴드와 동일 규약;
+    settle=벡터[0], 기록 끝 이후=a1 → rise 자동 0 — 기존 e1 배선 그대로)."""
     P = C._W["P"]
     if HIP["src"] == "knee":
         x = np.abs(P.J.ahat(P.A_PAPER, traw2, dq2))
     else:
         x = np.abs(P.J.ahat(P.A_PAPER, traw1, dq1))
-    return HIP["a1"] + HIP["b1"] * np.minimum(x, HIP["cap"]) * gate_v(dq1, HIP["v01"])
+    out = HIP["a1"] + HIP["b1"] * np.minimum(x, HIP["cap"]) * gate_v(dq1, HIP["v01"])
+    if HIP["k1"]:
+        out = out + rise_term(dq1, HIP["k1"], HIP["v01"])
+    return out
 
 
 def rise_of(d_dq):
