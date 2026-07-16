@@ -952,3 +952,268 @@ def air23(x32, sp, ref, law, d_dq, spr=None):
         rows.append(dict(cyc=i + 1, rq=rq, rdq=rdq,
                          score=rq + RN.AIR_W_DQ * rdq, crash=False))
     return float(np.mean([r["score"] for r in rows])), rows
+
+
+# ══════════════════ 5) 로그 반환 변형 (p23a_all_results 전용 — 신규 함수, 기존 함수 불변) ══════════════════
+# 규약: 본체는 원 함수를 문자 그대로 복제. 유일한 추가 = 로깅(GRF 접촉력 합/상태 기록).
+# mj_contactForce는 읽기 전용(상태 불변) → 궤적은 원 함수와 비트 동일 (교차검증이 이를 확인).
+def _grf_z(model, md):
+    """접촉력 z합 — p19_all_results.run_any GRF 로깅 규약 동형 (관측 전용)."""
+    mj = C._W["mj"]
+    gz = 0.0
+    for ci in range(md.ncon):
+        cf = np.zeros(6)
+        mj.mj_contactForce(model, md, ci, cf)
+        gz += (md.contact[ci].frame.reshape(3, 3).T @ cf[:3])[2]
+    return gz
+
+
+def cl_run23_log(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, law,
+                 c_cvt=0.0, o1=0.0, o2=0.0, ff_hip=False, spr=None, k_rise=0.0):
+    """cl_run23의 로그 확장 미러 — 변경점: Lg에 'grf' 추가 (스텝 후 관측만).
+    반환 로그 dict (t/q1/q2/dq1/dq2/sh1/sh2/bz/grf) — 그 외 본체 문자 동일."""
+    P = C._W["P"]
+    mj = P.J._P["mj"]; S = P.J._P["S"]
+    law_a, law_b, law_v0 = law
+    t = d["t"]
+    ap1, ad1, ap2, ad2 = alphas
+    kp1, kd1, kp2, kd2 = gains
+    kp1 *= ap1; kd1 *= ad1; kp2 *= ap2; kd2 *= ad2
+    qd1 = d["qd1"] + o1; qd2 = d["qd2"] + o2
+    dqd1 = d["dqd1"] if dqdes_on else np.zeros_like(t)
+    dqd2 = d["dqd2"] if dqdes_on else np.zeros_like(t)
+    md = mj.MjData(model)
+    dof_knee = safe.dofadr(model, "knee", mj)
+    iq_k = safe.qadr(model, "knee", mj)
+    sprm = spr_resolve(model, spr)
+    qg = rg = None
+    if is_cvt and c_cvt > 0:
+        qg, rg = rtab(l_i)
+    sq1, sq2 = -qd1[0] - np.pi / 2, -qd2[0]
+    if is_cvt:
+        from cvt_core import qpos_from_crank
+        md.qpos[:] = qpos_from_crank(1.0, sq1, sq2, l_i)[0]
+    else:
+        md.qpos[:] = [1.0, sq1, sq2, -sq2, sq2]
+    mj.mj_forward(model, md)
+    fg = mj.mj_name2id(model, mj.mjtObj.mjOBJ_GEOM, "foot")
+    md.qpos[0] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+    md.qvel[:] = 0
+    mj.mj_forward(model, md)
+    dt = model.opt.timestep
+    N = int((P.J.T_SETTLE + t[-1] + P.J.T_AFTER) / dt)
+    tl = np.arange(N) * dt - P.J.T_SETTLE
+    Lg = {k: np.zeros(N) for k in ["q1", "q2", "dq1", "dq2", "sh1", "sh2", "bz",
+                                   "grf"]}                      # ★ 로그 확장 (grf)
+    c1f = c2f = 0.0
+    al = dt / max(tm, dt)
+    for k in range(N):
+        tc = tl[k]
+        q1c = -md.qpos[1] - np.pi / 2; q2c = -md.qpos[2]
+        v1c = -md.qvel[1]; v2c = -md.qvel[2]
+        if tc < 0:
+            c1 = S.SETTLE_KP * (qd1[0] - q1c) - S.SETTLE_KD * v1c
+            c2 = S.SETTLE_KP * (qd2[0] - q2c) - S.SETTLE_KD * v2c
+            c1f, c2f = c1, c2
+        else:
+            tm_ = min(tc, t[-1])
+            c1 = kp1 * (np.interp(tm_, t, qd1) - q1c) + kd1 * (np.interp(tm_, t, dqd1) - v1c)
+            c2 = kp2 * (np.interp(tm_, t, qd2) - q2c) + kd2 * (np.interp(tm_, t, dqd2) - v2c)
+            if ffk:
+                c2 += np.interp(tm_, t, d["tdes2"])
+            if ff_hip:
+                c1 += np.interp(tm_, t, d["tdes1"])
+            c1f += al * (c1 - c1f); c2f += al * (c2 - c2f)
+            c1, c2 = c1f, c2f
+        c1 = float(np.clip(c1, -R19.CLIP, R19.CLIP)); c2 = float(np.clip(c2, -R19.CLIP, R19.CLIP))
+        s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
+        s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        supp = supp_scalar(s2, v2c, law_a, law_b, law_v0)
+        if k_rise:
+            supp += float(rise_term(v2c, k_rise, law_v0))
+        tql = 0.0
+        if qg is not None:
+            rr = float(np.interp(md.qpos[2], qg, rg))
+            amp = max(1.0 / max(abs(rr), 0.2) - 1.0, 0.0)
+            vk = float(md.qvel[dof_knee])
+            tql = -c_cvt * abs(s2) * amp * float(np.tanh(vk / 1.0))
+        if sprm is not None:
+            tql += spr_tau(float(md.qpos[iq_k]), abs(s2), sprm)
+        md.ctrl[:] = [-s1, -(s2 + supp)]
+        md.qfrc_applied[dof_knee] = tql
+        try:
+            mj.mj_step(model, md)
+        except Exception:
+            return None
+        if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
+            return None
+        Lg["q1"][k] = -md.qpos[1] - np.pi / 2; Lg["q2"][k] = -md.qpos[2]
+        Lg["dq1"][k] = -md.qvel[1]; Lg["dq2"][k] = -md.qvel[2]
+        Lg["sh1"][k] = s1; Lg["sh2"][k] = s2; Lg["bz"][k] = md.qpos[0]
+        Lg["grf"][k] = _grf_z(model, md)                        # ★ 로그 확장 (grf)
+    Lg["t"] = tl
+    return Lg
+
+
+def a_full23_log(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None,
+                 k_rise=0.0):
+    """a_full23의 로그 확장 미러 — 반환을 (rmse, h_sim)에서 로그 dict로 교체.
+    로그 키 = run_any mode-A 관례 (t/q1/q2/dq1/dq2/sh1/sh2/bz/grf).
+    sh 로깅 관례: sh1=s1, sh2=s2 (분기값 그대로 — 기록 창의 s2는 supp(측정 법칙) 포함;
+    settle 구간은 settle ahat, 기록 끝 이후는 0). rmse/h_sim은 호출측이 로그에서 재계산
+    (a_full23과 동일 공식) — 궤적 자체는 a_full23과 비트 동일."""
+    P = C._W["P"]; mj = C._W["mj"]; S = P.J._P["S"]
+    t = d["t"]
+    law_a = law[0]
+    hl = hl_vec(d["traw2"], d["dq2"], spr) if spr is not None else None
+    if spr is not None:
+        ks, kref, _ = spr_resolve(model, spr)
+    sv = supp_vec(d["traw2"], d["dq2"], law)
+    if k_rise:
+        sv = sv + rise_term(d["dq2"], k_rise, law[2])
+    t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+    t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
+    supp0 = float(sv[0])
+    q1_0 = float(d["q1"][0]) + o1
+    q2_0 = float(d["q2"][0]) + o2
+    md = mj.MjData(model)
+    sq1, sq2 = -q1_0 - np.pi / 2, -q2_0
+    if is_cvt:
+        from cvt_core import qpos_from_crank
+        md.qpos[:] = qpos_from_crank(1.0, sq1, sq2, l_i)[0]
+    else:
+        md.qpos[:] = [1.0, sq1, sq2, -sq2, sq2]
+    mj.mj_forward(model, md)
+    fg = mj.mj_name2id(model, mj.mjtObj.mjOBJ_GEOM, "foot")
+    md.qpos[0] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+    md.qvel[:] = 0
+    mj.mj_forward(model, md)
+    dof_knee = safe.dofadr(model, "knee", mj)
+    iq_k = safe.qadr(model, "knee", mj)
+    qg = rg = None
+    if is_cvt and c_cvt > 0:
+        qg, rg = rtab(l_i)
+    dt = model.opt.timestep
+    N = int((P.J.T_SETTLE + t[-1] + P.J.T_AFTER) / dt)
+    tl = np.arange(N) * dt - P.J.T_SETTLE
+    Lg = {k: np.zeros(N) for k in ["q1", "q2", "dq1", "dq2", "sh1", "sh2", "bz",
+                                   "grf"]}                      # ★ 로그 확장
+    for k in range(N):
+        tc = tl[k]
+        if tc < 0:
+            q1c = -md.qpos[1] - np.pi / 2; q2c = -md.qpos[2]
+            v1c = -md.qvel[1]; v2c = -md.qvel[2]
+            c1 = S.SETTLE_KP * (q1_0 - q1c) - S.SETTLE_KD * v1c
+            c2 = S.SETTLE_KP * (q2_0 - q2c) - S.SETTLE_KD * v2c
+            s1 = float(P.J.ahat(P.A_PAPER, np.array([float(c1)]), np.array([v1c]))[0])
+            s2 = float(P.J.ahat(P.A_PAPER, np.array([float(c2)]), np.array([v2c]))[0])
+            extra = supp0
+        else:
+            tm_ = min(tc, t[-1])
+            s1 = float(np.interp(tm_, t, t1)); s2 = float(np.interp(tm_, t, t2))
+            extra = 0.0
+            if tc > t[-1]:
+                s1 = s2 = 0.0
+                extra = law_a
+        md.ctrl[:] = [-s1, -(s2 + extra)]
+        tql = 0.0
+        if qg is not None:
+            rr = float(np.interp(md.qpos[2], qg, rg))
+            amp = max(1.0 / max(abs(rr), 0.2) - 1.0, 0.0)
+            vk = float(md.qvel[dof_knee])
+            tql = -c_cvt * abs(s2) * amp * float(np.tanh(vk / 1.0))
+        if hl is not None:
+            if tc < 0:
+                h = float(hl[0])
+            elif tc > t[-1]:
+                h = 0.0
+            else:
+                h = float(np.interp(tc, t, hl))
+            tql += ks * (kref - float(md.qpos[iq_k])) * h
+        md.qfrc_applied[dof_knee] = tql
+        try:
+            mj.mj_step(model, md)
+        except Exception:
+            return None
+        if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
+            return None
+        Lg["q1"][k] = -md.qpos[1] - np.pi / 2; Lg["q2"][k] = -md.qpos[2]
+        Lg["dq1"][k] = -md.qvel[1]; Lg["dq2"][k] = -md.qvel[2]
+        Lg["sh1"][k] = s1; Lg["sh2"][k] = s2; Lg["bz"][k] = md.qpos[0]
+        Lg["grf"][k] = _grf_z(model, md)                        # ★ 로그 확장 (grf)
+    Lg["t"] = tl
+    return Lg
+
+
+def air_cycle23_log(model, d, law, spr=None, k_rise=0.0):
+    """air_cycle23의 로그 확장 미러 — 반환을 (rq, rdq)에서 로그 dict로 교체.
+    용접 베이스(nq=4, base z=1m 고정, 무접촉) → bz=1.0 상수, grf=0 기록.
+    rq/rdq는 호출측이 재계산 (air_cycle23 공식과 동일) — 궤적 비트 동일."""
+    P = C._W["P"]; mj = C._W["mj"]; S = P.J._P["S"]
+    t = d["t"]
+    law_a = law[0]
+    hl = hl_vec(d["traw2"], d["dq2"], spr) if spr is not None else None
+    if spr is not None:
+        ks, kref, _ = spr_resolve(model, spr)
+    sv = supp_vec(d["traw2"], d["dq2"], law)
+    if k_rise:
+        sv = sv + rise_term(d["dq2"], k_rise, law[2])
+    t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+    t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
+    supp0 = float(sv[0])
+    q1_0 = float(d["q1"][0]); q2_0 = float(d["q2"][0])
+    md = mj.MjData(model)
+    iq_h = safe.qadr(model, "hip", mj); iq_c = safe.qadr(model, "knee_motor", mj)
+    iq_p = safe.qadr(model, "cpin", mj); iq_k = safe.qadr(model, "knee", mj)
+    id_h = safe.dofadr(model, "hip", mj); id_c = safe.dofadr(model, "knee_motor", mj)
+    id_k = safe.dofadr(model, "knee", mj)
+    sq1, sq2 = -q1_0 - np.pi / 2, -q2_0
+    md.qpos[:] = 0
+    md.qpos[iq_h] = sq1; md.qpos[iq_c] = sq2
+    md.qpos[iq_p] = -sq2; md.qpos[iq_k] = sq2
+    md.qvel[:] = 0
+    mj.mj_forward(model, md)
+    dt = model.opt.timestep
+    N = int((P.J.T_SETTLE + t[-1]) / dt) + 1
+    tl = np.arange(N) * dt - P.J.T_SETTLE
+    Lg = {k: np.zeros(N) for k in ["q1", "q2", "dq1", "dq2", "sh1", "sh2", "bz",
+                                   "grf"]}                      # ★ 로그 확장
+    for k in range(N):
+        tc = tl[k]
+        if tc < 0:
+            q1c = -md.qpos[iq_h] - np.pi / 2; q2c = -md.qpos[iq_c]
+            v1c = -md.qvel[id_h]; v2c = -md.qvel[id_c]
+            c1 = S.SETTLE_KP * (q1_0 - q1c) - S.SETTLE_KD * v1c
+            c2 = S.SETTLE_KP * (q2_0 - q2c) - S.SETTLE_KD * v2c
+            s1 = float(P.J.ahat(P.A_PAPER, np.array([float(c1)]), np.array([v1c]))[0])
+            s2 = float(P.J.ahat(P.A_PAPER, np.array([float(c2)]), np.array([v2c]))[0])
+            extra = supp0
+        else:
+            tm_ = min(tc, t[-1])
+            s1 = float(np.interp(tm_, t, t1)); s2 = float(np.interp(tm_, t, t2))
+            extra = 0.0
+            if tc > t[-1]:
+                s1 = s2 = 0.0
+                extra = law_a
+        md.ctrl[:] = [-s1, -(s2 + extra)]
+        if hl is not None:
+            if tc < 0:
+                h = float(hl[0])
+            elif tc > t[-1]:
+                h = 0.0
+            else:
+                h = float(np.interp(tc, t, hl))
+            md.qfrc_applied[id_k] = ks * (kref - float(md.qpos[iq_k])) * h
+        try:
+            mj.mj_step(model, md)
+        except Exception:
+            return None
+        if not np.isfinite(md.qpos).all() or np.abs(md.qpos).max() > 50:
+            return None
+        Lg["q1"][k] = -md.qpos[iq_h] - np.pi / 2; Lg["q2"][k] = -md.qpos[iq_c]
+        Lg["dq1"][k] = -md.qvel[id_h]; Lg["dq2"][k] = -md.qvel[id_c]
+        Lg["sh1"][k] = s1; Lg["sh2"][k] = s2
+        Lg["bz"][k] = 1.0                                       # 용접 베이스 (z=1m 고정)
+        Lg["grf"][k] = 0.0                                      # 무접촉 세션
+    Lg["t"] = tl
+    return Lg
