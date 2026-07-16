@@ -1,0 +1,80 @@
+=== p23_anchors — Phase 0c: 신규 v6 성분 앵커·바닥 (P19 vs p22b) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+winit+fix0421 done [2s]
+
+[1] 재구성 바닥 (측정 (q,dq)→명령모델 vs 측정 τ, gap_v3 동형)
+    session         knee-only   knee+hip
+    jump_0422          180.4%     156.5%
+    jump_0319tau        31.0%      20.7%
+    MEAN               105.7%      88.6%
+    ==> FF 주입 프로토콜 동결: knee+hip (세션평균 바닥 낮은 쪽)
+
+[2] 노이즈 바닥
+    dq2 noise jump_0422      = 0.161 rad/s (저속 샘플 n=10/9/3)
+    dq2 noise jump_0319tau   = 0.158 rad/s (저속 샘플 n=16)
+    AIR noise floor = 0.0204 (sig_q2 0.00015 rad + 0.1*sig_dq2 0.202 rad/s, 14 cycles)
+
+[3] weld 검증: nq=4 base_z0=1.000000 base_z1=1.000000 foot_min_z=0.475 -> PASS
+
+[4] P19 평가 (tm=0.31ms c_qs=0.000 v0=6.0 pre30=2.25)
+    CL_FF  jump_0422/P40_D0.7: g=33.7% q2=0.220
+    CL_FF  jump_0422/P70_D2: g=42.8% q2=0.265
+    CL_FF  jump_0422/P100_D3: g=49.0% q2=0.276
+    CL_FF  jump_0319tau/no_tr_tau: g=31.6% q2=0.078
+    OLDQ_FF jump_0422/P40_D0.7: dq2 RMSE=1.781 h_sim=0.691 h_real=0.740
+    OLDQ_FF jump_0422/P70_D2: dq2 RMSE=4.140 h_sim=0.642 h_real=0.715
+    OLDQ_FF jump_0422/P100_D3: dq2 RMSE=2.899 h_sim=0.668 h_real=0.715
+    OLDQ_FF jump_0319tau/no_tr_tau: dq2 RMSE=0.991 h_sim=0.720 h_real=nan
+    AIR = 2.1823 (pre30=0, 동결 정의; crash 0/14) | 진단 AIR(pre30 ON) = 12.9405 (폭주 반증용)
+      cyc01 rq=2.0771 rdq=1.340 score=2.2110
+      cyc02 rq=2.0087 rdq=1.797 score=2.1884
+      cyc03 rq=1.9238 rdq=2.034 score=2.1272
+      cyc04 rq=1.8523 rdq=2.265 score=2.0787
+      cyc05 rq=1.8203 rdq=2.577 score=2.0780
+      cyc06 rq=1.8090 rdq=2.900 score=2.0990
+      cyc07 rq=1.7922 rdq=3.250 score=2.1172
+      cyc08 rq=1.8617 rdq=3.485 score=2.2103
+      cyc09 rq=1.8902 rdq=3.764 score=2.2666
+      cyc10 rq=1.8499 rdq=4.048 score=2.2547
+      cyc11 rq=1.8046 rdq=4.393 score=2.2439
+      cyc12 rq=1.7545 rdq=4.712 score=2.2257
+      cyc13 rq=1.7072 rdq=5.096 score=2.2169
+      cyc14 rq=1.7059 rdq=5.281 score=2.2340
+    [P19] CL_FF 0422=41.8% 0319tau=31.6% | OLDQ_FF 0422=2.940 0319tau=0.991 | AIR=2.1823 [0.1m]
+
+[4] p22b 평가 (tm=0.94ms c_qs=0.064 v0=37.3 pre30=1.95)
+    CL_FF  jump_0422/P40_D0.7: g=32.5% q2=0.214
+    CL_FF  jump_0422/P70_D2: g=41.1% q2=0.261
+    CL_FF  jump_0422/P100_D3: g=47.6% q2=0.273
+    CL_FF  jump_0319tau/no_tr_tau: g=30.4% q2=0.075
+    OLDQ_FF jump_0422/P40_D0.7: dq2 RMSE=1.466 h_sim=0.714 h_real=0.740
+    OLDQ_FF jump_0422/P70_D2: dq2 RMSE=3.671 h_sim=0.667 h_real=0.715
+    OLDQ_FF jump_0422/P100_D3: dq2 RMSE=2.221 h_sim=0.693 h_real=0.715
+    OLDQ_FF jump_0319tau/no_tr_tau: dq2 RMSE=1.078 h_sim=0.751 h_real=nan
+    AIR = 2.1044 (pre30=0, 동결 정의; crash 0/14) | 진단 AIR(pre30 ON) = 6.5614 (폭주 반증용)
+      cyc01 rq=2.0048 rdq=1.164 score=2.1212
+      cyc02 rq=1.9241 rdq=1.548 score=2.0789
+      cyc03 rq=1.8677 rdq=1.844 score=2.0522
+      cyc04 rq=1.8230 rdq=2.159 score=2.0390
+      cyc05 rq=1.8019 rdq=2.472 score=2.0492
+      cyc06 rq=1.7838 rdq=2.798 score=2.0635
+      cyc07 rq=1.7612 rdq=3.125 score=2.0737
+      cyc08 rq=1.7508 rdq=3.475 score=2.0984
+      cyc09 rq=1.7309 rdq=3.784 score=2.1093
+      cyc10 rq=1.7089 rdq=4.060 score=2.1149
+      cyc11 rq=1.7453 rdq=4.188 score=2.1640
+      cyc12 rq=1.7407 rdq=4.380 score=2.1787
+      cyc13 rq=1.7032 rdq=4.627 score=2.1659
+      cyc14 rq=1.6573 rdq=4.949 score=2.1522
+    [p22b] CL_FF 0422=40.4% 0319tau=30.4% | OLDQ_FF 0422=2.453 0319tau=1.078 | AIR=2.1044 [0.2m]
+
+=== 앵커 표 (P19 = v6 정규화 기준) ===
+component                     P19       p22b  p22b/P19      floor
+CL_FF[jump_0422]           0.4182     0.4039     0.966     1.5646
+CL_FF[jump_0319tau]        0.3165     0.3035     0.959     0.2067
+OLDQ_FF[jump_0422]         2.9399     2.4526     0.834     0.1613
+OLDQ_FF[jump_0319tau]      0.9908     1.0782     1.088     0.1575
+AIR                        2.1823     2.1044     0.964     0.0204
+
+saved p23_anchors.json [0.2m]
