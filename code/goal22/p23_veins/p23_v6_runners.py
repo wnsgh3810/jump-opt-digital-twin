@@ -133,6 +133,23 @@ if SPRING_GATED:
     HI23 = np.append(HI23, T_SPR_HI)
 NV23 = len(NAMES23)
 
+# ── P24: HIP_LAW 모드 (opt-in) — 힙 부하-지지층 (P24 preflight 카드 1) ──
+#   supp₁ = HIP.a1 + HIP.b1·min(x, HIP.cap)·g(|dq₁|; HIP.v01)
+#     x = |τ̂₂| (HIP.src='knee', 기본 — 지상부하 대리; p24_hip_fit.json 'wire' K2f) 또는
+#         |τ̂₁| (HIP.src='hip', 과제 문언형 — 측정에선 공중/지상 비구별로 퇴화, 진단용).
+#   배선 = 무릎 supp와 동형·전 러너 균일: CL 온라인 (s1,s2,v1c) / 재생·창 = 측정 트레이스
+#   폴드 (SD 시프트 동일) / settle = sv1[0] / 기록 끝 이후 = a1 (기본 0 = 무부하 소멸).
+#   env P24_HIP_LAW=1 로만 켜짐 (import 시점, 기본 OFF = 바이트 동일 거동). 파라미터는
+#   env 오버라이드 가능 + 모듈 딕셔너리 HIP (in-process 그리드는 RU.HIP.update()).
+#   기본값 = p24_hip_fit.json wire (light-thigh 측정 적합 b₁=-0.2608±0.0778,
+#   v0₁=3.324±2.108, cap=15.66=적합 |τ̂₂| 창평균 최대 — 외삽 클램프).
+HIP_LAW = os.environ.get("P24_HIP_LAW", "0") == "1"
+HIP = dict(a1=float(os.environ.get("P24_HIP_A1", "0.0")),
+           b1=float(os.environ.get("P24_HIP_B1", "-0.2608")),
+           v01=float(os.environ.get("P24_HIP_V01", "3.3244")),
+           cap=float(os.environ.get("P24_HIP_CAP", "15.66")),
+           src=os.environ.get("P24_HIP_SRC", "knee"))
+
 # 측정 법칙 init (p23_law_fit.json hold_gate.gate — 전 자릿수 그대로)
 LAW_A0 = -1.2212310538664326
 LAW_B0 = 0.7585106669951319
@@ -266,6 +283,23 @@ def supp_vec(traw2, dq2, law):
     P = C._W["P"]
     ah = P.J.ahat(P.A_PAPER, traw2, dq2)
     return law_a + supp_term(np.abs(ah), law_b) * gate_v(dq2, law_v0)
+
+
+def hip_supp_scalar(s1, s2, v1):
+    """P24 CL 온라인 힙 지지 — supp_scalar 미러. 부하 대리 x = |s2|(knee, 기본)|·|s1|(hip),
+    적합 범위 밖 클램프 (min(x, cap)). HIP_LAW=1 호출 전제."""
+    x = min(abs(s2) if HIP["src"] == "knee" else abs(s1), HIP["cap"])
+    return HIP["a1"] + HIP["b1"] * x * float(gate_v(v1, HIP["v01"]))
+
+
+def hip_supp_vec(traw1, dq1, traw2, dq2):
+    """P24 재생/창용 힙 지지 벡터 — supp_vec 미러 (측정 트레이스, ahat = Paper 변환)."""
+    P = C._W["P"]
+    if HIP["src"] == "knee":
+        x = np.abs(P.J.ahat(P.A_PAPER, traw2, dq2))
+    else:
+        x = np.abs(P.J.ahat(P.A_PAPER, traw1, dq1))
+    return HIP["a1"] + HIP["b1"] * np.minimum(x, HIP["cap"]) * gate_v(dq1, HIP["v01"])
 
 
 def rise_of(d_dq):
@@ -416,7 +450,10 @@ def cl_run23(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, law,
             tql = -c_cvt * abs(s2) * amp * float(np.tanh(vk / 1.0))
         if sprm is not None:                                    # ★ Phase 4b 게이트 스프링
             tql += spr_tau(float(md.qpos[iq_k]), abs(s2), sprm)
-        md.ctrl[:] = [-s1, -(s2 + supp)]
+        if HIP_LAW:                                             # ★ P24 힙 지지 (온라인)
+            md.ctrl[:] = [-(s1 + hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+        else:
+            md.ctrl[:] = [-s1, -(s2 + supp)]
         md.qfrc_applied[dof_knee] = tql
         try:
             mj.mj_step(model, md)
@@ -540,7 +577,10 @@ def windows23(model, x32, dss, law, W_override=None, spr=None, k_rise=0.0):
         lam = supp_vec(tr["raw2"], tr["v2"], law)               # ★ 변경점
         if k_rise:
             lam = lam + rise_term(tr["v2"], k_rise, law[2])     # ★ Phase 4c 상승항
-        th = -(P.J.ahat(A, tr["raw1"], tr["v1"]))
+        a1v = P.J.ahat(A, tr["raw1"], tr["v1"])
+        if HIP_LAW:                                             # ★ P24 힙 지지 폴드
+            a1v = a1v + hip_supp_vec(tr["raw1"], tr["v1"], tr["raw2"], tr["v2"])
+        th = -a1v
         tk = -(P.J.ahat(A, tr["raw2"], tr["v2"]) + lam)
         ppv = dict(tr["pp"], tau_h=np.interp(t - P.SD, t, th),
                    tau_k=np.interp(t - P.SD, t, tk))
@@ -574,7 +614,10 @@ def win429_06_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
         sv = supp_vec(d["traw2"], d["dq2"], law)                # ★ 변경점
         if kr:
             sv = sv + rise_term(d["dq2"], kr, law[2])           # ★ Phase 4c 상승항
-        th = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+        a1v = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
+        if HIP_LAW:                                             # ★ P24 힙 지지 폴드
+            a1v = a1v + hip_supp_vec(d["traw1"], d["dq1"], d["traw2"], d["dq2"])
+        th = np.interp(t - P.SD, t, a1v)
         tk = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
         data = mj.MjData(model)
         dt = model.opt.timestep
@@ -644,7 +687,10 @@ def score_0604_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
         sv = supp_vec(d["traw2"], d["dq2"], law)                # ★ 변경점
         if kr:
             sv = sv + rise_term(d["dq2"], kr, law[2])           # ★ Phase 4c 상승항
-        th = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+        a1v = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
+        if HIP_LAW:                                             # ★ P24 힙 지지 폴드
+            a1v = a1v + hip_supp_vec(d["traw1"], d["dq1"], d["traw2"], d["dq2"])
+        th = np.interp(t - P.SD, t, a1v)
         tk = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
         for i0, r_, gp in pre["starts"]:
             t0 = t[i0]; t1 = min(t0 + 0.2, t[-1])
@@ -707,7 +753,13 @@ def a_full23(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None, k_rise=0.0
     sv = supp_vec(d["traw2"], d["dq2"], law)
     if k_rise:
         sv = sv + rise_term(d["dq2"], k_rise, law[2])           # ★ Phase 4c 상승항
-    t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+    sv1_0 = 0.0
+    a1v = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
+    if HIP_LAW:                                                 # ★ P24 힙 지지 트레이스 폴드
+        sv1 = hip_supp_vec(d["traw1"], d["dq1"], d["traw2"], d["dq2"])
+        a1v = a1v + sv1
+        sv1_0 = float(sv1[0])
+    t1 = np.interp(t - P.SD, t, a1v)
     t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
     supp0 = float(sv[0])
     q1_0 = float(d["q1"][0]) + o1
@@ -750,7 +802,11 @@ def a_full23(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None, k_rise=0.0
             if tc > t[-1]:
                 s1 = s2 = 0.0
                 extra = law_a                                   # ★ 기록 끝 이후: 상수 성분만
-        md.ctrl[:] = [-s1, -(s2 + extra)]
+        if HIP_LAW:                                             # ★ P24 힙 지지 (supp 동형:
+            e1 = sv1_0 if tc < 0 else (HIP["a1"] if tc > t[-1] else 0.0)
+            md.ctrl[:] = [-(s1 + e1), -(s2 + extra)]            #   settle=sv1[0]/이후=a1)
+        else:
+            md.ctrl[:] = [-s1, -(s2 + extra)]
         tql = 0.0
         if qg is not None:                                      # ★ C_CVT (CVT 한정)
             rr = float(np.interp(md.qpos[2], qg, rg))
@@ -879,7 +935,13 @@ def air_cycle23(model, d, law, spr=None, k_rise=0.0):
     sv = supp_vec(d["traw2"], d["dq2"], law)
     if k_rise:
         sv = sv + rise_term(d["dq2"], k_rise, law[2])           # ★ Phase 4c 상승항
-    t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+    sv1_0 = 0.0
+    a1v = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
+    if HIP_LAW:                                                 # ★ P24 힙 지지 트레이스 폴드
+        sv1 = hip_supp_vec(d["traw1"], d["dq1"], d["traw2"], d["dq2"])
+        a1v = a1v + sv1
+        sv1_0 = float(sv1[0])
+    t1 = np.interp(t - P.SD, t, a1v)
     t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
     supp0 = float(sv[0])
     q1_0 = float(d["q1"][0]); q2_0 = float(d["q2"][0])
@@ -915,7 +977,11 @@ def air_cycle23(model, d, law, spr=None, k_rise=0.0):
             if tc > t[-1]:
                 s1 = s2 = 0.0
                 extra = law_a
-        md.ctrl[:] = [-s1, -(s2 + extra)]
+        if HIP_LAW:                                             # ★ P24 힙 지지 (supp 동형:
+            e1 = sv1_0 if tc < 0 else (HIP["a1"] if tc > t[-1] else 0.0)
+            md.ctrl[:] = [-(s1 + e1), -(s2 + extra)]            #   settle=sv1[0]/이후=a1)
+        else:
+            md.ctrl[:] = [-s1, -(s2 + extra)]
         if hl is not None:                                      # ★ Phase 4b 게이트 스프링
             if tc < 0:
                 h = float(hl[0])
@@ -1039,7 +1105,10 @@ def cl_run23_log(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, law
             tql = -c_cvt * abs(s2) * amp * float(np.tanh(vk / 1.0))
         if sprm is not None:
             tql += spr_tau(float(md.qpos[iq_k]), abs(s2), sprm)
-        md.ctrl[:] = [-s1, -(s2 + supp)]
+        if HIP_LAW:                                             # ★ P24 힙 지지 (온라인)
+            md.ctrl[:] = [-(s1 + hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+        else:
+            md.ctrl[:] = [-s1, -(s2 + supp)]
         md.qfrc_applied[dof_knee] = tql
         try:
             mj.mj_step(model, md)
@@ -1071,7 +1140,13 @@ def a_full23_log(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None,
     sv = supp_vec(d["traw2"], d["dq2"], law)
     if k_rise:
         sv = sv + rise_term(d["dq2"], k_rise, law[2])
-    t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+    sv1_0 = 0.0
+    a1v = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
+    if HIP_LAW:                                                 # ★ P24 힙 지지 트레이스 폴드
+        sv1 = hip_supp_vec(d["traw1"], d["dq1"], d["traw2"], d["dq2"])
+        a1v = a1v + sv1
+        sv1_0 = float(sv1[0])
+    t1 = np.interp(t - P.SD, t, a1v)
     t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
     supp0 = float(sv[0])
     q1_0 = float(d["q1"][0]) + o1
@@ -1115,7 +1190,11 @@ def a_full23_log(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None,
             if tc > t[-1]:
                 s1 = s2 = 0.0
                 extra = law_a
-        md.ctrl[:] = [-s1, -(s2 + extra)]
+        if HIP_LAW:                                             # ★ P24 힙 지지 (supp 동형:
+            e1 = sv1_0 if tc < 0 else (HIP["a1"] if tc > t[-1] else 0.0)
+            md.ctrl[:] = [-(s1 + e1), -(s2 + extra)]            #   settle=sv1[0]/이후=a1)
+        else:
+            md.ctrl[:] = [-s1, -(s2 + extra)]
         tql = 0.0
         if qg is not None:
             rr = float(np.interp(md.qpos[2], qg, rg))
@@ -1158,7 +1237,13 @@ def air_cycle23_log(model, d, law, spr=None, k_rise=0.0):
     sv = supp_vec(d["traw2"], d["dq2"], law)
     if k_rise:
         sv = sv + rise_term(d["dq2"], k_rise, law[2])
-    t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
+    sv1_0 = 0.0
+    a1v = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
+    if HIP_LAW:                                                 # ★ P24 힙 지지 트레이스 폴드
+        sv1 = hip_supp_vec(d["traw1"], d["dq1"], d["traw2"], d["dq2"])
+        a1v = a1v + sv1
+        sv1_0 = float(sv1[0])
+    t1 = np.interp(t - P.SD, t, a1v)
     t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
     supp0 = float(sv[0])
     q1_0 = float(d["q1"][0]); q2_0 = float(d["q2"][0])
@@ -1195,7 +1280,11 @@ def air_cycle23_log(model, d, law, spr=None, k_rise=0.0):
             if tc > t[-1]:
                 s1 = s2 = 0.0
                 extra = law_a
-        md.ctrl[:] = [-s1, -(s2 + extra)]
+        if HIP_LAW:                                             # ★ P24 힙 지지 (supp 동형:
+            e1 = sv1_0 if tc < 0 else (HIP["a1"] if tc > t[-1] else 0.0)
+            md.ctrl[:] = [-(s1 + e1), -(s2 + extra)]            #   settle=sv1[0]/이후=a1)
+        else:
+            md.ctrl[:] = [-s1, -(s2 + extra)]
         if hl is not None:
             if tc < 0:
                 h = float(hl[0])
