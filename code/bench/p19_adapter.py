@@ -171,20 +171,33 @@ def eval_p23(cand):
       - CVT 0429: build_cvt23 + cl_run23, o1/o2 = x[17]/x[18], C_CVT=x[20]
       - alphas = R.ALPH (적합 세션; 0324는 [1,1,1,1])
       - crash 시 g=2.0 (cl_metrics23 규약 — eval_stack의 2.5와 다름, FIT 재현 우선)
+      - ★ P24 확장 (07-17): structure.p24_refit=True → env P24_REFIT을 import 전에
+        강제 (26축: slots 23/24/25 = B1_HIP/V0_HIP/K1_HIP — apply_freeze가 RU.HIP에
+        주입, cl_run23의 HIP_LAW 분기 활성; 러너 규약상 P24_REFIT은 힙 층 강제 ON).
+        p24_refit 없이 structure.hip_law(진리값/블록)만 있으면 P24_HIP_LAW만 켠다.
+        단일 프로세스 캐비앗: p23_v6_runners는 import 시점에 env로 벡터 축수·힙 층을
+        고정 — 같은 프로세스에서 다른 플래그의 후보를 이미 평가했다면 아래 assert가
+        거부한다 (프로세스 분리 필요; bench eval은 프로세스당 후보 1개라 안전).
     """
     import os
     st = cand.get("structure", {})
     sg = bool(st.get("spring_gated", True))
     rg = bool(st.get("rise_gated", True))
+    pr = bool(st.get("p24_refit", False))       # P24: 26축 (+힙 3슬롯, 케이지 교정)
+    hl = pr or bool(st.get("hip_law", False))   # P24_REFIT은 힙 층 강제 ON (러너 규약)
     os.environ["P23_SPRING_GATED"] = "1" if sg else "0"
     os.environ["P23_RISE_GATED"] = "1" if rg else "0"
+    os.environ["P24_REFIT"] = "1" if pr else "0"
+    os.environ["P24_HIP_LAW"] = "1" if hl else "0"
     p23dir = str(G22 / "p23_veins")
     if p23dir not in sys.path:
         sys.path.insert(0, p23dir)
     import p23_v6_runners as RU
-    assert RU.SPRING_GATED == sg and RU.RISE_GATED == rg, (
-        "p23 구조 플래그가 import 캐시와 불일치 — 같은 프로세스에서 다른 플래그의 "
-        "p23 후보를 이미 평가함 (프로세스 분리 필요)")
+    assert (RU.SPRING_GATED == sg and RU.RISE_GATED == rg
+            and RU.P24_REFIT == pr and RU.HIP_LAW == hl), (
+        "p23/p24 구조 플래그가 import 캐시와 불일치 — 같은 프로세스에서 다른 플래그의 "
+        "후보를 이미 평가함 (p23_v6_runners는 import 시점에 env를 읽어 벡터 축수/힙 "
+        "층을 결정 — 프로세스 분리 필요)")
     import p19_run as R
     RU.ensure_init()
     global _INIT
@@ -230,3 +243,15 @@ def eval_p23(cand):
     return dict(summary={k: list(map(float, val)) for k, val in s.items()},
                 fit=float(s["FIT"][0]), heldout=float(s["jump_0324"][0]),
                 rows=rows)
+
+
+def eval_p24(cand):
+    """P24 심판 — eval_p23의 별칭 (재구현 없음; 의미는 structure 블록이 지배).
+
+    P24 후보(fourbar_p24a_candidate.json)는 judge="p24"로 등록: 26축 벡터(p23a 23축 +
+    B1_HIP/V0_HIP/K1_HIP) + structure.p24_refit=True가 eval_p23 안에서 env(P24_REFIT)로
+    p23_v6_runners에 전달된다. judge 이름 분리는 레지스트리 가독/세대 구분용 —
+    코드 경로는 eval_p23과 동일 (심판 재구현 금지 원칙).
+    골든: fourbar_p24a_candidate.json → FIT=metric_full 재현 (bench REPRODUCED).
+    """
+    return eval_p23(cand)
