@@ -18,6 +18,9 @@
 env: P23_DQ_RELAX=1 → DQ̂ 캡 1.02 (기본은 과제 명세 strict 1.00).
      P23_SPRING_GATED=1 → Phase 4b 부하 연동 스프링 (벡터 23축, slot 22=T_SPR;
        p23_v6_runners docstring 참조). 구 22축 ckpt 재개 시 T_SPR=init(2.0) 자동 패드.
+     P23_RISE_GATED=1 → Phase 4c 보완 게이트 상승항 (slot 21 의미 교체: D_DQ→K_RISE
+       [0.0, 0.30] init 0.216; dof_damping 델타 경로 비활성). 구 ckpt 재개 시
+       slot 21이 새 bounds 밖이면 클립.
      P23_NSGA_TAG=<suffix> → ckpt/front 파일명 접미사 (스모크가 본 ckpt를 안 덮게).
 """
 import json
@@ -162,6 +165,13 @@ def main():
                       flush=True)
             assert Xc.shape[1] == RU.NV23, \
                 f"ckpt 폭 {Xc.shape[1]} != NV23 {RU.NV23} (모드/파일 불일치)"
+            if RU.RISE_GATED:
+                # 구 D_DQ 값(음수 가능)이 K_RISE bounds 밖일 수 있음 → 클립 (Phase 4c)
+                nc = int(((Xc < RU.LO23) | (Xc > RU.HI23)).any(axis=1).sum())
+                if nc:
+                    print(f"RISE_GATED: ckpt {nc} inds 새 bounds로 클립 (slot21 등)",
+                          flush=True)
+                Xc = np.clip(Xc, RU.LO23 + 1e-9, RU.HI23 - 1e-9)
             X0 = Xc
             print(f"resume from ckpt gen={ck['gen']} ({len(X0)} inds)", flush=True)
         except AssertionError:

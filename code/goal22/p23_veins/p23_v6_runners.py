@@ -32,6 +32,8 @@
   21  D_DQ      0.0             [-0.25, 0.10]      확장: 무릎 점성 보정 (dof_damping 가산).
                                                    ★음수 = 고속 소산 삭감 = 에너지 주입 위험
                                                    (P21 교훈) — H/OLdq_FF/AIR 게이트가 단속.
+                                                   ★P23_RISE_GATED=1이면 의미 교체 → K_RISE
+                                                   [0.0, 0.30] init 0.216 (Phase 4c 아래 참조).
   LAW_C = -0.0281448 (측정 고정 — 푸시 레짐 불확실, 탐색 금지. p23_law_fit.json gate.c)
 
 ═══ 지지 법칙 (Phase 2 측정 확정 — p23_law_fit.json 'hold_gate.gate') ═══
@@ -108,6 +110,20 @@ HI23 = np.array([2.5, 2.7, 2.50, 0.30, 0.15, 0.25, 0.030, 0.70, 0.020, 1.10, 1.4
                  1.45, 0.12, 0.12, 0.020, 0.0, 7.3, 0.15, 0.15, 0.89, 0.4, 0.10])
 assert len(NAMES23) == len(LO23) == len(HI23) == 22
 
+# ── Phase 4c: RISE_GATED 모드 (opt-in) — slot 21 의미 교체 ──
+#   D_DQ(무릎 dof_damping 델타, 전속도) → K_RISE(보완 게이트 상승항 계수).
+#   rise = K_RISE·dq₂·(1−g(|dq₂|; LAW_V0)) 를 supp와 동일 프레임(측정토크)·동일
+#   배선(ctrl/트레이스 합산)으로 무릎 입력에 가산 — Phase 3 측정 동적 상승
+#   λ₂ ≈ +0.216·dq₂ [CI +0.17,+0.26] (게이트 너머 고속)의 직접 구현 (세그3 판독:
+#   전속도 감쇠 델타는 AIR/S2S 게이트에 묶여 고속 상승을 표현 불가).
+#   저속 (1−g)→0 → AIR/S2S/유지 불침. 이 모드에선 dof_damping 델타 경로 비활성.
+#   ★ 에너지 주입 위험: 고속에서 운동 방향 토크 가산 가능 — H/OLdq_FF/AIR 게이트가 단속.
+RISE_GATED = os.environ.get("P23_RISE_GATED", "0") == "1"
+K_RISE0 = 0.216            # 측정 사전값 (Phase 3 회귀 중심, CI [0.17, 0.26])
+if RISE_GATED:
+    NAMES23[21] = "K_RISE"
+    LO23[21], HI23[21] = 0.0, 0.30
+
 # ── Phase 4b: SPRING_GATED 모드 (모듈 docstring 참조) — 벡터 23축 확장 ──
 SPRING_GATED = os.environ.get("P23_SPRING_GATED", "0") == "1"
 T_SPR0, T_SPR_LO, T_SPR_HI = 2.0, 0.5, 6.0
@@ -148,8 +164,8 @@ def apply_freeze(v):
 
 
 def _ext23():
-    """확장 슬롯 init: [C_CVT, D_DQ] (+ [T_SPR0], gated 모드)."""
-    return [0.0, 0.0] + ([T_SPR0] if SPRING_GATED else [])
+    """확장 슬롯 init: [C_CVT, D_DQ|K_RISE] (+ [T_SPR0], gated 모드)."""
+    return [0.0, K_RISE0 if RISE_GATED else 0.0] + ([T_SPR0] if SPRING_GATED else [])
 
 
 def v23_p19_law():
@@ -252,9 +268,24 @@ def supp_vec(traw2, dq2, law):
     return law_a + supp_term(np.abs(ah), law_b) * gate_v(dq2, law_v0)
 
 
+def rise_of(d_dq):
+    """slot 21 해석기 — RISE 모드: K_RISE(상승 계수), OFF: 0 (damping 델타 경로 전용)."""
+    return float(d_dq) if RISE_GATED else 0.0
+
+
+def rise_term(dq2, k_rise, law_v0):
+    """Phase 4c 상승항: K_RISE·dq₂·(1−g(|dq₂|; LAW_V0)) — supp와 동일(측정토크) 프레임.
+    dq2: CL=온라인 v2c 스칼라 / 재생·창=측정 dq₂ 트레이스 (법칙 게이트 입력과 동일 규약).
+    저속에서 (1−g)→0 (v0≈5.8이면 |dq|=1에서 3%, 0.15에서 0.07%) — AIR/S2S 실질 불침."""
+    return k_rise * dq2 * (1.0 - gate_v(dq2, law_v0))
+
+
 # ══════════════════ 빌더 (D_DQ 배선 + Phase 4b XML 스프링 무장해제) ══════════════════
 def _patch_ddq(model, d_dq):
-    """빌드 직후 무릎 dof 점성 가산 — 모든 러너(창 평가 포함)에 균일한 플랜트 속성."""
+    """빌드 직후 무릎 dof 점성 가산 — 모든 러너(창 평가 포함)에 균일한 플랜트 속성.
+    ★ RISE 모드: slot 21이 K_RISE로 재정의 → damping 델타 경로 비활성 (no-op)."""
+    if RISE_GATED:
+        return model
     if abs(float(d_dq)) > 1e-12:
         mj = C._W["mj"]
         model.dof_damping[safe.dofadr(model, "knee", mj)] += float(d_dq)
@@ -311,12 +342,14 @@ def rtab(l_i):
 
 # ══════════════════ 1) cl_run23 — 폐루프 러너 (cl_run20_ff 세대 교체) ══════════════════
 def cl_run23(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, law,
-             c_cvt=0.0, o1=0.0, o2=0.0, ff_hip=False, spr=None):
+             c_cvt=0.0, o1=0.0, o2=0.0, ff_hip=False, spr=None, k_rise=0.0):
     """p23_runners.cl_run20_ff의 세대 교체 — 변경점 3 (그 외 문자 동일):
     ① 구 s2_qs(c_qs·s2·gate)+preload → supp(측정 법칙; s2·v2c 온라인)
     ② Cd 동적층 제거 (기존 심판도 Cd=0으로 불렀음 — 죽은 가지 정리)
     ③ CVT 가지 한정 C_CVT 전달손실 qfrc (무변속 호출은 c_cvt=0).
-    + Phase 4b: spr=(stiff,ref,T_SPR)면 게이트 스프링 qfrc (x=|s2| 온라인, settle 포함)."""
+    + Phase 4b: spr=(stiff,ref,T_SPR)면 게이트 스프링 qfrc (x=|s2| 온라인, settle 포함).
+    + Phase 4c: k_rise≠0이면 상승항 rise_term(v2c) 을 supp에 가산 (온라인 v2c —
+      법칙 게이트 입력과 동일; settle 포함 상시이나 저속 (1−g)→0)."""
     P = C._W["P"]
     mj = P.J._P["mj"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = law
@@ -373,6 +406,8 @@ def cl_run23(model, is_cvt, l_i, d, gains, dqdes_on, ffk, A, tm, alphas, law,
         s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
         supp = supp_scalar(s2, v2c, law_a, law_b, law_v0)      # ★ 변경점 ①
+        if k_rise:
+            supp += float(rise_term(v2c, k_rise, law_v0))       # ★ Phase 4c 상승항
         tql = 0.0
         if qg is not None:                                      # ★ 변경점 ③ (CVT 한정)
             rr = float(np.interp(md.qpos[2], qg, rg))
@@ -404,6 +439,7 @@ def cl_metrics23(v, x32, sp, law, c_cvt, d_dq, spr=None, model_f=None):
     if model_f is None:
         model_f = build_flip23(x32, v[1], sp, d_dq)
     model_c = None
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     dd = dict(zip(P.J._P["FR"].NAMES, np.asarray(x32)[:26]))
     gs, dqs = [], []
     for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in R19.TRIALS:
@@ -415,13 +451,14 @@ def cl_metrics23(v, x32, sp, law, c_cvt, d_dq, spr=None, model_f=None):
                 model_c = build_cvt23(x32, v[1], sp, l_i, d_dq)
             L = cl_run23(model_c, True, l_i, d, gains, dqon, ffk, P.A_PAPER,
                          float(v[14]), alphas, law, c_cvt=c_cvt,
-                         o1=float(v[17]), o2=float(v[18]), spr=spr)
+                         o1=float(v[17]), o2=float(v[18]), spr=spr, k_rise=kr)
         else:
             k1, k2 = P.J.OFFK.get(ds, (None, None))
             o1 = dd.get(k1, 0.0) if k1 else 0.0
             o2 = dd.get(k2, 0.0) if k2 else 0.0
             L = cl_run23(model_f, False, l_i, d, gains, dqon, ffk, P.A_PAPER,
-                         float(v[14]), alphas, law, c_cvt=0.0, o1=o1, o2=o2, spr=spr)
+                         float(v[14]), alphas, law, c_cvt=0.0, o1=o1, o2=o2,
+                         spr=spr, k_rise=kr)
         if L is None:
             gs.append(2.0); dqs.append(2.0)
             continue
@@ -484,10 +521,11 @@ def eval_windows_g(model, pp, hl, spr):
     return sc
 
 
-def windows23(model, x32, dss, law, W_override=None, spr=None):
+def windows23(model, x32, dss, law, W_override=None, spr=None, k_rise=0.0):
     """p21_cma.windows_score 세대 교체 — lam = supp_vec (구 lam_vec+pre30 자리).
     D_DQ는 model 빌드 시 dof_damping으로 이미 배선됨 (eval_windows 내부까지 적용).
-    spr(게이트 스프링)은 eval_windows_g 미러로 (측정 트레이스 h_load 시계열)."""
+    spr(게이트 스프링)은 eval_windows_g 미러로 (측정 트레이스 h_load 시계열).
+    Phase 4c: k_rise≠0이면 rise_term(측정 dq₂ 트레이스)을 lam에 가산 (트레이스 폴드)."""
     P, P12 = C._W["P"], C._W["P12"]
     A = P.A_PAPER
     dd = dict(zip(P.J._P["FR"].NAMES, np.asarray(x32)[:26]))
@@ -500,6 +538,8 @@ def windows23(model, x32, dss, law, W_override=None, spr=None):
         o2 = dd.get(k2, 0.0) if k2 else 0.0
         t = tr["pp"]["t"]
         lam = supp_vec(tr["raw2"], tr["v2"], law)               # ★ 변경점
+        if k_rise:
+            lam = lam + rise_term(tr["v2"], k_rise, law[2])     # ★ Phase 4c 상승항
         th = -(P.J.ahat(A, tr["raw1"], tr["v1"]))
         tk = -(P.J.ahat(A, tr["raw2"], tr["v2"]) + lam)
         ppv = dict(tr["pp"], tau_h=np.interp(t - P.SD, t, th),
@@ -517,9 +557,10 @@ def windows23(model, x32, dss, law, W_override=None, spr=None):
 
 def win429_06_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
     """p21_cma.win429_06 세대 교체 — lam→supp_vec + D_DQ(damping) + C_CVT(qfrc)
-    + Phase 4b 게이트 스프링 (측정 트레이스 h_load)."""
+    + Phase 4b 게이트 스프링 (측정 트레이스 h_load) + Phase 4c 상승항 (트레이스 폴드)."""
     P, mj = C._W["P"], C._W["mj"]
     MS = C._W["P12"]._G["MS"]
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     model = build_cvt23(x32, ref, sp, 0.02508, d_dq)
     dof_knee = safe.dofadr(model, "knee", mj)
     iq_k = safe.qadr(model, "knee", mj)
@@ -531,6 +572,8 @@ def win429_06_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
         d = pre["d"]; t = pre["t"]
         hl = hl_vec(d["traw2"], d["dq2"], spr) if spr is not None else None
         sv = supp_vec(d["traw2"], d["dq2"], law)                # ★ 변경점
+        if kr:
+            sv = sv + rise_term(d["dq2"], kr, law[2])           # ★ Phase 4c 상승항
         th = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
         tk = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
         data = mj.MjData(model)
@@ -579,10 +622,11 @@ def win429_06_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
 
 
 def score_0604_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
-    """p20_cma2.score_0604 세대 교체 — lam→supp_vec + D_DQ + C_CVT (+ Phase 4b 스프링).
-    pre604 = winit 사전계산."""
+    """p20_cma2.score_0604 세대 교체 — lam→supp_vec + D_DQ + C_CVT (+ Phase 4b 스프링
+    + Phase 4c 상승항). pre604 = winit 사전계산."""
     P, mj = C._W["P"], C._W["mj"]
     MS = C._W["P12"]._G["MS"]
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     per = []
     for pre in C._W["pre604"]:
         d = pre["d"]; t = pre["t"]
@@ -598,6 +642,8 @@ def score_0604_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
         dt = model.opt.timestep
         hl = hl_vec(d["traw2"], d["dq2"], spr) if spr is not None else None
         sv = supp_vec(d["traw2"], d["dq2"], law)                # ★ 변경점
+        if kr:
+            sv = sv + rise_term(d["dq2"], kr, law[2])           # ★ Phase 4c 상승항
         th = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
         tk = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
         for i0, r_, gp in pre["starts"]:
@@ -644,12 +690,14 @@ def score_0604_23(x32, sp, ref, law, c_cvt, d_dq, spr=None):
 
 
 # ══════════════════ 3) a_full23 — Mode A 통짜 재생 (a_full 세대 교체) ══════════════════
-def a_full23(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None):
+def a_full23(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None, k_rise=0.0):
     """p22_eval.a_full 세대 교체 — 변경점: lam_vec+pre30 → supp_vec (t2 합산, SD 시프트 동일).
     settle엔 supp_vec[0] 가산, 기록 끝 이후엔 LAW_A만 (구 pre30 잔존 규약의 물리 대응).
     CVT 가지엔 C_CVT qfrc. 반환 (dq2 RMSE, h_sim) 또는 None(발산).
     + Phase 4b 스프링 h_load: settle=hl[0](초기 유지 부하), 기록 중=측정 트레이스 보간,
-      기록 끝 이후=0 (무명령=무부하 → 게이트 닫힘; XML 상시 스프링과의 의도된 차이)."""
+      기록 끝 이후=0 (무명령=무부하 → 게이트 닫힘; XML 상시 스프링과의 의도된 차이).
+    + Phase 4c 상승항: 측정 dq₂ 트레이스로 sv에 폴드 (supp와 동일 프레임·시프트;
+      기록 끝 이후는 law_a만 잔존 = rise 자동 0, 정지 물리와 정합)."""
     P = C._W["P"]; mj = C._W["mj"]; S = P.J._P["S"]
     t = d["t"]
     law_a = law[0]
@@ -657,6 +705,8 @@ def a_full23(model, is_cvt, l_i, d, law, o1, o2, c_cvt=0.0, spr=None):
     if spr is not None:
         ks, kref, _ = spr_resolve(model, spr)
     sv = supp_vec(d["traw2"], d["dq2"], law)
+    if k_rise:
+        sv = sv + rise_term(d["dq2"], k_rise, law[2])           # ★ Phase 4c 상승항
     t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
     t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
     supp0 = float(sv[0])
@@ -737,6 +787,7 @@ def oldq_h23(v, x32, sp, law, c_cvt, d_dq, spr=None, model_f=None):
     if model_f is None:
         model_f = build_flip23(x32, v[1], sp, d_dq)
     model_c = build_cvt23(x32, v[1], sp, 0.02508, d_dq)
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     dd = dict(zip(P.J._P["FR"].NAMES, np.asarray(x32)[:26]))
     rows, herr = [], []
     for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in R19.TRIALS:
@@ -745,13 +796,14 @@ def oldq_h23(v, x32, sp, law, c_cvt, d_dq, spr=None, model_f=None):
         if is_cvt:
             o1, o2 = E.QOFF_A429
             res = a_full23(model_c, True, d["l_i"], d, law, o1, o2, c_cvt=c_cvt,
-                           spr=spr)
+                           spr=spr, k_rise=kr)
             hr = float(d.get("h_real", float("nan")))
         else:
             k1, k2 = P.J.OFFK.get(ds, (None, None))
             o1 = dd.get(k1, 0.0) if k1 else 0.0
             o2 = dd.get(k2, 0.0) if k2 else 0.0
-            res = a_full23(model_f, False, l_i, d, law, o1, o2, c_cvt=0.0, spr=spr)
+            res = a_full23(model_f, False, l_i, d, law, o1, o2, c_cvt=0.0,
+                           spr=spr, k_rise=kr)
             hr = E.h_real_of(ds, sub)
         if res is None:
             rows.append(dict(ds=ds, sub=str(sub), rmse=9.9,
@@ -774,11 +826,12 @@ def cl_ff23(x32, sp, ref, tm, law, d_dq, ff_hip, spr=None, model_f=None):
     P = C._W["P"]
     if model_f is None:
         model_f = build_flip23(x32, ref, sp, d_dq)
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     rows = []
     for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in RN.ff_trials():
         Lg = cl_run23(model_f, False, l_i, d, gains, dqon, ffk, P.A_PAPER, tm,
                       [1, 1, 1, 1], law, c_cvt=0.0, o1=0.0, o2=0.0, ff_hip=ff_hip,
-                      spr=spr)
+                      spr=spr, k_rise=kr)
         if Lg is None:
             rows.append(dict(ds=ds, sub=sub, g=2.5, q2=9.9, crash=True))
             continue
@@ -794,9 +847,11 @@ def oldq_ff23(x32, sp, ref, law, d_dq, spr=None, model_f=None):
     """p23_runners.oldq_ff 세대 교체 — a_full23 (o1=o2=0)."""
     if model_f is None:
         model_f = build_flip23(x32, ref, sp, d_dq)
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     rows = []
     for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in RN.ff_trials():
-        res = a_full23(model_f, False, l_i, d, law, 0.0, 0.0, c_cvt=0.0, spr=spr)
+        res = a_full23(model_f, False, l_i, d, law, 0.0, 0.0, c_cvt=0.0, spr=spr,
+                       k_rise=kr)
         hr = float(d.get("h_real", float("nan")))
         if res is None:
             rows.append(dict(ds=ds, sub=sub, rmse=9.9, h_sim=float("nan"),
@@ -810,10 +865,11 @@ def oldq_ff23(x32, sp, ref, law, d_dq, spr=None, model_f=None):
     return sess, rows
 
 
-def air_cycle23(model, d, law, spr=None):
+def air_cycle23(model, d, law, spr=None, k_rise=0.0):
     """p23_runners.air_replay_cycle 세대 교체 — lam/pre30 → supp_vec.
     무부하에서 부하항 자동 소멸 → 실질 LAW_A 절편 주입 (Phase 2 air_replay_scan 실증).
-    + Phase 4b 스프링: 공중 |ahat|≈0.25Nm → h≈0.1 자연 소멸 (가설의 핵심 검증 지점)."""
+    + Phase 4b 스프링: 공중 |ahat|≈0.25Nm → h≈0.1 자연 소멸 (가설의 핵심 검증 지점).
+    + Phase 4c 상승항: 공중 |dq₂|≲3 ≪ v0 → (1−g) 소형 — 저속 불침의 검증 지점."""
     P = C._W["P"]; mj = C._W["mj"]; S = P.J._P["S"]
     t = d["t"]
     law_a = law[0]
@@ -821,6 +877,8 @@ def air_cycle23(model, d, law, spr=None):
     if spr is not None:
         ks, kref, _ = spr_resolve(model, spr)
     sv = supp_vec(d["traw2"], d["dq2"], law)
+    if k_rise:
+        sv = sv + rise_term(d["dq2"], k_rise, law[2])           # ★ Phase 4c 상승항
     t1 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"]))
     t2 = np.interp(t - P.SD, t, P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"]) + sv)
     supp0 = float(sv[0])
@@ -882,9 +940,10 @@ def air23(x32, sp, ref, law, d_dq, spr=None):
     """AIR = mean_cycles[ rmse(q2) + 0.1·rmse(dq2) ] (v6 동결 공식) — 용접 베이스 14사이클."""
     model_w = build_weld23(x32, ref, sp, d_dq)
     cycles, _ = RN.air_cycles()
+    kr = rise_of(d_dq)                                          # ★ Phase 4c
     rows = []
     for i, d in enumerate(cycles):
-        res = air_cycle23(model_w, d, law, spr=spr)
+        res = air_cycle23(model_w, d, law, spr=spr, k_rise=kr)
         if res is None:
             rows.append(dict(cyc=i + 1, rq=RN.CRASH_RQ, rdq=RN.CRASH_RDQ,
                              score=RN.CRASH_RQ + RN.AIR_W_DQ * RN.CRASH_RDQ, crash=True))
