@@ -2,7 +2,7 @@
 """bench — 디지털 트윈 후보 평가/비교/승격 CLI (사고의 외골격).
 
 사용 (cwd 무관):
-  python code/bench/bench.py eval <candidate.json> [--judge p19|p20|p22|modea|p14] [--tol 0.005]
+  python code/bench/bench.py eval <candidate.json> [--judge p19|p20|p22|p23|modea|p14] [--tol 0.005]
   python code/bench/bench.py compare <a.json> <b.json> [...]
   python code/bench/bench.py promote <candidate.json> --note "..." [--force]
   python code/bench/bench.py list
@@ -66,7 +66,7 @@ def do_eval(path, judge="p19", tol=0.005, quiet=False):
         if not quiet:
             print("[modea] " + " ".join(f"{k}={v:.0f}" for k, v in r.items()))
         return {"judge": "modea", **r}
-    r = {"p20": A.eval_p20, "p22": A.eval_p22}.get(judge, A.eval_p19)(cand)
+    r = {"p20": A.eval_p20, "p22": A.eval_p22, "p23": A.eval_p23}.get(judge, A.eval_p19)(cand)
     if not quiet:
         print(f"후보: {cand.get('CANDIDATE', path)}")
         for ds, (g, q2, n) in sorted(r["summary"].items()):
@@ -195,10 +195,10 @@ def main():
     ap = argparse.ArgumentParser(prog="bench")
     sub = ap.add_subparsers(dest="cmd", required=True)
     e = sub.add_parser("eval"); e.add_argument("path")
-    e.add_argument("--judge", default="p19", choices=["p19", "p20", "p22", "modea", "p14"])
+    e.add_argument("--judge", default="p19", choices=["p19", "p20", "p22", "p23", "modea", "p14"])
     e.add_argument("--tol", type=float, default=0.005)
     c = sub.add_parser("compare"); c.add_argument("paths", nargs="+")
-    c.add_argument("--judge", default="p19", choices=["p19", "p20", "p22", "modea", "p14"])
+    c.add_argument("--judge", default="p19", choices=["p19", "p20", "p22", "p23", "modea", "p14"])
     p = sub.add_parser("promote"); p.add_argument("path")
     p.add_argument("--note", default=""); p.add_argument("--force", action="store_true")
     sub.add_parser("list")
