@@ -191,4 +191,9 @@
 | iLQR(엄격18) | 성형 | 150_2.2_350_3.5 | 1.387 | 1.391 | 32.5% | 33.6% | 28.5% |
 | iLQR(엄격18) | 성형 | 150_2.2_500_4 | 1.387 | 1.388 | 35.4% | 33.6% | 40.9% |
 | iLQR(엄격18) | 성형 | 60_1.5_60_1.5 | 1.387 | 1.392 | 45.1% | 46.0% | 42.0% |
-| iLQR(엄격18) | 성형 | 90_1.5_90_2.5 | 1.387 | 1.394 | 42.3% | 42.8% | 40.6% |
+| iLQR(엄격18) | 성형 | 90_1.5_90_2.5 | 1.387 | 1.394 | 42.3% | 42.8% | 40.6% |C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_deploy\p25_e_summary.py:109: UserWarning: Glyph 8722 (\N{MINUS SIGN}) missing from font(s) Malgun Gothic.
+  fig.tight_layout()
+C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_deploy\p25_e_summary.py:110: UserWarning: Glyph 8722 (\N{MINUS SIGN}) missing from font(s) Malgun Gothic.
+  fig.savefig(HERE / f"p25_e_fig_scatter{SUF}.png", dpi=140)
+
+saved p25_e_master.json / p25_e_table.md / p25_e_fig_scatter.png / p25_e_fig_bars.png

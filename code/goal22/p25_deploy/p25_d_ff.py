@@ -67,7 +67,7 @@ def main():
     suf = "_t18" if T18 else ""
     plans = [p for p in sorted(set(HERE.glob("p25_[abc]_*.npz")) | set(HERE.glob("p25_a4_*.npz")))
              if all(s not in p.name for s in ("shaped", "plan", "golden", "fixedpoint"))
-             and p.stem.endswith("_t18") == T18]
+             and ("_t18" in p.stem) == T18]
     rows = {}
     print(f"{'계획(FF+PD)':28s} {'게인':5s} {'h_plan':>7s} {'h_PD':>7s} {'F_τ':>7s} {'hip':>7s} {'knee':>7s}")
     for src in plans:

@@ -78,7 +78,7 @@ def main():
     plans = [p for p in sorted(set(HERE.glob("p25_[abc]_*.npz")) | set(HERE.glob("p25_a4_*.npz")))
              if "shaped" not in p.name and "plan" not in p.name
              and "golden" not in p.name and "fixedpoint" not in p.name
-             and p.stem.endswith("_t18") == T18]
+             and ("_t18" in p.stem) == T18]
     rows = {}
     print(f"{'계획(성형)':28s} {'게인':5s} {'h_plan':>7s} {'h_PD':>7s} {'F_τ':>7s} {'hip':>7s} {'knee':>7s}")
     for src in plans:

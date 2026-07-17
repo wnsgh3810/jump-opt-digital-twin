@@ -40,7 +40,7 @@ OUT_PNG = HERE / f"p25_d_compare{SUF}.png"
 
 def scan_plans():
     ps = sorted(set(HERE.glob("p25_[abc]_*.npz")) | set(HERE.glob("p25_a4_*.npz")))
-    return [p for p in ps if p.stem.endswith("_t18") == T18]
+    return [p for p in ps if ("_t18" in p.stem) == T18]
 
 
 def _f(x, fmt):

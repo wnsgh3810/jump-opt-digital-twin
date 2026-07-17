@@ -29,6 +29,9 @@ METHOD = {
     "p25_b_traj": ("NLP", "CasADi collocation (해석 등가모델+법칙층)"),
     "p25_c_ppo": ("PPO", "RL 파일럿 (최종 정책)"),
     "p25_c_ppo_best": ("PPO(best)", "RL 파일럿 (최고 체크포인트)"),
+    "p25_a4_ilqr_strict": ("iLQR(엄격18)", "â≤18 전 구간 사영판"),
+    "p25_c_ppo_strict": ("PPO(엄격18)", "â≤18 전 구간 사영판"),
+    "p25_c_ppo_best_strict": ("PPO(best,엄격18)", "â≤18 전 구간 사영판"),
 }
 T18 = bool(os.environ.get("P25_T18"))
 SUF = "_t18" if T18 else ""
