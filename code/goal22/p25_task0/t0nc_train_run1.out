@@ -1,0 +1,46 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — dt=0.0005 law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms clip=25.581 crouch(task0)=(-0.3200,-2.5000) Q1R=(-1.2566,-0.2967) Q2R=(-2.5482,-0.6283) w_tn=50.0 w_dq=50.0 w_tau=50.0 m_tn=0.0 m_tau=0.0
+  golden A — 0602/60_0.75_60_2: dq2 RMSE=0.8903 h_sim=0.8966
+  golden A — 0602/60_1.5_60_1.5: dq2 RMSE=0.7416 h_sim=0.8824
+  golden A — 0602/90_0.75_90_2: dq2 RMSE=1.2248 h_sim=0.9510
+  golden A — 0602/120_2_120_2: dq2 RMSE=1.5531 h_sim=0.9238
+  golden A — 0602/150_2.2_250_3: dq2 RMSE=1.2513 h_sim=0.9002
+  golden A — 0602/150_2.2_500_5: dq2 RMSE=2.0494 h_sim=0.7890
+  golden A — session mean 1.2851 (canonical 1.2851) PASS
+  golden B — 0602/60_0.75_60_2 env vs cl_run23 (clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0602 재생 세션평균 / B: env 스텝 비트 일치, clip=25.581)
+PPO start — 1464 updates × batch 2048 (net 9541 params, clip=25.581)
+up   10 steps     20k  ret40  0.901  apex40 0.276  pen40 0.0214  det h 0.7551 (best 0.7551)  pen 0.0000  tnv 0.000  sat 0.00  bounce 1  std [0.571 0.548]
+up   20 steps     41k  ret40  1.069  apex40 0.276  pen40 0.0036  det h 0.9406 (best 0.9406)  pen 0.0000  tnv 0.000  sat 0.73  bounce 1  std [0.539 0.504]
+up   30 steps     61k  ret40  1.082  apex40 0.276  pen40 0.0001  det h 0.9691 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.88  bounce 1  std [0.525 0.488]
+up   40 steps     82k  ret40  1.093  apex40 0.276  pen40 0.0001  det h 0.9585 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.89  bounce 0  std [0.516 0.461]
+up   50 steps    102k  ret40  1.093  apex40 0.276  pen40 0.0233  det h 0.9095 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.83  bounce 0  std [0.475 0.458]
+up   60 steps    123k  ret40  1.085  apex40 0.276  pen40 0.0378  det h 0.8712 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.80  bounce 0  std [0.446 0.467]
+up   70 steps    143k  ret40  1.122  apex40 0.276  pen40 0.0230  det h 0.8186 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.79  bounce 0  std [0.426 0.453]
+up   80 steps    164k  ret40  1.173  apex40 0.276  pen40 0.0102  det h 0.7882 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.73  bounce 0  std [0.4  0.43]
+up   90 steps    184k  ret40  1.217  apex40 0.276  pen40 0.0276  det h 0.7682 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.69  bounce 0  std [0.374 0.401]
+up  100 steps    205k  ret40  1.271  apex40 0.276  pen40 0.0367  det h 0.7661 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.65  bounce 0  std [0.374 0.384]
+up  110 steps    225k  ret40  1.481  apex40 0.276  pen40 0.0343  det h 0.7842 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.59  bounce 0  std [0.355 0.36 ]
+up  120 steps    246k  ret40  2.656  apex40 0.779  pen40 0.0141  det h 0.7862 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.21  bounce 0  std [0.344 0.342]
+up  130 steps    266k  ret40  2.874  apex40 0.806  pen40 0.0226  det h 0.8157 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.23  bounce 0  std [0.355 0.334]
+up  140 steps    287k  ret40  2.903  apex40 0.813  pen40 0.0232  det h 0.8230 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.19  bounce 0  std [0.353 0.327]
+up  150 steps    307k  ret40  2.894  apex40 0.805  pen40 0.0258  det h 0.8089 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.19  bounce 0  std [0.356 0.326]
+up  160 steps    328k  ret40  2.818  apex40 0.785  pen40 0.0294  det h 0.7872 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.18  bounce 0  std [0.361 0.315]
+up  170 steps    348k  ret40  2.753  apex40 0.786  pen40 0.0703  det h 0.7902 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.20  bounce 0  std [0.35 0.31]
+up  180 steps    369k  ret40  2.719  apex40 0.773  pen40 0.0423  det h 0.7772 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.18  bounce 0  std [0.345 0.321]
+up  190 steps    389k  ret40  2.551  apex40 0.756  pen40 0.0724  det h 0.7526 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.18  bounce 0  std [0.338 0.321]
+up  200 steps    410k  ret40  2.523  apex40 0.742  pen40 0.0615  det h 0.7571 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.23  bounce 0  std [0.329 0.321]
+up  210 steps    430k  ret40  2.210  apex40 0.741  pen40 0.0381  det h 0.7320 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.17  bounce 0  std [0.322 0.317]
+up  220 steps    451k  ret40  2.556  apex40 0.737  pen40 0.0399  det h 0.7497 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.17  bounce 0  std [0.318 0.33 ]
+up  230 steps    471k  ret40  2.558  apex40 0.750  pen40 0.0377  det h 0.7708 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.26  bounce 0  std [0.319 0.315]
+up  240 steps    492k  ret40  2.564  apex40 0.746  pen40 0.0343  det h 0.7572 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.17  bounce 0  std [0.313 0.323]
+up  250 steps    512k  ret40  2.524  apex40 0.744  pen40 0.0288  det h 0.7396 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.22  bounce 0  std [0.309 0.319]
+up  260 steps    532k  ret40  2.436  apex40 0.725  pen40 0.0329  det h 0.7346 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.22  bounce 0  std [0.302 0.313]
+up  270 steps    553k  ret40  2.436  apex40 0.717  pen40 0.0378  det h 0.7254 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.16  bounce 0  std [0.299 0.301]
+up  280 steps    573k  ret40  2.381  apex40 0.708  pen40 0.0192  det h 0.7304 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.22  bounce 0  std [0.303 0.304]
+up  290 steps    594k  ret40  2.473  apex40 0.710  pen40 0.0165  det h 0.7110 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.22  bounce 0  std [0.302 0.293]
+up  300 steps    614k  ret40  2.351  apex40 0.697  pen40 0.0331  det h 0.6987 (best 0.9691)  pen 0.0000  tnv 0.000  sat 0.16  bounce 0  std [0.298 0.288]
+early stop: plateau (best 0.9691 이후 20회 미개선)
+done — steps 614400 wall 2.3min best_h 0.9691 (plateau (best 0.9691 이후 20회 미개선))
+curve saved: t0nc_ppo_curve.png

@@ -1,0 +1,40 @@
+saved t0nc_nlp_fig1.png
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [2s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+saved t0nc_nlp_fig1_gains.png
+saved t0nc_nlp_fig1_best.png
+saved t0nc_nlp_fig2.png
+saved t0nc_nlp_stick.png
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0nc_nlp.gif
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0nc_nlp_deploy.gif
+[t0nc_nlp] done — best 60_1.5_60_1.5 F_τ 9.0%
+saved t0nc_ol_fig1.png
+saved t0nc_ol_fig1_gains.png
+saved t0nc_ol_fig1_best.png
+saved t0nc_ol_fig2.png
+saved t0nc_ol_stick.png
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0nc_ol.gif
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0nc_ol_deploy.gif
+[t0nc_ol] done — best 60_1.5_60_1.5 F_τ 2.6%
+saved t0nc_cl_fig1.png
+saved t0nc_cl_fig1_gains.png
+saved t0nc_cl_fig1_best.png
+saved t0nc_cl_fig2.png
+saved t0nc_cl_stick.png
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0nc_cl.gif
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0nc_cl_deploy.gif
+[t0nc_cl] done — best 60_1.5_60_1.5 F_τ 14.4%
+saved t0wc_cl_li2508_fig1.png
+saved t0wc_cl_li2508_fig2.png
+saved t0wc_cl_li2508_stick.png
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0wc_cl_li2508.gif
+[t0wc_cl_li2508] done
+saved t0wc_ol_li2508_fig1.png
+saved t0wc_ol_li2508_fig2.png
+saved t0wc_ol_li2508_stick.png
+  saved animation: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_task0\t0wc_ol_li2508.gif
+[t0wc_ol_li2508] done
+saved t0wc_cl_li20_fig1.png
+saved t0wc_cl_li15_fig1.png
+ALL DONE

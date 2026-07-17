@@ -1,0 +1,18 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+seed: p25_a_res_cl_t18.json 사영  q0=(-0.2987, -2.5462) rad
+=== t0nc cl — clip ±25.581 (15Nm 등가), dim 16 ===
+seed f=38.9479
+  r0 it   25  nfev   401  best f=-0.4975  [40s]
+  r0 it   50  nfev   801  best f=-0.5445  [79s]
+  r0 it   75  nfev  1201  best f=-0.6447  [116s]
+  r0 it  100  nfev  1601  best f=-0.7913  [152s]
+  r0 it  125  nfev  2001  best f=-0.8284  [189s]
+  r0 it  150  nfev  2401  best f=-0.8400  [225s]
+  r0 it  175  nfev  2801  best f=-0.8441  [262s]
+  r0 it  200  nfev  3201  best f=-0.8487  [299s]
+  r0 it  225  nfev  3601  best f=-0.8508  [336s]
+round 0: h=0.9772 stance=0.220 audit_pass=True worst=tau_knee:-0.0000  [337s]
+h_plan=0.9772 m  (t18 1.3881 → Δ-41.1cm)  stance=0.220s  q0=(-17.6°, -145.1°)
+audit: tau_hip=-0.0812  tau_knee=-0.0000  tn_hip=-31.1274  tn_knee=-13.8361  dq_hip=-37.6810  dq_knee=-26.0444  q1_lo=-0.0025  q1_hi=-0.0042  q2_lo=-0.0049  q2_hi=-0.1064  PASS=True
+saved t0nc_cl.npz + t0nc_cl_audit.json [5.6m, evals=3617]

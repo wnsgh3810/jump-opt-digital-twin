@@ -1,0 +1,63 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[0] ahat(RAW15=25.581, v=+5) = 14.999976 Nm (기대 ~15.00)
+[1] 0429/60_0.75_60_2     dq2 RMSE=1.856
+[1] 0429/60_1.5_60_1.5    dq2 RMSE=2.134
+[1] 0429/90_0.75_90_2     dq2 RMSE=2.359
+[1] 0429/90_1.5_90_2.5    dq2 RMSE=2.344
+[1] 0429/120_2_120_2      dq2 RMSE=2.411
+[1] 0429/120_2.2_150_2.5  dq2 RMSE=2.485
+[1] 0429/120_2.2_200_2.8  dq2 RMSE=2.386
+[1] 0429/150_2.2_250_3    dq2 RMSE=3.390
+[1] 0429/150_2.2_350_3.5  dq2 RMSE=3.792
+[1] 0429/150_2.2_500_4    dq2 RMSE=2.898
+[1] session mean = 2.6057 (canonical 2.6057) PASS
+[2] 0429/60_0.75_60_2     mirror max|Δ|=0.000e+00
+[2] 0429/60_1.5_60_1.5    mirror max|Δ|=0.000e+00
+[2] 0429/90_0.75_90_2     mirror max|Δ|=0.000e+00
+GOLDEN PASS
+[cl/li20] round 0 esc=1 seed f=-0.4278
+  cl/li20 it   25  nfev   400  best f=-0.8871  [35s]
+  cl/li20 it   50  nfev   800  best f=-0.9503  [70s]
+  cl/li20 it   75  nfev  1200  best f=-0.9802  [105s]
+  cl/li20 it  100  nfev  1600  best f=-0.9868  [140s]
+  cl/li20 it  125  nfev  2000  best f=-0.9897  [175s]
+  cl/li20 it  150  nfev  2400  best f=-0.9909  [219s]
+  cl/li20 it  175  nfev  2800  best f=-0.9936  [255s]
+  cl/li20 it  200  nfev  3200  best f=-0.9960  [292s]
+[cl/li20] round 0 best f=-0.9962 audit_pass=False [294s]
+[cl/li20] round 1 esc=10 seed f=-0.9861
+  cl/li20 it   25  nfev   400  best f=-0.9792  [38s]
+  cl/li20 it   50  nfev   800  best f=-0.9891  [75s]
+  cl/li20 it   75  nfev  1200  best f=-0.9944  [112s]
+[cl/li20] round 1 best f=-0.9944 audit_pass=False [408s]
+[cl/li20] round 2 esc=100 seed f=-0.9930
+  cl/li20 it   25  nfev   400  best f=-0.9799  [37s]
+  cl/li20 it   50  nfev   800  best f=-0.9865  [77s]
+  cl/li20 it   75  nfev  1200  best f=-0.9918  [118s]
+[cl/li20] round 2 best f=-0.9918 audit_pass=False [527s]
+[cl/li20] h_plan=0.9922 m (rise 0.7246)  stance=0.057s  audit_pass=False  peak dq=(13.0,36.1)  peak tau=(15.00,15.00)  r=[-0.683,0.035]
+[ol/li20] round 0 esc=1 seed f=8205.3782
+  ol/li20 it   25  nfev   400  best f=-0.7047  [28s]
+  ol/li20 it   50  nfev   800  best f=-0.7047  [55s]
+  ol/li20 it   75  nfev  1200  best f=-0.7704  [83s]
+  ol/li20 it  100  nfev  1600  best f=-0.8497  [110s]
+  ol/li20 it  125  nfev  2000  best f=-0.8925  [137s]
+  ol/li20 it  150  nfev  2400  best f=-0.9109  [163s]
+  ol/li20 it  175  nfev  2800  best f=-0.9236  [190s]
+  ol/li20 it  200  nfev  3200  best f=-0.9295  [216s]
+  ol/li20 it  225  nfev  3600  best f=-0.9325  [242s]
+  ol/li20 it  250  nfev  4000  best f=-0.9326  [268s]
+[ol/li20] round 0 best f=-0.9326 audit_pass=False [270s]
+[ol/li20] round 1 esc=10 seed f=-0.9080
+  ol/li20 it   25  nfev   400  best f=-0.9152  [28s]
+  ol/li20 it   50  nfev   800  best f=-0.9168  [57s]
+  ol/li20 it   75  nfev  1200  best f=-0.9283  [86s]
+[ol/li20] round 1 best f=-0.9283 audit_pass=False [357s]
+[ol/li20] round 2 esc=100 seed f=-0.9278
+  ol/li20 it   25  nfev   400  best f=-0.8960  [27s]
+  ol/li20 it   50  nfev   800  best f=-0.9190  [52s]
+  ol/li20 it   75  nfev  1200  best f=-0.9234  [76s]
+[ol/li20] round 2 best f=-0.9234 audit_pass=True [434s]
+[ol/li20] h_plan=0.9234 m (rise 0.6533)  stance=0.127s  audit_pass=True  peak dq=(11.9,38.4)  peak tau=(15.00,15.00)  r=[-0.683,0.020]

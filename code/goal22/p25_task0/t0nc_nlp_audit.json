@@ -1,0 +1,136 @@
+{
+ "CAMPAIGN": "P25-task0 no_cvt (task0 constraint block on p25_b NLP / p24a twin)",
+ "constraints": {
+  "tau_axis_abs_max": 15.0,
+  "raw_box": 25.581,
+  "tn": "|dq| <= -0.731019*|ahat| + 48.476878",
+  "dq_abs_max": 50.0,
+  "q1": [
+   -1.2566,
+   -0.2967
+  ],
+  "q2": [
+   -2.5482,
+   -0.6283
+  ],
+  "start": "free pose in box + rest + static equilibrium (Fz(0)=M*g)",
+  "stance_max_s": 0.3,
+  "stance_mode": "fixed grid -> liftoff audit"
+ },
+ "nlp": {
+  "status": "converged",
+  "iters": 117,
+  "wall_s": 5.460059642791748,
+  "N": 121,
+  "dt": 0.005,
+  "horizon_s": 0.6,
+  "k_c": 130000.0,
+  "b_c": 180.0,
+  "objective": "G20 'Base via CoM v_z' (p25_b 동일)",
+  "warm_start": "p25_b_traj_t18.npz projected to task0 box",
+  "enforce_tst_2nd_solve": false
+ },
+ "start": {
+  "q1_0": -0.3116479141622368,
+  "q2_0": -2.4897818547713957,
+  "bz0": 0.2058255815988776,
+  "note": "자유 최적화 결과 (t18은 0602 웅크림 고정 = 박스 밖이었음)"
+ },
+ "results": {
+  "h_plan": 0.8866697672487106,
+  "h_twin_rollout": 0.90123193623293,
+  "gap_pct": 1.64234414232991,
+  "plan_twin_stance_qRMSE": 0.0734017653536901,
+  "vz_com_T": -0.47209004703946467,
+  "t18_ref": {
+   "h_plan": 1.0703,
+   "h_twin": 1.0273
+  },
+  "dh_plan_vs_t18": -0.18363023275128942
+ },
+ "stance": {
+  "liftoff_plan_s": 0.245,
+  "liftoff_twin_s": 0.24849999999999994,
+  "limit_s": 0.3,
+  "pass_plan": true,
+  "pass_twin": true
+ },
+ "audit_plan": {
+  "tau_hip": -2.395294588986019e-05,
+  "tau_knee": -2.3805723463610207e-05,
+  "tn_hip": -29.520605793349254,
+  "tn_knee": -21.011216986707865,
+  "dq_hip": -41.31468546669193,
+  "dq_knee": -29.201778792643776,
+  "q1_lo": 9.993467164903791e-09,
+  "q1_hi": 1.2739005683659599e-08,
+  "q2_lo": 2.5481566634510955e-08,
+  "q2_hi": 9.9994232893863e-09,
+  "pass": true
+ },
+ "audit_twin_rollout": {
+  "tau_hip": -2.395294588986019e-05,
+  "tau_knee": -2.3805723463610207e-05,
+  "tn_hip": -29.503278842889124,
+  "tn_knee": -20.70249237371234,
+  "dq_hip": -39.47774900529727,
+  "dq_knee": -29.315536616988652,
+  "q1_lo": 0.2427428965025673,
+  "q1_hi": 0.021216277047000187,
+  "q2_lo": 9.505538437792893e-05,
+  "q2_hi": 0.014414751958997107,
+  "pass": false
+ },
+ "tn_active_plan": {
+  "hip_active_pct_stance": 0.0,
+  "knee_active_pct_stance": 0.0,
+  "hip_active_pct_all": 0.0,
+  "knee_active_pct_all": 0.0,
+  "hip_min_margin_rads": 29.520605793349254,
+  "knee_min_margin_rads": 21.011216986707865,
+  "active_tol_rads": 0.5
+ },
+ "tn_active_twin": {
+  "hip_active_pct_stance": 0.0,
+  "knee_active_pct_stance": 0.0,
+  "hip_active_pct_all": 0.0,
+  "knee_active_pct_all": 0.0,
+  "hip_min_margin_rads": 29.503278842889124,
+  "knee_min_margin_rads": 20.70249237371234,
+  "active_tol_rads": 0.5
+ },
+ "peaks": {
+  "s1_absmax": 14.99997604705411,
+  "s2_absmax": 14.999976194276536,
+  "raw1_absmax": 25.58100063944846,
+  "raw2_absmax": 25.58100090859358,
+  "dq1_absmax": 8.685314533308071,
+  "dq2_absmax": 20.798221207356224,
+  "grf_max": 118.5971653124818,
+  "grf_twin_max": 920.3556933849351,
+  "ceiling_ride_pct_stance": [
+   20.408163265306122,
+   32.6530612244898
+  ],
+  "raw_le_clip_ok": true
+ },
+ "eom": {
+  "basis_rel_resid": {
+   "M": 8.145223963870147e-15,
+   "G": 9.506502788204648e-15,
+   "F": 6.289568539615672e-15,
+   "phi": 1.3802292642139946e-11
+  },
+  "air_rollout_check": {
+   "q_err_max": 0.00759790123281201,
+   "q_err_mean": 0.0010859495438465946,
+   "horizon_s": 0.1,
+   "n": 5
+  }
+ },
+ "notes": [
+  "audit_twin은 개루프 â replay의 실현 궤적 감사 — 플랜 준수여도 트윈 편차로 위반 가능",
+  "T-N/|dq| 매끈화(sqrt(x²+ε²), ε=0.05)는 보수측 — 정확 fabs 감사가 기준",
+  "raw 공급 박스(25.5810)와 |â|≤15 박스 공존 — 제동 가지는 박스가 지배"
+ ]
+}

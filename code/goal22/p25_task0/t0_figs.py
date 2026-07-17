@@ -26,15 +26,24 @@ TN_C, TN_O = S.TN_COEF, S.TN_OFF
 
 
 def _chan(z):
-    """npz → dict(t,bz,dz,q1,q2,dq1,dq2,tau1,tau2,grf) (t≥0, â Nm 채널)."""
+    """npz → dict(t,bz,dz,q1,q2,dq1,dq2,tau1,tau2,grf) (t≥0, â Nm 채널).
+    쌍(pair)·행렬(Phase B: q/dq/tau_cmd_nm (N,2)) 스키마 겸용."""
     t = np.asarray(z["t"], float)
     m = t >= 0
     t = t[m] - t[m][0]
-    g = lambda k: np.asarray(z[k], float)[m]
-    bz = g("bz")
-    return dict(t=t, bz=bz, dz=np.gradient(bz, t), q1=g("q1"), q2=g("q2"),
-                dq1=g("dq1"), dq2=g("dq2"), tau1=g("tau1_nm"), tau2=g("tau2_nm"),
-                grf=g("grf"))
+    if "q1" in z.files:
+        g = lambda k: np.asarray(z[k], float)[m]
+        bz = g("bz")
+        return dict(t=t, bz=bz, dz=np.gradient(bz, t), q1=g("q1"), q2=g("q2"),
+                    dq1=g("dq1"), dq2=g("dq2"), tau1=g("tau1_nm"), tau2=g("tau2_nm"),
+                    grf=g("grf"))
+    col = lambda k, j: np.asarray(z[k], float)[m][:, j]
+    bz = np.asarray(z["bz"], float)[m]
+    grf = (np.asarray(z["fz_plan"], float)[m] if "fz_plan" in z.files
+           else np.asarray(z["grf"], float)[m])
+    return dict(t=t, bz=bz, dz=np.gradient(bz, t), q1=col("q", 0), q2=col("q", 1),
+                dq1=col("dq", 0), dq2=col("dq", 1),
+                tau1=col("tau_cmd_nm", 0), tau2=col("tau_cmd_nm", 1), grf=grf)
 
 
 def _log_chan(L):
