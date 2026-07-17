@@ -16,12 +16,18 @@ p25_a_cma_cl의 복사-변형. 동일 골든 배선(p25_a_twin) · 동일 g_high
 산출: p25_a_clt.npz (Phase D 스캔 규약 p25_[abc]_*.npz — save_npz 공통 스키마 +
 qd/dqd/knots) + p25_a_res_clt.json (h_plan · stats · 페널티 잔차 · 사용 dq 한계).
 p25_a_results.json은 건드리지 않음 (append-safe — 별도 파일).
+
+멀티스타트: `python p25_a_cma_cl_trust.py [meas|clcma]` — meas(기본) = 0602 측정
+desired 시드, clcma = 무제약 cl_cma 최적 매듭(p25_a_results.json methods.cl_cma) 시드
+(페널티가 트러스트 리전 안으로 끌어당김). 저장은 기존 p25_a_res_clt.json h_plan보다
+좋을 때만 덮어씀 (베스트 유지 — 멀티스타트 안전).
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "2")   # 동시 작업 배려 — import 전 설정
 
 import p25_a_twin as TW          # env 플래그는 TW import가 설정
 
+import sys
 import time
 from pathlib import Path
 
@@ -100,9 +106,11 @@ def qd_grids(free, q0):
 def main():
     safe.utf8_console()
     global TG
+    seed_mode = sys.argv[1] if len(sys.argv) > 1 else "meas"
+    assert seed_mode in ("meas", "clcma"), f"seed_mode={seed_mode}"
     t0 = time.time()
     print("=== p25_a_cma_cl_trust — 트러스트 리전 폐루프 q_des CMA "
-          "(g_high 150/2.2/500/4) ===", flush=True)
+          f"(g_high 150/2.2/500/4, seed={seed_mode}) ===", flush=True)
     lim = dq_limits()
     print(f"dq trust(+10%): dq1=[{lim['dq1'][0]:.2f}, {lim['dq1'][1]:.2f}]  "
           f"dq2=[{lim['dq2'][0]:.2f}, {lim['dq2'][1]:.2f}] rad/s", flush=True)
@@ -114,12 +122,19 @@ def main():
     lo = np.array([e["q1"][0]] * (NK - 1) + [e["q2"][0]] * (NK - 1))
     hi = np.array([e["q1"][1]] * (NK - 1) + [e["q2"][1]] * (NK - 1))
 
-    # 시드: 0602 측정 desired 궤적 (|dq2| 피크를 0.3 s 지점에 정렬) — 원본 동일
-    d0 = tw["d0"]; t = d0["t"]
-    tp = float(t[int(np.argmax(np.abs(d0["dq2"])))])
-    ts = tp - 0.3
-    seed1 = np.interp(ts + KT_[1:], t, d0["qd1"])
-    seed2 = np.interp(ts + KT_[1:], t, d0["qd2"])
+    if seed_mode == "clcma":
+        # 시드: 무제약 cl_cma 최적 매듭 (지지 밖 전략 — 페널티가 안으로 끌어당김)
+        p = safe.read_json(HERE / "p25_a_results.json")["methods"]["cl_cma"]["params"]
+        assert np.allclose(p["knot_t"], KT_), "cl_cma knot_t 불일치"
+        seed1 = np.asarray(p["knots_qd1"][1:], float)
+        seed2 = np.asarray(p["knots_qd2"][1:], float)
+    else:
+        # 시드: 0602 측정 desired 궤적 (|dq2| 피크를 0.3 s 지점에 정렬) — 원본 동일
+        d0 = tw["d0"]; t = d0["t"]
+        tp = float(t[int(np.argmax(np.abs(d0["dq2"])))])
+        ts = tp - 0.3
+        seed1 = np.interp(ts + KT_[1:], t, d0["qd1"])
+        seed2 = np.interp(ts + KT_[1:], t, d0["qd2"])
     x0 = np.clip(np.concatenate([seed1, seed2]), lo + 1e-6, hi - 1e-6)
 
     nfev = [0]; ncrash = [0]

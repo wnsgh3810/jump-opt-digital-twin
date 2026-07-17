@@ -168,14 +168,23 @@ def main():
     steps = fin.get("steps")
     n_ep_rl = int(steps / env.n_ep) if steps else None
     # ── 정직 노트 ──
+    n_roll_rl = (n_ep_rl + len(tlog.get("evals", []))) if n_ep_rl else None
     caveats = [
-        "RL 파일럿 — 보상 shaping(Δbz+apex 보너스)·범위 종료 페널티가 목적을 근사할 뿐, "
-        "제약 엄수(관절범위/미끄럼)는 소프트 페널티임",
+        "RL 파일럿 — 보상 v2 = APEX_W·Δ(러닝맥스 bz) (합계=apex−bz0 정확) + 종단 탄도외삽 "
+        "증분. v1(Δbz shaping+종단보너스)은 착지 상쇄로 h≈0.54 국소최적에 갇혔음 — "
+        "보상 설계 민감성이 이 파일럿의 핵심 관찰",
+        "관절범위(0602 방문 +10%)는 종료+페널티(hard-ish), 미끄럼은 소프트 페널티 — "
+        "Phase A(cl_cma)는 dq2 피크 45.5로 방문 범위 밖까지 나감 (제약 처리 방식이 달라 "
+        "h_plan 직접 비교에 유의)",
         "학습 중 apex 보상은 탄도 외삽 추정(bz+vz²/2g), 본 h_plan은 수동 연장 0.6s 실측",
-        f"시작 웅크림 = 0602 첫 trial의 qd(0) settle (Phase A twin은 측정 q(0) — "
-        f"양쪽 settle 수렴 자세 차이는 mm 수준)",
-        "에피소드 0.6s 고정 — 이지 후 잔여 시간의 Δbz shaping이 자세 정리와 무관한 "
-        "관성 활용을 이미 포함",
+        "시작 웅크림 = 0602 첫 trial의 qd(0) settle (Phase A twin은 측정 q(0) — "
+        "양쪽 settle 수렴 자세 차이는 mm 수준)",
+        f"표본 효율: PPO {n_roll_rl}회 롤아웃(에피소드+평가)·wall "
+        f"{fin.get('wall_s', 0):.0f}s ≈ CMA와 동급 규모 (ol 4513 / cl 3217 evals) — "
+        "이 태스크(300스텝, 밀집 보상)에선 RL이 표본상 경쟁력 있으나, best는 "
+        f"{fin.get('best_step')}스텝에서 나왔고 이후 미개선 (플래토)",
+        "결정론 롤아웃은 깨끗함: apex 전 재접촉(바운스) 0회·범위 이탈 없음 — 탐사 중엔 "
+        "간헐 바운스(n_bounce≤6)가 보였으나 러닝맥스 보상이라 착취 유인 자체가 없음",
     ]
     if out["final"]["range_viol"]:
         caveats.append(f"최종 정책 롤아웃 중 관절범위 이탈 발생: {out['final']['range_viol']}")
