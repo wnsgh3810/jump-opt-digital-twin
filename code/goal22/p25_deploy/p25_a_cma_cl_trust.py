@@ -184,6 +184,16 @@ def main():
     print(f"trust residuals: pen_dq={p_dq:.3e} rad  retouch={p_bnc * 1000:.1f} ms "
           f"({n_re} samples)  env_pen={stats['env_pen']:.3e} rad*s", flush=True)
 
+    # 베스트 유지: 기존 산출물이 더 높으면 덮어쓰지 않음 (멀티스타트 안전)
+    res_path = HERE / "p25_a_res_clt.json"
+    if res_path.exists():
+        prev = safe.read_json(res_path)
+        if float(prev.get("h_plan", -1)) >= h_plan:
+            print(f"기존 베스트 유지 (prev h_plan={prev['h_plan']:.4f} >= "
+                  f"{h_plan:.4f}) — 저장 생략 [{(time.time() - t0) / 60:.1f}m]",
+                  flush=True)
+            return
+
     # qd/dqd를 로그 시간축(settle 포함)으로 확장 저장 (t<0 = 시작값, t>0.6 = 유지)
     tl = Lg["t"]
     qd_l = [np.interp(np.clip(tl, 0.0, TW.T_END), TG, g) for g in (g1, g2)]
@@ -212,7 +222,7 @@ def main():
                    air_min_s=AIR_MIN_S, grf_contact_N=GRF_CONTACT),
         evals=nfev[0], crashes=ncrash[0],
         crash_rate=ncrash[0] / max(nfev[0], 1), f_best=fb, f_seed=float(f0),
-        gains=list(TW.G_HIGH),
+        seed_mode=seed_mode, gains=list(TW.G_HIGH),
         params=dict(knot_t=[float(a) for a in KT_],
                     knots_qd1=[float(a) for a in np.concatenate([[q0[0]], xb[:NK - 1]])],
                     knots_qd2=[float(a) for a in np.concatenate([[q0[1]], xb[NK - 1:]])]),
