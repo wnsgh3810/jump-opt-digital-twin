@@ -28,7 +28,7 @@ import p25_d_deploy as D
 import p23_v6_runners as RU
 
 
-def deploy_ff(npz_path, gains_key):
+def deploy_ff(npz_path, gains_key, return_log=False):
     D.setup()
     g4 = D.GAINS[gains_key]
     plan = D.load_plan(npz_path)
@@ -59,6 +59,9 @@ def deploy_ff(npz_path, gains_key):
         return dict(crash=True, plan=str(npz_path), gains=gains_key)
     out = D.metrics_of(L, plan)
     out.update(plan=Path(npz_path).name, gains=gains_key, mode="FF+PD")
+    if return_log:
+        out["log"] = L
+        out["_plan"] = plan
     return out
 
 
