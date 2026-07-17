@@ -15,15 +15,39 @@ import time
 from pathlib import Path
 import sys
 
+import numpy as np
+
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
 import safe
+
+
+def npz_stats(path):
+    """npz에서 정직 재계산: 최종 이지 시각(마지막 grf>1N, t≤0.6) · 반동(카운터무브)
+    여부(초기 무하중 창) · apex 시각. stats_of의 t_liftoff(첫 grf<1N)는 반동 전략에서
+    오독 — 여기 값이 정본."""
+    z = np.load(path)
+    t, grf, bz = z["t"], z["grf"], z["bz"]
+    on = grf > 1.0
+    idx = np.where(on & (t <= 0.6))[0]
+    t_lo = float(t[idx[-1]]) if len(idx) else float("nan")
+    early_air = np.where(~on & (t > 0) & (t < t_lo))[0]
+    m = t > 0
+    return dict(t_liftoff_final=t_lo,
+                countermove=bool(len(early_air) > 10),
+                t_unload=[float(t[early_air[0]]), float(t[early_air[-1]])]
+                if len(early_air) > 10 else None,
+                bz_min=float(bz[m].min()), t_apex=float(t[np.argmax(bz)]))
 
 FILES = dict(ol_cma="p25_a_res_ol.json", mppi="p25_a_res_mppi.json",
              cl_cma="p25_a_res_cl.json")
 BASE = dict(h_real_best=0.98, h_g20_nlp=1.063,
             note="실측 최고 0.98 m (0602) · G20(P19 트윈) NLP apex 1.063 m — "
                  "p24a 트윈 재산정이 이 마라톤 베이스라인")
+# fit 세션(0421/0424/0602) 측정 dq 지지범위 (p25_a_twin.twin() 트라이얼에서 산출 —
+# 외삽 정도 판정용; hip 8~14 rad/s = G20 미개척 대역)
+DQ_SUPPORT = dict(dq1=[-14.0, 1.2], dq2=[-15.0, 29.6],
+                  note="측정 fit 세션 전 트레이스 min/max [rad/s]")
 
 
 def main():
@@ -34,6 +58,7 @@ def main():
         p = HERE / fn
         if p.exists():
             methods[m] = safe.read_json(p)
+            methods[m]["stats"].update(npz_stats(HERE / methods[m]["npz"]))
         else:
             print(f"WARN: {fn} 없음 — 건너뜀", flush=True)
     out = dict(
@@ -50,6 +75,16 @@ def main():
                   objective="max base-z apex (t>0 절대 bz — h_real 직접 비교 규약)",
                   slip="수직 레일 1-DOF 베이스 — 수평 DOF 없음, 미끄럼 제약 자동 충족"),
         baselines=BASE,
+        dq_support_measured=DQ_SUPPORT,
+        caveats=[
+            "cl_cma 해는 접촉 다중 바운스 펌핑 + dq 외삽 (dq1 -21.9, dq2 -42..+45.5 "
+            "rad/s vs 측정 지지 dq1 -14..1.2 / dq2 -15..29.6) — 트윈 신뢰구간 밖 전략, "
+            "물리 신빙성은 ol/mppi보다 낮음 (Phase D 배포·비교로 판정)",
+            "ol_cma도 반동(드롭-캐치) 전략 — dq 외삽은 경미 (dq1 14.7 / dq2 33.5)",
+            "포락선 위반 페널티는 소프트 (PEN_W=10/rad·s) — 잔여 위반 env_pen 참조 "
+            "(전 방법 ≤0.05 rad·s)",
+            "천장 라이딩 실증: ol/cl 양 관절 |raw|=35.5 도달 (G20 헤드룸 예상과 합치), "
+            "Nm 환산 피크 20.23 = ahat 체인 포화값"],
         methods=methods)
     safe.atomic_json_write(HERE / "p25_a_results.json", out)
     print("=== p25_a_results.json ===", flush=True)

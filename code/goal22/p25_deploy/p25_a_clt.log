@@ -1,0 +1,8 @@
+=== p25_a_cma_cl_trust — 트러스트 리전 폐루프 q_des CMA (g_high 150/2.2/500/4) ===
+dq trust(+10%): dq1=[-15.52, 2.72]  dq2=[-19.46, 34.06] rad/s
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+seed f=-0.6084
+  it   25  nfev   401  best f=-0.6138  [42s]
+  it   50  nfev   801  best f=-0.6391  [82s]

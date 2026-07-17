@@ -9,3 +9,11 @@ init [2s] dt=0.0005
   pilot λ=3.0 (S=128) ...
     λ=3.0: h=0.8228 m  crash_samples=5
 λ* = 0.3 → 본판 S=256
+    replan 10/60  bz=0.172  vz=-0.04  best J=-1.045  [27s]
+    replan 20/60  bz=0.198  vz=0.93  best J=-1.057  [53s]
+    replan 30/60  bz=0.415  vz=3.62  best J=-1.064  [74s]
+    replan 40/60  bz=0.717  vz=2.42  best J=-1.027  [88s]
+    replan 50/60  bz=0.909  vz=1.43  best J=-1.028  [97s]
+    replan 60/60  bz=1.006  vz=0.49  best J=-1.024  [100s]
+h_plan=1.0178 m  peak raw=(17.7, 35.5)  peak dq=(12.5, 24.1)  ceil_frac=(0.00, 0.01)  crash_samples=12/15360
+saved p25_a_mppi.npz + p25_a_res_mppi.json [4.3m]

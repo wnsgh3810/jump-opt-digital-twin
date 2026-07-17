@@ -1,0 +1,34 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — dt=0.0005 law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms crouch(sub=60_0.75_60_2)=(-0.2967,-2.5481) Q1R=(-1.378,-0.154) Q2R=(-2.811,-0.329)
+  golden A — 0602/60_0.75_60_2: dq2 RMSE=0.8903 h_sim=0.8966
+  golden A — 0602/60_1.5_60_1.5: dq2 RMSE=0.7416 h_sim=0.8824
+  golden A — 0602/90_0.75_90_2: dq2 RMSE=1.2248 h_sim=0.9510
+  golden A — 0602/120_2_120_2: dq2 RMSE=1.5531 h_sim=0.9238
+  golden A — 0602/150_2.2_250_3: dq2 RMSE=1.2513 h_sim=0.9002
+  golden A — 0602/150_2.2_500_5: dq2 RMSE=2.0494 h_sim=0.7890
+  golden A — session mean 1.2851 (canonical 1.2851) PASS
+  golden B — 0602/60_0.75_60_2 env vs cl_run23 max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0602 재생 세션평균 / B: env 스텝 비트 일치)
+PPO start — 1464 updates × batch 2048 (net 9541 params)
+up   10 steps     20k  ret40  1.046  apex40 0.247  det h 0.6331 (best 0.6331)  sat 0.00  bounce 3  std [0.638 0.54 ]
+up   20 steps     41k  ret40  1.532  apex40 0.372  det h 0.6333 (best 0.6333)  sat 0.07  bounce 0  std [0.624 0.525]
+up   30 steps     61k  ret40  1.933  apex40 0.607  det h 0.6568 (best 0.6568)  sat 0.09  bounce 0  std [0.607 0.541]
+up   40 steps     82k  ret40  2.222  apex40 0.660  det h 0.7341 (best 0.7341)  sat 0.11  bounce 0  std [0.592 0.537]
+up   50 steps    102k  ret40  2.354  apex40 0.671  det h 0.7318 (best 0.7341)  sat 0.13  bounce 0  std [0.577 0.526]
+up   60 steps    123k  ret40  2.498  apex40 0.709  det h 0.7687 (best 0.7687)  sat 0.14  bounce 0  std [0.577 0.507]
+up   70 steps    143k  ret40  2.708  apex40 0.747  det h 0.7717 (best 0.7717)  sat 0.15  bounce 1  std [0.579 0.515]
+up   80 steps    164k  ret40  2.658  apex40 0.759  det h 0.7697 (best 0.7717)  sat 0.15  bounce 3  std [0.583 0.518]
+up   90 steps    184k  ret40  2.777  apex40 0.759  det h 0.8278 (best 0.8278)  sat 0.19  bounce 1  std [0.553 0.516]
+up  100 steps    205k  ret40  3.142  apex40 0.827  det h 0.9092 (best 0.9092)  sat 0.26  bounce 0  std [0.556 0.497]
+up  110 steps    225k  ret40  3.484  apex40 0.869  det h 1.1183 (best 1.1183)  sat 0.38  bounce 0  std [0.542 0.495]
+up  120 steps    246k  ret40  4.013  apex40 0.907  det h 1.1908 (best 1.1908)  sat 0.34  bounce 1  std [0.532 0.504]
+up  130 steps    266k  ret40  4.479  apex40 0.981  det h 1.2451 (best 1.2451)  sat 0.32  bounce 0  std [0.525 0.514]
+up  140 steps    287k  ret40  4.900  apex40 1.182  det h 1.2319 (best 1.2451)  sat 0.33  bounce 0  std [0.533 0.525]
+up  150 steps    307k  ret40  4.925  apex40 1.220  det h 1.2627 (best 1.2627)  sat 0.24  bounce 1  std [0.533 0.539]
+up  160 steps    328k  ret40  4.982  apex40 1.228  det h 1.2925 (best 1.2925)  sat 0.32  bounce 0  std [0.523 0.541]
+up  170 steps    348k  ret40  4.226  apex40 1.289  det h 1.2934 (best 1.2934)  sat 0.90  bounce 3  std [0.525 0.538]
+up  180 steps    369k  ret40  5.307  apex40 1.286  det h 1.2638 (best 1.2934)  sat 0.30  bounce 4  std [0.519 0.526]
+up  190 steps    389k  ret40  5.355  apex40 1.273  det h 1.3008 (best 1.3008)  sat 0.32  bounce 0  std [0.498 0.529]
+up  200 steps    410k  ret40  5.221  apex40 1.243  det h 1.2578 (best 1.3008)  sat 0.25  bounce 0  std [0.484 0.516]
+up  210 steps    430k  ret40  5.097  apex40 1.223  det h 1.2559 (best 1.3008)  sat 0.31  bounce 1  std [0.471 0.504]

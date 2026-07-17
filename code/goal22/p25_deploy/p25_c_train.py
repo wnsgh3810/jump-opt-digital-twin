@@ -42,13 +42,13 @@ CLIP_EPS = 0.2
 EPOCHS = 10
 MB = 256
 LR0, LR1 = 3e-4, 1e-4
-ENT_COEF = 1e-3
+ENT_COEF = 3e-3
 VF_COEF = 0.5
 GRAD_CLIP = 0.5
-LOG_STD0 = np.log(0.5)
+LOG_STD0 = np.log(0.6)
 EVAL_EVERY = 10          # 업데이트 단위
 PLATEAU_AFTER = 600_000
-PLATEAU_PATIENCE = 15    # det-eval 횟수
+PLATEAU_PATIENCE = 20    # det-eval 횟수
 PLATEAU_DELTA = 0.005    # [m]
 
 
@@ -63,9 +63,13 @@ class ActorCritic(nn.Module):
                                nn.Linear(hid, 1))
         self.log_std = nn.Parameter(torch.full((act_dim,), float(LOG_STD0)))
 
+    def mean(self, obs):
+        """결정론 액션 — 선형 평균 (v2: tanh 스쿼시 제거 — 천장 ±1 도달성 확보,
+        env가 [−1,1] 클립). 초기 가중치가 작아 시작 평균 ≈ 0."""
+        return self.pi(obs)
+
     def dist(self, obs):
-        mu = torch.tanh(self.pi(obs))
-        return torch.distributions.Normal(mu, self.log_std.exp())
+        return torch.distributions.Normal(self.mean(obs), self.log_std.exp())
 
     def value(self, obs):
         return self.v(obs).squeeze(-1)
@@ -78,7 +82,7 @@ def det_eval(env, ac):
     info = {}
     while True:
         with torch.no_grad():
-            mu = torch.tanh(ac.pi(torch.as_tensor(obs, dtype=torch.float32)))
+            mu = ac.mean(torch.as_tensor(obs, dtype=torch.float32))
         obs, r, done, info = env.step(mu.numpy())
         ep_ret += r
         if done:
@@ -127,11 +131,12 @@ def main():
     log = dict(golden=golden, updates=[], evals=[], hyper=dict(
         n_envs=N_ENVS, t_roll=T_ROLL, total_steps=TOTAL_STEPS, gamma=GAMMA,
         lam=LAM, clip=CLIP_EPS, epochs=EPOCHS, mb=MB, lr=[LR0, LR1],
-        ent=ENT_COEF, vf=VF_COEF, log_std0=float(LOG_STD0), net="MLP 2x64 tanh",
-        n_params=int(n_par),
-        reward=dict(shaping="d_bz", apex_bonus=EV.APEX_BONUS, tau_pen=EV.TAU_PEN,
-                    slip_pen=EV.SLIP_PEN, range_pen=EV.RANGE_PEN,
-                    crash_pen=EV.CRASH_PEN)))
+        ent=ENT_COEF, vf=VF_COEF, log_std0=float(LOG_STD0),
+        net="MLP 2x64 tanh (mean linear out, v2)", n_params=int(n_par),
+        reward=dict(shaping="APEX_W*d(running_max_bz) v2", apex_w=EV.APEX_W,
+                    terminal="APEX_W*max(0, ballistic_apex - running_max)",
+                    tau_pen=EV.TAU_PEN, slip_pen=EV.SLIP_PEN,
+                    range_pen=EV.RANGE_PEN, crash_pen=EV.CRASH_PEN)))
     best_h, best_state, best_step = -1.0, None, 0
     ep_rets = [0.0] * N_ENVS
     fin_ret, fin_apex, fin_sat = [], [], []
@@ -221,6 +226,11 @@ def main():
                 best_h = ev["h_eval"]
                 best_state = {k: v.clone() for k, v in ac.state_dict().items()}
                 best_step = steps_done
+            # 매 eval 체크포인트 (외부 kill 대비 — final 슬롯에 현 상태)
+            torch.save(dict(final=ac.state_dict(), best=best_state, best_h=best_h,
+                            best_step=best_step, steps=steps_done,
+                            hyper=log["hyper"]),
+                       os.path.join(HERE, "p25_c_policy.pt"))
             print(f"up {up:4d} steps {steps_done / 1e3:6.0f}k  ret40 {mret:6.3f}  "
                   f"apex40 {mapex:.3f}  det h {ev['h_eval']:.4f} "
                   f"(best {best_h:.4f})  sat {ev['sat_frac']:.2f}  "
@@ -281,7 +291,7 @@ def make_curve(log):
     print("curve saved: p25_c_curve.png", flush=True)
 
 
-import safe  # noqa: E402  (p25_c_env가 bench 경로 주입 완료)
-
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        TOTAL_STEPS = int(sys.argv[1])          # smoke: python p25_c_train.py 40960
     main()

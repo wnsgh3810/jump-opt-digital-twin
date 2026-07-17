@@ -1,0 +1,103 @@
+{
+ "PHASE": "p25_B_analytic_NLP",
+ "twin": "fourbar_p24a_candidate.json",
+ "nlp": {
+  "N": 121,
+  "dt": 0.005,
+  "horizon_s": 0.6,
+  "k_c": 130000.0,
+  "b_c": 180.0,
+  "mu": 1.0,
+  "transcription": "trapezoidal direct collocation (G20 관례)",
+  "objective": "bz(T) + max(vz_com,0)^2/2g (G20 'Base via CoM v_z')",
+  "eps": {
+   "abs_Nm": 0.05,
+   "min": 0.1,
+   "fric_v": 0.05,
+   "sgn_v": 0.5,
+   "contact_m": 0.0001,
+   "slip_band_m": 0.003
+  },
+  "supply": "conservative envelope u∈[ahat(-35.5,v), ahat(+35.5,v)], tanh(v/0.5) smoothed sgn",
+  "start": {
+   "trial": "jump_0602/120_2_120_2",
+   "q1_0": -0.2778450628115108,
+   "q2_0": -2.574649171033178,
+   "bz0": 0.18560156563929858,
+   "delta_static_mm": 0.2414767721538461
+  },
+  "joint_cage": {
+   "q1": [
+    -1.4931502004457882,
+    -0.14364229639305376
+   ],
+   "q2": [
+    -2.8923043529179435,
+    -0.17909787098434968
+   ],
+   "note": "무변속 점프 세션 방문범위 +10% span"
+  },
+  "status": "converged",
+  "iters": 141,
+  "wall_s": 6.274327993392944
+ },
+ "eom": {
+  "method": "numeric fit of reduced M/G/FK on p24a MuJoCo model (parallelogram exact linear map [bz,j1,j2,-j2,j2])",
+  "basis_rel_resid": {
+   "M": 7.0828034468436066e-15,
+   "G": 9.959193397166774e-15,
+   "F": 5.1373383404092e-15,
+   "phi": 9.562128866491548e-12
+  },
+  "air_rollout_check": {
+   "q_err_max": 0.018767673030145815,
+   "q_err_mean": 0.0021571874975761574,
+   "horizon_s": 0.1,
+   "n": 5
+  }
+ },
+ "results": {
+  "h_plan": 1.1302040646878855,
+  "h_twin_rollout": 1.0765134606408826,
+  "gap_pct": -4.7505230006255506,
+  "plan_twin_stance_qRMSE": 0.13330535195757842,
+  "vz_com_T": 0.22664146148632655
+ },
+ "sensitivity_kc": {
+  "k_c": 44300.0,
+  "b_c": 90.0,
+  "h_plan": 1.1787200487216107,
+  "h_twin": 1.115450686018467,
+  "gap_pct": -5.36763269376499,
+  "status": "converged",
+  "iters": 51
+ },
+ "peaks": {
+  "s1_absmax": 20.23386722035948,
+  "s2_absmax": 20.233901489702568,
+  "raw1_absmax": 35.50000001903717,
+  "raw2_absmax": 35.50006743509358,
+  "dq1_absmax": 11.642966151844371,
+  "dq2_absmax": 26.582012532987953,
+  "grf_max": 145.75390019372998,
+  "grf_twin_max": 1147.286306758358,
+  "liftoff_plan_s": 0.245
+ },
+ "references": {
+  "G20_realized_m": 1.063,
+  "real_best_0602_m": 0.98,
+  "modeA_replay_this_trial_m": 0.924
+ },
+ "k_eq_p24a": {
+  "secant": 44300.0,
+  "local_jump_loads": 110000.0,
+  "note": "하중스윕 0.5~8g — solimp 비선형 (저부하 연화); G20 1.3e5는 점프 하중대 국소 기울기와 근접"
+ },
+ "caveats": [
+  "frictionloss tanh 매끈화 — MuJoCo 정확 stiction과 저속 교차 시 차이",
+  "접촉: NLP 선형 스프링-댐퍼 vs 트윈 solimp 비선형 임피던스 (감도행 참조)",
+  "구름 밴드 3mm 이완 — 트윈 미소슬립 1.3mm rms의 관측 기반",
+  "목적은 vz_com 탄도 외삽 — 비행 중 관절 재배치의 bz 편차는 트윈 롤아웃으로 검증",
+  "sgn(v) tanh(v/0.5) 매끈화 — |v|<1 rad/s 대역 마찰항 부호 블렌드"
+ ]
+}

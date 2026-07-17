@@ -14,12 +14,14 @@ env 플래그 4종은 import 전에 강제 (p24a_all_results.py 규약 그대로
 l_i=30 flip 모델, horizon 0.6s, 제어 dt 2ms (트윈 dt 서브스텝), 공급 천장 raw ±35.5,
 관절 범위 = 0602 실측 방문 범위 +10% 마진, 발 미끄럼 감시 (관측/페널티).
 
-보상 (문서화 — p25_c_results.json에도 기록):
-  r_t = Δbz (포텐셜형 shaping, 텔레스코프 = bz_T − bz_0)
+보상 (문서화 — p25_c_results.json에도 기록; v2 2026-07-17):
+  r_t = APEX_W·Δ(running max bz)   (러닝맥스 증분 — 합계가 정확히 APEX_W·(apex − bz0).
+        v1의 Δbz shaping은 에피소드 내 착지 시 상승분이 상쇄되어 신호가 종단 보너스로만
+        남는 문제 → 러닝맥스 증분으로 교체. 단조 증가라 바운스가 보상받을 여지도 없음)
         − TAU_PEN·(|a1|+|a2|)  (정규화 액션, 토크 절약 소항)
         − SLIP_PEN·|Δfoot_x|   (접촉 중 발 미끄럼 — 이지 전 미끄럼 금지 제약의 연속 완화)
-  종단(에피소드 정상 종료): + APEX_BONUS·(apex_est − bz0),
-        apex_est = max(관측 apex, bz_T + max(vbz_T,0)²/(2g))  (탄도 외삽 — 학습용 저가 추정.
+  종단(정상 종료): + APEX_W·max(0, 탄도외삽 apex − running max)
+        탄도외삽 = bz_T + max(vbz_T,0)²/(2g)  (apex가 horizon 밖일 때의 학습용 저가 추정.
         최종 보고 h_plan은 rollout 스크립트가 수동 연장 0.6s로 실측)
   관절범위 이탈: 종료 + RANGE_PEN / 발산: 종료 + CRASH_PEN.
 """
@@ -64,7 +66,7 @@ CAND = json.load(open(PV / "fourbar_p24a_candidate.json", encoding="utf-8"))
 # ── 태스크/보상 상수 (Phase C 파일럿 — 선고정, 결과 json에 기록) ──
 CTRL_DT = 0.002          # 제어 주기 [s]
 EP_T = 0.6               # 에피소드 (horizon) [s]
-APEX_BONUS = 5.0
+APEX_W = 5.0
 TAU_PEN = 1e-4
 SLIP_PEN = 1.0
 RANGE_PEN = 0.5
@@ -258,8 +260,9 @@ class JumpEnv:
         self.ep_steps += 1
         md = self.md
         bz = float(md.qpos[0])
+        old_apex = self.apex
         self.apex = max(self.apex, bz)
-        rew = bz - self.prev_bz
+        rew = APEX_W * (self.apex - old_apex)          # 러닝맥스 증분 (v2)
         self.prev_bz = bz
         rew -= TAU_PEN * (abs(float(a[0])) + abs(float(a[1])))
         if max(abs(c1_cmd), abs(c2_cmd)) >= 0.95 * R19.CLIP:
@@ -292,7 +295,7 @@ class JumpEnv:
             done = True
             vbz = float(md.qvel[0])
             apex_est = max(self.apex, bz + max(vbz, 0.0) ** 2 / (2 * GRAV))
-            rew += APEX_BONUS * (apex_est - self.bz0)
+            rew += APEX_W * max(0.0, apex_est - self.apex)   # 탄도 외삽분만 가산
             info["apex_est"] = apex_est
         if done:
             info["apex_obs"] = self.apex
