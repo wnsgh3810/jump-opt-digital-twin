@@ -1,0 +1,95 @@
+{
+ "gen": "2026-07-17 22:28",
+ "model": "p24a",
+ "cand": "C:\\Users\\junho\\Documents\\jump-opt-digital-twin\\code\\goal22\\p23_veins\\fourbar_p24a_candidate.json",
+ "golden": {
+  "trial": "jump_0602/60_0.75_60_2",
+  "gains": [
+   60.0,
+   0.75,
+   60.0,
+   2.0
+  ],
+  "identity_max_abs_diff": {
+   "q1": 0.0,
+   "q2": 0.0,
+   "dq1": 0.0,
+   "dq2": 0.0,
+   "sh1": 0.0,
+   "sh2": 0.0,
+   "bz": 0.0
+  },
+  "identity_pass": true,
+  "F_tau": 0.19894354998269748,
+  "F_tau_hip": 0.21779120147801334,
+  "F_tau_knee": 0.19616950167490377,
+  "gap_v3_ref": 0.28195966862494243,
+  "q2_rmse_ref": 0.07444783336288996,
+  "h_PD": 0.9716909583552145,
+  "h_plan": 0.94,
+  "H_fid": 0.03371378548427084,
+  "dq_rmse": 6.347871690123007,
+  "t_liftoff": 0.252,
+  "stance_n": 505,
+  "apex_censored": false,
+  "note": "항등: deploy 내부 로그 vs 동일 인자 cl_run23_log (기대 0). F_τ(스탠스, τ*=â측정) vs gap_v3(심판 창, alphas=1·o=0 배포 규약이라 fitted-α 심판 수치와 다름) 병기.",
+  "deploy_result": {
+   "plan": "C:\\Users\\junho\\Documents\\jump-opt-digital-twin\\code\\goal22\\p25_deploy\\p25_d_golden_plan.npz",
+   "gains_label": "60_0.75_60_2",
+   "gains": [
+    60.0,
+    0.75,
+    60.0,
+    2.0
+   ],
+   "model": "p24a",
+   "crash": false,
+   "dt": 0.0005,
+   "h_PD": 0.9716909583552145,
+   "apex_censored": false,
+   "t_end": 0.2819999999999965,
+   "t_liftoff": 0.252,
+   "liftoff_found": true,
+   "stance_n": 505,
+   "h_plan": 0.94,
+   "tau_src": "nm",
+   "H_fid": 0.03371378548427084,
+   "rms_tau_star": 13.123126145763422,
+   "F_tau": 0.19894354998269748,
+   "F_tau_hip": 0.21779120147801334,
+   "F_tau_knee": 0.19616950167490377,
+   "dq_rmse_hip": 3.178396476851379,
+   "dq_rmse_knee": 5.494840382595645,
+   "dq_rmse": 6.347871690123007,
+   "q_rmse_hip": 0.1284942612798835,
+   "q_rmse_knee": 0.2910562998453828,
+   "q_rmse": 0.3181580501284674
+  }
+ },
+ "fixedpoint": {
+  "gains_label": "mid",
+  "run1": {
+   "h_PD": 1.0009129327739472,
+   "F_tau_vs_golden": 0.26872212542341145,
+   "t_liftoff": 0.25049999999999994
+  },
+  "floor_cmd": {
+   "F_tau": 0.025440091746446222,
+   "F_tau_hip": 0.031028014638143708,
+   "F_tau_knee": 0.024401564158274304,
+   "h_PD": 1.0009129327739472,
+   "H_fid": 0.0
+  },
+  "run2": {
+   "h_PD": 1.1791108837478255,
+   "F_tau": 0.6466462839356973,
+   "F_tau_hip": 0.9948772326978765,
+   "F_tau_knee": 0.5523997234556591,
+   "H_fid": 0.1780354166071343,
+   "dq_rmse": 5.5065433614804355,
+   "q_rmse": 0.19826178112328083,
+   "t_liftoff": 0.25949999999999995
+  },
+  "note": "floor_cmd: 동일 명령 재배포 (진짜 고정점) → F_τ 바닥 확인. run2: 실현 (q,dq) 재배포 — δ=q₁−q₂ 동역학이 M δ̈+k_d δ̇+k_p δ=τ₁ 인 공진 필터 (τ₂=k_p δ+k_d δ̇, ζ=k_d/2√(k_p M)≪1) 라 τ₁이 증폭 재생됨 → 실현 궤적은 일반적으로 PD 고정점이 아님 (개루프≠폐루프 독트린의 정량 재현 — MARATHON 가설 열의 예상과 정합)."
+ }
+}

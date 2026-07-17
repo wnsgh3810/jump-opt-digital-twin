@@ -1,0 +1,16 @@
+=== p25_a_twin golden — 배선 = 정본 러너 검증 ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init done [2s]  dt=0.0005  start q=(-0.2611, -2.6040) rad (jump_0602/60_0.75_60_2)
+envelope+10%: q1=[-1.4638, -0.1463] q2=[-2.8254, -0.2788]
+[1] ahat scalar maxdiff = 0.000e+00
+[2] rollout_cl vs cl_run23 maxdiff = 0.000e+00
+[3] 0602/60_0.75_60_2 dq2 RMSE=0.890  h_sim=0.897  h_real=0.940
+[3] 0602/60_1.5_60_1.5 dq2 RMSE=0.742  h_sim=0.882  h_real=0.960
+[3] 0602/90_0.75_90_2 dq2 RMSE=1.225  h_sim=0.951  h_real=0.980
+[3] 0602/120_2_120_2  dq2 RMSE=1.553  h_sim=0.924  h_real=0.940
+[3] 0602/150_2.2_250_3 dq2 RMSE=1.251  h_sim=0.900  h_real=0.900
+[3] 0602/150_2.2_500_5 dq2 RMSE=2.049  h_sim=0.789  h_real=0.800
+[3] session mean = 1.285 (기대 ~1.29)
+PASS: ahat=P  cl_mirror=P  replay=P  ALL=P
+saved p25_a_golden.json [3s]

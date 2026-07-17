@@ -1,0 +1,10 @@
+=== p25_a_cma_cl — 폐루프 인식 q_des CMA (g_high 150/2.2/500/4) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+seed f=-0.6135 (apex~0.614m)
+  it   25  nfev   401  best f=-1.4713  [35s]
+  it   50  nfev   801  best f=-1.4954  [69s]
+  it   75  nfev  1201  best f=-1.5003  [102s]
+  it  100  nfev  1601  best f=-1.5048  [135s]
+  it  125  nfev  2001  best f=-1.5050  [169s]

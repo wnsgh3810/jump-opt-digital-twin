@@ -1,0 +1,11 @@
+=== p25_a_mppi — MPPI (10ms 재계획, K<=40, 탄도 종단 추정) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+  pilot λ=0.3 (S=128) ...
+    λ=0.3: h=0.9837 m  crash_samples=8
+  pilot λ=1.0 (S=128) ...
+    λ=1.0: h=0.8391 m  crash_samples=4
+  pilot λ=3.0 (S=128) ...
+    λ=3.0: h=0.8228 m  crash_samples=5
+λ* = 0.3 → 본판 S=256
