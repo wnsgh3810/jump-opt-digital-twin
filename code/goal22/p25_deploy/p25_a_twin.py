@@ -52,6 +52,14 @@ import p19_run as R19
 import p23_v6_runners as RU
 import safe
 
+# P25_CLIP_RAW → 공급 클립 재정의 (raw 도메인; 기본 35.5 = 무설정 시 기존 동작 완전 보존).
+# 18Nm 캠페인: 31.1771 (a_hat 운동방향 가지 = 정확히 18.00Nm; 35.5→20.23Nm과 동일 가지).
+# 클립 '지점'은 불변 — cl_run23/a_full23/rollout_*이 R19.CLIP을 호출 시점에 읽으므로
+# 모듈 상수만 바꾼다. 비기본 클립 산출물은 OUT_TAG(_t18) 접미로 저장 (원본 npz 보존).
+CLIP_RAW = float(os.environ.get("P25_CLIP_RAW", "35.5"))
+R19.CLIP = CLIP_RAW
+OUT_TAG = "" if abs(CLIP_RAW - 35.5) < 1e-9 else "_t18"
+
 CAND_PATH = G22 / "p23_veins/fourbar_p24a_candidate.json"
 T_END = 0.6          # 커맨드 호라이즌 [s] (MARATHON 동결)
 T_PUSH = 0.35        # 개루프 푸시 창 [s] (이후 0)
@@ -93,7 +101,7 @@ def twin():
     model = RU.build_flip23(x32, ref, sp, d_dq)
     sprm = RU.spr_resolve(model, spr)
     P = C._W["P"]
-    assert abs(R19.CLIP - 35.5) < 1e-12, f"CLIP={R19.CLIP} (기대 35.5)"
+    assert abs(R19.CLIP - CLIP_RAW) < 1e-12, f"CLIP={R19.CLIP} (기대 {CLIP_RAW})"
 
     # 시작 자세 = 0602 첫 trial 측정 q(0) (표준 로더 R19.TRIALS 경로)
     tr0602 = [(ds, sub, d) for ds, sub, d, *_ in R19.TRIALS if ds == "jump_0602"]

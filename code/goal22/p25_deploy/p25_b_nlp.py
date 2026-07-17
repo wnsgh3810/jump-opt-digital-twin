@@ -48,6 +48,7 @@ import os
 
 os.environ["P23_SPRING_GATED"] = "1"
 os.environ["P23_RISE_GATED"] = "1"
+os.environ["P24_HIP_LAW"] = "1"   # P24_REFIT=1이 강제 ON이지만 명시 (p23 import 전)
 os.environ["P24_REFIT"] = "1"
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 
@@ -80,7 +81,10 @@ import p19_run as R19
 
 # ══════════ 상수 (선택 문서화) ══════════
 KT, GR, CF = 0.091, 9.0, 0.59          # p14_judge 규약 (AK80-9 V2)
-RAW_CLIP = 35.5                        # R19.CLIP — 공급 천장 (raw)
+# 공급 천장 (raw): env P25_CLIP_RAW로 재정의 가능 (무설정 = 35.5, 기존 동작 보존).
+#   P25 t18 캠페인: P25_CLIP_RAW=31.1771 → a_hat 운동방향 가지 축토크 정확히 18.00 Nm.
+RAW_CLIP = float(os.environ.get("P25_CLIP_RAW", "35.5"))
+R19.CLIP = RAW_CLIP                    # 트윈측 클립 동기화 (cl_run23/a_full23/트윈 롤아웃이 호출 시점에 읽음)
 K_C = 1.3e5                            # [N/m] G20 RECOMMENDED (실측 k_eq)
 B_C = 180.0                            # [N·s/m] G20 페어링
 K_C_ALT = 4.43e4                       # p24a 재실측 시컨트 (감도 재해석용)
@@ -98,9 +102,13 @@ START_TRIAL = ("jump_0602", "120_2_120_2")
 G20_REF = 1.063                        # G20 k_c=k_eq 완결판 트윈 실현 높이 [m]
 GG = 9.81
 
-OUT_JSON = HERE / "p25_b_results.json"
-OUT_NPZ = HERE / "p25_b_traj.npz"
-OUT_PNG = HERE / "p25_b_summary.png"
+# 출력 태그: 기본 클립(35.5)이면 무태그 (기존 파일 그대로), 커스텀 클립이면 "_t18"
+#   (원본 p25_b_traj.npz 덮어쓰기 금지 — t18 캠페인 산출은 별도 파일로).
+_TAG = os.environ.get("P25_OUT_TAG", "" if RAW_CLIP == 35.5 else "_t18")
+OUT_JSON = HERE / f"p25_b_results{_TAG}.json"
+OUT_NPZ = HERE / f"p25_b_traj{_TAG}.npz"
+OUT_PNG = HERE / f"p25_b_summary{_TAG}.png"
+BASE_NPZ = HERE / "p25_b_traj.npz"     # 1차 해 (warm-start 시드용)
 
 
 # ══════════ 1. 하네스 초기화 + p24a 트윈 ══════════
@@ -513,6 +521,34 @@ def make_guess(ex, d, k_c):
     return dict(Y=Yg, DY=DYg, U=Ug, tg=tg)
 
 
+# ══════════ 4b. 1차 해 warm-start (바운드 사영 시드) ══════════
+def ahat_env_np(v, sign_raw):
+    """ahat_env의 numpy 미러 (동일 tanh 매끈화) — warm 시드 사영용."""
+    A = C._W["P"].A_PAPER
+    Iq = (CF / (GR * KT)) * (sign_raw * RAW_CLIP)
+    s = np.tanh(np.asarray(v, float) / EPS_S)
+    return A[0] * GR * KT * Iq - A[1] * GR * abs(Iq) * Iq - A[2] * s - A[3] * abs(Iq) * s
+
+
+def warm_from_base(npz_path):
+    """1차 해(p25_b_traj.npz)를 새 공급 포락선에 사영해 warm-start 시드 구성."""
+    z = np.load(npz_path)
+    t = np.asarray(z["t"], float)
+    j1 = -np.asarray(z["q"])[:, 0] - np.pi / 2
+    j2 = -np.asarray(z["q"])[:, 1]
+    bz = np.asarray(z["bz"], float)
+    Y = np.vstack([bz, j1, j2])
+    DY = np.vstack([np.gradient(bz, t),
+                    -np.asarray(z["dq"])[:, 0], -np.asarray(z["dq"])[:, 1]])
+    U = np.asarray(z["tau_cmd_nm"], float).T.copy()
+    # NLP 제약 프레임: v1c=-DY[1], v2c=-DY[2] (측정 프레임 속도)
+    v1c = -DY[1]; v2c = -DY[2]
+    U[0] = np.clip(U[0], ahat_env_np(v1c, -1.0), ahat_env_np(v1c, +1.0))
+    U[1] = np.clip(U[1], ahat_env_np(v2c, -1.0), ahat_env_np(v2c, +1.0))
+    FX = np.atleast_2d(np.asarray(z["fx_plan"], float))
+    return dict(Y=Y, DY=DY, U=U, FX=FX)
+
+
 # ══════════ 5. raw 역변환 (뉴턴 — p14 invert_paper 패턴, 실제 sgn(v)) ══════════
 def raw_of(u, v):
     A = C._W["P"].A_PAPER
@@ -559,6 +595,9 @@ def twin_rollout(model, twin, t_u, s1_u, s2_u, q1_0, q2_0):
         if tc < 0:
             c1 = S.SETTLE_KP * (q1_0 - q1c) - S.SETTLE_KD * v1c
             c2 = S.SETTLE_KP * (q2_0 - q2c) - S.SETTLE_KD * v2c
+            # a_full23 규약: settle 커맨드도 공급 클립 (R19.CLIP 호출 시점 값)
+            c1 = float(np.clip(c1, -R19.CLIP, R19.CLIP))
+            c2 = float(np.clip(c2, -R19.CLIP, R19.CLIP))
             s1 = float(P.J.ahat(P.A_PAPER, np.array([c1]), np.array([v1c]))[0])
             s2 = float(P.J.ahat(P.A_PAPER, np.array([c2]), np.array([v2c]))[0])
         elif tc <= T_end:
@@ -649,7 +688,13 @@ def main():
           f"(δ_st={dst*1000:.2f}mm)", flush=True)
 
     # ── NLP 본해 (k_c=1.3e5, G20 레시피) ──
-    res = solve_nlp(model, twin, ex, y0, guess, k_c=K_C, b_c=B_C)
+    warm0 = None
+    if _TAG and BASE_NPZ.exists():
+        warm0 = warm_from_base(BASE_NPZ)
+        warm0["Y"][:, 0] = y0            # 시작 상태 정합 (δ_st 동일 k_c라 사실상 동일)
+        print(f"[warm] 1차 해 {BASE_NPZ.name} 바운드 사영 시드 (clip {RAW_CLIP})",
+              flush=True)
+    res = solve_nlp(model, twin, ex, y0, guess, k_c=K_C, b_c=B_C, warm=warm0)
     print(f"[NLP] status={res['status']} iters={res['iters']} "
           f"wall={res['wall_s']:.1f}s  h_plan={res['h_plan']:.4f} m "
           f"(vz_com(T)={res['vz_com_T']:.3f})", flush=True)
@@ -700,10 +745,20 @@ def main():
         grf_twin_max=float(L["grf"].max()),
         liftoff_plan_s=float(tt[np.argmax(res["fz"] < 0.5)]) if (res["fz"] < 0.5).any() else None,
     )
+    # 천장 라이딩 % (스탠스 노드 중 |raw| ≥ clip−0.01 비율) + 클립 준수 검증
+    stance_n = res["fz"] >= 0.5
+    peaks["ceiling_ride_pct_stance"] = [
+        float(np.mean(np.abs(raw1)[stance_n] >= RAW_CLIP - 0.01) * 100),
+        float(np.mean(np.abs(raw2)[stance_n] >= RAW_CLIP - 0.01) * 100)]
+    peaks["raw_le_clip_ok"] = bool(
+        max(peaks["raw1_absmax"], peaks["raw2_absmax"]) <= RAW_CLIP + 0.005)
     print(f"피크: |s1|={peaks['s1_absmax']:.1f} |s2|={peaks['s2_absmax']:.1f} Nm  "
-          f"|raw|=({peaks['raw1_absmax']:.1f},{peaks['raw2_absmax']:.1f})/35.5  "
+          f"|raw|=({peaks['raw1_absmax']:.4f},{peaks['raw2_absmax']:.4f})/{RAW_CLIP:g}  "
           f"|dq|=({peaks['dq1_absmax']:.1f},{peaks['dq2_absmax']:.1f}) rad/s  "
-          f"GRF={peaks['grf_max']:.0f}N", flush=True)
+          f"GRF={peaks['grf_max']:.0f}N  천장라이딩(스탠스)="
+          f"({peaks['ceiling_ride_pct_stance'][0]:.0f}%,"
+          f"{peaks['ceiling_ride_pct_stance'][1]:.0f}%)  "
+          f"raw<=clip: {peaks['raw_le_clip_ok']}", flush=True)
 
     # ── 저장 (Phase A 스키마) ──
     np.savez(OUT_NPZ,
@@ -715,7 +770,8 @@ def main():
              t_twin=L["t"], bz_twin=L["bz"],
              q_twin=np.vstack([L["q1"], L["q2"]]).T,
              dq_twin=np.vstack([L["dq1"], L["dq2"]]).T,
-             grf_twin=L["grf"], footx_twin=L["fx"])
+             grf_twin=L["grf"], footx_twin=L["fx"],
+             h_plan=res["h_plan"], h_twin=h_twin, raw_clip=RAW_CLIP)
     summary = dict(
         PHASE="p25_B_analytic_NLP",
         twin="fourbar_p24a_candidate.json",
@@ -724,8 +780,9 @@ def main():
                  objective="bz(T) + max(vz_com,0)^2/2g (G20 'Base via CoM v_z')",
                  eps=dict(abs_Nm=EPS_A, min=EPS_M, fric_v=EPS_V, sgn_v=EPS_S,
                           contact_m=EPS_C, slip_band_m=SLIP_BAND),
-                 supply="conservative envelope u∈[ahat(-35.5,v), ahat(+35.5,v)], "
-                        "tanh(v/0.5) smoothed sgn",
+                 supply=f"conservative envelope u∈[ahat(-{RAW_CLIP},v), "
+                        f"ahat(+{RAW_CLIP},v)], tanh(v/0.5) smoothed sgn",
+                 raw_clip=RAW_CLIP,
                  start=dict(trial="/".join(START_TRIAL), q1_0=q1_0, q2_0=q2_0,
                             bz0=float(bz0), delta_static_mm=float(dst * 1e3)),
                  joint_cage=dict(q1=list(map(float, q1_rng)), q2=list(map(float, q2_rng)),
@@ -786,7 +843,7 @@ def main():
     ax.plot(tt, raw1, label="raw1")
     ax.plot(tt, raw2, label="raw2")
     ax.axhline(RAW_CLIP, ls=":", lw=1); ax.axhline(-RAW_CLIP, ls=":", lw=1)
-    ax.set_title("raw command (|.|<=35.5)"); ax.legend(fontsize=7); ax.grid(alpha=0.3)
+    ax.set_title(f"raw command (|.|<={RAW_CLIP:g})"); ax.legend(fontsize=7); ax.grid(alpha=0.3)
     ax = axs[1, 2]
     ax.plot(tt, res["fz"], label="plan Fz")
     ax.plot(L["t"], L["grf"], "--", label="twin GRF")

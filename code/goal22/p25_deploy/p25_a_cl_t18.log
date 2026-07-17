@@ -1,0 +1,17 @@
+=== p25_a_cma_cl — 폐루프 인식 q_des CMA (g_high 150/2.2/500/4) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+warm-start: p25_a_res_cl.json 최적해 시드 (clip 31.1771)
+seed f=-1.3307 (apex~1.331m)
+  it   25  nfev   401  best f=-1.3719  [35s]
+  it   50  nfev   801  best f=-1.3745  [67s]
+  it   75  nfev  1201  best f=-1.3793  [99s]
+  it  100  nfev  1601  best f=-1.3797  [132s]
+  it  125  nfev  2001  best f=-1.3798  [164s]
+  it  150  nfev  2401  best f=-1.3799  [197s]
+  it  175  nfev  2801  best f=-1.3799  [228s]
+  it  200  nfev  3201  best f=-1.3799  [261s]
+CMA done: nfev=3217 crash=0 best f=-1.3799 [262s]
+h_plan=1.3881 m  peak raw=(31.2, 31.2)  peak dq=(20.9, 43.1)  ceil_frac=(0.18, 0.42)
+saved p25_a_cl_cma_t18.npz + p25_a_res_cl_t18.json [4.4m]

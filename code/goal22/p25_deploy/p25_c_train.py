@@ -2,13 +2,15 @@
 """p25_c_train — P25 Phase C: PPO 파일럿 학습 (커스텀 torch PPO, CPU 전용).
 
 정책/가치: MLP 2×64 tanh (소형 넷 — 과제 규약). 액션 = 대각 가우시안 (state-independent
-log_std), 평균은 tanh로 [−1,1] 스쿼시 → env가 ×35.5.
+log_std), 평균은 tanh로 [−1,1] 스쿼시 → env가 ×R19.CLIP (기본 35.5, P25_CLIP_RAW로 재정의).
 PPO: n_envs=4 lockstep(단일 프로세스, BLAS 2스레드 캡) · T=512/env → batch 2048 ·
 γ=0.999 λ=0.95 clip=0.2 epochs=10 mb=256 · lr 3e-4→1e-4 선형 · ent 1e-3 · vf 0.5 ·
 grad clip 0.5. 예산 1.5M 제어스텝 (조기 종료: 600k 이후 det-eval h가 15회(≈307k 스텝)
 연속 5mm 미개선이면 플래토 판정).
 det-eval (10 업데이트마다): 노이즈 없는 결정론 에피소드 + 수동 연장 0.6s → 실측 apex.
-출력: p25_c_policy.pt (final+best) · p25_c_train_log.json · p25_c_curve.png.
+출력: p25_c_policy{TAG}.pt (final+best) · p25_c_train_log{TAG}.json · p25_c_curve{TAG}.png
+(TAG = env P25_TAG, 기본 "" = 1차 파일명 그대로; 18Nm 캠페인은 P25_TAG=_t18 +
+P25_CLIP_RAW=31.1771 — 원본 미덮어쓰기).
 시동 전 골든 체크 (run_golden) 통과 필수 — 실패 시 학습 진입 금지.
 """
 import os
@@ -31,6 +33,7 @@ torch.set_num_threads(2)
 torch.manual_seed(0)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+TAG = os.environ.get("P25_TAG", "")     # 출력 파일명 접미 (예: "_t18")
 
 # ── 하이퍼파라미터 (선고정) ──
 N_ENVS = 4
@@ -132,6 +135,7 @@ def main():
         n_envs=N_ENVS, t_roll=T_ROLL, total_steps=TOTAL_STEPS, gamma=GAMMA,
         lam=LAM, clip=CLIP_EPS, epochs=EPOCHS, mb=MB, lr=[LR0, LR1],
         ent=ENT_COEF, vf=VF_COEF, log_std0=float(LOG_STD0),
+        clip_raw=float(EV.R19.CLIP),
         net="MLP 2x64 tanh (mean linear out, v2)", n_params=int(n_par),
         reward=dict(shaping="APEX_W*d(running_max_bz) v2", apex_w=EV.APEX_W,
                     terminal="APEX_W*max(0, ballistic_apex - running_max)",
@@ -230,13 +234,13 @@ def main():
             torch.save(dict(final=ac.state_dict(), best=best_state, best_h=best_h,
                             best_step=best_step, steps=steps_done,
                             hyper=log["hyper"]),
-                       os.path.join(HERE, "p25_c_policy.pt"))
+                       os.path.join(HERE, f"p25_c_policy{TAG}.pt"))
             print(f"up {up:4d} steps {steps_done / 1e3:6.0f}k  ret40 {mret:6.3f}  "
                   f"apex40 {mapex:.3f}  det h {ev['h_eval']:.4f} "
                   f"(best {best_h:.4f})  sat {ev['sat_frac']:.2f}  "
                   f"bounce {ev['n_bounce']}  std {ac.log_std.exp().detach().numpy().round(3)}",
                   flush=True)
-            safe.atomic_json_write(os.path.join(HERE, "p25_c_train_log.json"), log)
+            safe.atomic_json_write(os.path.join(HERE, f"p25_c_train_log{TAG}.json"), log)
             # 플래토 조기 종료
             if steps_done >= PLATEAU_AFTER and len(log["evals"]) > PLATEAU_PATIENCE:
                 recent = [e["h_eval"] for e in log["evals"][-PLATEAU_PATIENCE:]]
@@ -251,8 +255,8 @@ def main():
                         best_step=best_step, stop=stop_reason)
     torch.save(dict(final=ac.state_dict(), best=best_state, best_h=best_h,
                     best_step=best_step, hyper=log["hyper"]),
-               os.path.join(HERE, "p25_c_policy.pt"))
-    safe.atomic_json_write(os.path.join(HERE, "p25_c_train_log.json"), log)
+               os.path.join(HERE, f"p25_c_policy{TAG}.pt"))
+    safe.atomic_json_write(os.path.join(HERE, f"p25_c_train_log{TAG}.json"), log)
     print(f"done — steps {steps_done} wall {wall / 60:.1f}min best_h {best_h:.4f} "
           f"({stop_reason})", flush=True)
     make_curve(log)
@@ -286,9 +290,9 @@ def make_curve(log):
     ax[1].legend(fontsize=8); ax[1].set_title("결정론 평가 점프 높이")
     fig.suptitle("P25 Phase C — PPO 파일럿 (p24a 트윈, 점프 태스크)")
     fig.tight_layout()
-    fig.savefig(os.path.join(HERE, "p25_c_curve.png"), dpi=130)
+    fig.savefig(os.path.join(HERE, f"p25_c_curve{TAG}.png"), dpi=130)
     plt.close(fig)
-    print("curve saved: p25_c_curve.png", flush=True)
+    print(f"curve saved: p25_c_curve{TAG}.png", flush=True)
 
 
 if __name__ == "__main__":

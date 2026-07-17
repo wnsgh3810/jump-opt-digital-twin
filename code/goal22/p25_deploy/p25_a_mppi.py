@@ -45,7 +45,7 @@ def _mk_ctx(tw):
                 law=tw["law"], kr=tw["kr"], sprm=tw["sprm"],
                 A=P.A_PAPER, tm=tw["tm"], dt=tw["dt"],
                 sub=int(round(DT_CTRL / tw["dt"])),
-                clip=35.5, hipa1=None)
+                clip=TW.CLIP_RAW, hipa1=None)
 
 
 def _substep(cx, md, c1_t, c2_t, fs):
@@ -117,6 +117,14 @@ def run_mppi(tw, lam, S, seed, verbose=True):
     m = tc_grid <= TW.T_PUSH
     U[0, m] = np.interp(ts + tc_grid[m], t, d0["traw1"])
     U[1, m] = np.interp(ts + tc_grid[m], t, d0["traw2"])
+    ws = HERE / "p25_a_mppi.npz"
+    if TW.OUT_TAG and ws.exists():    # 1차(35.5) 노미널을 새 클립으로 사영해 시드
+        with np.load(ws) as z:
+            if "U_nominal" in z and z["U_nominal"].shape == U.shape:
+                U = np.asarray(z["U_nominal"], float)
+                if verbose:
+                    print(f"    warm-start: {ws.name} U_nominal 사영 (clip {cx['clip']})",
+                          flush=True)
     U = np.clip(U, -cx["clip"], cx["clip"])
 
     st = TW.settle_state(tw, *tw["q0"])
@@ -201,20 +209,23 @@ def main():
           f"{stats['ceil_frac_raw2']:.2f})  crash_samples={ncrash}/{n_samples}",
           flush=True)
 
-    TW.save_npz(HERE / "p25_a_mppi.npz", Lg,
+    TAG = TW.OUT_TAG
+    TW.save_npz(HERE / f"p25_a_mppi{TAG}.npz", Lg,
                 extra=dict(U_nominal=U, dt_ctrl=np.array(DT_CTRL),
                            lam=np.array(lam_best), sigma=np.array(SIGMA)))
-    safe.atomic_json_write(HERE / "p25_a_res_mppi.json", dict(
+    safe.atomic_json_write(HERE / f"p25_a_res_mppi{TAG}.json", dict(
         gen=time.strftime("%Y-%m-%d %H:%M"), method="mppi",
         note=f"MPPI 10ms 재계획, S={S_FINAL}, K<=40 (0.4s 룩어헤드), σ={SIGMA} raw, "
-             f"탄도 종단 apex 추정, 순수 보상 가중 (제어비용항 없음)",
+             f"탄도 종단 apex 추정, 순수 보상 가중 (제어비용항 없음), "
+             f"clip ±{TW.CLIP_RAW}",
         h_plan=float(h_plan), stats=stats, lam=float(lam_best), pilots=pilots,
         samples=S_FINAL, replans=int(round(TW.T_END / DT_CTRL)),
         crash_samples=int(ncrash), crash_rate=float(ncrash / n_samples),
-        seed_trial=list(tw["seed_trial"]), npz="p25_a_mppi.npz",
+        clip_raw=TW.CLIP_RAW,
+        seed_trial=list(tw["seed_trial"]), npz=f"p25_a_mppi{TAG}.npz",
         wall_s=float(time.time() - t0)))
-    print(f"saved p25_a_mppi.npz + p25_a_res_mppi.json [{(time.time() - t0) / 60:.1f}m]",
-          flush=True)
+    print(f"saved p25_a_mppi{TAG}.npz + p25_a_res_mppi{TAG}.json "
+          f"[{(time.time() - t0) / 60:.1f}m]", flush=True)
 
 
 if __name__ == "__main__":

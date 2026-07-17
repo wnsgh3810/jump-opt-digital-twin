@@ -68,6 +68,12 @@ def main():
     seed1 = np.interp(ts + KT_[1:], t, d0["qd1"])
     seed2 = np.interp(ts + KT_[1:], t, d0["qd2"])
     x0 = np.clip(np.concatenate([seed1, seed2]), lo + 1e-6, hi - 1e-6)
+    ws = HERE / "p25_a_res_cl.json"
+    if TW.OUT_TAG and ws.exists():    # 1차(35.5) 최적 매듭 시드 (q-공간 — 사영 불필요,
+        p1 = safe.read_json(ws)["params"]     # 새 클립은 플랜트 체인 R19.CLIP이 강제)
+        x0 = np.clip(np.array(p1["knots_qd1"][1:] + p1["knots_qd2"][1:]),
+                     lo + 1e-6, hi - 1e-6)
+        print(f"warm-start: {ws.name} 최적해 시드 (clip {TW.CLIP_RAW})", flush=True)
 
     nfev = [0]; ncrash = [0]
 
@@ -115,26 +121,27 @@ def main():
     dqd_l = [np.where((tl >= 0) & (tl <= TW.T_END),
                       np.interp(np.clip(tl, 0.0, TW.T_END), TG, dg), 0.0)
              for dg in (dg1, dg2)]
-    TW.save_npz(HERE / "p25_a_cl_cma.npz", Lg,
+    TAG = TW.OUT_TAG
+    TW.save_npz(HERE / f"p25_a_cl_cma{TAG}.npz", Lg,
                 extra=dict(qd1=qd_l[0], qd2=qd_l[1], dqd1=dqd_l[0], dqd2=dqd_l[1],
                            knot_t=KT_,
                            knots_qd1=np.concatenate([[q0[0]], xb[:NK - 1]]),
                            knots_qd2=np.concatenate([[q0[1]], xb[NK - 1:]]),
                            gains=np.array(TW.G_HIGH)))
-    safe.atomic_json_write(HERE / "p25_a_res_cl.json", dict(
+    safe.atomic_json_write(HERE / f"p25_a_res_cl{TAG}.json", dict(
         gen=time.strftime("%Y-%m-%d %H:%M"), method="cl_cma",
-        note="폐루프 인식 q_des 스플라인 CMA (8매듭/관절, 매듭0=시작자세 고정, dim 14; "
-             "dq_des=도함수; g_high=150/2.2/500/4, alphas=1, clip 35.5)",
+        note=f"폐루프 인식 q_des 스플라인 CMA (8매듭/관절, 매듭0=시작자세 고정, dim 14; "
+             f"dq_des=도함수; g_high=150/2.2/500/4, alphas=1, clip {TW.CLIP_RAW})",
         h_plan=h_plan, stats=stats, evals=nfev[0], crashes=ncrash[0],
         crash_rate=ncrash[0] / max(nfev[0], 1), f_best=fb, f_seed=float(f0),
-        gains=list(TW.G_HIGH),
+        gains=list(TW.G_HIGH), clip_raw=TW.CLIP_RAW,
         params=dict(knot_t=[float(a) for a in KT_],
                     knots_qd1=[float(a) for a in np.concatenate([[q0[0]], xb[:NK - 1]])],
                     knots_qd2=[float(a) for a in np.concatenate([[q0[1]], xb[NK - 1:]])]),
-        seed_trial=list(tw["seed_trial"]), npz="p25_a_cl_cma.npz",
+        seed_trial=list(tw["seed_trial"]), npz=f"p25_a_cl_cma{TAG}.npz",
         wall_s=float(time.time() - t0)))
-    print(f"saved p25_a_cl_cma.npz + p25_a_res_cl.json [{(time.time() - t0) / 60:.1f}m]",
-          flush=True)
+    print(f"saved p25_a_cl_cma{TAG}.npz + p25_a_res_cl{TAG}.json "
+          f"[{(time.time() - t0) / 60:.1f}m]", flush=True)
 
 
 if __name__ == "__main__":

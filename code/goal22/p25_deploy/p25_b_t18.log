@@ -1,0 +1,101 @@
+═══ P25 Phase B — analytic NLP (CasADi/IPOPT) on p24a twin ═══
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[init 2s] p24a 트윈 빌드 완료  law=(-0.3823013868548077, 0.6300821673870375, 7.296751871368546)
+관절 케이지 (+10%): q1 [-1.493,-0.144] q2 [-2.892,-0.179]
+[EoM] 기저 적합 rel resid: M=7.1e-15 G=1.0e-14 F=5.1e-15
+[EoM 검증] 공중 개루프 100ms×5: q err max 1.88e-02 rad
+시작: ('jump_0602', '120_2_120_2') q=(-0.2778,-2.5746) bz0=0.1856 (δ_st=0.24mm)
+[warm] 1차 해 p25_b_traj.npz 바운드 사영 시드 (clip 31.1771)
+
+******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit https://github.com/coin-or/Ipopt
+******************************************************************************
+
+Total number of variables............................:     1089
+                     variables with only lower bounds:        0
+                variables with lower and upper bounds:        0
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:      726
+Total number of inequality constraints...............:     1816
+        inequality constraints with only lower bounds:      122
+   inequality constraints with lower and upper bounds:      847
+        inequality constraints with only upper bounds:      847
+
+
+Number of Iterations....: 66
+
+                                   (scaled)                 (unscaled)
+Objective...............:  -9.2030454237710941e+01   -1.8406090847542187e+03
+Dual infeasibility......:   3.3796823117882013e-09    6.7593646235764027e-08
+Constraint violation....:   4.6367354400445038e-12    4.6367354400445038e-12
+Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
+Complementarity.........:   2.4779683270321405e-10    4.9559366540642803e-09
+Overall NLP error.......:   3.3796823117882013e-09    6.7593646235764027e-08
+
+
+Number of objective function evaluations             = 67
+Number of objective gradient evaluations             = 67
+Number of equality constraint evaluations            = 67
+Number of inequality constraint evaluations          = 67
+Number of equality constraint Jacobian evaluations   = 67
+Number of inequality constraint Jacobian evaluations = 67
+Number of Lagrangian Hessian evaluations             = 66
+Total seconds in IPOPT                               = 2.152
+
+EXIT: Optimal Solution Found.
+      solver  :   t_proc      (avg)   t_wall      (avg)    n_eval
+       nlp_f  |   2.00ms ( 29.85us)   3.81ms ( 56.82us)        67
+       nlp_g  | 109.00ms (  1.63ms) 105.00ms (  1.57ms)        67
+  nlp_grad_f  |  10.00ms (147.06us)   5.57ms ( 81.88us)        68
+  nlp_hess_l  |   1.07 s ( 16.23ms)   1.09 s ( 16.47ms)        66
+   nlp_jac_g  | 393.00ms (  5.78ms) 408.57ms (  6.01ms)        68
+       total  |   2.14 s (  2.14 s)   2.15 s (  2.15 s)         1
+[NLP] status=converged iters=66 wall=3.1s  h_plan=1.0703 m (vz_com(T)=0.044)
+[검증] h_plan=1.0703  h_twin=1.0273  gap=-4.0%
+  플랜-트윈 스탠스 q RMSE = 0.1189 rad
+Total number of variables............................:     1089
+                     variables with only lower bounds:        0
+                variables with lower and upper bounds:        0
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:      726
+Total number of inequality constraints...............:     1816
+        inequality constraints with only lower bounds:      122
+   inequality constraints with lower and upper bounds:      847
+        inequality constraints with only upper bounds:      847
+
+
+Number of Iterations....: 40
+
+                                   (scaled)                 (unscaled)
+Objective...............:  -9.4798689688760732e+01   -1.8959737937752145e+03
+Dual infeasibility......:   1.5453030910439480e-07    3.0906061820878961e-06
+Constraint violation....:   3.1631941510568140e-10    3.1631941510568140e-10
+Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
+Complementarity.........:   5.6035764614564357e-09    1.1207152922912871e-07
+Overall NLP error.......:   1.5453030910439480e-07    3.0906061820878961e-06
+
+
+Number of objective function evaluations             = 49
+Number of objective gradient evaluations             = 41
+Number of equality constraint evaluations            = 49
+Number of inequality constraint evaluations          = 49
+Number of equality constraint Jacobian evaluations   = 41
+Number of inequality constraint Jacobian evaluations = 41
+Number of Lagrangian Hessian evaluations             = 40
+Total seconds in IPOPT                               = 1.263
+
+EXIT: Optimal Solution Found.
+      solver  :   t_proc      (avg)   t_wall      (avg)    n_eval
+       nlp_f  |        0 (       0)   2.27ms ( 46.33us)        49
+       nlp_g  |  82.00ms (  1.67ms)  71.49ms (  1.46ms)        49
+  nlp_grad_f  |        0 (       0)   3.33ms ( 79.36us)        42
+  nlp_hess_l  | 645.00ms ( 16.13ms) 657.32ms ( 16.43ms)        40
+   nlp_jac_g  | 235.00ms (  5.60ms) 248.08ms (  5.91ms)        42
+       total  |   1.26 s (  1.26 s)   1.26 s (  1.26 s)         1
+[감도 k_c=4.43e+04] h_plan=1.0985 h_twin=1.0471 gap=-4.7%
+피크: |s1|=18.0 |s2|=18.0 Nm  |raw|=(31.1771,31.1776)/31.1771  |dq|=(11.3,25.9) rad/s  GRF=135N  천장라이딩(스탠스)=(10%,39%)  raw<=clip: True
+saved p25_b_results_t18.json, p25_b_traj_t18.npz
+saved p25_b_summary_t18.png  [0.2 min total]

@@ -31,6 +31,8 @@ KT_ = np.linspace(0.0, TW.T_PUSH, NK)
 MAXFEVALS = 4500
 POPSIZE = 16
 SIGMA0 = 8.0                      # raw 단위 (천장 35.5의 ~23%)
+CLIP = TW.CLIP_RAW                # 공급 천장 [raw] (P25_CLIP_RAW; 기본 35.5)
+TAG = TW.OUT_TAG                  # 비기본 클립 → "_t18" 접미 (원본 npz 보존)
 TG = None                         # 커맨드 평가 그리드 (dt 해상도)
 
 
@@ -63,7 +65,13 @@ def main():
     ts = tp - TW.T_PUSH * 0.85
     seed1 = np.interp(ts + KT_[:-1], t, d0["traw1"])
     seed2 = np.interp(ts + KT_[:-1], t, d0["traw2"])
-    x0 = np.clip(np.concatenate([seed1, seed2]), -35.0, 35.0)
+    x0 = np.clip(np.concatenate([seed1, seed2]), -(CLIP - 0.5), CLIP - 0.5)
+    ws = HERE / "p25_a_res_ol.json"
+    if TAG and ws.exists():           # 1차(35.5) 최적 매듭을 새 바운드로 사영해 시드
+        p1 = safe.read_json(ws)["params"]
+        x0 = np.clip(np.array(p1["knots_raw1"][:NK - 1] + p1["knots_raw2"][:NK - 1]),
+                     -(CLIP - 1e-3), CLIP - 1e-3)
+        print(f"warm-start: {ws.name} 최적해를 ±{CLIP}로 사영해 시드", flush=True)
 
     nfev = [0]; ncrash = [0]
 
@@ -82,7 +90,7 @@ def main():
 
     es = cma.CMAEvolutionStrategy(
         x0, SIGMA0,
-        dict(bounds=[-35.5, 35.5], popsize=POPSIZE, maxfevals=MAXFEVALS,
+        dict(bounds=[-CLIP, CLIP], popsize=POPSIZE, maxfevals=MAXFEVALS,
              seed=1, verbose=-1))
     while not es.stop():
         X = es.ask()
@@ -104,22 +112,24 @@ def main():
           f"{stats['peak_dq2']:.1f})  ceil_frac=({stats['ceil_frac_raw1']:.2f}, "
           f"{stats['ceil_frac_raw2']:.2f})", flush=True)
 
-    TW.save_npz(HERE / "p25_a_ol_cma.npz", Lg,
+    TW.save_npz(HERE / f"p25_a_ol_cma{TAG}.npz", Lg,
                 extra=dict(knot_t=KT_,
                            knots_raw1=np.append(xb[:NK - 1], 0.0),
                            knots_raw2=np.append(xb[NK - 1:], 0.0)))
-    safe.atomic_json_write(HERE / "p25_a_res_ol.json", dict(
+    safe.atomic_json_write(HERE / f"p25_a_res_ol{TAG}.json", dict(
         gen=time.strftime("%Y-%m-%d %H:%M"), method="ol_cma",
-        note="개루프 raw 토크 스플라인 CMA (9매듭/관절, 끝매듭 0 고정, dim 16)",
+        note=f"개루프 raw 토크 스플라인 CMA (9매듭/관절, 끝매듭 0 고정, dim 16, "
+             f"clip ±{CLIP})",
         h_plan=h_plan, stats=stats, evals=nfev[0], crashes=ncrash[0],
         crash_rate=ncrash[0] / max(nfev[0], 1), f_best=fb, f_seed=float(f0),
+        clip_raw=CLIP,
         params=dict(knot_t=[float(a) for a in KT_],
                     knots_raw1=[float(a) for a in np.append(xb[:NK - 1], 0.0)],
                     knots_raw2=[float(a) for a in np.append(xb[NK - 1:], 0.0)]),
-        seed_trial=list(tw["seed_trial"]), npz="p25_a_ol_cma.npz",
+        seed_trial=list(tw["seed_trial"]), npz=f"p25_a_ol_cma{TAG}.npz",
         wall_s=float(time.time() - t0)))
-    print(f"saved p25_a_ol_cma.npz + p25_a_res_ol.json [{(time.time() - t0) / 60:.1f}m]",
-          flush=True)
+    print(f"saved p25_a_ol_cma{TAG}.npz + p25_a_res_ol{TAG}.json "
+          f"[{(time.time() - t0) / 60:.1f}m]", flush=True)
 
 
 if __name__ == "__main__":

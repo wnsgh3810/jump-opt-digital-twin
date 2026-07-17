@@ -7,6 +7,9 @@ bz/grf (t: 0→1.1995s, dt=0.5ms, active 0.6s + 수동 연장 0.6s; raw = tm 필
 + RL 전용 cmd_raw1/cmd_raw2 (정책 ZOH 원커맨드, 필터 전).
 롤아웃 규약: 학습 env와 동일 (범위 이탈 시 그 시점에서 능동 중단 → 수동 연장; 발생 여부
 results.caveats에 기록). h_plan = max bz (t>0, 연장 포함) — det_eval의 탄도 추정이 아닌 실측.
+TAG(env P25_TAG, 기본 "") — 입출력 파일명 접미. 18Nm 캠페인: P25_TAG=_t18 +
+P25_CLIP_RAW=31.1771 (학습과 동일 조합 필수 — 클립이 env 액션 스케일 자체를 바꿈).
+TAG 설정 시 best npz는 무조건 저장 (1차 기본 동작: final+5mm 초과 시에만).
 """
 import os
 import sys
@@ -23,6 +26,7 @@ import safe
 import torch
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+TAG = os.environ.get("P25_TAG", "")
 T_AFTER = 0.6
 
 
@@ -124,8 +128,11 @@ def stats_of(Lg, contact, n_act, dt):
 def main():
     t0 = time.time()
     EV.setup()
-    ck = torch.load(os.path.join(HERE, "p25_c_policy.pt"), weights_only=False)
-    tlog = json.load(open(os.path.join(HERE, "p25_c_train_log.json"), encoding="utf-8"))
+    ck = torch.load(os.path.join(HERE, f"p25_c_policy{TAG}.pt"), weights_only=False)
+    tlog = json.load(open(os.path.join(HERE, f"p25_c_train_log{TAG}.json"), encoding="utf-8"))
+    ck_clip = ck.get("hyper", {}).get("clip_raw", 35.5)
+    assert abs(ck_clip - float(EV.R19.CLIP)) < 1e-9, \
+        f"클립 불일치: 체크포인트 {ck_clip} vs 현재 env {EV.R19.CLIP} (P25_CLIP_RAW 확인)"
     env = JumpEnv(seed=12345, reset_noise=False)
     n_act = env.n_ep * env.nsub
     out = {}
@@ -148,13 +155,14 @@ def main():
                  dq2=Lg["dq2"], raw1=Lg["raw1"], raw2=Lg["raw2"],
                  tau1_nm=Lg["tau1_nm"], tau2_nm=Lg["tau2_nm"], bz=Lg["bz"],
                  grf=Lg["grf"], cmd_raw1=Lg["cmd_raw1"], cmd_raw2=Lg["cmd_raw2"],
-                 qd1=Lg["q1"], qd2=Lg["q2"], dqd1=Lg["dq1"], dqd2=Lg["dq2"])
-    save_npz(os.path.join(HERE, "p25_c_ppo.npz"), out["final"])
-    files = dict(npz="p25_c_ppo.npz", curve="p25_c_curve.png",
-                 policy="p25_c_policy.pt", train_log="p25_c_train_log.json")
-    if out["best"]["h_plan"] > out["final"]["h_plan"] + 0.005:
-        save_npz(os.path.join(HERE, "p25_c_ppo_best.npz"), out["best"])
-        files["npz_best"] = "p25_c_ppo_best.npz"
+                 qd1=Lg["q1"], qd2=Lg["q2"], dqd1=Lg["dq1"], dqd2=Lg["dq2"],
+                 h_plan=float(R["h_plan"]))
+    save_npz(os.path.join(HERE, f"p25_c_ppo{TAG}.npz"), out["final"])
+    files = dict(npz=f"p25_c_ppo{TAG}.npz", curve=f"p25_c_curve{TAG}.png",
+                 policy=f"p25_c_policy{TAG}.pt", train_log=f"p25_c_train_log{TAG}.json")
+    if TAG or out["best"]["h_plan"] > out["final"]["h_plan"] + 0.005:
+        save_npz(os.path.join(HERE, f"p25_c_ppo_best{TAG}.npz"), out["best"])
+        files["npz_best"] = f"p25_c_ppo_best{TAG}.npz"
     # ── Phase A 대비 (표본 효율 — 존재하는 결과만) ──
     comp = {}
     for meth, f in (("ol_cma", "p25_a_res_ol.json"), ("mppi", "p25_a_res_mppi.json"),
@@ -183,8 +191,10 @@ def main():
         f"{fin.get('wall_s', 0):.0f}s ≈ CMA와 동급 규모 (ol 4513 / cl 3217 evals) — "
         "이 태스크(300스텝, 밀집 보상)에선 RL이 표본상 경쟁력 있으나, best는 "
         f"{fin.get('best_step')}스텝에서 나왔고 이후 미개선 (플래토)",
-        "결정론 롤아웃은 깨끗함: apex 전 재접촉(바운스) 0회·범위 이탈 없음 — 탐사 중엔 "
-        "간헐 바운스(n_bounce≤6)가 보였으나 러닝맥스 보상이라 착취 유인 자체가 없음",
+        ("결정론 롤아웃 청결: apex 전 재접촉(바운스) "
+         f"{out['final']['stats']['n_hops_before_apex']}회·범위 이탈 "
+         f"{'없음' if out['final']['range_viol'] is None else '발생'} — "
+         "러닝맥스 보상이라 바운스 착취 유인 자체가 없음"),
     ]
     if out["final"]["range_viol"]:
         caveats.append(f"최종 정책 롤아웃 중 관절범위 이탈 발생: {out['final']['range_viol']}")
@@ -210,15 +220,17 @@ def main():
                  q1_range=[float(x) for x in G["Q1R"]],
                  q2_range=[float(x) for x in G["Q2R"]],
                  obs="[(bz-0.6)/0.4, q1/1.5, q2/1.5, dq1/10, dq2/10, vbz/3, t/0.6]",
-                 action="raw torque (2,) [-35.5,35.5] → tm필터→클립→ahat→supp/rise/스프링/힙층",
+                 clip_raw=float(EV.R19.CLIP),
+                 action=f"raw torque (2,) [-{EV.R19.CLIP},{EV.R19.CLIP}] → "
+                        "tm필터→클립→ahat→supp/rise/스프링/힙층",
                  reset_noise=dict(q_std=EV.NOISE_Q, dq_std=EV.NOISE_DQ)),
         phase_a_comparison=comp,
         caveats=caveats,
         files=files,
         wall_s_rollout=time.time() - t0)
-    safe.atomic_json_write(os.path.join(HERE, "p25_c_results.json"), res)
+    safe.atomic_json_write(os.path.join(HERE, f"p25_c_results{TAG}.json"), res)
     make_traj_fig(out["final"]["Lg"], out["final"]["h_plan"], n_act)
-    print(f"saved: p25_c_ppo.npz / p25_c_results.json / p25_c_traj.png "
+    print(f"saved: p25_c_ppo{TAG}.npz / p25_c_results{TAG}.json / p25_c_traj{TAG}.png "
           f"[{time.time() - t0:.0f}s]", flush=True)
 
 
@@ -237,10 +249,11 @@ def make_traj_fig(Lg, h_plan, n_act):
     ax[0, 1].plot(t, Lg["q1"], label="q1")
     ax[0, 1].plot(t, Lg["q2"], label="q2")
     ax[0, 1].set_title("관절각 [rad]"); ax[0, 1].legend(fontsize=8)
+    clip = float(EV.R19.CLIP)
     ax[1, 0].plot(t, Lg["raw1"], label="raw1 (적용)")
     ax[1, 0].plot(t, Lg["raw2"], label="raw2 (적용)")
-    ax[1, 0].axhline(35.5, linestyle=":", alpha=0.5)
-    ax[1, 0].axhline(-35.5, linestyle=":", alpha=0.5)
+    ax[1, 0].axhline(clip, linestyle=":", alpha=0.5)
+    ax[1, 0].axhline(-clip, linestyle=":", alpha=0.5)
     ax[1, 0].set_title("raw 토크 명령 (필터+클립 후)"); ax[1, 0].legend(fontsize=8)
     ax[1, 1].plot(t, Lg["grf"], label="GRF z")
     ax[1, 1].set_title("접촉력 z 합 [N]"); ax[1, 1].legend(fontsize=8)
@@ -248,7 +261,7 @@ def make_traj_fig(Lg, h_plan, n_act):
         a.set_xlabel("t [s]")
     fig.suptitle("P25 Phase C — PPO 최종 결정론 롤아웃 (p24a 트윈)")
     fig.tight_layout()
-    fig.savefig(os.path.join(HERE, "p25_c_traj.png"), dpi=130)
+    fig.savefig(os.path.join(HERE, f"p25_c_traj{TAG}.png"), dpi=130)
     plt.close(fig)
 
 

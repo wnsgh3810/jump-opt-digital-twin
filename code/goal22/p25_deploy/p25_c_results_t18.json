@@ -1,0 +1,124 @@
+{
+ "gen": "2026-07-17 23:15",
+ "method": "ppo",
+ "note": "PPO 파일럿 (Phase C) — 커스텀 torch PPO, MLP 2x64, p24a 트윈 전 층 미러 env",
+ "h_plan": 1.2297675356334652,
+ "h_plan_best_ckpt": 1.2459525456616733,
+ "stats": {
+  "peak_raw1": 31.177099999999996,
+  "peak_raw2": 31.177099999999996,
+  "peak_tau1_nm": 20.74005913761362,
+  "peak_tau2_nm": 20.74005893413602,
+  "peak_dq1": 16.80539219116537,
+  "peak_dq2": 34.36956385266521,
+  "ceil_frac_raw1": 0.19333333333333333,
+  "ceil_frac_raw2": 0.245,
+  "ceil_frac_cmd1": 0.20666666666666667,
+  "ceil_frac_cmd2": 0.2633333333333333,
+  "n_liftoffs": 1,
+  "n_touchdowns": 1,
+  "n_hops_before_apex": 0,
+  "t_liftoff": 0.128,
+  "t_liftoff_last_before_apex": 0.128,
+  "t_apex": 0.525
+ },
+ "training": {
+  "steps": 1392640,
+  "episodes": 4642,
+  "wall_s": 277.2712323665619,
+  "stop": "plateau (best 1.2413 이후 20회 미개선)",
+  "best_h_during_train": 1.245949226734348,
+  "best_step": 1208320,
+  "n_updates": 680,
+  "n_evals": 68
+ },
+ "hyper": {
+  "n_envs": 4,
+  "t_roll": 512,
+  "total_steps": 3000000,
+  "gamma": 0.999,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epochs": 10,
+  "mb": 256,
+  "lr": [
+   0.0003,
+   0.0001
+  ],
+  "ent": 0.003,
+  "vf": 0.5,
+  "log_std0": -0.5108256237659907,
+  "clip_raw": 31.1771,
+  "net": "MLP 2x64 tanh (mean linear out, v2)",
+  "n_params": 9541,
+  "reward": {
+   "shaping": "APEX_W*d(running_max_bz) v2",
+   "apex_w": 5.0,
+   "terminal": "APEX_W*max(0, ballistic_apex - running_max)",
+   "tau_pen": 0.0001,
+   "slip_pen": 1.0,
+   "range_pen": 0.5,
+   "crash_pen": 1.0
+  }
+ },
+ "golden": {
+  "golden_A_mean": 1.2850899929228805,
+  "golden_A_canonical": 1.2851,
+  "golden_B_maxdiff": 0.0
+ },
+ "env": {
+  "ctrl_dt": 0.002,
+  "ep_t": 0.6,
+  "sim_dt": 0.0005,
+  "crouch": [
+   -0.29672805269493363,
+   -2.548136548199926
+  ],
+  "crouch_sub": "60_0.75_60_2",
+  "q1_range": [
+   -1.3777535100771359,
+   -0.15413290460838577
+  ],
+  "q2_range": [
+   -2.811278943219457,
+   -0.3287887851384024
+  ],
+  "obs": "[(bz-0.6)/0.4, q1/1.5, q2/1.5, dq1/10, dq2/10, vbz/3, t/0.6]",
+  "clip_raw": 31.1771,
+  "action": "raw torque (2,) [-31.1771,31.1771] → tm필터→클립→ahat→supp/rise/스프링/힙층",
+  "reset_noise": {
+   "q_std": 0.005,
+   "dq_std": 0.05
+  }
+ },
+ "phase_a_comparison": {
+  "ol_cma": {
+   "h_plan": 1.2509529372899244,
+   "evals": 4513
+  },
+  "mppi": {
+   "h_plan": 1.0178056612741913,
+   "evals": null
+  },
+  "cl_cma": {
+   "h_plan": 1.5166482770246776,
+   "evals": 3217
+  }
+ },
+ "caveats": [
+  "RL 파일럿 — 보상 v2 = APEX_W·Δ(러닝맥스 bz) (합계=apex−bz0 정확) + 종단 탄도외삽 증분. v1(Δbz shaping+종단보너스)은 착지 상쇄로 h≈0.54 국소최적에 갇혔음 — 보상 설계 민감성이 이 파일럿의 핵심 관찰",
+  "관절범위(0602 방문 +10%)는 종료+페널티(hard-ish), 미끄럼은 소프트 페널티 — Phase A(cl_cma)는 dq2 피크 45.5로 방문 범위 밖까지 나감 (제약 처리 방식이 달라 h_plan 직접 비교에 유의)",
+  "학습 중 apex 보상은 탄도 외삽 추정(bz+vz²/2g), 본 h_plan은 수동 연장 0.6s 실측",
+  "시작 웅크림 = 0602 첫 trial의 qd(0) settle (Phase A twin은 측정 q(0) — 양쪽 settle 수렴 자세 차이는 mm 수준)",
+  "표본 효율: PPO 4710회 롤아웃(에피소드+평가)·wall 277s ≈ CMA와 동급 규모 (ol 4513 / cl 3217 evals) — 이 태스크(300스텝, 밀집 보상)에선 RL이 표본상 경쟁력 있으나, best는 1208320스텝에서 나왔고 이후 미개선 (플래토)",
+  "결정론 롤아웃 청결: apex 전 재접촉(바운스) 0회·범위 이탈 없음 — 러닝맥스 보상이라 바운스 착취 유인 자체가 없음"
+ ],
+ "files": {
+  "npz": "p25_c_ppo_t18.npz",
+  "curve": "p25_c_curve_t18.png",
+  "policy": "p25_c_policy_t18.pt",
+  "train_log": "p25_c_train_log_t18.json",
+  "npz_best": "p25_c_ppo_best_t18.npz"
+ },
+ "wall_s_rollout": 2.4152307510375977
+}

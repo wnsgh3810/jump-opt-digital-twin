@@ -1,0 +1,21 @@
+=== p25_a_cma_ol — 개루프 토크 스플라인 CMA ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+settle cached: q=(-0.2557, -2.6141) target=(-0.2611, -2.6040)
+warm-start: p25_a_res_ol.json 최적해를 ±31.1771로 사영해 시드
+seed f=53.9822 (apex~-53.982m, trial 60_0.75_60_2, push peak t=0.254)
+  it   25  nfev   401  best f=-0.9302  [14s]
+  it   50  nfev   801  best f=-1.0358  [26s]
+  it   75  nfev  1201  best f=-1.0759  [39s]
+  it  100  nfev  1601  best f=-1.1134  [51s]
+  it  125  nfev  2001  best f=-1.1263  [63s]
+  it  150  nfev  2401  best f=-1.1324  [75s]
+  it  175  nfev  2801  best f=-1.1435  [87s]
+  it  200  nfev  3201  best f=-1.1448  [99s]
+  it  225  nfev  3601  best f=-1.1459  [111s]
+  it  250  nfev  4001  best f=-1.1459  [123s]
+  it  275  nfev  4401  best f=-1.1461  [134s]
+CMA done: nfev=4513 crash=0 best f=-1.1461 [138s]
+h_plan=1.1483 m  peak raw=(31.2, 31.2)  peak dq=(13.7, 31.2)  ceil_frac=(0.14, 0.25)
+saved p25_a_ol_cma_t18.npz + p25_a_res_ol_t18.json [2.3m]

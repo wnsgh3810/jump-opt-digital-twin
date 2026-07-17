@@ -1,0 +1,20 @@
+=== p25_a_mppi — MPPI (10ms 재계획, K<=40, 탄도 종단 추정) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+  pilot λ=0.3 (S=128) ...
+    λ=0.3: h=1.0579 m  crash_samples=8
+  pilot λ=1.0 (S=128) ...
+    λ=1.0: h=0.9591 m  crash_samples=6
+  pilot λ=3.0 (S=128) ...
+    λ=3.0: h=0.9292 m  crash_samples=5
+λ* = 0.3 → 본판 S=256
+    warm-start: p25_a_mppi.npz U_nominal 사영 (clip 31.1771)
+    replan 10/60  bz=0.173  vz=-0.02  best J=-1.066  [26s]
+    replan 20/60  bz=0.205  vz=1.08  best J=-1.102  [51s]
+    replan 30/60  bz=0.433  vz=3.63  best J=-1.106  [71s]
+    replan 40/60  bz=0.746  vz=2.54  best J=-1.086  [85s]
+    replan 50/60  bz=0.949  vz=1.54  best J=-1.086  [94s]
+    replan 60/60  bz=1.059  vz=0.63  best J=-1.084  [97s]
+h_plan=1.0771 m  peak raw=(23.0, 31.2)  peak dq=(15.0, 27.6)  ceil_frac=(0.00, 0.04)  crash_samples=19/15360
+saved p25_a_mppi_t18.npz + p25_a_res_mppi_t18.json [4.1m]

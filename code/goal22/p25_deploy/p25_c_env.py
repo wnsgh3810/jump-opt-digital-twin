@@ -3,15 +3,18 @@
 
 플랜트 = 승격 p24a 후보 (fourbar_p24a_candidate.json) + p23_v6_runners 전 층:
   ahat(Paper) 변환 · 측정 지지법칙 supp · Phase 4c 상승항 K_RISE · Phase 4b 게이트 스프링 ·
-  P24 힙 부하-지지층 (HIP_LAW) · 커맨드층 (tm 1차 지연 + 클립 ±35.5).
+  P24 힙 부하-지지층 (HIP_LAW) · 커맨드층 (tm 1차 지연 + 클립 ±R19.CLIP).
 env 플래그 4종은 import 전에 강제 (p24a_all_results.py 규약 그대로).
+공급 클립은 env 변수 P25_CLIP_RAW로 재정의 (기본 = R19.CLIP = 35.5, 무설정 시 기존 동작
+완전 보존). 18Nm 캠페인: 31.1771 (a_hat 운동방향 가지 정확히 18.00Nm — p25_d_deploy 규약).
+env·cl_run23 모두 R19.CLIP을 호출 시점에 읽으므로 monkeypatch 한 곳으로 전 경로 일관.
 
 미러 원칙: JumpEnv._layer_step()은 cl_run23의 스텝 본체를 문자 그대로 복제
 (PD 명령 계산부만 정책 액션으로 대체). golden_cl()이 이를 비트 수준으로 검증:
 동일 0602 trial을 cl_run23와 env 경로로 각각 폐루프 구동 → 궤적 max|Δ| ≈ 0.
 
 태스크 (MARATHON_p25 공통 고정): 수직 최대 점프, 시작 = 0602 웅크림(qd(0), settle 0.4s),
-l_i=30 flip 모델, horizon 0.6s, 제어 dt 2ms (트윈 dt 서브스텝), 공급 천장 raw ±35.5,
+l_i=30 flip 모델, horizon 0.6s, 제어 dt 2ms (트윈 dt 서브스텝), 공급 천장 raw ±R19.CLIP,
 관절 범위 = 0602 실측 방문 범위 +10% 마진, 발 미끄럼 감시 (관측/페널티).
 
 보상 (문서화 — p25_c_results.json에도 기록; v2 2026-07-17):
@@ -57,6 +60,12 @@ safe.utf8_console()
 
 import p23_v6_runners as RU
 import p19_run as R19
+
+# P25_CLIP_RAW → 공급 클립 재정의 (raw 도메인; 무설정 시 R19.CLIP=35.5 그대로 = 기존 동작).
+# cl_run23(p23_v6_runners)과 본 env의 _layer_step/액션 스케일/sat 감시 전부 R19.CLIP을
+# 호출 시점에 읽음 → 이 한 곳이 유일한 진입점. 18Nm 캠페인: 31.1771 (p25_d_deploy 동일 규약).
+if os.environ.get("P25_CLIP_RAW"):
+    R19.CLIP = float(os.environ["P25_CLIP_RAW"])
 
 assert RU.SPRING_GATED and RU.RISE_GATED and RU.HIP_LAW and RU.P24_REFIT, \
     "p24a 구조 플래그 불일치 (env 강제 실패)"
@@ -119,7 +128,7 @@ class JumpEnv:
     """gymnasium-스타일 (reset/step) 점프 환경 — 플랜트 스텝은 cl_run23 본체 미러.
 
     obs (7,): [(bz−0.6)/0.4, q1/1.5, q2/1.5, dq1/10, dq2/10, vbz/3, t/EP_T]
-    action (2,): 정규화 raw 토크 명령 [−1,1] → ×35.5 (tm 필터+클립+ahat 체인 통과)
+    action (2,): 정규화 raw 토크 명령 [−1,1] → ×R19.CLIP (tm 필터+클립+ahat 체인 통과)
     """
 
     OBS_DIM = 7
