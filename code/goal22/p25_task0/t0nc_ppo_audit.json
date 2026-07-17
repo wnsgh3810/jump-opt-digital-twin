@@ -1,0 +1,231 @@
+{
+ "gen": "2026-07-18 00:53",
+ "campaign": "P25-task0 no_cvt (PPO 재학습, task0 제약)",
+ "method": "ppo",
+ "clip_raw": 25.581,
+ "h_plan": 0.6987393563381277,
+ "h_plan_best_ckpt": 0.9691236294191531,
+ "audit_final": {
+  "tau_hip": -2.430272432007996e-05,
+  "tau_knee": -2.430272432007996e-05,
+  "tn_hip": -31.86129520280573,
+  "tn_knee": -24.077268711550097,
+  "dq_hip": -40.918996725701184,
+  "dq_knee": -31.155504266647746,
+  "q1_lo": -0.3075965631948051,
+  "q1_hi": -0.0174115088448778,
+  "q2_lo": -0.032603333224466624,
+  "q2_hi": -0.6767491355417689,
+  "pass": true
+ },
+ "audit_best": {
+  "tau_hip": -6.442723287671738,
+  "tau_knee": -2.430272432007996e-05,
+  "tn_hip": -26.858154156330816,
+  "tn_knee": -8.920598257344999,
+  "dq_hip": -33.508906946889354,
+  "dq_knee": -13.60103919550123,
+  "q1_lo": 0.9547782701446648,
+  "q1_hi": -0.017393182507326743,
+  "q2_lo": -0.0386097796730529,
+  "q2_hi": 1.5042055595688908,
+  "pass": false
+ },
+ "pass_final": true,
+ "pass_best": false,
+ "stance_final": {
+  "t_stance": 0.12,
+  "ok": true,
+  "max": 0.3
+ },
+ "stance_best": {
+  "t_stance": 0.1565,
+  "ok": true,
+  "max": 0.3
+ },
+ "stats_final": {
+  "peak_raw1": 25.580999999999996,
+  "peak_raw2": 25.580999999999996,
+  "peak_tau1_nm": 14.99997569727568,
+  "peak_tau2_nm": 14.99997569727568,
+  "peak_dq1": 15.489867196221619,
+  "peak_dq2": 18.844495733352254,
+  "ceil_frac_raw1": 0.0725,
+  "ceil_frac_raw2": 0.15083333333333335,
+  "ceil_frac_cmd1": 0.09666666666666666,
+  "ceil_frac_cmd2": 0.16,
+  "tn_gap_max_1": -31.86129520280573,
+  "tn_active0.5_frac_1": 0.0,
+  "tn_active1.0_frac_1": 0.0,
+  "tn_active2.0_frac_1": 0.0,
+  "tn_active5.0_frac_1": 0.0,
+  "tn_gap_max_2": -24.077268711550097,
+  "tn_active0.5_frac_2": 0.0,
+  "tn_active1.0_frac_2": 0.0,
+  "tn_active2.0_frac_2": 0.0,
+  "tn_active5.0_frac_2": 0.0,
+  "n_liftoffs": 2,
+  "n_touchdowns": 2,
+  "n_hops_before_apex": 0,
+  "t_liftoff": 0.12,
+  "t_liftoff_last_before_apex": 0.12,
+  "t_apex": 0.369,
+  "t_stance": 0.12,
+  "stance_ok": true
+ },
+ "stats_best": {
+  "peak_raw1": 14.259570641625457,
+  "peak_raw2": 25.580999999999996,
+  "peak_tau1_nm": 8.557276712328262,
+  "peak_tau2_nm": 14.99997569727568,
+  "peak_dq1": 16.491093053110642,
+  "peak_dq2": 36.39896080449877,
+  "ceil_frac_raw1": 0.0,
+  "ceil_frac_raw2": 0.23416666666666666,
+  "ceil_frac_cmd1": 0.0,
+  "ceil_frac_cmd2": 0.24666666666666667,
+  "tn_gap_max_1": -26.858154156330816,
+  "tn_active0.5_frac_1": 0.0,
+  "tn_active1.0_frac_1": 0.0,
+  "tn_active2.0_frac_1": 0.0,
+  "tn_active5.0_frac_1": 0.0,
+  "tn_gap_max_2": -8.920598257344999,
+  "tn_active0.5_frac_2": 0.0,
+  "tn_active1.0_frac_2": 0.0,
+  "tn_active2.0_frac_2": 0.0,
+  "tn_active5.0_frac_2": 0.0,
+  "n_liftoffs": 2,
+  "n_touchdowns": 2,
+  "n_hops_before_apex": 1,
+  "t_liftoff": 0.1565,
+  "t_liftoff_last_before_apex": 0.1635,
+  "t_apex": 0.47300000000000003,
+  "t_stance": 0.1565,
+  "stance_ok": true
+ },
+ "range_viol_final": null,
+ "range_viol_best": {
+  "k_ctrl": 83,
+  "t": 0.168,
+  "q1": -1.2577852986244857,
+  "q2": -0.6858709847599395
+ },
+ "training": {
+  "steps": 614400,
+  "episodes": 2048,
+  "wall_s": 136.54719376564026,
+  "stop": "plateau (best 0.9691 이후 20회 미개선)",
+  "best_h_during_train": 0.9691236294191531,
+  "best_step": 61440,
+  "n_updates": 300,
+  "n_evals": 30
+ },
+ "hyper": {
+  "n_envs": 4,
+  "t_roll": 512,
+  "total_steps": 3000000,
+  "gamma": 0.999,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epochs": 10,
+  "mb": 256,
+  "lr": [
+   0.0003,
+   0.0001
+  ],
+  "ent": 0.003,
+  "vf": 0.5,
+  "log_std0": -0.5108256237659907,
+  "clip_raw": 25.581,
+  "net": "MLP 2x64 tanh (mean linear out, v2)",
+  "n_params": 9541,
+  "task0": {
+   "w_tn": 50.0,
+   "w_dq": 50.0,
+   "w_tau": 50.0,
+   "m_tn": 0.0,
+   "m_tau": 0.0,
+   "q1_bounds": [
+    -1.2566,
+    -0.2967
+   ],
+   "q2_bounds": [
+    -2.5482,
+    -0.6283
+   ],
+   "crouch": [
+    -0.32,
+    -2.5
+   ],
+   "tn": [
+    -0.731019,
+    48.476878
+   ],
+   "dq_lim": 50.0
+  },
+  "reward": {
+   "shaping": "APEX_W*d(running_max_bz) v2",
+   "apex_w": 5.0,
+   "terminal": "APEX_W*max(0, ballistic_apex - running_max)",
+   "tau_pen": 0.0001,
+   "slip_pen": 1.0,
+   "range_pen": 0.5,
+   "crash_pen": 1.0,
+   "t0_pen": "w_tn/w_dq * viol^2 per substep, / (n_ep*nsub) (= t0_spec.penalty 창 평균 규모)"
+  }
+ },
+ "golden": {
+  "golden_A_mean": 1.2850899929228805,
+  "golden_A_canonical": 1.2851,
+  "golden_B_maxdiff": 0.0,
+  "clip_raw": 25.581
+ },
+ "env": {
+  "ctrl_dt": 0.002,
+  "ep_t": 0.6,
+  "sim_dt": 0.0005,
+  "crouch": [
+   -0.32,
+   -2.5
+  ],
+  "crouch_sub": "task0",
+  "q1_range": [
+   -1.2566,
+   -0.2967
+  ],
+  "q2_range": [
+   -2.5482,
+   -0.6283
+  ],
+  "obs": "[(bz-0.6)/0.4, q1/1.5, q2/1.5, dq1/10, dq2/10, vbz/3, t/0.6]",
+  "action": "raw torque (2,) [-25.581,25.581] → tm필터→클립→ahat→supp/rise/스프링/힙층",
+  "w_tn": 50.0,
+  "w_dq": 50.0,
+  "w_tau": 50.0,
+  "m_tn": 0.0,
+  "m_tau": 0.0,
+  "reset_noise": {
+   "q_std": 0.005,
+   "dq_std": 0.05
+  }
+ },
+ "caveats": [
+  "P25-task0 캠페인 — 제약은 AVT LEG task0_vertjump_no_cvt 기준 (t0_spec): |â|≤15Nm(raw 박스 25.5810) · T-N |dq|≤-0.731|â|+48.48 · |dq|≤50 · q1∈[-1.2566,-0.2967] q2∈[-2.5482,-0.6283] · 스탠스≤0.3s(감사)",
+  "관절바운드 = 학습 종료조건(hard-ish), T-N/dq50 = 스텝당 위반량² 소프트 페널티 (w=50, t0_spec.penalty 규모) — task0(NLP)의 hard 제약과 처리 방식이 달라 h_plan 직접 비교에 유의",
+  "토크 박스는 공급 클립 25.5810이 구조적으로 강제 (a_hat 운동방향 가지 15.00Nm — 제동 가지에서 |â|가 15를 넘을 수 있는지는 감사(tau_hip/tau_knee)로 확인)",
+  "시작 웅크림 = task0 초기추정 (q1=-0.32, q2=-2.50) settle — task0은 시작 자세도 최적화 대상(바운드 내 자유)이므로 본 캠페인은 그 부분공간의 한 점에서 출발",
+  "학습 중 apex 보상은 탄도 외삽 추정, 본 h_plan은 수동 연장 0.6s 실측",
+  "감사 창(t≤0.6s)은 이륙 후 공중 자세까지 포함 — task0 NLP는 스탠스 구간만 제약하므로 본 감사가 더 엄격한 쪽",
+  "best 정책 롤아웃 중 관절범위 이탈: {'k_ctrl': 83, 't': 0.168, 'q1': -1.2577852986244857, 'q2': -0.6858709847599395}",
+  "best: apex 전 재접촉(바운스) 1회 — bz 트레이스 확인 필요"
+ ],
+ "files": {
+  "npz": "t0nc_ppo.npz",
+  "npz_best": "t0nc_ppo_best.npz",
+  "curve": "t0nc_ppo_curve.png",
+  "policy": "t0nc_ppo_policy.pt",
+  "train_log": "t0nc_train_log.json",
+  "traj": "t0nc_ppo_traj.png"
+ },
+ "wall_s_rollout": 2.7014455795288086
+}
