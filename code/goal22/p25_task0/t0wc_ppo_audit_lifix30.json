@@ -1,0 +1,315 @@
+{
+ "gen": "2026-07-18 02:21",
+ "campaign": "P25-task0 with_cvt (PPO l_i-조건부, task0 제약)",
+ "method": "ppo_licond",
+ "clip_raw": 25.581,
+ "primary_ckpt": "final",
+ "li_star_mm": 30.0,
+ "h_plan": 0.9860336483040377,
+ "pass_all": true,
+ "extrapolated": false,
+ "audit_star": {
+  "tau_hip": -2.430272432007996e-05,
+  "tau_knee": -2.430272432007996e-05,
+  "tn_hip": -26.52805889622837,
+  "tn_knee": -14.411180850518328,
+  "dq_hip": -37.92874635907933,
+  "dq_knee": -26.799506396349656,
+  "q1_lo": -0.042287865859232276,
+  "q1_hi": -0.017411201218753225,
+  "q2_lo": -0.04084942205267339,
+  "q2_hi": -0.8364186345178585,
+  "pass": true
+ },
+ "stance_star": {
+  "t_stance": 0.1335,
+  "ok": true,
+  "max": 0.3
+ },
+ "stats_star": {
+  "peak_raw1": 25.580999999999996,
+  "peak_raw2": 25.580999999999996,
+  "peak_tau1_nm": 14.99997569727568,
+  "peak_tau2_nm": 14.99997569727568,
+  "peak_dq1": 12.071253640920675,
+  "peak_dq2": 23.200493603650344,
+  "ceil_frac_raw1": 0.15833333333333333,
+  "ceil_frac_raw2": 0.20416666666666666,
+  "ceil_frac_cmd1": 0.17,
+  "ceil_frac_cmd2": 0.21333333333333335,
+  "tn_gap_max_1": -26.52805889622837,
+  "tn_active0.5_frac_1": 0.0,
+  "tn_active1.0_frac_1": 0.0,
+  "tn_active2.0_frac_1": 0.0,
+  "tn_active5.0_frac_1": 0.0,
+  "tn_gap_max_2": -14.411180850518328,
+  "tn_active0.5_frac_2": 0.0,
+  "tn_active1.0_frac_2": 0.0,
+  "tn_active2.0_frac_2": 0.0,
+  "tn_active5.0_frac_2": 0.0,
+  "n_liftoffs": 1,
+  "n_touchdowns": 1,
+  "n_hops_before_apex": 0,
+  "t_liftoff": 0.1335,
+  "t_apex": 0.461,
+  "t_stance": 0.1335,
+  "stance_ok": true
+ },
+ "range_viol_star": null,
+ "li_star_by_ckpt": {
+  "final": {
+   "l_i_mm": 30.0,
+   "h_plan": 0.9860336483040377,
+   "pass_all": true,
+   "from_pass_pool": true,
+   "extrapolated": false
+  },
+  "best": {
+   "l_i_mm": 30.0,
+   "h_plan": 0.9959915332898346,
+   "pass_all": false,
+   "from_pass_pool": false,
+   "extrapolated": false
+  }
+ },
+ "h_curve": {
+  "final": [
+   {
+    "l_i_mm": 30.0,
+    "h_plan": 0.9860336483040377,
+    "bz_settle": 0.19943028357837136,
+    "audit": {
+     "tau_hip": -2.430272432007996e-05,
+     "tau_knee": -2.430272432007996e-05,
+     "tn_hip": -26.52805889622837,
+     "tn_knee": -14.411180850518328,
+     "dq_hip": -37.92874635907933,
+     "dq_knee": -26.799506396349656,
+     "q1_lo": -0.042287865859232276,
+     "q1_hi": -0.017411201218753225,
+     "q2_lo": -0.04084942205267339,
+     "q2_hi": -0.8364186345178585,
+     "pass": true
+    },
+    "audit_pass": true,
+    "stance_s": 0.1335,
+    "stance_ok": true,
+    "range_viol": null,
+    "pass_all": true,
+    "extrapolated": false,
+    "r_range": [
+     -1.2622102273938403,
+     -0.8452003057619287
+    ]
+   }
+  ],
+  "best": [
+   {
+    "l_i_mm": 30.0,
+    "h_plan": 0.9959915332898346,
+    "bz_settle": 0.19942994644143575,
+    "audit": {
+     "tau_hip": -2.430272432007996e-05,
+     "tau_knee": -2.430272432007996e-05,
+     "tn_hip": -26.21862242231642,
+     "tn_knee": -14.624935348265208,
+     "dq_hip": -37.705146692625355,
+     "dq_knee": -26.397159239690097,
+     "q1_lo": -0.0018346915686542342,
+     "q1_hi": -0.017405672521561166,
+     "q2_lo": 0.2154148872738335,
+     "q2_hi": -0.8310309819263755,
+     "pass": false
+    },
+    "audit_pass": false,
+    "stance_s": 0.135,
+    "stance_ok": true,
+    "range_viol": {
+     "k_ctrl": 226,
+     "t": 0.454,
+     "q1": -1.2212732444714534,
+     "qm": -2.9528739254373866
+    },
+    "pass_all": false,
+    "extrapolated": false,
+    "r_range": [
+     -1.2687948806888727,
+     -0.844475298837976
+    ]
+   }
+  ]
+ },
+ "h_anchor_2508": {
+  "final": null,
+  "best": null
+ },
+ "h_anchor_30": {
+  "final": 0.9860336483040377,
+  "best": 0.9959915332898346
+ },
+ "cma_ref": {
+  "cl_li15": {
+   "l_i_mm": 15.0,
+   "h_plan": 0.8744331512897888,
+   "audit_pass": true
+  },
+  "cl_li20": {
+   "l_i_mm": 20.0,
+   "h_plan": 0.9919627905636118,
+   "audit_pass": true
+  },
+  "cl_li2508": {
+   "l_i_mm": 25.080000000000002,
+   "h_plan": 1.1044790822448562,
+   "audit_pass": true
+  },
+  "ol_li15": {
+   "l_i_mm": 15.0,
+   "h_plan": 0.8258734990253983,
+   "audit_pass": true
+  },
+  "ol_li20": {
+   "l_i_mm": 20.0,
+   "h_plan": 0.9233557655953497,
+   "audit_pass": true
+  },
+  "ol_li2508": {
+   "l_i_mm": 25.080000000000002,
+   "h_plan": 1.024222740118092,
+   "audit_pass": true
+  }
+ },
+ "avt_opt_mm": 25.161,
+ "li_eval_grid": [
+  30.0
+ ],
+ "training": {
+  "steps": 1720320,
+  "wall_s": 412.5594084262848,
+  "stop": "plateau (best 0.9954 이후 20회 미개선)",
+  "best_h_mean3_during_train": 0.9959915332898346,
+  "best_step": 1413120,
+  "n_updates": 840,
+  "n_evals": 84
+ },
+ "hyper": {
+  "n_envs": 4,
+  "t_roll": 512,
+  "total_steps": 3000000,
+  "gamma": 0.999,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epochs": 10,
+  "mb": 256,
+  "lr": [
+   0.0003,
+   0.0001
+  ],
+  "ent": 0.003,
+  "vf": 0.5,
+  "log_std0": -0.5108256237659907,
+  "clip_raw": 25.581,
+  "net": "MLP 2x64 tanh (obs 8, mean linear out, v2)",
+  "n_params": 9669,
+  "li": {
+   "lb_mm": 15.0,
+   "ub_mm": 30.0,
+   "quant_mm": 0.05,
+   "fit_mm": 25.08,
+   "sample": "FIXED 30.0 mm (폴백 모드)",
+   "li_fixed": 30.0,
+   "obs_norm": "(li_mm-22.5)/7.5",
+   "eval_anchors": [
+    30.0
+   ]
+  },
+  "task0": {
+   "w_tn": 50.0,
+   "w_dq": 50.0,
+   "w_tau": 50.0,
+   "m_tn": 0.0,
+   "m_tau": 0.0,
+   "q1_bounds": [
+    -1.2566,
+    -0.2967
+   ],
+   "qm_bounds": [
+    -2.95,
+    -0.05
+   ],
+   "crouch": [
+    -0.32,
+    -2.5
+   ],
+   "tn": [
+    -0.731019,
+    48.476878
+   ],
+   "dq_lim": 50.0
+  },
+  "reward": {
+   "shaping": "APEX_W*d(running_max_bz) v2",
+   "apex_w": 5.0,
+   "terminal": "APEX_W*max(0, ballistic_apex - running_max)",
+   "tau_pen": 0.0001,
+   "slip_pen": 1.0,
+   "range_pen": 0.5,
+   "crash_pen": 1.0,
+   "t0_pen": "w_tn/w_dq/w_tau * viol^2 per substep, / (n_ep*nsub)"
+  }
+ },
+ "golden": {
+  "golden_A_mean": 2.605677176947612,
+  "golden_A_canonical": 2.6057,
+  "golden_B_maxdiff": 0.0,
+  "clip_raw": 25.581,
+  "golden_li_mm": 25.08
+ },
+ "env": {
+  "ctrl_dt": 0.002,
+  "ep_t": 0.6,
+  "sim_dt": 0.0005,
+  "crouch": [
+   -0.32,
+   -2.5
+  ],
+  "li_sample": "U[15,30]mm (train)",
+  "li_quant_mm": 0.05,
+  "q1_range": [
+   -1.2566,
+   -0.2967
+  ],
+  "qm_range": [
+   -2.95,
+   -0.05
+  ],
+  "obs": "[(bz-0.6)/0.4, q1/1.5, qm/1.5, dq1/10, dqm/10, vbz/3, t/0.6, (l_i-22.5)/7.5]",
+  "action": "raw torque (2,) [-25.581,25.581] → tm필터→클립→ahat→supp/rise/C_CVT/스프링/힙층",
+  "w_tn": 50.0,
+  "w_dq": 50.0,
+  "w_tau": 50.0,
+  "m_tn": 0.0,
+  "m_tau": 0.0,
+  "reset_noise": {
+   "q_std": 0.005,
+   "dq_std": 0.05
+  }
+ },
+ "caveats": [
+  "P25-task0 with_cvt 캠페인 — 제약은 AVT LEG task0_vertjump_with_cvt 기준 (t0_spec cvt=True): |â|≤15Nm(raw 박스 25.5810) · T-N · |dq|≤50 · q1∈[-1.2566,-0.2967] · 크랭크 qm∈[-2.95,-0.05] · 스탠스≤0.3s(감사)",
+  "l_i-조건부 단일 정책: 학습 시 에피소드마다 l_i~U[15,30]mm (0.05mm 양자화, obs 8축째 = (l_i-22.5)/7.5) — h(l_i) 곡선은 같은 정책의 결정론 롤아웃",
+  "CVT 층(C_CVT 전달손실·게이트 스프링)은 l_i=25.08mm(0429)에서만 실측 검증 — l_i<25.08 결과는 모델 외삽(extrapolated 플래그), [25.08,30]은 양끝 검증 내삽",
+  "관절바운드(qm 포함) = 학습 종료조건(hard-ish), T-N/dq50/|â|>15 = 스텝당 위반량² 소프트 페널티 (w=50) — CMA(t0wc_cma)의 소프트 페널티+에스컬레이션과 처리 방식이 달라 h 직접 비교에 유의",
+  "시작 웅크림 = task0 초기추정 (q1=-0.32, qm=-2.50) settle 고정 — CMA판은 시작 자세도 최적화 대상(바운드 내 자유)이므로 RL이 그 부분공간의 한 점에서 출발",
+  "h_plan = 능동 0.6s + 수동 연장 0.6s 실측 max bz (학습 중 apex 보상은 탄도 외삽)"
+ ],
+ "files": {
+  "npz": "t0wc_ppo_lifix30.npz",
+  "curve": "t0wc_ppo_curve_lifix30.png",
+  "licurve": "t0wc_ppo_licurve_lifix30.png",
+  "policy": "t0wc_ppo_policy_lifix30.pt",
+  "train_log": "t0wc_train_log_lifix30.json"
+ },
+ "wall_s_rollout": 3.327953815460205,
+ "mode": "fixed-l_i 폴백 (30.0 mm) — 조건부 저성과 시 개별 학습 (코디 07-18)"
+}

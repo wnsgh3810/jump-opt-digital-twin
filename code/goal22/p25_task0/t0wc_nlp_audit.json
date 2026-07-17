@@ -1,0 +1,429 @@
+{
+ "CAMPAIGN": "P25-task0 with_cvt NLP — l_i(상수) 결정변수 (task0 제약 / p24a CVT twin)",
+ "gen": "2026-07-18 02:51",
+ "method": "sweep",
+ "method_note": "joint = l_i 결정변수 NLP (5점 Lagrange 신뢰영역) / sweep = 고정-l_i NLP 체인 스윕 — 최고 h_plan(감사 통과) 채택 (사용자 지시 07-18)",
+ "joint_result": {
+  "l_i_mm": 28.19682993313931,
+  "h_plan": 0.9843600510237676
+ },
+ "sweep": {
+  "file": "t0wc_nlp_sweep.json",
+  "n_points": 11,
+  "best": {
+   "l_i_mm": 28.0,
+   "h_plan": 0.9848233285092324,
+   "h_twin": 0.9091295594775122
+  },
+  "best_by_twin_replay": {
+   "l_i_mm": 27.0,
+   "h_plan": 0.9768326244131746,
+   "h_twin": 0.9234486233407042,
+   "gap_pct": -5.4650100476057,
+   "note": "트윈 â 재생 h(심판 지표) 기준 argmax — 플랜 지표 argmax(28mm)와 1mm 어긋남. 채택 해는 플랜 지표 관례(t0nc 동형) 유지, 트윈 지표 최적은 여기 병기"
+  }
+ },
+ "l_i": {
+  "opt_mm": 28.0,
+  "bounds_mm": [
+   10.0,
+   30.0
+  ],
+  "trust_final_mm": [
+   28.0,
+   28.0
+  ],
+  "fit_cap_note": "EoM 적합 유효 상한: 중심≤28.08mm (최대 노드 29.58) — (29.6,30)mm 협대역은 폐쇄 브랜치 근접 첨점으로 적합 실패, l_i=30 무변속판은 t0nc 커버",
+  "validity": "interpolation",
+  "validity_note": "CVT 층(게이트 스프링·C_CVT |r|≤0.2 캡)은 l_i=25.08 fit. [25.08,30]=양끝 검증 내삽 (0429 CVT/무변속), <25.08=외삽",
+  "chosen_attempt": "liopt",
+  "attempts": [
+   {
+    "label": "li2508",
+    "warm_npz": "t0wc_cl_li2508.npz",
+    "warm_li0_mm": 25.080000000000002,
+    "warm_shift_s": 0.0,
+    "h_plan": 0.9828611772561913,
+    "li_mm": 26.871331669193687,
+    "truncated_at_fit_cap": false,
+    "rounds": [
+     {
+      "round": 0,
+      "l_c_mm": 25.080000000000002,
+      "li_mm": 26.580000014656633,
+      "h_plan": 0.9763323986492988,
+      "status": "converged",
+      "iters": 161,
+      "wall_s": 30.415017127990723,
+      "at_edge": true
+     },
+     {
+      "round": 1,
+      "l_c_mm": 26.580000014656633,
+      "li_mm": 26.871331669193687,
+      "h_plan": 0.9828611772561913,
+      "status": "converged",
+      "iters": 180,
+      "wall_s": 37.986448526382446,
+      "at_edge": false
+     }
+    ]
+   },
+   {
+    "label": "liopt",
+    "warm_npz": "t0wc_cl_liopt.npz",
+    "warm_li0_mm": 26.25,
+    "warm_shift_s": 0.0,
+    "h_plan": 0.9843600510237676,
+    "li_mm": 28.19682993313931,
+    "truncated_at_fit_cap": false,
+    "rounds": [
+     {
+      "round": 0,
+      "l_c_mm": 26.25,
+      "li_mm": 27.74999948701742,
+      "h_plan": 0.9852624857042087,
+      "status": "converged",
+      "iters": 162,
+      "wall_s": 30.825613498687744,
+      "at_edge": true
+     },
+     {
+      "round": 1,
+      "l_c_mm": 27.74999948701742,
+      "li_mm": 28.19682993313931,
+      "h_plan": 0.9843600510237676,
+      "status": "converged",
+      "iters": 56,
+      "wall_s": 11.544862270355225,
+      "at_edge": false
+     }
+    ]
+   }
+  ]
+ },
+ "constraints": {
+  "tau_axis_abs_max": 15.0,
+  "raw_box": 25.581,
+  "tn": "|dq| <= -0.731019*|ahat| + 48.476878 (hip축 + 크랭크측)",
+  "dq_abs_max": 50.0,
+  "q1": [
+   -1.2566,
+   -0.2967
+  ],
+  "qm": [
+   -2.95,
+   -0.05
+  ],
+  "branch_guard": "양판 하드 (전 노드): rtab(반위상) r <= -0.05 (liopt/audit 정본) + AVT mechanism_fun 이식 J(qm_avt=-pi+qc) <= -0.05",
+  "start": "free pose in box + rest + static equilibrium (Fz(0)=M*g)",
+  "stance_max_s": 0.3,
+  "stance_mode": "fixed grid -> liftoff audit"
+ },
+ "nlp": {
+  "status": "converged",
+  "iters": 47,
+  "wall_s": 9.845981359481812,
+  "N": 121,
+  "dt": 0.005,
+  "horizon_s": 0.6,
+  "k_c": 130000.0,
+  "b_c": 180.0,
+  "objective": "G20 'Base via CoM v_z' (p25_b 동일)",
+  "warm_start": "t0wc_cl_liopt.npz (CMA CL) projected, apex-align shift +0ms, l_i0=26.25mm",
+  "li_variable": "dimensionless uLI, l_i = l_c + uLI*0.75mm (trust region)",
+  "t_flight_final": null,
+  "basin_hop": [
+   {
+    "t_flight": 0.2,
+    "status": "converged",
+    "h_plan": 0.9671320149407702,
+    "li_mm": 27.663540239122668,
+    "iters": 345
+   },
+   {
+    "t_flight": null,
+    "status": "converged",
+    "h_plan": 0.9762251072462843,
+    "li_mm": 27.681124941814204,
+    "iters": 21
+   },
+   {
+    "t_flight": 0.14,
+    "status": "converged",
+    "h_plan": 0.9083580773713857,
+    "li_mm": 27.514955760878856,
+    "iters": 271
+   },
+   {
+    "t_flight": null,
+    "status": "converged",
+    "h_plan": 0.9209513995349455,
+    "li_mm": 27.531384163778856,
+    "iters": 104
+   },
+   {
+    "t_flight": 0.1,
+    "status": "converged",
+    "h_plan": 0.5923840126177876,
+    "li_mm": 26.24999947308979,
+    "iters": 370
+   },
+   {
+    "t_flight": null,
+    "status": "converged",
+    "h_plan": 0.888745867325123,
+    "li_mm": 26.471805350881947,
+    "iters": 92
+   }
+  ]
+ },
+ "start": {
+  "q1_0": -0.3324785082886885,
+  "qm_0": -2.726955775870244,
+  "bz0": 0.1811010927854442
+ },
+ "results": {
+  "h_plan": 0.9848233285092324,
+  "h_twin_rollout": 0.9091295594775122,
+  "gap_pct": -7.6860251824356185,
+  "h_rise_plan": 0.8037222357237882,
+  "plan_twin_stance_qRMSE": 0.11517260827505574,
+  "vz_com_T": 0.1589253487961667,
+  "dh_vs_cma_li2508": -0.11965575373562387
+ },
+ "references": {
+  "cma_cl_li2508": {
+   "l_i_mm": 25.08,
+   "h_plan": 1.1044790822448562
+  },
+  "avt_analytic_opt_mm": 25.161,
+  "cma_cl_liopt": {
+   "l_i_mm": 26.25,
+   "h_plan": 1.1233037163483233
+  }
+ },
+ "stance": {
+  "liftoff_plan_s": 0.28,
+  "liftoff_twin_s": 0.28700000000000003,
+  "limit_s": 0.3,
+  "pass_plan": true,
+  "pass_twin": true
+ },
+ "audit_plan": {
+  "tau_hip": -2.997637868773495e-05,
+  "tau_knee": -2.443870142343485e-05,
+  "tn_hip": -29.37580989163837,
+  "tn_knee": -18.42443922554164,
+  "dq_hip": -41.542155456027366,
+  "dq_knee": -25.623818961072054,
+  "q1_lo": -2.185632785867142e-09,
+  "q1_hi": -1.8549981939397497e-08,
+  "q2_lo": -9.962027647247851e-09,
+  "q2_hi": -0.2503925093358361,
+  "pass": true
+ },
+ "audit_twin_rollout": {
+  "tau_hip": -2.997637868773495e-05,
+  "tau_knee": -2.443870142343485e-05,
+  "tn_hip": -30.559123633583173,
+  "tn_knee": -20.000824956136864,
+  "dq_hip": -40.63030378530436,
+  "dq_knee": -29.11497821345154,
+  "q1_lo": 0.10993631124671444,
+  "q1_hi": 0.02745525857335457,
+  "q2_lo": -0.028385690673399466,
+  "q2_hi": -0.6008450030179059,
+  "pass": false
+ },
+ "r_guard": {
+  "bound": -0.05,
+  "rtab_r_range_plan": [
+   -1.032620560959574,
+   -0.4349123136243114
+  ],
+  "rtab_margin_plan": -0.3849123136243114,
+  "ok_plan": true,
+  "avt_J_max_plan": -0.3984246947301826,
+  "rtab_r_range_twin": [
+   -1.032800651496923,
+   -0.6765116323702954
+  ],
+  "rtab_margin_twin": -0.6265116323702954,
+  "ok_twin": true
+ },
+ "tn_active_plan": {
+  "hip_active_pct_stance": 0.0,
+  "knee_active_pct_stance": 0.0,
+  "hip_active_pct_all": 0.0,
+  "knee_active_pct_all": 0.0,
+  "hip_min_margin_rads": 29.37580989163837,
+  "knee_min_margin_rads": 18.42443922554164,
+  "active_tol_rads": 0.5
+ },
+ "tn_active_twin": {
+  "hip_active_pct_stance": 0.0,
+  "knee_active_pct_stance": 0.0,
+  "hip_active_pct_all": 0.0,
+  "knee_active_pct_all": 0.0,
+  "hip_min_margin_rads": 30.559123633583173,
+  "knee_min_margin_rads": 20.000824956136864,
+  "active_tol_rads": 0.5
+ },
+ "peaks": {
+  "s1_absmax": 14.999970023621312,
+  "s2_absmax": 14.999975561298577,
+  "raw1_absmax": 25.58098962769243,
+  "raw2_absmax": 25.580999751413056,
+  "dq1_absmax": 8.457844543972632,
+  "dqm_absmax": 24.376181038927946,
+  "grf_max": 116.12750891580761,
+  "grf_twin_max": 1341.5958229413536,
+  "ceiling_ride_pct_stance": [
+   10.714285714285714,
+   30.357142857142854
+  ],
+  "raw_le_clip_ok": true
+ },
+ "eom": {
+  "method": "numeric fit on p24a CVT twin, (bz,j1,j2crank) reduced coords; basis {1,cos j1,sin j1} x Cheb18(j2); l_i = 5-node Lagrange (0.75mm spacing) trust region; kinematics = in-phase closure (physical branch), C_CVT amp = rtab anti-phase mirror",
+  "fit_rel_resid_max": {
+   "qk": 2.901032328890224e-09,
+   "cp": 4.563816063880794e-08,
+   "r": 4.112064494279942e-07,
+   "rtab": 6.479525620274934e-05,
+   "M": 5.310603545359765e-06,
+   "G": 5.3106039113415134e-06,
+   "F": 9.22895392680584e-08,
+   "phi": 4.371107920064787e-09
+  },
+  "li_interp_check": {
+   "u=-0.5": {
+    "rel_M": 2.6369823915844596e-07,
+    "rel_G": 2.636982391488295e-07,
+    "abs_r": 3.806904318393034e-06
+   },
+   "u=+0.5": {
+    "rel_M": 2.3387223514212995e-07,
+    "rel_G": 2.33872235134224e-07,
+    "abs_r": 5.250622689634277e-06
+   }
+  },
+  "air_rollout_check": [
+   {
+    "l_i_mm": 28.0,
+    "q_err_max": 0.0021114230002607925,
+    "q_err_mean": 0.0005368817560103582,
+    "horizon_s": 0.1,
+    "n": 5,
+    "n_skipped_out_of_domain": 3
+   }
+  ],
+  "air_note": "정의역(스펙 박스) 이탈 개루프 trial은 제외 (외삽 영역 — NLP는 박스 제약으로 상태 구속; 초기판 7e54 폭발은 이 이탈 외삽 아티팩트)"
+ },
+ "goldens": {
+  "w_golden": {
+   "replay_0429_mean": 2.605677176947612,
+   "cl_mirror_maxdiff": 0.0,
+   "ALL": true
+  },
+  "ahat_mirror": {
+   "maxdiff": {
+    "bz": 0.0,
+    "q1": 0.0,
+    "q2": 0.0,
+    "dq1": 0.0,
+    "dq2": 0.0
+   },
+   "apex_recorded_win": 1.090426217565382,
+   "apex_replay_win": 1.090426217565382,
+   "ok": true
+  },
+  "avt_mechanism_crosscheck": {
+   "25.08mm": {
+    "max_dq2_rad": 1.709743457922741e-14,
+    "max_dJ": 1.50712775592865e-13
+   },
+   "23.58mm": {
+    "max_dq2_rad": 1.1435297153639112e-14,
+    "max_dJ": 7.222000775186643e-14
+   },
+   "26.58mm": {
+    "max_dq2_rad": 1.8041124150158794e-14,
+    "max_dJ": 2.606248550307555e-13
+   }
+  }
+ },
+ "notes": [
+  "audit_twin은 개루프 â replay의 실현 궤적 감사 — 플랜 준수여도 트윈 편차로 위반 가능",
+  "T-N/|dq| 매끈화(sqrt(x²+ε²), ε=0.05)는 보수측 — 정확 fabs 감사가 기준",
+  "raw 공급 박스(25.5810)와 |â|≤15 박스 공존 — 제동 가지는 박스가 지배",
+  "트윈 재생 비행규약 = rollout_ol/a_full23 (t>0.6: s=0) — CL(1.1045)의 q_des 유지 규약과 다름 (기록 apex ~0.65s라 일부 손실 가능)",
+  "C_CVT amp/스프링의 NLP측은 매끈화 근사 — 트윈 재생이 정확판 심판",
+  "NLP-CMA h 격차의 성격: â 재생 진단(liopt CMA 해 → 트윈 1.1223 재현)이 보여주듯 트윈은 단스탠스(0.04~0.10s) 충격형 전략으로 1.12를 실현하나, 본 NLP 대리 플랜트(수치 EoM + 선형 스프링-댐퍼 접촉 + 매끈화 층)는 같은 전략을 열세로 평가 (이지 강제 홉 사다리에서 t_f 짧아질수록 h 하락) — 충격 레짐 대리모델 한계로 진단. 정량 진단은 audit 'diagnosis' 필드 참조"
+ ],
+ "diagnosis": {
+  "hypothesis": "선형 k_c/b_c 접촉(G20, 완만 레짐 캘리브레이션)이 충격형 단스탠스에서 트윈 solimp 접촉과 괴리 — NLP가 CMA식 전략을 저평가 (홉 사다리에서 t_f 짧아질수록 h 하락과 정합)",
+  "replay_golden": {
+   "cma_liopt_ahat_replay_h": 1.122340619317157,
+   "cma_liopt_recorded_h": 1.1233037163483233
+  },
+  "contact_eval": [
+   {
+    "label": "cma_liopt_replay(impulsive)",
+    "l_i_mm": 26.25,
+    "contact_samples_s": 0.19500000000000017,
+    "t_last_contact_s": 0.2885,
+    "grf_twin_peak_N": 157.95018895601788,
+    "fz_model_peak_N": 1331.2910326428557,
+    "fz_rms_mismatch_N": 591.5269231311437,
+    "fz_model_min_N": -13.973341809227108,
+    "impulse_twin_Ns": 20.56397060953214,
+    "impulse_model_Ns": 107.5523855369824,
+    "damper_dissipation_J": 1.1765591134759403,
+    "jump_energy_scale_J": 28.252782341999996,
+    "note": "fz_model = NLP 선형 k_c·δ⁺+b_c·δ̇·w 를 트윈 재생 궤적 위에서 평가; 창 = 전 접촉 샘플 (다중 세그먼트 포함)"
+   },
+   {
+    "label": "nlp_solution_replay(gentle)",
+    "l_i_mm": 28.0,
+    "contact_samples_s": 0.28650000000000025,
+    "t_last_contact_s": 0.2865,
+    "grf_twin_peak_N": 112.81993285813367,
+    "fz_model_peak_N": 1409.5923136719268,
+    "fz_rms_mismatch_N": 605.0823902625913,
+    "fz_model_min_N": -4.840646175981995,
+    "impulse_twin_Ns": 18.807676404583884,
+    "impulse_model_Ns": 148.98049655956962,
+    "damper_dissipation_J": 0.4654370748007385,
+    "jump_energy_scale_J": 28.252782341999996,
+    "note": "fz_model = NLP 선형 k_c·δ⁺+b_c·δ̇·w 를 트윈 재생 궤적 위에서 평가; 창 = 전 접촉 샘플 (다중 세그먼트 포함)"
+   }
+  ]
+ },
+ "sensitivity_kc": {
+  "k_c": 44300.0,
+  "b_c": 90.0,
+  "l_i_mm": 28.0,
+  "status": "converged",
+  "iters": 64,
+  "h_plan": 1.0073773715452847,
+  "h_twin": 0.9325358220709825,
+  "gap_pct": -7.429345902369999,
+  "liftoff_plan_s": 0.28,
+  "audit_plan": {
+   "tau_hip": -8.366605786847003e-05,
+   "tau_knee": -3.4425233177870496e-05,
+   "tn_hip": -29.00831321841254,
+   "tn_knee": -18.20825913598464,
+   "dq_hip": -41.20555468117004,
+   "dq_knee": -25.216518623300455,
+   "q1_lo": -4.7040899842087924e-08,
+   "q1_hi": -1.3927584302519946e-07,
+   "q2_lo": -1.47591456833851e-07,
+   "q2_hi": -0.27662980116675184,
+   "pass": true
+  },
+  "note": "p24a 재실측 시컨트 k_eq(4.43e4)/b_c=90 재해 (p25_b 감도 관례) — 진단: CVT 점프는 저부하(GRF<160N) 접촉 레짐이라 G20 k_c=1.3e5(125~250N 국소기울기)가 과강성"
+ }
+}

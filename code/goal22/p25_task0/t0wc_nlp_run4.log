@@ -1,0 +1,77 @@
+═══ P25-task0 with_cvt — NLP (l_i 결정변수, p24a CVT twin) ═══
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[검증] raw=25.581 → â_motoring=15.0000 Nm  R19.CLIP=25.581
+[0] ahat(RAW15=25.581, v=+5) = 14.999976 Nm (기대 ~15.00)
+[1] 0429/60_0.75_60_2     dq2 RMSE=1.856
+[1] 0429/60_1.5_60_1.5    dq2 RMSE=2.134
+[1] 0429/90_0.75_90_2     dq2 RMSE=2.359
+[1] 0429/90_1.5_90_2.5    dq2 RMSE=2.344
+[1] 0429/120_2_120_2      dq2 RMSE=2.411
+[1] 0429/120_2.2_150_2.5  dq2 RMSE=2.485
+[1] 0429/120_2.2_200_2.8  dq2 RMSE=2.386
+[1] 0429/150_2.2_250_3    dq2 RMSE=3.390
+[1] 0429/150_2.2_350_3.5  dq2 RMSE=3.792
+[1] 0429/150_2.2_500_4    dq2 RMSE=2.898
+[1] session mean = 2.6057 (canonical 2.6057) PASS
+[2] 0429/60_0.75_60_2     mirror max|Δ|=0.000e+00
+[2] 0429/60_1.5_60_1.5    mirror max|Δ|=0.000e+00
+[2] 0429/90_0.75_90_2     mirror max|Δ|=0.000e+00
+GOLDEN PASS
+[mirror golden] max|Δ|=0.00e+00  apex 1.0904→1.0904  PASS
+[AVT crosscheck] max|q2_avt-(-qk)|=1.80e-14 rad  max|J_avt-r|=2.61e-13
+박스: q1 [-1.2566,-0.2967]  qm [-2.95,-0.05]  l_i [10,30]mm  J≤-0.05
+[l_i 보간 검증] {'u=-0.5': {'rel_M': 2.6369823915844596e-07, 'rel_G': 2.636982391488295e-07, 'abs_r': 3.806904318393034e-06}, 'u=+0.5': {'rel_M': 2.3387223514212995e-07, 'rel_G': 2.33872235134224e-07, 'abs_r': 5.250622689634277e-06}}
+[li2508] warm=t0wc_cl_li2508.npz li0=25.08mm apex정렬 shift=+0ms
+
+******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit https://github.com/coin-or/Ipopt
+******************************************************************************
+
+Total number of variables............................:     1090
+                     variables with only lower bounds:        0
+                variables with lower and upper bounds:        0
+                     variables with only upper bounds:        0
+Total number of equality constraints.................:      724
+Total number of inequality constraints...............:     2543
+        inequality constraints with only lower bounds:      122
+   inequality constraints with lower and upper bounds:     1090
+        inequality constraints with only upper bounds:     1331
+
+
+Number of Iterations....: 800
+
+                                   (scaled)                 (unscaled)
+Objective...............:   9.6806977819688527e+00    6.6864690549109710e+01
+Dual infeasibility......:   3.2748789100618581e+02    2.2619626171467685e+03
+Constraint violation....:   3.6063129636442925e-02    4.5274174829703646e-02
+Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
+Complementarity.........:   1.6586635296460945e-04    1.1456408012390630e-03
+Overall NLP error.......:   3.2748789100618581e+02    2.2619626171467685e+03
+
+
+Number of objective function evaluations             = 2124
+Number of objective gradient evaluations             = 795
+Number of equality constraint evaluations            = 2124
+Number of inequality constraint evaluations          = 2124
+Number of equality constraint Jacobian evaluations   = 805
+Number of inequality constraint Jacobian evaluations = 805
+Number of Lagrangian Hessian evaluations             = 800
+Total seconds in IPOPT                               = 157.638
+
+EXIT: Maximum Number of Iterations Exceeded.
+      solver  :   t_proc      (avg)   t_wall      (avg)    n_eval
+       nlp_f  |  72.00ms ( 33.90us)  66.42ms ( 31.27us)      2124
+       nlp_g  |  10.25 s (  4.83ms)  10.32 s (  4.86ms)      2124
+  nlp_grad_f  |  86.00ms (108.04us)  62.86ms ( 78.97us)       796
+  nlp_hess_l  | 111.03 s (139.49ms) 110.99 s (139.43ms)       796
+   nlp_jac_g  |  26.65 s ( 33.07ms)  26.70 s ( 33.13ms)       806
+       total  | 157.64 s (157.64 s) 157.64 s (157.64 s)         1
+IPOPT FAIL: Error in Opti::solve [OptiNode] at .../casadi/core/optistack.cpp:217:
+.../casadi/core/optistack_internal.cpp:1338: Assertion "return_success(accept_limit)" failed:
+Solver failed. You may use opti.debug.value to investigate the latest values of variables. return_status is 'Maximum_Iterations_Exceeded'
+[li2508] feas 프리솔브 failed(debug values) iters=800 h@feas=0.1969 l_i=26.58mm
+[li2508 r0] fits@['23.58', '24.33', '25.08', '25.83', '26.58']mm resid(max) M=7.8e-08 [161s]

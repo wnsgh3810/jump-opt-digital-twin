@@ -1,0 +1,104 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+PPO start — 1464 updates × batch 2048 (net 9669 params, obs 8, clip=25.581, li U[15.0,30.0]mm)
+up   10 steps     20k  ret40  0.703  apex40 0.418  pen40 0.1568  det h(15/25.08/30) 0.585/0.637/0.622 mean 0.6148 (best 0.6148)  pen 0.0000  tnv 0.000  sat 0.00  std [0.585 0.53 ]
+up   20 steps     41k  ret40  0.531  apex40 0.477  pen40 0.3933  det h(15/25.08/30) 0.513/0.538/0.525 mean 0.5254 (best 0.6148)  pen 0.0000  tnv 0.000  sat 0.00  std [0.555 0.514]
+up   30 steps     61k  ret40 -6.672  apex40 0.504  pen40 7.5541  det h(15/25.08/30) 0.466/0.562/0.606 mean 0.5444 (best 0.6148)  pen 0.0000  tnv 0.000  sat 0.00  std [0.526 0.487]
+up   40 steps     82k  ret40  0.782  apex40 0.497  pen40 0.0519  det h(15/25.08/30) 0.599/0.683/0.697 mean 0.6595 (best 0.6595)  pen 0.0000  tnv 0.000  sat 0.00  std [0.522 0.484]
+up   50 steps    102k  ret40  0.692  apex40 0.497  pen40 0.0516  det h(15/25.08/30) 0.647/0.646/0.594 mean 0.6289 (best 0.6595)  pen 0.0000  tnv 0.000  sat 0.00  std [0.495 0.484]
+up   60 steps    123k  ret40  0.805  apex40 0.491  pen40 0.0682  det h(15/25.08/30) 0.658/0.565/0.451 mean 0.5579 (best 0.6595)  pen 0.0000  tnv 0.000  sat 0.00  std [0.459 0.457]
+up   70 steps    143k  ret40  0.826  apex40 0.502  pen40 0.0694  det h(15/25.08/30) 0.616/0.580/0.489 mean 0.5618 (best 0.6595)  pen 0.0000  tnv 0.000  sat 0.00  std [0.45  0.448]
+up   80 steps    164k  ret40  1.139  apex40 0.575  pen40 0.0518  det h(15/25.08/30) 0.627/0.699/0.650 mean 0.6587 (best 0.6595)  pen 0.0000  tnv 0.000  sat 0.12  std [0.439 0.415]
+up   90 steps    184k  ret40  1.629  apex40 0.669  pen40 0.0967  det h(15/25.08/30) 0.627/0.701/0.678 mean 0.6686 (best 0.6686)  pen 0.0000  tnv 0.000  sat 0.10  std [0.423 0.396]
+up  100 steps    205k  ret40  1.590  apex40 0.683  pen40 0.2595  det h(15/25.08/30) 0.631/0.734/0.730 mean 0.6984 (best 0.6984)  pen 0.0000  tnv 0.000  sat 0.13  std [0.415 0.384]
+up  110 steps    225k  ret40  1.861  apex40 0.692  pen40 0.0943  det h(15/25.08/30) 0.644/0.779/0.795 mean 0.7390 (best 0.7390)  pen 0.0000  tnv 0.000  sat 0.12  std [0.411 0.376]
+up  120 steps    246k  ret40  2.000  apex40 0.721  pen40 0.1731  det h(15/25.08/30) 0.643/0.768/0.788 mean 0.7330 (best 0.7390)  pen 0.0000  tnv 0.000  sat 0.12  std [0.42  0.363]
+up  130 steps    266k  ret40  1.950  apex40 0.725  pen40 0.1603  det h(15/25.08/30) 0.676/0.805/0.815 mean 0.7654 (best 0.7654)  pen 0.0000  tnv 0.000  sat 0.17  std [0.418 0.343]
+up  140 steps    287k  ret40  2.212  apex40 0.748  pen40 0.0796  det h(15/25.08/30) 0.673/0.835/0.860 mean 0.7893 (best 0.7893)  pen 0.0000  tnv 0.000  sat 0.17  std [0.404 0.33 ]
+up  150 steps    307k  ret40  2.101  apex40 0.764  pen40 0.2205  det h(15/25.08/30) 0.651/0.845/0.917 mean 0.8043 (best 0.8043)  pen 0.0000  tnv 0.000  sat 0.20  std [0.391 0.326]
+up  160 steps    328k  ret40  2.151  apex40 0.768  pen40 0.1398  det h(15/25.08/30) 0.674/0.867/0.910 mean 0.8168 (best 0.8168)  pen 0.0000  tnv 0.000  sat 0.15  std [0.387 0.316]
+up  170 steps    348k  ret40  2.441  apex40 0.799  pen40 0.1561  det h(15/25.08/30) 0.700/0.869/0.898 mean 0.8222 (best 0.8222)  pen 0.0000  tnv 0.000  sat 0.22  std [0.371 0.305]
+up  180 steps    369k  ret40  2.495  apex40 0.793  pen40 0.0606  det h(15/25.08/30) 0.702/0.871/0.902 mean 0.8251 (best 0.8251)  pen 0.0000  tnv 0.000  sat 0.19  std [0.358 0.298]
+up  190 steps    389k  ret40  2.673  apex40 0.818  pen40 0.0858  det h(15/25.08/30) 0.702/0.872/0.906 mean 0.8267 (best 0.8267)  pen 0.0000  tnv 0.000  sat 0.16  std [0.35  0.291]
+up  200 steps    410k  ret40  2.387  apex40 0.804  pen40 0.0547  det h(15/25.08/30) 0.719/0.878/0.902 mean 0.8331 (best 0.8331)  pen 0.0000  tnv 0.000  sat 0.16  std [0.352 0.292]
+up  210 steps    430k  ret40  2.646  apex40 0.814  pen40 0.0397  det h(15/25.08/30) 0.701/0.873/0.910 mean 0.8282 (best 0.8331)  pen 0.0000  tnv 0.000  sat 0.16  std [0.346 0.288]
+up  220 steps    451k  ret40  2.473  apex40 0.802  pen40 0.1693  det h(15/25.08/30) 0.709/0.889/0.929 mean 0.8422 (best 0.8422)  pen 0.0000  tnv 0.000  sat 0.16  std [0.337 0.286]
+up  230 steps    471k  ret40  2.497  apex40 0.835  pen40 0.1580  det h(15/25.08/30) 0.701/0.889/0.954 mean 0.8480 (best 0.8480)  pen 0.0000  tnv 0.000  sat 0.16  std [0.331 0.281]
+up  240 steps    492k  ret40  2.708  apex40 0.830  pen40 0.0612  det h(15/25.08/30) 0.717/0.889/0.926 mean 0.8441 (best 0.8480)  pen 0.0000  tnv 0.000  sat 0.16  std [0.324 0.278]
+up  250 steps    512k  ret40  2.718  apex40 0.831  pen40 0.0515  det h(15/25.08/30) 0.690/0.886/0.938 mean 0.8378 (best 0.8480)  pen 0.0000  tnv 0.000  sat 0.16  std [0.319 0.281]
+up  260 steps    532k  ret40  2.556  apex40 0.813  pen40 0.1158  det h(15/25.08/30) 0.706/0.889/0.934 mean 0.8432 (best 0.8480)  pen 0.0000  tnv 0.000  sat 0.16  std [0.314 0.282]
+up  270 steps    553k  ret40  2.737  apex40 0.828  pen40 0.0278  det h(15/25.08/30) 0.710/0.888/0.925 mean 0.8412 (best 0.8480)  pen 0.0000  tnv 0.000  sat 0.16  std [0.299 0.28 ]
+up  280 steps    573k  ret40  2.568  apex40 0.829  pen40 0.1887  det h(15/25.08/30) 0.711/0.896/0.971 mean 0.8594 (best 0.8594)  pen 0.0000  tnv 0.000  sat 0.16  std [0.302 0.278]
+up  290 steps    594k  ret40  2.639  apex40 0.828  pen40 0.1234  det h(15/25.08/30) 0.721/0.892/0.964 mean 0.8592 (best 0.8594)  pen 0.0000  tnv 0.000  sat 0.16  std [0.288 0.274]
+up  300 steps    614k  ret40  2.693  apex40 0.824  pen40 0.0413  det h(15/25.08/30) 0.717/0.890/0.962 mean 0.8565 (best 0.8594)  pen 0.0000  tnv 0.000  sat 0.16  std [0.289 0.263]
+up  310 steps    635k  ret40  2.655  apex40 0.824  pen40 0.0693  det h(15/25.08/30) 0.729/0.903/0.936 mean 0.8556 (best 0.8594)  pen 0.0000  tnv 0.000  sat 0.19  std [0.282 0.266]
+up  320 steps    655k  ret40  2.816  apex40 0.842  pen40 0.0197  det h(15/25.08/30) 0.713/0.903/0.977 mean 0.8645 (best 0.8645)  pen 0.0000  tnv 0.000  sat 0.16  std [0.27  0.264]
+up  330 steps    676k  ret40  2.725  apex40 0.837  pen40 0.0648  det h(15/25.08/30) 0.720/0.905/0.974 mean 0.8661 (best 0.8661)  pen 0.0000  tnv 0.000  sat 0.16  std [0.264 0.261]
+up  340 steps    696k  ret40  2.741  apex40 0.834  pen40 0.0531  det h(15/25.08/30) 0.720/0.898/0.933 mean 0.8501 (best 0.8661)  pen 0.0000  tnv 0.000  sat 0.16  std [0.252 0.259]
+up  350 steps    717k  ret40  2.924  apex40 0.853  pen40 0.0151  det h(15/25.08/30) 0.733/0.900/0.928 mean 0.8536 (best 0.8661)  pen 0.0000  tnv 0.000  sat 0.16  std [0.243 0.249]
+up  360 steps    737k  ret40  2.795  apex40 0.844  pen40 0.0251  det h(15/25.08/30) 0.732/0.893/0.918 mean 0.8478 (best 0.8661)  pen 0.0000  tnv 0.000  sat 0.16  std [0.241 0.245]
+up  370 steps    758k  ret40  2.882  apex40 0.849  pen40 0.0217  det h(15/25.08/30) 0.734/0.905/0.959 mean 0.8662 (best 0.8662)  pen 0.0000  tnv 0.000  sat 0.17  std [0.235 0.238]
+up  380 steps    778k  ret40  2.847  apex40 0.857  pen40 0.0332  det h(15/25.08/30) 0.731/0.907/0.935 mean 0.8578 (best 0.8662)  pen 0.0000  tnv 0.000  sat 0.17  std [0.231 0.234]
+up  390 steps    799k  ret40  2.860  apex40 0.862  pen40 0.0220  det h(15/25.08/30) 0.744/0.907/0.921 mean 0.8572 (best 0.8662)  pen 0.0000  tnv 0.000  sat 0.20  std [0.235 0.234]
+up  400 steps    819k  ret40  2.668  apex40 0.843  pen40 0.0670  det h(15/25.08/30) 0.737/0.919/0.979 mean 0.8783 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.21  std [0.235 0.236]
+up  410 steps    840k  ret40  2.776  apex40 0.884  pen40 0.0845  det h(15/25.08/30) 0.742/0.916/0.972 mean 0.8767 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.23  std [0.234 0.231]
+up  420 steps    860k  ret40  2.771  apex40 0.858  pen40 0.0272  det h(15/25.08/30) 0.748/0.914/0.966 mean 0.8761 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.24  std [0.237 0.231]
+up  430 steps    881k  ret40  2.722  apex40 0.847  pen40 0.0505  det h(15/25.08/30) 0.755/0.909/0.926 mean 0.8635 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.22  std [0.235 0.235]
+up  440 steps    901k  ret40  2.801  apex40 0.870  pen40 0.1186  det h(15/25.08/30) 0.764/0.904/0.922 mean 0.8632 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.22  std [0.228 0.234]
+up  450 steps    922k  ret40  2.969  apex40 0.874  pen40 0.0209  det h(15/25.08/30) 0.750/0.909/0.926 mean 0.8617 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.26  std [0.227 0.231]
+up  460 steps    942k  ret40  2.763  apex40 0.859  pen40 0.0478  det h(15/25.08/30) 0.755/0.913/0.956 mean 0.8746 (best 0.8783)  pen 0.0000  tnv 0.000  sat 0.23  std [0.227 0.237]
+up  470 steps    963k  ret40  2.799  apex40 0.876  pen40 0.0198  det h(15/25.08/30) 0.757/0.921/0.965 mean 0.8812 (best 0.8812)  pen 0.0000  tnv 0.000  sat 0.24  std [0.232 0.242]
+up  480 steps    983k  ret40  2.929  apex40 0.867  pen40 0.0247  det h(15/25.08/30) 0.757/0.910/0.927 mean 0.8647 (best 0.8812)  pen 0.0000  tnv 0.000  sat 0.25  std [0.231 0.245]
+up  490 steps   1004k  ret40  2.922  apex40 0.862  pen40 0.0278  det h(15/25.08/30) 0.765/0.913/0.926 mean 0.8679 (best 0.8812)  pen 0.0000  tnv 0.000  sat 0.25  std [0.223 0.24 ]
+up  500 steps   1024k  ret40  2.929  apex40 0.867  pen40 0.0244  det h(15/25.08/30) 0.766/0.920/0.960 mean 0.8820 (best 0.8820)  pen 0.0000  tnv 0.000  sat 0.28  std [0.212 0.239]
+up  510 steps   1044k  ret40  3.015  apex40 0.878  pen40 0.0141  det h(15/25.08/30) 0.769/0.923/0.937 mean 0.8763 (best 0.8820)  pen 0.0000  tnv 0.000  sat 0.26  std [0.207 0.236]
+up  520 steps   1065k  ret40  3.063  apex40 0.880  pen40 0.0094  det h(15/25.08/30) 0.761/0.918/0.936 mean 0.8716 (best 0.8820)  pen 0.0000  tnv 0.000  sat 0.26  std [0.206 0.233]
+up  530 steps   1085k  ret40  2.915  apex40 0.876  pen40 0.0212  det h(15/25.08/30) 0.765/0.931/0.971 mean 0.8889 (best 0.8889)  pen 0.0000  tnv 0.000  sat 0.27  std [0.203 0.235]
+up  540 steps   1106k  ret40  2.951  apex40 0.870  pen40 0.0109  det h(15/25.08/30) 0.761/0.937/0.989 mean 0.8954 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.29  std [0.203 0.233]
+up  550 steps   1126k  ret40  2.909  apex40 0.876  pen40 0.0484  det h(15/25.08/30) 0.755/0.923/0.933 mean 0.8704 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.26  std [0.206 0.23 ]
+up  560 steps   1147k  ret40  2.926  apex40 0.872  pen40 0.0875  det h(15/25.08/30) 0.757/0.917/0.944 mean 0.8726 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.23  std [0.197 0.224]
+up  570 steps   1167k  ret40  2.812  apex40 0.850  pen40 0.0451  det h(15/25.08/30) 0.760/0.913/0.928 mean 0.8671 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.24  std [0.198 0.222]
+up  580 steps   1188k  ret40  2.976  apex40 0.883  pen40 0.0097  det h(15/25.08/30) 0.766/0.925/0.951 mean 0.8810 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.22  std [0.197 0.226]
+up  590 steps   1208k  ret40  2.929  apex40 0.882  pen40 0.0196  det h(15/25.08/30) 0.773/0.926/0.936 mean 0.8784 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.21  std [0.196 0.225]
+up  600 steps   1229k  ret40  3.057  apex40 0.890  pen40 0.0249  det h(15/25.08/30) 0.775/0.933/0.942 mean 0.8834 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.21  std [0.195 0.226]
+up  610 steps   1249k  ret40  2.944  apex40 0.879  pen40 0.0256  det h(15/25.08/30) 0.772/0.925/0.935 mean 0.8771 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.17  std [0.192 0.223]
+up  620 steps   1270k  ret40  2.914  apex40 0.863  pen40 0.0090  det h(15/25.08/30) 0.773/0.929/0.942 mean 0.8815 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.17  std [0.19  0.215]
+up  630 steps   1290k  ret40  2.884  apex40 0.863  pen40 0.0248  det h(15/25.08/30) 0.770/0.934/0.955 mean 0.8862 (best 0.8954)  pen 0.0000  tnv 0.000  sat 0.21  std [0.189 0.213]
+up  640 steps   1311k  ret40  2.978  apex40 0.889  pen40 0.0489  det h(15/25.08/30) 0.772/0.946/0.996 mean 0.9047 (best 0.9047)  pen 0.0000  tnv 0.000  sat 0.23  std [0.192 0.21 ]
+up  650 steps   1331k  ret40  2.802  apex40 0.879  pen40 0.0205  det h(15/25.08/30) 0.776/0.938/0.931 mean 0.8815 (best 0.9047)  pen 0.0000  tnv 0.000  sat 0.25  std [0.19  0.212]
+up  660 steps   1352k  ret40  2.913  apex40 0.897  pen40 0.0432  det h(15/25.08/30) 0.774/0.942/0.989 mean 0.9017 (best 0.9047)  pen 0.0000  tnv 0.000  sat 0.21  std [0.182 0.209]
+up  670 steps   1372k  ret40  2.985  apex40 0.887  pen40 0.0116  det h(15/25.08/30) 0.771/0.938/0.986 mean 0.8983 (best 0.9047)  pen 0.0000  tnv 0.000  sat 0.24  std [0.182 0.204]
+up  680 steps   1393k  ret40  2.964  apex40 0.882  pen40 0.0225  det h(15/25.08/30) 0.772/0.945/1.000 mean 0.9057 (best 0.9057)  pen 0.0000  tnv 0.000  sat 0.22  std [0.181 0.199]
+up  690 steps   1413k  ret40  3.042  apex40 0.890  pen40 0.0026  det h(15/25.08/30) 0.775/0.943/1.006 mean 0.9081 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.17  std [0.179 0.196]
+up  700 steps   1434k  ret40  2.788  apex40 0.879  pen40 0.0302  det h(15/25.08/30) 0.772/0.944/1.004 mean 0.9068 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.20  std [0.179 0.197]
+up  710 steps   1454k  ret40  3.041  apex40 0.896  pen40 0.0332  det h(15/25.08/30) 0.773/0.937/0.964 mean 0.8915 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.21  std [0.177 0.192]
+up  720 steps   1475k  ret40  3.082  apex40 0.904  pen40 0.0487  det h(15/25.08/30) 0.775/0.937/0.991 mean 0.9012 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.17  std [0.176 0.192]
+up  730 steps   1495k  ret40  2.976  apex40 0.882  pen40 0.0049  det h(15/25.08/30) 0.774/0.939/0.992 mean 0.9018 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.23  std [0.176 0.192]
+up  740 steps   1516k  ret40  3.059  apex40 0.895  pen40 0.0100  det h(15/25.08/30) 0.778/0.940/0.991 mean 0.9032 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.23  std [0.172 0.191]
+up  750 steps   1536k  ret40  3.051  apex40 0.889  pen40 0.0279  det h(15/25.08/30) 0.775/0.932/0.941 mean 0.8829 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.24  std [0.173 0.188]
+up  760 steps   1556k  ret40  2.803  apex40 0.871  pen40 0.0319  det h(15/25.08/30) 0.778/0.937/0.950 mean 0.8883 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.22  std [0.174 0.185]
+up  770 steps   1577k  ret40  2.918  apex40 0.872  pen40 0.0264  det h(15/25.08/30) 0.779/0.935/0.944 mean 0.8861 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.24  std [0.172 0.184]
+up  780 steps   1597k  ret40  3.174  apex40 0.901  pen40 0.0087  det h(15/25.08/30) 0.780/0.929/0.946 mean 0.8851 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.21  std [0.171 0.183]
+up  790 steps   1618k  ret40  3.028  apex40 0.889  pen40 0.0854  det h(15/25.08/30) 0.782/0.928/0.940 mean 0.8832 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.23  std [0.168 0.182]
+up  800 steps   1638k  ret40  2.980  apex40 0.883  pen40 0.0213  det h(15/25.08/30) 0.779/0.922/0.922 mean 0.8747 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.25  std [0.167 0.178]
+up  810 steps   1659k  ret40  3.067  apex40 0.891  pen40 0.0471  det h(15/25.08/30) 0.780/0.920/0.923 mean 0.8746 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.24  std [0.169 0.178]
+up  820 steps   1679k  ret40  3.008  apex40 0.882  pen40 0.0492  det h(15/25.08/30) 0.781/0.918/0.919 mean 0.8725 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.23  std [0.165 0.175]
+up  830 steps   1700k  ret40  2.968  apex40 0.874  pen40 0.0105  det h(15/25.08/30) 0.779/0.921/0.931 mean 0.8768 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.23  std [0.16  0.178]
+up  840 steps   1720k  ret40  2.991  apex40 0.877  pen40 0.0026  det h(15/25.08/30) 0.781/0.922/0.931 mean 0.8778 (best 0.9081)  pen 0.0000  tnv 0.000  sat 0.26  std [0.16 0.18]
+early stop: plateau (best 0.9047 이후 20회 미개선)
+done — steps 1720320 wall 6.9min best_h(mean3) 0.9081 (plateau (best 0.9047 이후 20회 미개선))
+curve saved: t0wc_ppo_curve.png
