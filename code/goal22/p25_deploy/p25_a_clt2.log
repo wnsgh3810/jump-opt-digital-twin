@@ -1,0 +1,17 @@
+=== p25_a_cma_cl_trust — 트러스트 리전 폐루프 q_des CMA (g_high 150/2.2/500/4, seed=clcma) ===
+dq trust(+10%): dq1=[-15.52, 2.72]  dq2=[-19.46, 34.06] rad/s
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+init [2s] dt=0.0005
+seed f=84.7033
+  it   25  nfev   401  best f=7.7122  [40s]
+  it   50  nfev   801  best f=-0.6422  [79s]
+  it   75  nfev  1201  best f=-0.7129  [118s]
+  it  100  nfev  1601  best f=-0.7495  [157s]
+  it  125  nfev  2001  best f=-0.7821  [196s]
+  it  150  nfev  2401  best f=-0.7901  [235s]
+  it  175  nfev  2801  best f=-0.8005  [274s]
+CMA done: nfev=3009 crash=0 best f=-0.8014 [294s]
+h_plan=0.8032 m  peak raw=(25.9, 35.5)  peak dq=(8.4, 15.9)  ceil_frac=(0.00, 0.17)
+trust residuals: pen_dq=3.242e-05 rad  retouch=0.0 ms (0 samples)  env_pen=2.274e-05 rad*s
+saved p25_a_clt.npz + p25_a_res_clt.json [4.9m]

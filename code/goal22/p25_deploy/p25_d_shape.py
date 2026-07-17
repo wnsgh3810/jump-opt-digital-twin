@@ -27,7 +27,9 @@ sys.path.insert(0, str(HERE.parent.parent / "bench"))
 import safe
 import p25_d_deploy as D
 
-GAINS = {"mid": (120.0, 2.0, 120.0, 2.0), "high": (150.0, 2.2, 500.0, 4.0)}
+GAINS = D.GAINS                     # env P25_GAINS_FULL=1 → 8종
+T18 = bool(os.environ.get("P25_T18"))
+SUF = "_t18" if T18 else ""
 
 
 def shape_npz(src, kp1, kp2):
@@ -73,9 +75,10 @@ def shape_npz(src, kp1, kp2):
 
 
 def main():
-    plans = [p for p in sorted(HERE.glob("p25_[ab]_*.npz"))
+    plans = [p for p in sorted(set(HERE.glob("p25_[abc]_*.npz")) | set(HERE.glob("p25_a4_*.npz")))
              if "shaped" not in p.name and "plan" not in p.name
-             and "golden" not in p.name and "fixedpoint" not in p.name]
+             and "golden" not in p.name and "fixedpoint" not in p.name
+             and p.stem.endswith("_t18") == T18]
     rows = {}
     print(f"{'계획(성형)':28s} {'게인':5s} {'h_plan':>7s} {'h_PD':>7s} {'F_τ':>7s} {'hip':>7s} {'knee':>7s}")
     for src in plans:
@@ -88,8 +91,8 @@ def main():
                   f"{r['h_PD']:7.3f} {100*r['F_tau']:6.1f}% {100*r['F_tau_hip']:6.1f}% "
                   f"{100*r['F_tau_knee']:6.1f}%", flush=True)
             dst.unlink()          # 임시 성형본 정리
-    safe.atomic_json_write(HERE / "p25_d_shaped_results.json", rows)
-    print("saved p25_d_shaped_results.json", flush=True)
+    safe.atomic_json_write(HERE / f"p25_d_shaped_results{SUF}.json", rows)
+    print(f"saved p25_d_shaped_results{SUF}.json", flush=True)
 
 
 if __name__ == "__main__":

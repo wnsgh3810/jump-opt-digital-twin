@@ -52,8 +52,13 @@
     FD 야코비안이 유한값. 전이 순간에 걸친 상태는 G3에서 오차 별도 보고.
   · horizon 2종 실험: (i) through-liftoff 0.6 s (주력 — 비행 구간까지 미분),
     (ii) stance-only 0.35 s (terminal 프록시를 이지 부근에서 평가 — 비행 미분 회피).
-  · 착지 재접촉은 horizon 내 없음 (apex ~0.68 s > 0.6 s).
-  · 발산/크래시 롤아웃 = 비용 ∞ (라인서치가 자동 기각), 정규화 μ 스케줄이 방어.
+  · 착지 재접촉은 horizon 내 없음 (apex ~0.68 s > 0.6 s). 단 궤적에 따라 초기 미소 홉의
+    재접촉 임팩트가 horizon 안에 생길 수 있음 — 실측 ‖A‖~6e5 노드 (cl-warm 진단).
+  · 임팩트 노드 후진 폭주 방어: Vx/Vxx 노름 상한 V_CAP 스케일링 + Quu 바닥 정칙화
+    QU_FLOOR (비유한 즉시 실패 → μ 인상). 발산/크래시 롤아웃 = 비용 ∞ (라인서치 기각).
+  · 최종 선발은 실현 apex 기준 score = h_plan − PEN_W·env_pen (Phase A 형제와 동일 잣대)
+    — 탄도 프록시는 base가 비행 중 관절운동으로 비탄도라 과대예측 가능 (mppi-warm 실측
+    +0.42 m 괴리) → 프록시가 아닌 정본 기록 롤아웃의 apex로 선발.
 
 ═══ 초기화 ═══
   (a) crouch-hold: settle 끝 PD 커맨드를 전 구간 상수 유지 (중력 보상 근사)
@@ -103,6 +108,11 @@ BUDGET_S = 1500.0            # run당 wall 상한 [s]
 TOL_REL = 1e-6               # 상대 개선 수렴 임계
 NX = 12                      # 증강 상태 차원
 NU = 2
+V_CAP = 1e4                  # Vx/Vxx 노름 상한 — 접촉 임팩트 매크로노드(‖A‖~6e5 실측,
+                             # cl-warm 진단)의 후진 지수폭주(→overflow→전 μ 실패) 차단.
+                             # 방향 보존 스케일링 (정확 뉴턴은 깨지나 라인서치가 하강 보장)
+QU_FLOOR = 1e-6              # Quu_reg += μ·QU_FLOOR·I — B 근사-랭크결손 노드에서도
+                             # μ 인상이 반드시 PD를 회복하도록 하는 u-공간 바닥 정칙화
 
 
 # ══════════════════ 컨텍스트 ══════════════════
@@ -443,8 +453,10 @@ def backward_pass(cx, nom, As, Bs, mu):
         Quu = luu + B.T @ Vxx @ B
         Qux = B.T @ Vxx @ A
         Vxx_reg = Vxx + mu * np.eye(NX)
-        Quu_r = luu + B.T @ Vxx_reg @ B
+        Quu_r = luu + B.T @ Vxx_reg @ B + mu * QU_FLOOR * np.eye(NU)
         Qux_r = B.T @ Vxx_reg @ A
+        if not (np.isfinite(Quu_r).all() and np.isfinite(Qu).all()):
+            return None
         sol = boxqp2(Quu_r, Qu, lo - U[j], hi - U[j])
         if sol is None:
             return None
@@ -462,6 +474,14 @@ def backward_pass(cx, nom, As, Bs, mu):
         Vx = Qx + K.T @ Quu @ k + K.T @ Qu + Qux.T @ k
         Vxx = Qxx + K.T @ Quu @ K + K.T @ Qux + Qux.T @ K
         Vxx = 0.5 * (Vxx + Vxx.T)
+        # ── 접촉 임팩트 방어: 노름 상한 스케일링 (+ 비유한 즉시 실패) ──
+        nxx = np.linalg.norm(Vxx); nx_ = np.linalg.norm(Vx)
+        if not (np.isfinite(nxx) and np.isfinite(nx_)):
+            return None
+        if nxx > V_CAP:
+            Vxx *= V_CAP / nxx
+        if nx_ > V_CAP:
+            Vx *= V_CAP / nx_
     return ks, Ks, float(dV1), float(dV2)
 
 
@@ -808,9 +828,11 @@ def main(smoke=False):
         res["h_plan"] = TW.apex_of(Lg) if Lg is not None else float("nan")
         res["stats"] = TW.stats_of(tw, Lg, t_push=T_HOR) if Lg is not None else {}
         res["horizon"] = T_HOR
-        log(f"[{tag}] h_plan(실현 apex)={res['h_plan']:.4f}m vs proxy={res['proxy']:.4f}m")
+        res["score"] = res["h_plan"] - TW.PEN_W * res["stats"].get("env_pen", 9e9)
+        log(f"[{tag}] h_plan(실현 apex)={res['h_plan']:.4f}m vs proxy={res['proxy']:.4f}m "
+            f"score(h−{TW.PEN_W:.0f}·env_pen)={res['score']:+.4f}")
         runs.append(res)
-        if best is None or res["h_plan"] > best["h_plan"]:
+        if best is None or res["score"] > best["score"]:
             best = res
 
     # ── stance-only 변형 (0.35 s horizon — 이지 이후 미분 회피) ──
@@ -827,9 +849,11 @@ def main(smoke=False):
             res["stats"] = TW.stats_of(tw, Lg, t_push=T_STANCE) if Lg is not None else {}
             res["horizon"] = T_STANCE
             res["U"] = Ufull
-            log(f"[stance0.35] h_plan={res['h_plan']:.4f}m vs proxy(0.35)={res['proxy']:.4f}m")
+            res["score"] = res["h_plan"] - TW.PEN_W * res["stats"].get("env_pen", 9e9)
+            log(f"[stance0.35] h_plan={res['h_plan']:.4f}m vs proxy(0.35)={res['proxy']:.4f}m "
+                f"score={res['score']:+.4f}")
             runs.append(res)
-            if res["h_plan"] > best["h_plan"]:
+            if res["score"] > best["score"]:
                 best = res
 
     # ── 최종 산출물 (최고 h_plan 런) ──
@@ -847,13 +871,15 @@ def main(smoke=False):
         config=dict(dt_ctrl=DT_C, horizon=T_HOR, n_nodes=N, substeps=M,
                     clip=float(R19.CLIP), r_u=R_U, w_env=W_ENV, w_h=W_H,
                     eps_fd=1e-6, eps_qfrc=EPS_Q, eps_layer=EPS_L, eps_sp=EPS_SP,
-                    mu0=MU0, alphas=ALPHAS, max_it=MAX_IT, budget_s=BUDGET_S),
+                    mu0=MU0, alphas=ALPHAS, max_it=MAX_IT, budget_s=BUDGET_S,
+                    v_cap=V_CAP, qu_floor=QU_FLOOR,
+                    selection=f"score = h_plan(정본 기록 apex) - {TW.PEN_W}*env_pen"),
         golden=dict(g1_afull_maxdiff=g1, g2_ol_maxdiff=g2,
                     g3=g3, g3_worstA=worstA, g3_worstB=worstB, g3_eps_sens=sens),
         runs=[{k: v for k, v in r.items() if k != "U"} for r in runs],
         best=dict(tag=best["tag"], h_plan=best["h_plan"], proxy=best["proxy"],
-                  cost=best["cost"], iters=best["iters"], wall_s=best["wall_s"],
-                  horizon=best["horizon"], stats=best["stats"]),
+                  score=best["score"], cost=best["cost"], iters=best["iters"],
+                  wall_s=best["wall_s"], horizon=best["horizon"], stats=best["stats"]),
         h_plan=best["h_plan"],
         seed_trial=list(tw["seed_trial"]), npz="p25_a4_ilqr.npz",
         wall_total_s=float(time.time() - t00))

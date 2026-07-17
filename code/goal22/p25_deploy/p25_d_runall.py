@@ -13,6 +13,7 @@ docstring의 계약 — Phase A(i/ii/iii)/B/C가 이 이름 규약으로 산출)
 
 사용: 배포 리허설 게인 2종 = MARATHON 선고정 (mid 120_2_120_2 / high 150_2.2_500_4).
 """
+import os
 import sys
 import time
 from pathlib import Path
@@ -30,13 +31,16 @@ plt.rcParams["axes.unicode_minus"] = False
 import p25_d_deploy as D
 import safe
 
-GAINSETS = ("mid", "high")
-OUT_JSON = HERE / "p25_d_results.json"
-OUT_PNG = HERE / "p25_d_compare.png"
+GAINSETS = tuple(D.GAINS)          # env P25_GAINS_FULL=1 → 8종
+T18 = bool(os.environ.get("P25_T18"))   # 1 → *_t18 계획만 + 클립 31.1771 (P25_CLIP_RAW 동반 필수)
+SUF = "_t18" if T18 else ""
+OUT_JSON = HERE / f"p25_d_results{SUF}.json"
+OUT_PNG = HERE / f"p25_d_compare{SUF}.png"
 
 
 def scan_plans():
-    return sorted(HERE.glob("p25_[abc]_*.npz"))
+    ps = sorted(set(HERE.glob("p25_[abc]_*.npz")) | set(HERE.glob("p25_a4_*.npz")))
+    return [p for p in ps if p.stem.endswith("_t18") == T18]
 
 
 def _f(x, fmt):
@@ -68,7 +72,7 @@ def print_table(results):
 def make_fig(results):
     names = list(results)
     x = np.arange(len(names))
-    w = 0.26
+    w = 0.8 / (len(GAINSETS) + 1)
     hp = [results[n][GAINSETS[0]].get("h_plan", float("nan")) for n in names]
     fig, ax = plt.subplots(figsize=(max(7, 1.9 * len(names) + 3), 4.6))
     ax.bar(x - w, hp, w, label="h_plan (최적화기 롤아웃)")

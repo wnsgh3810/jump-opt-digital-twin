@@ -17,10 +17,12 @@ p25_a_cma_cl의 복사-변형. 동일 골든 배선(p25_a_twin) · 동일 g_high
 qd/dqd/knots) + p25_a_res_clt.json (h_plan · stats · 페널티 잔차 · 사용 dq 한계).
 p25_a_results.json은 건드리지 않음 (append-safe — 별도 파일).
 
-멀티스타트: `python p25_a_cma_cl_trust.py [meas|clcma]` — meas(기본) = 0602 측정
+멀티스타트: `python p25_a_cma_cl_trust.py [meas|clcma|mppi]` — meas(기본) = 0602 측정
 desired 시드, clcma = 무제약 cl_cma 최적 매듭(p25_a_results.json methods.cl_cma) 시드
-(페널티가 트러스트 리전 안으로 끌어당김). 저장은 기존 p25_a_res_clt.json h_plan보다
-좋을 때만 덮어씀 (베스트 유지 — 멀티스타트 안전).
+(페널티가 트러스트 리전 안으로 끌어당김), mppi = p25_a_mppi.npz 실현 q 트레이스 매듭
+보간 시드 (지지구간 안 단일푸시·깊은 크라우치 바슨 직접 조준 — mppi h=1.018 실증).
+저장은 기존 p25_a_res_clt.json h_plan보다 좋을 때만 덮어씀 (베스트 유지 — 멀티스타트
+안전).
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "2")   # 동시 작업 배려 — import 전 설정
@@ -107,7 +109,7 @@ def main():
     safe.utf8_console()
     global TG
     seed_mode = sys.argv[1] if len(sys.argv) > 1 else "meas"
-    assert seed_mode in ("meas", "clcma"), f"seed_mode={seed_mode}"
+    assert seed_mode in ("meas", "clcma", "mppi"), f"seed_mode={seed_mode}"
     t0 = time.time()
     print("=== p25_a_cma_cl_trust — 트러스트 리전 폐루프 q_des CMA "
           f"(g_high 150/2.2/500/4, seed={seed_mode}) ===", flush=True)
@@ -128,6 +130,11 @@ def main():
         assert np.allclose(p["knot_t"], KT_), "cl_cma knot_t 불일치"
         seed1 = np.asarray(p["knots_qd1"][1:], float)
         seed2 = np.asarray(p["knots_qd2"][1:], float)
+    elif seed_mode == "mppi":
+        # 시드: MPPI 실현 q 트레이스 (t=0 시작 시간축) 매듭 보간 — 단일푸시 바슨
+        dm = np.load(HERE / "p25_a_mppi.npz")
+        seed1 = np.interp(KT_[1:], dm["t"], dm["q1"])
+        seed2 = np.interp(KT_[1:], dm["t"], dm["q2"])
     else:
         # 시드: 0602 측정 desired 궤적 (|dq2| 피크를 0.3 s 지점에 정렬) — 원본 동일
         d0 = tw["d0"]; t = d0["t"]

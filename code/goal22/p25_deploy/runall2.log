@@ -1,0 +1,40 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [2s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+deploy p25_a4_ilqr.npz [mid] — h_PD 1.148 m, F_τ 91.9%
+deploy p25_a4_ilqr.npz [high] — h_PD 1.147 m, F_τ 113.8%
+deploy p25_a_cl_cma.npz [mid] — h_PD 1.156 m, F_τ 23.8%
+deploy p25_a_cl_cma.npz [high] — h_PD 1.517 m, F_τ 0.0%
+deploy p25_a_clt.npz [mid] — h_PD 0.688 m, F_τ 22.2%
+deploy p25_a_clt.npz [high] — h_PD 0.803 m, F_τ 0.0%
+deploy p25_a_mppi.npz [mid] — h_PD 1.203 m, F_τ 70.0%
+deploy p25_a_mppi.npz [high] — h_PD 1.134 m, F_τ 45.7%
+deploy p25_a_ol_cma.npz [mid] — h_PD 1.352 m, F_τ 98.4%
+deploy p25_a_ol_cma.npz [high] — h_PD 1.429 m, F_τ 99.6%
+deploy p25_b_traj.npz [mid] — h_PD 1.133 m, F_τ 97.6%
+deploy p25_b_traj.npz [high] — h_PD 1.435 m, F_τ 110.4%
+deploy p25_c_ppo.npz [mid] — h_PD 1.207 m, F_τ 89.9%
+deploy p25_c_ppo.npz [high] — h_PD 1.303 m, F_τ 81.4%
+deploy p25_c_ppo_best.npz [mid] — h_PD 1.264 m, F_τ 90.3%
+deploy p25_c_ppo_best.npz [high] — h_PD 1.338 m, F_τ 79.5%
+결과 원장 저장: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_deploy\p25_d_results.json
+계획                           게인     h_plan    h_PD   H_fid     F_τ  F_τ,hip  F_τ,knee  dqRMSE      이지
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+p25_a4_ilqr.npz              mid     1.551   1.148   26.0%   91.9%    93.6%     84.6%    7.14    93ms
+p25_a4_ilqr.npz              high    1.551   1.147   26.1%  113.8%    85.1%    198.5%    7.52    48ms
+p25_a_cl_cma.npz             mid     1.517   1.156   23.8%   23.8%     8.2%     49.3%    7.48    20ms
+p25_a_cl_cma.npz             high    1.517   1.517    0.0%    0.0%     0.0%      0.0%    9.42    20ms
+p25_a_clt.npz                mid     0.803   0.688   14.4%   22.2%    11.8%     25.2%    3.59   100ms
+p25_a_clt.npz                high    0.803   0.803    0.0%    0.0%     0.0%      0.0%    3.40    99ms
+p25_a_mppi.npz               mid     1.018   1.203   18.2%   70.0%   107.2%     61.6%    3.63   333ms
+p25_a_mppi.npz               high    1.018   1.134   11.4%   45.7%    48.0%     45.2%    2.25   322ms
+p25_a_ol_cma.npz             mid     1.251   1.352    8.1%   98.4%   102.8%     87.0%    6.79    52ms
+p25_a_ol_cma.npz             high    1.251   1.429   14.2%   99.6%    95.1%    117.6%    6.73    24ms
+p25_b_traj.npz               mid     1.128   1.133    0.4%   97.6%    75.9%    106.7%    9.20   338ms
+p25_b_traj.npz               high    1.128   1.435   27.3%  110.4%    54.4%    179.9%    9.31    72ms
+p25_c_ppo.npz                mid     1.319   1.207    8.5%   89.9%    93.6%     86.2%    6.42   149ms
+p25_c_ppo.npz                high    1.319   1.303    1.2%   81.4%    88.8%     73.6%    7.43   141ms
+p25_c_ppo_best.npz           mid     1.349   1.264    6.3%   90.3%    92.2%     88.4%    7.59   152ms
+p25_c_ppo_best.npz           high    1.349   1.338    0.8%   79.5%    86.2%     72.8%    9.62   142ms
+그림 저장: C:\Users\junho\Documents\jump-opt-digital-twin\code\goal22\p25_deploy\p25_d_compare.png
+DONE [0.1m]

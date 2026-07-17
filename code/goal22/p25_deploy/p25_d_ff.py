@@ -63,12 +63,15 @@ def deploy_ff(npz_path, gains_key):
 
 
 def main():
-    plans = [p for p in sorted(HERE.glob("p25_[abc]_*.npz"))
-             if all(s not in p.name for s in ("shaped", "plan", "golden", "fixedpoint"))]
+    T18 = bool(os.environ.get("P25_T18"))
+    suf = "_t18" if T18 else ""
+    plans = [p for p in sorted(set(HERE.glob("p25_[abc]_*.npz")) | set(HERE.glob("p25_a4_*.npz")))
+             if all(s not in p.name for s in ("shaped", "plan", "golden", "fixedpoint"))
+             and p.stem.endswith("_t18") == T18]
     rows = {}
     print(f"{'계획(FF+PD)':28s} {'게인':5s} {'h_plan':>7s} {'h_PD':>7s} {'F_τ':>7s} {'hip':>7s} {'knee':>7s}")
     for src in plans:
-        for gname in ("mid", "high"):
+        for gname in D.GAINS:
             r = deploy_ff(src, gname)
             if r.get("crash"):
                 print(f"{src.stem:28s} {gname:5s}  CRASH", flush=True)
@@ -78,8 +81,8 @@ def main():
             print(f"{src.stem:28s} {gname:5s} {r.get('h_plan', float('nan')):7.3f} "
                   f"{r['h_PD']:7.3f} {100*r['F_tau']:6.1f}% {100*r['F_tau_hip']:6.1f}% "
                   f"{100*r['F_tau_knee']:6.1f}%", flush=True)
-    safe.atomic_json_write(HERE / "p25_d_ff_results.json", rows)
-    print("saved p25_d_ff_results.json", flush=True)
+    safe.atomic_json_write(HERE / f"p25_d_ff_results{suf}.json", rows)
+    print(f"saved p25_d_ff_results{suf}.json", flush=True)
 
 
 if __name__ == "__main__":
