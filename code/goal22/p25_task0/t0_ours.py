@@ -37,8 +37,11 @@ LABEL = {"t0nc_nlp": "NLP", "t0nc_ol": "OL-CMA", "t0nc_cl": "CL-CMA", "t0nc_ppo"
 
 
 def fig_std(P, Dc, out_png, title, t_lo):
-    """P=계획 채널, Dc=배포 채널 — p24a all_results 2×3 양식."""
+    """P=계획 채널, Dc=배포 채널 — p24a all_results 2×3 양식.
+    창(t≤tm) 밖 데이터(착지 충격 등)는 플롯 전에 잘라냄 — y축 자동스케일 오염 방지."""
     tm = (t_lo + 0.05) if np.isfinite(t_lo) else 0.35
+    P = {k: np.asarray(v)[np.asarray(P["t"]) <= tm] for k, v in P.items()}
+    Dc = {k: np.asarray(v)[np.asarray(Dc["t"]) <= tm] for k, v in Dc.items()}
     fig, axs = plt.subplots(2, 3, figsize=(15, 7))
 
     ax = axs[0, 0]
