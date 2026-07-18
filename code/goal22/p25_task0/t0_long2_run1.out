@@ -1,0 +1,48 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[dev] NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.254s / gpu 0.284s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용
+[bc] teacher t0wc_cl_li15.npz (li=15.0): 300 pairs, replay apex=0.877 (teacher h=0.874)
+[bc] teacher t0wc_cl_li20.npz (li=20.0): 300 pairs, replay apex=0.996 (teacher h=0.992)
+[bc] teacher t0wc_cl_li2508.npz (li=25.08): 300 pairs, replay apex=1.084 (teacher h=1.104)
+[bc] fit: MSE 0.2662 → 0.001691 (4000 iters)
+[bc] det-eval h: {'15': 0.8759, '25.08': 1.0862, '26.25': 0.3124, '30': 0.1381}
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[mp] 8 workers × 2 envs = 16 — ready [15s]
+PPO start — 2929 updates × batch 8192 (dev cpu, clip=25.581)

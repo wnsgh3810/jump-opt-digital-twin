@@ -85,7 +85,15 @@ def setup():
     W.setup()
 
 
-_SETTLE = {}   # l_i키[mm] → (qpos, qvel, qacc_warmstart, c1f, c2f) — 전 env 공유 (결정론)
+_SETTLE = {}   # (l_i키[mm], q1_0, q2_0) → (qpos, qvel, warmstart, c1f, c2f) — 전 env 공유
+
+# 장기 캠페인(BC 워밍스타트) 티처 crouch 주입 훅: li_mm → (q1_0, qm_0). None이면 CROUCH_T0.
+# (t0_spec 규약상 시작 자세는 바운드 내 자유 = 최적화 대상 — CMA 최적 crouch 사용은 합법)
+CROUCH_FN = None
+
+
+def _crouch_of(li_mm):
+    return CROUCH_FN(li_mm) if CROUCH_FN is not None else CROUCH_T0
 
 
 class JumpEnv:
@@ -207,10 +215,11 @@ class JumpEnv:
                 raise RuntimeError(f"settle 발산 (l_i={self.li_mm}mm) — 모델/후보 배선 확인")
 
     def _settled(self):
-        """현 l_i키의 settle 상태 (전역 캐시 — 결정론이라 env 간 공유 가능)."""
-        key = self.li_mm
+        """현 (l_i키, crouch)의 settle 상태 (전역 캐시 — 결정론이라 env 간 공유 가능)."""
+        q0 = _crouch_of(self.li_mm)
+        key = (self.li_mm, round(q0[0], 6), round(q0[1], 6))
         if key not in _SETTLE:
-            self._settle(*CROUCH_T0)
+            self._settle(*q0)
             _SETTLE[key] = (self.md.qpos.copy(), self.md.qvel.copy(),
                             self.md.qacc_warmstart.copy(), self.c1f, self.c2f)
         return _SETTLE[key]

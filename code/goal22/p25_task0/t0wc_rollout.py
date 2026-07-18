@@ -178,8 +178,9 @@ def main():
     n_act = env.n_ep * env.nsub
     curves = {}
     logs = {}
+    hid = int(ck.get("hyper", {}).get("hid", 64))   # long2(128) 등 넷 크기 호환
     for tag in ("final", "best"):
-        ac = TR.ActorCritic()
+        ac = TR.ActorCritic(hid=hid)
         ac.load_state_dict(ck[tag] if ck[tag] is not None else ck["final"])
         ac.eval()
         rows = []
@@ -294,7 +295,9 @@ def main():
         hyper=tlog.get("hyper"),
         golden=golden,
         env=dict(ctrl_dt=EV.CTRL_DT, ep_t=EV.EP_T, sim_dt=env.dt,
-                 crouch=list(EV.CROUCH_T0), li_sample="U[15,30]mm (train)",
+                 crouch=("teacher CROUCH_FN(l_i) 보간 (t0_train_long)"
+                         if EV.CROUCH_FN is not None else list(EV.CROUCH_T0)),
+                 li_sample="U[15,30]mm (train)",
                  li_quant_mm=EV.LI_Q_MM,
                  q1_range=[T0.Q1_LB, T0.Q1_UB], qm_range=[T0.QM_LB, T0.QM_UB],
                  obs="[(bz-0.6)/0.4, q1/1.5, qm/1.5, dq1/10, dqm/10, vbz/3, "
