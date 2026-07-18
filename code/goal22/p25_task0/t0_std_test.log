@@ -1,0 +1,13 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [3s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+saved t0nc_ol_std_60_1.5_60_1.5.png
+saved t0nc_ol_std_90_1.5_90_2.5.png
+saved t0nc_ol_std_120_2_120_2.png
+saved t0nc_ol_std_120_2.2_150_2.5.png
+saved t0nc_ol_std_120_2.2_200_2.8.png
+saved t0nc_ol_std_150_2.2_250_3.png
+saved t0nc_ol_std_150_2.2_350_3.5.png
+saved t0nc_ol_std_150_2.2_500_4.png
+[t0nc_ol] best gain 60_1.5_60_1.5 (F_τ 2.6%)
+STD DONE

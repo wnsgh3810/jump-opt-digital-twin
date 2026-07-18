@@ -1,0 +1,51 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [3s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+saved t0nc_ol_ours_60_1.5_60_1.5.png
+saved t0nc_ol_ours_90_1.5_90_2.5.png
+saved t0nc_ol_ours_120_2_120_2.png
+saved t0nc_ol_ours_120_2.2_150_2.5.png
+saved t0nc_ol_ours_120_2.2_200_2.8.png
+saved t0nc_ol_ours_150_2.2_250_3.png
+saved t0nc_ol_ours_150_2.2_350_3.5.png
+saved t0nc_ol_ours_150_2.2_500_4.png
+[t0nc_ol] best gain 60_1.5_60_1.5 (F_τ 2.6%)
+saved t0nc_cl_ours_60_1.5_60_1.5.png
+saved t0nc_cl_ours_90_1.5_90_2.5.png
+saved t0nc_cl_ours_120_2_120_2.png
+saved t0nc_cl_ours_120_2.2_150_2.5.png
+saved t0nc_cl_ours_120_2.2_200_2.8.png
+saved t0nc_cl_ours_150_2.2_250_3.png
+saved t0nc_cl_ours_150_2.2_350_3.5.png
+saved t0nc_cl_ours_150_2.2_500_4.png
+[t0nc_cl] best gain 60_1.5_60_1.5 (F_τ 14.4%)
+saved t0nc_nlp_ours_60_1.5_60_1.5.png
+saved t0nc_nlp_ours_90_1.5_90_2.5.png
+saved t0nc_nlp_ours_120_2_120_2.png
+saved t0nc_nlp_ours_120_2.2_150_2.5.png
+saved t0nc_nlp_ours_120_2.2_200_2.8.png
+saved t0nc_nlp_ours_150_2.2_250_3.png
+saved t0nc_nlp_ours_150_2.2_350_3.5.png
+saved t0nc_nlp_ours_150_2.2_500_4.png
+[t0nc_nlp] best gain 60_1.5_60_1.5 (F_τ 9.0%)
+saved t0nc_ppo_ours_60_1.5_60_1.5.png
+saved t0nc_ppo_ours_90_1.5_90_2.5.png
+saved t0nc_ppo_ours_120_2_120_2.png
+saved t0nc_ppo_ours_120_2.2_150_2.5.png
+saved t0nc_ppo_ours_120_2.2_200_2.8.png
+saved t0nc_ppo_ours_150_2.2_250_3.png
+saved t0nc_ppo_ours_150_2.2_350_3.5.png
+saved t0nc_ppo_ours_150_2.2_500_4.png
+[t0nc_ppo] best gain 60_1.5_60_1.5 (F_τ 4.6%)
+saved t0nc_ppo_long_ours_60_1.5_60_1.5.png
+saved t0nc_ppo_long_ours_90_1.5_90_2.5.png
+saved t0nc_ppo_long_ours_120_2_120_2.png
+saved t0nc_ppo_long_ours_120_2.2_150_2.5.png
+saved t0nc_ppo_long_ours_120_2.2_200_2.8.png
+saved t0nc_ppo_long_ours_150_2.2_250_3.png
+saved t0nc_ppo_long_ours_150_2.2_350_3.5.png
+saved t0nc_ppo_long_ours_150_2.2_500_4.png
+[t0nc_ppo_long] best gain 60_1.5_60_1.5 (F_τ 8.3%)
+saved t0wc_cl_liopt_ours.png
+saved t0wc_cl_li2508_ours.png
+OURS DONE
