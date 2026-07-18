@@ -13,7 +13,7 @@ from pathlib import Path
 
 for k in ("P23_SPRING_GATED", "P23_RISE_GATED", "P24_HIP_LAW", "P24_REFIT"):
     os.environ.setdefault(k, "1")
-os.environ["P25_CLIP_RAW"] = "25.5810"
+os.environ["P25_CLIP_RAW"] = "35.5"   # 배포 플랜트 = 하드웨어 천장 (계획 캡 15Nm는 계획 npz에 이미 반영 — 사용자 지시 07-18: PD 제어에 토크 제약 없앰)
 os.environ["P25_GAINS_FULL"] = "1"
 
 import matplotlib
