@@ -92,24 +92,35 @@ def rmse_vs(P, Dc, key, tmax):
     return float(np.sqrt(np.mean((d - P[key][m]) ** 2)))
 
 
+MDIR = {"t0nc_nlp": "NLP", "t0nc_ol": "OL-CMA", "t0nc_cl": "CL-CMA", "t0nc_ppo": "PPO",
+        "t0nc_ppo_long": "PPO_long"}
+MODES = (("FF+PD", "ffpd", lambda p, g: FF.deploy_ff(p, g, return_log=True)),
+         ("PD단독", "pd_only", lambda p, g: D.deploy(p, g, return_log=True)))
+
+
 def do_nc(stem):
     z = np.load(HERE / f"{stem}.npz")
     P = _chan(z)
-    lab = LABEL.get(stem, stem)
-    best = None
-    for gk in D.GAINS:
-        r = FF.deploy_ff(HERE / f"{stem}.npz", gk, return_log=True)
-        Dc = _log_chan(r["log"])
-        tlo = r.get("t_liftoff", float("nan"))
-        rq2 = rmse_vs(P, Dc, "q2", tlo if np.isfinite(tlo) else 0.3)
-        rdq2 = rmse_vs(P, Dc, "dq2", tlo if np.isfinite(tlo) else 0.3)
-        ttl = (f"{stem}/{gk} [FF+PD p24a, task0 15Nm · l_i=30.0mm] — "
-               f"q2 RMSE {rq2:.3f} rad · dq2 {rdq2:.2f} · "
-               f"h_PD {r['h_PD']:.2f} / h_plan {r['h_plan']:.2f} m  (F_τ {100*r['F_tau']:.1f}%)")
-        fig_std(P, Dc, HERE / f"{stem}_std_{gk}.png", ttl, tlo)
-        if best is None or r["F_tau"] < best[1]:
-            best = (gk, r["F_tau"])
-    print(f"[{stem}] best gain {best[0]} (F_τ {100*best[1]:.1f}%)", flush=True)
+    for mname, mdir, fn in MODES:
+        best = None
+        for gk in D.GAINS:
+            r = fn(HERE / f"{stem}.npz", gk)
+            if r.get("crash"):
+                print(f"[{stem}|{mname}|{gk}] CRASH", flush=True)
+                continue
+            Dc = _log_chan(r["log"])
+            tlo = r.get("t_liftoff", float("nan"))
+            rq2 = rmse_vs(P, Dc, "q2", tlo if np.isfinite(tlo) else 0.3)
+            rdq2 = rmse_vs(P, Dc, "dq2", tlo if np.isfinite(tlo) else 0.3)
+            ttl = (f"{stem}/{gk} [{mname} p24a, task0 15Nm · l_i=30.0mm] — "
+                   f"q2 RMSE {rq2:.3f} rad · dq2 {rdq2:.2f} · "
+                   f"h_PD {r['h_PD']:.2f} / h_plan {r['h_plan']:.2f} m  (F_τ {100*r['F_tau']:.1f}%)")
+            out = HERE / "graphs" / MDIR[stem] / mdir / f"gain_{gk}.png"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            fig_std(P, Dc, out, ttl, tlo)
+            if best is None or r["F_tau"] < best[1]:
+                best = (gk, r["F_tau"])
+        print(f"[{stem}|{mname}] best gain {best[0]} (F_τ {100*best[1]:.1f}%)", flush=True)
 
 
 def main():

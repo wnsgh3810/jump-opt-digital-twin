@@ -1,0 +1,94 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [2s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_ol|FF+PD] best gain 60_1.5_60_1.5 (F_τ 2.6%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_ol|PD단독] best gain 150_2.2_500_4 (F_τ 66.1%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_cl|FF+PD] best gain 60_1.5_60_1.5 (F_τ 14.4%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_cl|PD단독] best gain 150_2.2_500_4 (F_τ 0.0%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_nlp|FF+PD] best gain 60_1.5_60_1.5 (F_τ 9.0%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_nlp|PD단독] best gain 150_2.2_500_4 (F_τ 69.5%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_ppo|FF+PD] best gain 60_1.5_60_1.5 (F_τ 4.6%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_ppo|PD단독] best gain 150_2.2_500_4 (F_τ 76.8%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_ppo_long|FF+PD] best gain 60_1.5_60_1.5 (F_τ 8.3%)
+saved gain_60_1.5_60_1.5.png
+saved gain_90_1.5_90_2.5.png
+saved gain_120_2_120_2.png
+saved gain_120_2.2_150_2.5.png
+saved gain_120_2.2_200_2.8.png
+saved gain_150_2.2_250_3.png
+saved gain_150_2.2_350_3.5.png
+saved gain_150_2.2_500_4.png
+[t0nc_ppo_long|PD단독] best gain 150_2.2_500_4 (F_τ 70.2%)
+STD DONE
