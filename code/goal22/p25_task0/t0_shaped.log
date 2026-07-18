@@ -1,0 +1,84 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [2s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+saved gain_60_1.5_60_1.5.png
+[t0nc_nlp|성형PD|60_1.5_60_1.5] h_PD 0.898 F_τ 101.5%
+saved gain_90_1.5_90_2.5.png
+[t0nc_nlp|성형PD|90_1.5_90_2.5] h_PD 0.893 F_τ 13.2%
+saved gain_120_2_120_2.png
+[t0nc_nlp|성형PD|120_2_120_2] h_PD 0.900 F_τ 14.8%
+saved gain_120_2.2_150_2.5.png
+[t0nc_nlp|성형PD|120_2.2_150_2.5] h_PD 0.906 F_τ 15.3%
+saved gain_120_2.2_200_2.8.png
+[t0nc_nlp|성형PD|120_2.2_200_2.8] h_PD 0.916 F_τ 15.5%
+saved gain_150_2.2_250_3.png
+[t0nc_nlp|성형PD|150_2.2_250_3] h_PD 0.927 F_τ 17.1%
+saved gain_150_2.2_350_3.5.png
+[t0nc_nlp|성형PD|150_2.2_350_3.5] h_PD 0.931 F_τ 17.9%
+saved gain_150_2.2_500_4.png
+[t0nc_nlp|성형PD|150_2.2_500_4] h_PD 0.920 F_τ 19.1%
+saved gain_60_1.5_60_1.5.png
+[t0nc_ol|성형PD|60_1.5_60_1.5] h_PD 0.925 F_τ 9.4%
+saved gain_90_1.5_90_2.5.png
+[t0nc_ol|성형PD|90_1.5_90_2.5] h_PD 0.908 F_τ 6.9%
+saved gain_120_2_120_2.png
+[t0nc_ol|성형PD|120_2_120_2] h_PD 0.901 F_τ 6.0%
+saved gain_120_2.2_150_2.5.png
+[t0nc_ol|성형PD|120_2.2_150_2.5] h_PD 0.903 F_τ 6.5%
+saved gain_120_2.2_200_2.8.png
+[t0nc_ol|성형PD|120_2.2_200_2.8] h_PD 0.904 F_τ 7.7%
+saved gain_150_2.2_250_3.png
+[t0nc_ol|성형PD|150_2.2_250_3] h_PD 0.900 F_τ 7.3%
+saved gain_150_2.2_350_3.5.png
+[t0nc_ol|성형PD|150_2.2_350_3.5] h_PD 0.896 F_τ 8.7%
+saved gain_150_2.2_500_4.png
+[t0nc_ol|성형PD|150_2.2_500_4] h_PD 0.892 F_τ 9.7%
+saved gain_60_1.5_60_1.5.png
+[t0nc_cl|성형PD|60_1.5_60_1.5] h_PD 1.004 F_τ 8.3%
+saved gain_90_1.5_90_2.5.png
+[t0nc_cl|성형PD|90_1.5_90_2.5] h_PD 0.998 F_τ 6.4%
+saved gain_120_2_120_2.png
+[t0nc_cl|성형PD|120_2_120_2] h_PD 0.994 F_τ 5.9%
+saved gain_120_2.2_150_2.5.png
+[t0nc_cl|성형PD|120_2.2_150_2.5] h_PD 0.991 F_τ 5.2%
+saved gain_120_2.2_200_2.8.png
+[t0nc_cl|성형PD|120_2.2_200_2.8] h_PD 0.985 F_τ 4.9%
+saved gain_150_2.2_250_3.png
+[t0nc_cl|성형PD|150_2.2_250_3] h_PD 0.982 F_τ 4.3%
+saved gain_150_2.2_350_3.5.png
+[t0nc_cl|성형PD|150_2.2_350_3.5] h_PD 0.980 F_τ 4.5%
+saved gain_150_2.2_500_4.png
+[t0nc_cl|성형PD|150_2.2_500_4] h_PD 0.980 F_τ 5.3%
+saved gain_60_1.5_60_1.5.png
+[t0nc_ppo|성형PD|60_1.5_60_1.5] h_PD 0.609 F_τ 24.2%
+saved gain_90_1.5_90_2.5.png
+[t0nc_ppo|성형PD|90_1.5_90_2.5] h_PD 0.662 F_τ 22.9%
+saved gain_120_2_120_2.png
+[t0nc_ppo|성형PD|120_2_120_2] h_PD 0.691 F_τ 23.5%
+saved gain_120_2.2_150_2.5.png
+[t0nc_ppo|성형PD|120_2.2_150_2.5] h_PD 0.714 F_τ 23.7%
+saved gain_120_2.2_200_2.8.png
+[t0nc_ppo|성형PD|120_2.2_200_2.8] h_PD 0.739 F_τ 25.2%
+saved gain_150_2.2_250_3.png
+[t0nc_ppo|성형PD|150_2.2_250_3] h_PD 0.750 F_τ 23.7%
+saved gain_150_2.2_350_3.5.png
+[t0nc_ppo|성형PD|150_2.2_350_3.5] h_PD 0.759 F_τ 24.1%
+saved gain_150_2.2_500_4.png
+[t0nc_ppo|성형PD|150_2.2_500_4] h_PD 0.758 F_τ 24.4%
+saved gain_60_1.5_60_1.5.png
+[t0nc_ppo_long|성형PD|60_1.5_60_1.5] h_PD 0.990 F_τ 26.9%
+saved gain_90_1.5_90_2.5.png
+[t0nc_ppo_long|성형PD|90_1.5_90_2.5] h_PD 1.076 F_τ 25.4%
+saved gain_120_2_120_2.png
+[t0nc_ppo_long|성형PD|120_2_120_2] h_PD 1.120 F_τ 25.3%
+saved gain_120_2.2_150_2.5.png
+[t0nc_ppo_long|성형PD|120_2.2_150_2.5] h_PD 1.141 F_τ 25.0%
+saved gain_120_2.2_200_2.8.png
+[t0nc_ppo_long|성형PD|120_2.2_200_2.8] h_PD 1.158 F_τ 25.4%
+saved gain_150_2.2_250_3.png
+[t0nc_ppo_long|성형PD|150_2.2_250_3] h_PD 1.150 F_τ 23.2%
+saved gain_150_2.2_350_3.5.png
+[t0nc_ppo_long|성형PD|150_2.2_350_3.5] h_PD 1.138 F_τ 23.2%
+saved gain_150_2.2_500_4.png
+[t0nc_ppo_long|성형PD|150_2.2_500_4] h_PD 1.107 F_τ 23.8%
+SHAPED DONE
