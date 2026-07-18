@@ -1,0 +1,104 @@
+{
+ "ol_plan": {
+  "gif": "mjc_ol_plan.gif",
+  "label": "task0 OL-CMA plan",
+  "h_render": 0.8905,
+  "h_ref": 0.8905,
+  "h_ref_name": "h_plan(npz)",
+  "dh_mm": 0.0,
+  "n_samples": 2400,
+  "size_kb": 4614.6
+ },
+ "cl_plan": {
+  "gif": "mjc_cl_plan.gif",
+  "label": "task0 CL-CMA plan",
+  "h_render": 0.9772,
+  "h_ref": 0.9772,
+  "h_ref_name": "h_plan(npz)",
+  "dh_mm": 0.0,
+  "n_samples": 2500,
+  "size_kb": 4588.7
+ },
+ "nlp_plan": {
+  "gif": "mjc_nlp_plan.gif",
+  "label": "task0 NLP plan",
+  "h_render": 0.9012,
+  "h_ref": 0.9012,
+  "h_ref_name": "h_twin(npz)",
+  "dh_mm": 0.0,
+  "n_samples": 2500,
+  "size_kb": 4571.1
+ },
+ "ppo_plan": {
+  "gif": "mjc_ppo_plan.gif",
+  "label": "task0 PPO plan",
+  "h_render": 0.6987,
+  "h_ref": 0.6987,
+  "h_ref_name": "h_plan(npz)",
+  "dh_mm": 0.0,
+  "n_samples": 2400,
+  "size_kb": 4568.1
+ },
+ "ol_deploy": {
+  "gif": "mjc_ol_deploy.gif",
+  "label": "task0 OL-CMA FF+PD 60_1.5_60_1.5",
+  "h_render": 0.9027,
+  "h_ref": 0.9027,
+  "h_ref_name": "h_PD(json)",
+  "dh_mm": 0.0,
+  "n_samples": 3699,
+  "size_kb": 4643.7,
+  "F_tau": 0.0257,
+  "F_tau_json": 0.0257,
+  "h_PD_regen": 0.9027
+ },
+ "cl_deploy": {
+  "gif": "mjc_cl_deploy.gif",
+  "label": "task0 CL-CMA FF+PD 60_1.5_60_1.5",
+  "h_render": 0.9749,
+  "h_ref": 0.9749,
+  "h_ref_name": "h_PD(json)",
+  "dh_mm": 0.0,
+  "n_samples": 3699,
+  "size_kb": 4607.6,
+  "F_tau": 0.1441,
+  "F_tau_json": 0.1441,
+  "h_PD_regen": 0.9749
+ },
+ "nlp_deploy": {
+  "gif": "mjc_nlp_deploy.gif",
+  "label": "task0 NLP FF+PD 60_1.5_60_1.5",
+  "h_render": 0.8784,
+  "h_ref": 0.8784,
+  "h_ref_name": "h_PD(json)",
+  "dh_mm": 0.0,
+  "n_samples": 2500,
+  "size_kb": 4620.4,
+  "F_tau": 0.0896,
+  "F_tau_json": 0.0896,
+  "h_PD_regen": 0.8784
+ },
+ "ppo_deploy": {
+  "gif": "mjc_ppo_deploy.gif",
+  "label": "task0 PPO FF+PD 60_1.5_60_1.5",
+  "h_render": 0.7075,
+  "h_ref": 0.7075,
+  "h_ref_name": "h_PD(json)",
+  "dh_mm": 0.0,
+  "n_samples": 3699,
+  "size_kb": 4638.5,
+  "F_tau": 0.0461,
+  "F_tau_json": 0.0461,
+  "h_PD_regen": 0.7075
+ },
+ "wc_cl_li2508_plan": {
+  "gif": "mjc_wc_cl_li2508_plan.gif",
+  "label": "task0 CVT li=25.08 CL plan",
+  "h_render": 1.1045,
+  "h_ref": 1.1045,
+  "h_ref_name": "h_plan(npz)",
+  "dh_mm": 0.0,
+  "n_samples": 2500,
+  "size_kb": 4634.9
+ }
+}
