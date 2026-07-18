@@ -25,7 +25,7 @@ xs_n = sorted(ok)
 ys_n = [ok[x]["h_plan"] for x in xs_n]
 
 ppo_fix = {25.08: 0.7146, 26.0: 0.6882, 30.0: 0.9860}
-ppo_cond = (26.0, 0.9565)
+ppo_cond = (27.0, 0.9838)   # wc2 재시도 (다중앵커 BC+128넷, 07-18)
 
 fig, ax = plt.subplots(figsize=(10, 6.5))
 ax.axvspan(10, 25.08, alpha=0.10, label="외삽 구간 (CVT 층 fit @25.08)")
@@ -38,7 +38,7 @@ ax.plot([28.0], [0.9848], "*", ms=14, color=l2.get_color(),
 l3 = ax.scatter(list(ppo_fix), list(ppo_fix.values()), marker="^", s=90,
                 label="PPO 고정-l_i (저예산 — 충격전략 미학습 아티팩트)")
 ax.plot([ppo_cond[0]], [ppo_cond[1]], "D", ms=10,
-        label=f"PPO 조건부 정책 argmax: {ppo_cond[0]:.0f}mm, {ppo_cond[1]:.3f}m")
+        label=f"PPO 조건부(wc2) argmax: {ppo_cond[0]:.0f}mm, {ppo_cond[1]:.3f}m")
 ax.axvline(25.08, ls="--", lw=1.2, alpha=0.6, color="0.4")
 ax.axvline(30.0, ls="--", lw=1.2, alpha=0.6, color="0.6")
 ax.axvline(25.161, ls=":", lw=1.5, alpha=0.9, color="k",
