@@ -49,7 +49,9 @@ def fig_std(P, Dc, out_png, title, t_lo):
     ax.plot(P["t"], np.degrees(P["q1"]), "C1", lw=1.4, label="q1 plan")
     ax.plot(Dc["t"], np.degrees(Dc["q2"]), "C0", lw=1.6, label="q2(crank) sim")
     ax.plot(P["t"], np.degrees(P["q2"]), "C1", lw=1.4, label="q2 plan")
-    # q_des 생략 — FF+PD에선 q_des ≡ plan (사용자 지시 07-18: 둘 중 하나만)
+    if "qd1" in P:   # q_des ≠ plan인 계획(CL)만 표시 — FF+PD 동일시엔 생략 규약 유지
+        ax.plot(P["t"], np.degrees(P["qd1"]), "C2", lw=1.1, ls="--", label="q_des(명령)", alpha=0.9)
+        ax.plot(P["t"], np.degrees(P["qd2"]), "C2", lw=1.1, ls="--", alpha=0.9)
     ax.set(xlabel="t [s]", ylabel="q [deg]")
     ax.legend(fontsize=7)
     ax.grid(alpha=0.3)
@@ -101,6 +103,13 @@ MODES = (("FF+PD", "ffpd", lambda p, g: FF.deploy_ff(p, g, return_log=True)),
 def do_nc(stem):
     z = np.load(HERE / f"{stem}.npz")
     P = _chan(z)
+    if "qd1" in z.files:                      # CL류: 명령(q_des)이 실현궤적과 다르면 함께 표시
+        t_all = np.asarray(z["t"], float)
+        mm = t_all >= 0
+        qd1 = np.asarray(z["qd1"], float)[mm]
+        qd2 = np.asarray(z["qd2"], float)[mm]
+        if np.max(np.abs(qd1 - P["q1"])) > 1e-6:
+            P = dict(P, qd1=qd1, qd2=qd2)
     for mname, mdir, fn in MODES:
         best = None
         for gk in D.GAINS:
