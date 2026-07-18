@@ -60,6 +60,8 @@ def fig_std(P, Dc, out_png, title, t_lo):
                          (axs[0, 2], "dq2", "dq2 crank [rad/s]")):
         ax.plot(Dc["t"], Dc[kd], "C0", lw=1.6, label="sim")
         ax.plot(P["t"], P[kd], "C1", lw=1.4, label="plan")
+        if f"d{kd}" in P:
+            ax.plot(P["t"], P[f"d{kd}"], "C2", lw=1.1, ls="--", label="dq_des(명령)", alpha=0.9)
         ax.set(xlabel="t [s]", ylabel=ylab)
         ax.legend(fontsize=8)
         ax.grid(alpha=0.3)
@@ -109,7 +111,9 @@ def do_nc(stem):
         qd1 = np.asarray(z["qd1"], float)[mm]
         qd2 = np.asarray(z["qd2"], float)[mm]
         if np.max(np.abs(qd1 - P["q1"])) > 1e-6:
-            P = dict(P, qd1=qd1, qd2=qd2)
+            dqd1 = np.asarray(z["dqd1"], float)[mm]
+            dqd2 = np.asarray(z["dqd2"], float)[mm]
+            P = dict(P, qd1=qd1, qd2=qd2, ddq1=dqd1, ddq2=dqd2)
     for mname, mdir, fn in MODES:
         best = None
         for gk in D.GAINS:
