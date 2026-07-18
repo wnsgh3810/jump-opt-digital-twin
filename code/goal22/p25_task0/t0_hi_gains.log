@@ -1,0 +1,84 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+[p25_d] setup done [2s] — p24a law=(-0.3823, 0.6301, 7.2968) spr=(0.5637, 1.8775, 5.8838) k_rise=0.2656 tm=1.31ms
+saved gain_300_3_500_4.png
+[t0nc_nlp|FF+PD|300_3_500_4] h_PD 0.933 F_τ 25.8%
+saved gain_300_3_500_4.png
+[t0nc_nlp|PD단독|300_3_500_4] h_PD 1.181 F_τ 64.9%
+saved gain_500_5_500_5.png
+[t0nc_nlp|FF+PD|500_5_500_5] h_PD 0.944 F_τ 32.9%
+saved gain_500_5_500_5.png
+[t0nc_nlp|PD단독|500_5_500_5] h_PD 1.167 F_τ 59.2%
+saved gain_1000_8_2000_10.png
+[t0nc_nlp|FF+PD|1000_8_2000_10] h_PD 0.995 F_τ 51.0%
+saved gain_1000_8_2000_10.png
+[t0nc_nlp|PD단독|1000_8_2000_10] h_PD 1.112 F_τ 65.8%
+saved gain_2000_10_8000_20.png
+[t0nc_nlp|FF+PD|2000_10_8000_20] h_PD 1.057 F_τ 69.1%
+saved gain_2000_10_8000_20.png
+[t0nc_nlp|PD단독|2000_10_8000_20] h_PD 1.125 F_τ 73.6%
+saved gain_300_3_500_4.png
+[t0nc_ol|FF+PD|300_3_500_4] h_PD 0.893 F_τ 3.9%
+saved gain_300_3_500_4.png
+[t0nc_ol|PD단독|300_3_500_4] h_PD 1.030 F_τ 44.3%
+saved gain_500_5_500_5.png
+[t0nc_ol|FF+PD|500_5_500_5] h_PD 0.894 F_τ 3.9%
+saved gain_500_5_500_5.png
+[t0nc_ol|PD단독|500_5_500_5] h_PD 0.966 F_τ 34.7%
+saved gain_1000_8_2000_10.png
+[t0nc_ol|FF+PD|1000_8_2000_10] h_PD 0.892 F_τ 7.8%
+saved gain_1000_8_2000_10.png
+[t0nc_ol|PD단독|1000_8_2000_10] h_PD 0.928 F_τ 33.6%
+saved gain_2000_10_8000_20.png
+[t0nc_ol|FF+PD|2000_10_8000_20] h_PD 0.891 F_τ 15.9%
+saved gain_2000_10_8000_20.png
+[t0nc_ol|PD단독|2000_10_8000_20] h_PD 0.901 F_τ 30.5%
+saved gain_300_3_500_4.png
+[t0nc_cl|FF+PD|300_3_500_4] h_PD 1.036 F_τ 38.0%
+saved gain_300_3_500_4.png
+[t0nc_cl|PD단독|300_3_500_4] h_PD 1.024 F_τ 30.2%
+saved gain_500_5_500_5.png
+[t0nc_cl|FF+PD|500_5_500_5] h_PD 1.006 F_τ 42.0%
+saved gain_500_5_500_5.png
+[t0nc_cl|PD단독|500_5_500_5] h_PD 1.027 F_τ 38.2%
+saved gain_1000_8_2000_10.png
+[t0nc_cl|FF+PD|1000_8_2000_10] h_PD 0.997 F_τ 49.6%
+saved gain_1000_8_2000_10.png
+[t0nc_cl|PD단독|1000_8_2000_10] h_PD 0.981 F_τ 47.6%
+saved gain_2000_10_8000_20.png
+[t0nc_cl|FF+PD|2000_10_8000_20] h_PD 0.937 F_τ 43.4%
+saved gain_2000_10_8000_20.png
+[t0nc_cl|PD단독|2000_10_8000_20] h_PD 0.924 F_τ 41.9%
+saved gain_300_3_500_4.png
+[t0nc_ppo|FF+PD|300_3_500_4] h_PD 0.694 F_τ 6.8%
+saved gain_300_3_500_4.png
+[t0nc_ppo|PD단독|300_3_500_4] h_PD 0.907 F_τ 59.1%
+saved gain_500_5_500_5.png
+[t0nc_ppo|FF+PD|500_5_500_5] h_PD 0.697 F_τ 6.5%
+saved gain_500_5_500_5.png
+[t0nc_ppo|PD단독|500_5_500_5] h_PD 0.849 F_τ 38.8%
+saved gain_1000_8_2000_10.png
+[t0nc_ppo|FF+PD|1000_8_2000_10] h_PD 0.708 F_τ 12.6%
+saved gain_1000_8_2000_10.png
+[t0nc_ppo|PD단독|1000_8_2000_10] h_PD 0.733 F_τ 24.2%
+saved gain_2000_10_8000_20.png
+[t0nc_ppo|FF+PD|2000_10_8000_20] h_PD 0.699 F_τ 18.0%
+saved gain_2000_10_8000_20.png
+[t0nc_ppo|PD단독|2000_10_8000_20] h_PD 0.713 F_τ 18.4%
+saved gain_300_3_500_4.png
+[t0nc_ppo_long|FF+PD|300_3_500_4] h_PD 1.057 F_τ 8.5%
+saved gain_300_3_500_4.png
+[t0nc_ppo_long|PD단독|300_3_500_4] h_PD 1.226 F_τ 47.4%
+saved gain_500_5_500_5.png
+[t0nc_ppo_long|FF+PD|500_5_500_5] h_PD 1.060 F_τ 7.9%
+saved gain_500_5_500_5.png
+[t0nc_ppo_long|PD단독|500_5_500_5] h_PD 1.139 F_τ 31.7%
+saved gain_1000_8_2000_10.png
+[t0nc_ppo_long|FF+PD|1000_8_2000_10] h_PD 1.060 F_τ 11.8%
+saved gain_1000_8_2000_10.png
+[t0nc_ppo_long|PD단독|1000_8_2000_10] h_PD 1.083 F_τ 25.6%
+saved gain_2000_10_8000_20.png
+[t0nc_ppo_long|FF+PD|2000_10_8000_20] h_PD 1.058 F_τ 15.6%
+saved gain_2000_10_8000_20.png
+[t0nc_ppo_long|PD단독|2000_10_8000_20] h_PD 1.069 F_τ 20.8%
+saved gain_trend.png
