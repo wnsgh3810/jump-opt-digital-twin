@@ -1,0 +1,634 @@
+skip (수확 있음): fix:24
+skip (수확 있음): fix:25.08
+[chain] fix:26.25: 기존 ckpt 발견 — T0_RESUME=1
+===== t0_train_long.py fix:26.25 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [10s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[dev] NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.246s / gpu 0.270s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용
+[resume] t0wc_ppo_policy_lifix26p25_long.pt: steps=5079040 best=1.0923 — BC 스킵, 잔여 예산으로 재개
+[bc] det-eval h: {'26.25': 1.063}
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[mp] 8 workers × 2 envs = 16 — ready [31s]
+PPO start — 2929 updates × batch 8192 (dev cpu, clip=25.581)
+up   10 steps   5.16M  ret  4.646  apex 1.191  det h(26.25) 1.041 mean 1.0411 (best 1.0923)  sps  8349  std [0.296 0.25 ]
+up   20 steps   5.24M  ret -5.672  apex 1.196  det h(26.25) 1.049 mean 1.0487 (best 1.0923)  sps  8356  std [0.29  0.255]
+up   30 steps   5.32M  ret  4.639  apex 1.179  det h(26.25) 0.988 mean 0.9880 (best 1.0923)  sps  8464  std [0.289 0.25 ]
+up   40 steps   5.41M  ret  1.270  apex 0.764  det h(26.25) 0.714 mean 0.7138 (best 1.0923)  sps  8391  std [0.279 0.258]
+up   50 steps   5.49M  ret  4.559  apex 1.198  det h(26.25) 1.030 mean 1.0302 (best 1.0923)  sps  8397  std [0.268 0.253]
+up   60 steps   5.57M  ret  1.771  apex 1.180  det h(26.25) 1.027 mean 1.0270 (best 1.0923)  sps  8609  std [0.264 0.259]
+up   70 steps   5.65M  ret  2.938  apex 0.891  det h(26.25) 0.760 mean 0.7604 (best 1.0923)  sps  8561  std [0.255 0.264]
+up   80 steps   5.73M  ret  3.893  apex 1.044  det h(26.25) 1.012 mean 1.0116 (best 1.0923)  sps  8467  std [0.25  0.266]
+up   90 steps   5.82M  ret  4.373  apex 1.136  det h(26.25) 1.019 mean 1.0191 (best 1.0923)  sps  8538  std [0.25 0.25]
+up  100 steps   5.90M  ret  4.398  apex 1.144  det h(26.25) 0.966 mean 0.9657 (best 1.0923)  sps  8580  std [0.254 0.25 ]
+up  110 steps   5.98M  ret  3.444  apex 0.958  det h(26.25) 0.887 mean 0.8866 (best 1.0923)  sps  8544  std [0.259 0.251]
+up  120 steps   6.06M  ret  3.410  apex 1.113  det h(26.25) 1.029 mean 1.0287 (best 1.0923)  sps  8538  std [0.251 0.254]
+up  130 steps   6.14M  ret  3.252  apex 0.901  det h(26.25) 0.795 mean 0.7946 (best 1.0923)  sps  8552  std [0.25  0.268]
+up  140 steps   6.23M  ret  4.112  apex 1.108  det h(26.25) 1.033 mean 1.0326 (best 1.0923)  sps  8534  std [0.252 0.25 ]
+up  150 steps   6.31M  ret  3.099  apex 0.870  det h(26.25) 0.713 mean 0.7129 (best 1.0923)  sps  8661  std [0.263 0.253]
+up  160 steps   6.39M  ret  3.552  apex 0.978  det h(26.25) 0.959 mean 0.9588 (best 1.0923)  sps  8652  std [0.259 0.25 ]
+up  170 steps   6.47M  ret  3.700  apex 0.993  det h(26.25) 0.865 mean 0.8646 (best 1.0923)  sps  8437  std [0.268 0.259]
+up  180 steps   6.55M  ret -0.358  apex 1.091  det h(26.25) 0.997 mean 0.9971 (best 1.0923)  sps  8592  std [0.271 0.252]
+up  190 steps   6.64M  ret  2.618  apex 0.788  det h(26.25) 0.704 mean 0.7036 (best 1.0923)  sps  8582  std [0.264 0.25 ]
+up  200 steps   6.72M  ret  3.638  apex 1.067  det h(26.25) 1.007 mean 1.0073 (best 1.0923)  sps  8597  std [0.267 0.25 ]
+up  210 steps   6.80M  ret  3.815  apex 1.040  det h(26.25) 0.998 mean 0.9978 (best 1.0923)  sps  8608  std [0.263 0.253]
+up  220 steps   6.88M  ret  3.605  apex 0.981  det h(26.25) 0.888 mean 0.8882 (best 1.0923)  sps  8549  std [0.263 0.253]
+up  230 steps   6.96M  ret  3.937  apex 1.053  det h(26.25) 0.930 mean 0.9297 (best 1.0923)  sps  8504  std [0.25 0.25]
+up  240 steps   7.05M  ret  3.728  apex 0.995  det h(26.25) 0.925 mean 0.9251 (best 1.0923)  sps  8517  std [0.253 0.26 ]
+up  250 steps   7.13M  ret  1.292  apex 1.072  det h(26.25) 0.972 mean 0.9724 (best 1.0923)  sps  8641  std [0.265 0.267]
+up  260 steps   7.21M  ret  3.434  apex 0.945  det h(26.25) 0.973 mean 0.9726 (best 1.0923)  sps  8653  std [0.262 0.256]
+up  270 steps   7.29M  ret  3.900  apex 1.029  det h(26.25) 0.959 mean 0.9594 (best 1.0923)  sps  8643  std [0.25 0.25]
+up  280 steps   7.37M  ret  3.773  apex 1.019  det h(26.25) 0.894 mean 0.8942 (best 1.0923)  sps  8546  std [0.25 0.25]
+up  290 steps   7.45M  ret  3.342  apex 1.062  det h(26.25) 0.990 mean 0.9903 (best 1.0923)  sps  8615  std [0.263 0.253]
+up  300 steps   7.54M  ret  3.035  apex 1.029  det h(26.25) 0.985 mean 0.9847 (best 1.0923)  sps  8588  std [0.256 0.252]
+up  310 steps   7.62M  ret  3.741  apex 0.996  det h(26.25) 0.960 mean 0.9598 (best 1.0923)  sps  8561  std [0.25 0.25]
+up  320 steps   7.70M  ret  3.802  apex 1.068  det h(26.25) 0.854 mean 0.8543 (best 1.0923)  sps  8593  std [0.252 0.254]
+up  330 steps   7.78M  ret  3.107  apex 0.870  det h(26.25) 0.829 mean 0.8295 (best 1.0923)  sps  8489  std [0.25  0.258]
+up  340 steps   7.86M  ret  3.908  apex 1.081  det h(26.25) 0.967 mean 0.9673 (best 1.0923)  sps  8568  std [0.256 0.255]
+up  350 steps   7.95M  ret  3.005  apex 1.085  det h(26.25) 0.971 mean 0.9706 (best 1.0923)  sps  8608  std [0.262 0.254]
+up  360 steps   8.03M  ret  3.659  apex 0.983  det h(26.25) 0.916 mean 0.9160 (best 1.0923)  sps  8548  std [0.271 0.25 ]
+up  370 steps   8.11M  ret  3.905  apex 1.059  det h(26.25) 0.896 mean 0.8959 (best 1.0923)  sps  8548  std [0.263 0.25 ]
+up  380 steps   8.19M  ret  3.214  apex 0.906  det h(26.25) 0.915 mean 0.9147 (best 1.0923)  sps  8587  std [0.273 0.25 ]
+up  390 steps   8.27M  ret  3.813  apex 1.012  det h(26.25) 0.957 mean 0.9574 (best 1.0923)  sps  8559  std [0.282 0.253]
+up  400 steps   8.36M  ret  3.781  apex 1.006  det h(26.25) 0.865 mean 0.8652 (best 1.0923)  sps  8582  std [0.281 0.252]
+up  410 steps   8.44M  ret  3.910  apex 1.050  det h(26.25) 0.953 mean 0.9533 (best 1.0923)  sps  8482  std [0.289 0.255]
+up  420 steps   8.52M  ret  3.830  apex 1.040  det h(26.25) 0.966 mean 0.9664 (best 1.0923)  sps  8626  std [0.281 0.25 ]
+up  430 steps   8.60M  ret  3.772  apex 1.057  det h(26.25) 0.919 mean 0.9188 (best 1.0923)  sps  8537  std [0.278 0.25 ]
+up  440 steps   8.68M  ret  3.663  apex 1.005  det h(26.25) 0.949 mean 0.9490 (best 1.0923)  sps  8463  std [0.266 0.252]
+up  450 steps   8.77M  ret  3.986  apex 1.053  det h(26.25) 0.892 mean 0.8915 (best 1.0923)  sps  8481  std [0.283 0.254]
+up  460 steps   8.85M  ret  3.668  apex 0.987  det h(26.25) 0.948 mean 0.9476 (best 1.0923)  sps  8526  std [0.286 0.251]
+up  470 steps   8.93M  ret  3.146  apex 1.126  det h(26.25) 1.006 mean 1.0057 (best 1.0923)  sps  8588  std [0.281 0.252]
+up  480 steps   9.01M  ret  3.548  apex 0.973  det h(26.25) 0.897 mean 0.8974 (best 1.0923)  sps  8486  std [0.293 0.257]
+up  490 steps   9.09M  ret  1.779  apex 1.134  det h(26.25) 1.019 mean 1.0187 (best 1.0923)  sps  8517  std [0.301 0.256]
+up  500 steps   9.18M  ret  3.280  apex 0.905  det h(26.25) 0.837 mean 0.8372 (best 1.0923)  sps  8532  std [0.293 0.253]
+up  510 steps   9.26M  ret  3.838  apex 1.073  det h(26.25) 1.009 mean 1.0093 (best 1.0923)  sps  8599  std [0.305 0.252]
+up  520 steps   9.34M  ret  3.901  apex 1.036  det h(26.25) 0.981 mean 0.9814 (best 1.0923)  sps  8416  std [0.301 0.253]
+up  530 steps   9.42M  ret  3.708  apex 0.989  det h(26.25) 0.949 mean 0.9493 (best 1.0923)  sps  8501  std [0.305 0.256]
+up  540 steps   9.50M  ret  3.983  apex 1.049  det h(26.25) 0.934 mean 0.9339 (best 1.0923)  sps  8532  std [0.315 0.253]
+up  550 steps   9.58M  ret  3.450  apex 1.064  det h(26.25) 0.882 mean 0.8823 (best 1.0923)  sps  8616  std [0.308 0.25 ]
+up  560 steps   9.67M  ret  3.791  apex 1.057  det h(26.25) 0.939 mean 0.9390 (best 1.0923)  sps  8733  std [0.302 0.239]
+up  570 steps   9.75M  ret  3.943  apex 1.053  det h(26.25) 0.915 mean 0.9155 (best 1.0923)  sps  8614  std [0.284 0.225]
+up  580 steps   9.83M  ret  3.674  apex 1.078  det h(26.25) 0.903 mean 0.9032 (best 1.0923)  sps  8728  std [0.27  0.216]
+up  590 steps   9.91M  ret  3.500  apex 0.970  det h(26.25) 0.878 mean 0.8782 (best 1.0923)  sps  8601  std [0.264 0.212]
+up  600 steps   9.99M  ret  4.017  apex 1.057  det h(26.25) 0.887 mean 0.8870 (best 1.0923)  sps  8700  std [0.261 0.204]
+up  610 steps  10.08M  ret  3.213  apex 1.104  det h(26.25) 0.970 mean 0.9698 (best 1.0923)  sps  8548  std [0.251 0.201]
+up  620 steps  10.16M  ret  4.048  apex 1.058  det h(26.25) 0.971 mean 0.9711 (best 1.0923)  sps  8712  std [0.257 0.209]
+early stop: plateau (best 1.0487 이후 60회 미개선)
+done — steps 10158080 wall 10.5min best_h 1.0923 (plateau (best 1.0487 이후 60회 미개선))
+curve saved: t0wc_ppo_curve_lifix26p25_long.png
+===== t0_rollout_long.py fix:26.25 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[final] l_i= 26.25mm  h=0.9711  audit=PASS  stance=0.075s  내삽
+[best] l_i= 26.25mm  h=1.0923  audit=FAIL  stance=0.292s  내삽
+
+l_i* = 26.25 mm (final ckpt)  h=0.9711 m  pass_all=True  extrapolated=False
+saved: t0wc_ppo_lifix26p25_long.npz / t0wc_ppo_audit_lifix26p25_long.json [1s]
+===== t0_train_long.py fix:28 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[dev] NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.250s / gpu 0.260s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용
+[bc] teacher t0wc_cl_li28.npz (li=28.0): 152 pairs, replay apex=0.564 (teacher h=1.117)
+[bc] fit: MSE 0.3967 → 0.000526 (4000 iters)
+[bc] det-eval h: {'28': 1.0996}
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[mp] 8 workers × 2 envs = 16 — ready [12s]
+PPO start — 2929 updates × batch 8192 (dev cpu, clip=25.581)
+up   10 steps   0.08M  ret -0.387  apex nan  det h(28) 1.100 mean 1.0996 (best 1.0996)  sps 11903  std [0.4 0.4]  [VF-warm]
+up   20 steps   0.16M  ret -0.368  apex nan  det h(28) 1.100 mean 1.0996 (best 1.0996)  sps 12015  std [0.4 0.4]  [VF-warm]
+up   30 steps   0.25M  ret  0.028  apex nan  det h(28) 0.699 mean 0.6994 (best 1.0996)  sps  8580  std [0.383 0.374]
+up   40 steps   0.33M  ret  0.320  apex nan  det h(28) 0.683 mean 0.6830 (best 1.0996)  sps  8514  std [0.34  0.333]
+up   50 steps   0.41M  ret  0.702  apex nan  det h(28) 0.696 mean 0.6959 (best 1.0996)  sps  8585  std [0.347 0.345]
+up   60 steps   0.49M  ret  1.159  apex nan  det h(28) 0.787 mean 0.7875 (best 1.0996)  sps  8545  std [0.353 0.329]
+up   70 steps   0.57M  ret  1.077  apex nan  det h(28) 0.771 mean 0.7708 (best 1.0996)  sps  8605  std [0.358 0.329]
+up   80 steps   0.66M  ret  1.357  apex nan  det h(28) 0.185 mean 0.1847 (best 1.0996)  sps  8600  std [0.369 0.316]
+up   90 steps   0.74M  ret  1.178  apex nan  det h(28) 0.861 mean 0.8611 (best 1.0996)  sps  8591  std [0.372 0.345]
+up  100 steps   0.82M  ret  1.582  apex nan  det h(28) 0.875 mean 0.8751 (best 1.0996)  sps  8535  std [0.366 0.344]
+up  110 steps   0.90M  ret  1.696  apex nan  det h(28) 0.859 mean 0.8587 (best 1.0996)  sps  8558  std [0.35  0.352]
+up  120 steps   0.98M  ret  1.429  apex 0.891  det h(28) 0.877 mean 0.8766 (best 1.0996)  sps  8496  std [0.342 0.346]
+up  130 steps   1.06M  ret  1.435  apex 0.897  det h(28) 0.896 mean 0.8959 (best 1.0996)  sps  8682  std [0.331 0.383]
+up  140 steps   1.15M  ret  1.644  apex 0.905  det h(28) 0.910 mean 0.9104 (best 1.0996)  sps  8534  std [0.336 0.369]
+up  150 steps   1.23M  ret  1.580  apex 0.911  det h(28) 0.919 mean 0.9192 (best 1.0996)  sps  8520  std [0.331 0.374]
+up  160 steps   1.31M  ret  2.135  apex 0.893  det h(28) 0.919 mean 0.9194 (best 1.0996)  sps  8561  std [0.333 0.395]
+up  170 steps   1.39M  ret  1.467  apex 0.878  det h(28) 0.889 mean 0.8895 (best 1.0996)  sps  8545  std [0.318 0.394]
+up  180 steps   1.47M  ret  2.000  apex 0.891  det h(28) 0.924 mean 0.9244 (best 1.0996)  sps  8509  std [0.31  0.388]
+up  190 steps   1.56M  ret  2.324  apex 0.926  det h(28) 0.185 mean 0.1850 (best 1.0996)  sps  8542  std [0.309 0.409]
+up  200 steps   1.64M  ret  2.049  apex 0.923  det h(28) 0.960 mean 0.9600 (best 1.0996)  sps  8663  std [0.296 0.406]
+up  210 steps   1.72M  ret  2.088  apex 0.948  det h(28) 0.969 mean 0.9690 (best 1.0996)  sps  8555  std [0.294 0.414]
+up  220 steps   1.80M  ret  2.037  apex 0.942  det h(28) 0.959 mean 0.9592 (best 1.0996)  sps  8600  std [0.291 0.386]
+up  230 steps   1.88M  ret  2.408  apex 0.950  det h(28) 0.969 mean 0.9695 (best 1.0996)  sps  8542  std [0.3   0.384]
+up  240 steps   1.97M  ret  2.268  apex 0.946  det h(28) 0.965 mean 0.9646 (best 1.0996)  sps  8599  std [0.313 0.372]
+up  250 steps   2.05M  ret  2.163  apex 0.951  det h(28) 0.978 mean 0.9778 (best 1.0996)  sps  8583  std [0.306 0.372]
+up  260 steps   2.13M  ret  2.212  apex 0.933  det h(28) 0.945 mean 0.9448 (best 1.0996)  sps  8455  std [0.309 0.368]
+up  270 steps   2.21M  ret  1.812  apex 0.934  det h(28) 0.945 mean 0.9451 (best 1.0996)  sps  8694  std [0.302 0.366]
+up  280 steps   2.29M  ret  2.032  apex 0.934  det h(28) 0.948 mean 0.9484 (best 1.0996)  sps  8635  std [0.285 0.368]
+up  290 steps   2.38M  ret  1.798  apex 0.943  det h(28) 0.942 mean 0.9419 (best 1.0996)  sps  8707  std [0.277 0.369]
+up  300 steps   2.46M  ret  1.969  apex 0.923  det h(28) 0.941 mean 0.9411 (best 1.0996)  sps  8652  std [0.27  0.365]
+up  310 steps   2.54M  ret  1.932  apex 0.937  det h(28) 0.940 mean 0.9402 (best 1.0996)  sps  8634  std [0.273 0.368]
+up  320 steps   2.62M  ret  1.881  apex 0.936  det h(28) 0.960 mean 0.9601 (best 1.0996)  sps  8653  std [0.257 0.361]
+up  330 steps   2.70M  ret  2.264  apex 0.960  det h(28) 0.972 mean 0.9719 (best 1.0996)  sps  8664  std [0.25  0.338]
+up  340 steps   2.79M  ret  2.372  apex 0.971  det h(28) 0.992 mean 0.9919 (best 1.0996)  sps  8599  std [0.252 0.327]
+up  350 steps   2.87M  ret  2.538  apex 1.005  det h(28) 1.021 mean 1.0206 (best 1.0996)  sps  8665  std [0.255 0.332]
+up  360 steps   2.95M  ret  2.241  apex 0.993  det h(28) 1.023 mean 1.0229 (best 1.0996)  sps  8547  std [0.259 0.331]
+up  370 steps   3.03M  ret  2.287  apex 0.986  det h(28) 0.991 mean 0.9910 (best 1.0996)  sps  8620  std [0.253 0.337]
+up  380 steps   3.11M  ret  1.721  apex 0.976  det h(28) 0.986 mean 0.9858 (best 1.0996)  sps  8700  std [0.25  0.327]
+up  390 steps   3.19M  ret  2.361  apex 0.986  det h(28) 1.018 mean 1.0181 (best 1.0996)  sps  8653  std [0.25  0.303]
+up  400 steps   3.28M  ret  2.240  apex 1.005  det h(28) 1.009 mean 1.0085 (best 1.0996)  sps  8550  std [0.256 0.31 ]
+up  410 steps   3.36M  ret  2.188  apex 1.009  det h(28) 1.009 mean 1.0086 (best 1.0996)  sps  8543  std [0.267 0.305]
+up  420 steps   3.44M  ret  2.352  apex 0.982  det h(28) 0.995 mean 0.9953 (best 1.0996)  sps  8523  std [0.261 0.309]
+up  430 steps   3.52M  ret  2.100  apex 0.988  det h(28) 0.999 mean 0.9989 (best 1.0996)  sps  8567  std [0.25  0.293]
+up  440 steps   3.60M  ret  2.298  apex 0.986  det h(28) 1.012 mean 1.0125 (best 1.0996)  sps  8653  std [0.259 0.288]
+up  450 steps   3.69M  ret  2.094  apex 1.031  det h(28) 1.044 mean 1.0438 (best 1.0996)  sps  8627  std [0.252 0.296]
+up  460 steps   3.77M  ret  2.237  apex 1.034  det h(28) 1.044 mean 1.0437 (best 1.0996)  sps  8661  std [0.25 0.29]
+up  470 steps   3.85M  ret  2.399  apex 1.021  det h(28) 1.024 mean 1.0244 (best 1.0996)  sps  8656  std [0.257 0.297]
+up  480 steps   3.93M  ret  2.600  apex 1.035  det h(28) 1.048 mean 1.0481 (best 1.0996)  sps  8608  std [0.25  0.302]
+up  490 steps   4.01M  ret  0.009  apex 1.031  det h(28) 1.038 mean 1.0381 (best 1.0996)  sps  8519  std [0.256 0.313]
+up  500 steps   4.10M  ret  1.556  apex 1.016  det h(28) 0.988 mean 0.9881 (best 1.0996)  sps  8628  std [0.25  0.302]
+up  510 steps   4.18M  ret  2.177  apex 1.020  det h(28) 1.035 mean 1.0354 (best 1.0996)  sps  8433  std [0.255 0.311]
+up  520 steps   4.26M  ret  2.335  apex 1.016  det h(28) 1.049 mean 1.0486 (best 1.0996)  sps  8593  std [0.25  0.294]
+up  530 steps   4.34M  ret  2.454  apex 1.037  det h(28) 1.047 mean 1.0465 (best 1.0996)  sps  8542  std [0.253 0.283]
+up  540 steps   4.42M  ret  2.271  apex 1.062  det h(28) 1.082 mean 1.0822 (best 1.0996)  sps  8666  std [0.25  0.292]
+up  550 steps   4.51M  ret  2.555  apex 1.054  det h(28) 1.061 mean 1.0607 (best 1.0996)  sps  8522  std [0.251 0.289]
+up  560 steps   4.59M  ret  2.360  apex 1.056  det h(28) 1.073 mean 1.0727 (best 1.0996)  sps  8635  std [0.254 0.28 ]
+up  570 steps   4.67M  ret  2.533  apex 1.070  det h(28) 1.087 mean 1.0870 (best 1.0996)  sps  8580  std [0.25  0.277]
+up  580 steps   4.75M  ret  2.013  apex 1.060  det h(28) 1.056 mean 1.0558 (best 1.0996)  sps  8653  std [0.25  0.274]
+up  590 steps   4.83M  ret  2.284  apex 1.045  det h(28) 1.034 mean 1.0336 (best 1.0996)  sps  8670  std [0.253 0.295]
+up  600 steps   4.92M  ret  2.330  apex 1.027  det h(28) 1.031 mean 1.0311 (best 1.0996)  sps  8562  std [0.252 0.282]
+up  610 steps   5.00M  ret  2.256  apex 1.019  det h(28) 0.185 mean 0.1846 (best 1.0996)  sps  8544  std [0.265 0.299]
+up  620 steps   5.08M  ret  2.427  apex 1.031  det h(28) 1.032 mean 1.0315 (best 1.0996)  sps  8561  std [0.264 0.309]
+up  630 steps   5.16M  ret  2.376  apex 1.032  det h(28) 1.054 mean 1.0536 (best 1.0996)  sps  8635  std [0.266 0.313]
+up  640 steps   5.24M  ret  2.640  apex 1.039  det h(28) 1.042 mean 1.0419 (best 1.0996)  sps  8393  std [0.27  0.295]
+up  650 steps   5.32M  ret  2.702  apex 1.045  det h(28) 1.049 mean 1.0491 (best 1.0996)  sps  8496  std [0.267 0.283]
+up  660 steps   5.41M  ret  2.689  apex 1.046  det h(28) 1.048 mean 1.0483 (best 1.0996)  sps  8552  std [0.254 0.285]
+up  670 steps   5.49M  ret  2.536  apex 1.025  det h(28) 1.012 mean 1.0120 (best 1.0996)  sps  8656  std [0.263 0.299]
+up  680 steps   5.57M  ret  2.202  apex 1.022  det h(28) 1.034 mean 1.0340 (best 1.0996)  sps  8668  std [0.254 0.311]
+up  690 steps   5.65M  ret  2.870  apex 1.041  det h(28) 1.039 mean 1.0393 (best 1.0996)  sps  8557  std [0.256 0.305]
+up  700 steps   5.73M  ret  2.412  apex 1.047  det h(28) 1.057 mean 1.0565 (best 1.0996)  sps  8670  std [0.261 0.299]
+up  710 steps   5.82M  ret  2.466  apex 1.054  det h(28) 1.047 mean 1.0472 (best 1.0996)  sps  8539  std [0.258 0.291]
+up  720 steps   5.90M  ret  2.607  apex 1.053  det h(28) 1.057 mean 1.0574 (best 1.0996)  sps  8559  std [0.258 0.286]
+up  730 steps   5.98M  ret  2.468  apex 1.053  det h(28) 1.055 mean 1.0549 (best 1.0996)  sps  8556  std [0.254 0.291]
+up  740 steps   6.06M  ret  2.728  apex 1.066  det h(28) 1.064 mean 1.0637 (best 1.0996)  sps  8628  std [0.25  0.297]
+early stop: plateau (best 1.0996 이후 60회 미개선)
+done — steps 6062080 wall 11.9min best_h 1.0996 (plateau (best 1.0996 이후 60회 미개선))
+curve saved: t0wc_ppo_curve_lifix28_long.png
+===== t0_rollout_long.py fix:28 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[final] l_i= 28.00mm  h=1.0637  audit=PASS  stance=0.012s  내삽
+[best] l_i= 28.00mm  h=1.0996  audit=FAIL  stance=0.013s  내삽  range_viol
+
+l_i* = 28.00 mm (final ckpt)  h=1.0637 m  pass_all=True  extrapolated=False
+saved: t0wc_ppo_lifix28_long.npz / t0wc_ppo_audit_lifix28_long.json [1s]
+===== t0_train_long.py fix:30 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[dev] NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.240s / gpu 0.272s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용
+[bc] teacher t0nc_cl.npz (li=30.0): 300 pairs, replay apex=0.974 (teacher h=0.977)
+[bc] fit: MSE 0.2129 → 0.000297 (4000 iters)
+[bc] det-eval h: {'30': 0.9713}
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[mp] 8 workers × 2 envs = 16 — ready [12s]
+PPO start — 2929 updates × batch 8192 (dev cpu, clip=25.581)
+up   10 steps   0.08M  ret  0.371  apex 0.633  det h(30) 0.971 mean 0.9713 (best 0.9713)  sps 11989  std [0.4 0.4]  [VF-warm]
+up   20 steps   0.16M  ret  0.338  apex 0.665  det h(30) 0.971 mean 0.9713 (best 0.9713)  sps 11853  std [0.4 0.4]  [VF-warm]
+up   30 steps   0.25M  ret  0.932  apex 0.674  det h(30) 0.803 mean 0.8032 (best 0.9713)  sps  8459  std [0.394 0.391]
+up   40 steps   0.33M  ret  1.662  apex 0.840  det h(30) 0.889 mean 0.8888 (best 0.9713)  sps  8618  std [0.369 0.387]
+up   50 steps   0.41M  ret  1.789  apex 0.781  det h(30) 0.868 mean 0.8678 (best 0.9713)  sps  8647  std [0.377 0.359]
+up   60 steps   0.49M  ret  1.817  apex 0.867  det h(30) 0.914 mean 0.9141 (best 0.9713)  sps  8693  std [0.372 0.359]
+up   70 steps   0.57M  ret  2.358  apex 0.917  det h(30) 0.942 mean 0.9422 (best 0.9713)  sps  8695  std [0.358 0.348]
+up   80 steps   0.66M  ret  2.087  apex 0.911  det h(30) 0.930 mean 0.9301 (best 0.9713)  sps  8574  std [0.34  0.329]
+up   90 steps   0.74M  ret  2.425  apex 0.920  det h(30) 0.937 mean 0.9370 (best 0.9713)  sps  8646  std [0.345 0.334]
+up  100 steps   0.82M  ret  1.751  apex 0.893  det h(30) 0.910 mean 0.9098 (best 0.9713)  sps  8632  std [0.341 0.337]
+up  110 steps   0.90M  ret  2.134  apex 0.883  det h(30) 0.901 mean 0.9005 (best 0.9713)  sps  8567  std [0.325 0.315]
+up  120 steps   0.98M  ret  1.872  apex 0.881  det h(30) 0.904 mean 0.9041 (best 0.9713)  sps  8645  std [0.328 0.318]
+up  130 steps   1.06M  ret  1.772  apex 0.882  det h(30) 0.899 mean 0.8985 (best 0.9713)  sps  8613  std [0.317 0.299]
+up  140 steps   1.15M  ret  1.977  apex 0.884  det h(30) 0.885 mean 0.8852 (best 0.9713)  sps  8478  std [0.313 0.303]
+up  150 steps   1.23M  ret  2.114  apex 0.870  det h(30) 0.893 mean 0.8934 (best 0.9713)  sps  8507  std [0.3   0.327]
+up  160 steps   1.31M  ret  1.930  apex 0.872  det h(30) 0.886 mean 0.8859 (best 0.9713)  sps  8607  std [0.3   0.324]
+up  170 steps   1.39M  ret  1.796  apex 0.863  det h(30) 0.867 mean 0.8671 (best 0.9713)  sps  8648  std [0.29  0.315]
+up  180 steps   1.47M  ret  1.812  apex 0.822  det h(30) 0.850 mean 0.8498 (best 0.9713)  sps  8544  std [0.276 0.317]
+up  190 steps   1.56M  ret  2.130  apex 0.832  det h(30) 0.845 mean 0.8446 (best 0.9713)  sps  8522  std [0.283 0.316]
+up  200 steps   1.64M  ret  1.797  apex 0.831  det h(30) 0.839 mean 0.8389 (best 0.9713)  sps  8538  std [0.285 0.306]
+up  210 steps   1.72M  ret  1.726  apex 0.837  det h(30) 0.858 mean 0.8577 (best 0.9713)  sps  8723  std [0.299 0.328]
+up  220 steps   1.80M  ret  1.435  apex 0.851  det h(30) 0.862 mean 0.8618 (best 0.9713)  sps  8609  std [0.3   0.338]
+up  230 steps   1.88M  ret  1.451  apex 0.831  det h(30) 0.848 mean 0.8478 (best 0.9713)  sps  8645  std [0.305 0.346]
+up  240 steps   1.97M  ret  1.985  apex 0.818  det h(30) 0.840 mean 0.8397 (best 0.9713)  sps  8681  std [0.294 0.337]
+up  250 steps   2.05M  ret  1.871  apex 0.841  det h(30) 0.858 mean 0.8581 (best 0.9713)  sps  8479  std [0.286 0.324]
+up  260 steps   2.13M  ret  2.203  apex 0.836  det h(30) 0.850 mean 0.8501 (best 0.9713)  sps  8535  std [0.287 0.314]
+up  270 steps   2.21M  ret  1.928  apex 0.838  det h(30) 0.849 mean 0.8491 (best 0.9713)  sps  8674  std [0.275 0.32 ]
+up  280 steps   2.29M  ret  1.777  apex 0.839  det h(30) 0.847 mean 0.8466 (best 0.9713)  sps  8766  std [0.273 0.326]
+up  290 steps   2.38M  ret  1.600  apex 0.835  det h(30) 0.848 mean 0.8480 (best 0.9713)  sps  8701  std [0.266 0.321]
+up  300 steps   2.46M  ret  1.380  apex 0.844  det h(30) 0.855 mean 0.8553 (best 0.9713)  sps  8620  std [0.27  0.334]
+up  310 steps   2.54M  ret  1.988  apex 0.837  det h(30) 0.854 mean 0.8540 (best 0.9713)  sps  8563  std [0.263 0.316]
+up  320 steps   2.62M  ret  1.945  apex 0.848  det h(30) 0.858 mean 0.8575 (best 0.9713)  sps  8667  std [0.263 0.307]
+up  330 steps   2.70M  ret  1.620  apex 0.825  det h(30) 0.836 mean 0.8360 (best 0.9713)  sps  8693  std [0.261 0.31 ]
+up  340 steps   2.79M  ret  1.789  apex 0.834  det h(30) 0.842 mean 0.8420 (best 0.9713)  sps  8556  std [0.263 0.299]
+up  350 steps   2.87M  ret  1.694  apex 0.839  det h(30) 0.852 mean 0.8520 (best 0.9713)  sps  8478  std [0.255 0.301]
+up  360 steps   2.95M  ret  1.911  apex 0.838  det h(30) 0.836 mean 0.8359 (best 0.9713)  sps  8651  std [0.25  0.295]
+up  370 steps   3.03M  ret  1.462  apex 0.838  det h(30) 0.851 mean 0.8506 (best 0.9713)  sps  8590  std [0.256 0.312]
+up  380 steps   3.11M  ret  1.866  apex 0.848  det h(30) 0.858 mean 0.8576 (best 0.9713)  sps  8529  std [0.26  0.314]
+up  390 steps   3.19M  ret  2.064  apex 0.855  det h(30) 0.862 mean 0.8616 (best 0.9713)  sps  8747  std [0.278 0.317]
+up  400 steps   3.28M  ret  1.605  apex 0.857  det h(30) 0.864 mean 0.8644 (best 0.9713)  sps  8654  std [0.276 0.315]
+up  410 steps   3.36M  ret  1.886  apex 0.859  det h(30) 0.866 mean 0.8665 (best 0.9713)  sps  8590  std [0.272 0.305]
+up  420 steps   3.44M  ret  1.931  apex 0.870  det h(30) 0.874 mean 0.8741 (best 0.9713)  sps  8624  std [0.274 0.295]
+up  430 steps   3.52M  ret  2.009  apex 0.878  det h(30) 0.881 mean 0.8809 (best 0.9713)  sps  8732  std [0.273 0.293]
+up  440 steps   3.60M  ret  1.807  apex 0.882  det h(30) 0.888 mean 0.8880 (best 0.9713)  sps  8670  std [0.278 0.311]
+up  450 steps   3.69M  ret  1.749  apex 0.877  det h(30) 0.884 mean 0.8844 (best 0.9713)  sps  8659  std [0.281 0.301]
+up  460 steps   3.77M  ret  2.143  apex 0.888  det h(30) 0.898 mean 0.8984 (best 0.9713)  sps  8578  std [0.261 0.299]
+up  470 steps   3.85M  ret  1.825  apex 0.895  det h(30) 0.900 mean 0.9003 (best 0.9713)  sps  8760  std [0.25  0.292]
+up  480 steps   3.93M  ret  2.064  apex 0.909  det h(30) 0.916 mean 0.9163 (best 0.9713)  sps  8597  std [0.254 0.292]
+up  490 steps   4.01M  ret  1.578  apex 0.916  det h(30) 0.918 mean 0.9183 (best 0.9713)  sps  8592  std [0.253 0.299]
+up  500 steps   4.10M  ret  1.849  apex 0.921  det h(30) 0.926 mean 0.9265 (best 0.9713)  sps  8687  std [0.268 0.308]
+up  510 steps   4.18M  ret  1.830  apex 0.924  det h(30) 0.932 mean 0.9319 (best 0.9713)  sps  8659  std [0.262 0.307]
+up  520 steps   4.26M  ret  2.229  apex 0.932  det h(30) 0.948 mean 0.9485 (best 0.9713)  sps  8568  std [0.257 0.304]
+up  530 steps   4.34M  ret  2.115  apex 0.946  det h(30) 0.951 mean 0.9515 (best 0.9713)  sps  8670  std [0.263 0.307]
+up  540 steps   4.42M  ret  2.411  apex 0.951  det h(30) 0.955 mean 0.9552 (best 0.9713)  sps  8609  std [0.263 0.297]
+up  550 steps   4.51M  ret  2.048  apex 0.956  det h(30) 0.968 mean 0.9680 (best 0.9713)  sps  8499  std [0.26  0.299]
+up  560 steps   4.59M  ret  2.163  apex 0.959  det h(30) 0.956 mean 0.9563 (best 0.9713)  sps  8701  std [0.252 0.298]
+up  570 steps   4.67M  ret  2.318  apex 0.957  det h(30) 0.964 mean 0.9644 (best 0.9713)  sps  8611  std [0.251 0.295]
+up  580 steps   4.75M  ret  2.302  apex 0.969  det h(30) 0.977 mean 0.9770 (best 0.9770)  sps  8687  std [0.253 0.305]
+up  590 steps   4.83M  ret  2.038  apex 0.960  det h(30) 0.968 mean 0.9679 (best 0.9770)  sps  8642  std [0.27  0.327]
+up  600 steps   4.92M  ret  2.302  apex 0.957  det h(30) 0.955 mean 0.9553 (best 0.9770)  sps  8696  std [0.292 0.335]
+up  610 steps   5.00M  ret  2.335  apex 0.951  det h(30) 0.962 mean 0.9615 (best 0.9770)  sps  8531  std [0.297 0.339]
+up  620 steps   5.08M  ret  2.243  apex 0.955  det h(30) 0.960 mean 0.9604 (best 0.9770)  sps  8637  std [0.288 0.329]
+up  630 steps   5.16M  ret  1.895  apex 0.964  det h(30) 0.969 mean 0.9693 (best 0.9770)  sps  8584  std [0.291 0.319]
+up  640 steps   5.24M  ret  2.167  apex 0.967  det h(30) 0.974 mean 0.9744 (best 0.9770)  sps  8685  std [0.283 0.332]
+up  650 steps   5.32M  ret  2.082  apex 0.972  det h(30) 0.978 mean 0.9776 (best 0.9776)  sps  8679  std [0.267 0.31 ]
+up  660 steps   5.41M  ret  1.891  apex 0.975  det h(30) 0.975 mean 0.9753 (best 0.9776)  sps  8687  std [0.267 0.305]
+up  670 steps   5.49M  ret  2.040  apex 0.971  det h(30) 0.976 mean 0.9756 (best 0.9776)  sps  8625  std [0.269 0.322]
+up  680 steps   5.57M  ret  2.483  apex 0.971  det h(30) 0.981 mean 0.9807 (best 0.9807)  sps  8666  std [0.26  0.313]
+up  690 steps   5.65M  ret  1.727  apex 0.973  det h(30) 0.976 mean 0.9762 (best 0.9807)  sps  8636  std [0.273 0.307]
+up  700 steps   5.73M  ret  1.842  apex 0.977  det h(30) 0.986 mean 0.9858 (best 0.9858)  sps  8623  std [0.278 0.315]
+up  710 steps   5.82M  ret  2.451  apex 0.982  det h(30) 0.984 mean 0.9843 (best 0.9858)  sps  8568  std [0.296 0.317]
+up  720 steps   5.90M  ret  2.542  apex 0.977  det h(30) 0.983 mean 0.9828 (best 0.9858)  sps  8645  std [0.299 0.307]
+up  730 steps   5.98M  ret  2.685  apex 0.979  det h(30) 0.984 mean 0.9843 (best 0.9858)  sps  8520  std [0.295 0.308]
+up  740 steps   6.06M  ret  2.218  apex 0.983  det h(30) 0.991 mean 0.9911 (best 0.9911)  sps  8680  std [0.266 0.288]
+up  750 steps   6.14M  ret  2.461  apex 0.983  det h(30) 0.988 mean 0.9883 (best 0.9911)  sps  8700  std [0.26  0.285]
+up  760 steps   6.23M  ret  2.367  apex 0.985  det h(30) 0.991 mean 0.9912 (best 0.9912)  sps  8699  std [0.266 0.299]
+up  770 steps   6.31M  ret  2.315  apex 0.992  det h(30) 0.993 mean 0.9934 (best 0.9934)  sps  8689  std [0.278 0.294]
+up  780 steps   6.39M  ret  2.626  apex 0.987  det h(30) 0.988 mean 0.9885 (best 0.9934)  sps  8617  std [0.284 0.284]
+up  790 steps   6.47M  ret  1.696  apex 0.985  det h(30) 0.993 mean 0.9929 (best 0.9934)  sps  8604  std [0.282 0.283]
+up  800 steps   6.55M  ret  2.398  apex 0.996  det h(30) 1.000 mean 1.0002 (best 1.0002)  sps  8620  std [0.275 0.294]
+up  810 steps   6.64M  ret  2.217  apex 1.011  det h(30) 1.014 mean 1.0141 (best 1.0141)  sps  8608  std [0.267 0.31 ]
+up  820 steps   6.72M  ret  2.810  apex 1.008  det h(30) 1.014 mean 1.0136 (best 1.0141)  sps  8589  std [0.261 0.303]
+up  830 steps   6.80M  ret  2.546  apex 1.011  det h(30) 1.009 mean 1.0093 (best 1.0141)  sps  8670  std [0.28  0.312]
+up  840 steps   6.88M  ret  2.806  apex 1.009  det h(30) 1.011 mean 1.0110 (best 1.0141)  sps  8770  std [0.268 0.302]
+up  850 steps   6.96M  ret  1.986  apex 1.010  det h(30) 1.018 mean 1.0178 (best 1.0178)  sps  8695  std [0.278 0.31 ]
+up  860 steps   7.05M  ret  2.350  apex 1.005  det h(30) 1.013 mean 1.0135 (best 1.0178)  sps  8709  std [0.265 0.306]
+up  870 steps   7.13M  ret  2.032  apex 1.008  det h(30) 1.013 mean 1.0134 (best 1.0178)  sps  8608  std [0.257 0.306]
+up  880 steps   7.21M  ret  2.448  apex 1.017  det h(30) 1.020 mean 1.0201 (best 1.0201)  sps  8626  std [0.252 0.308]
+up  890 steps   7.29M  ret  2.454  apex 1.018  det h(30) 1.021 mean 1.0211 (best 1.0211)  sps  8742  std [0.25  0.292]
+up  900 steps   7.37M  ret  2.682  apex 1.018  det h(30) 1.024 mean 1.0239 (best 1.0239)  sps  8621  std [0.25  0.293]
+up  910 steps   7.45M  ret  2.302  apex 1.021  det h(30) 1.025 mean 1.0250 (best 1.0250)  sps  8548  std [0.251 0.303]
+up  920 steps   7.54M  ret  2.470  apex 1.025  det h(30) 1.029 mean 1.0287 (best 1.0287)  sps  8560  std [0.253 0.288]
+up  930 steps   7.62M  ret  2.206  apex 1.024  det h(30) 1.023 mean 1.0232 (best 1.0287)  sps  8577  std [0.261 0.292]
+up  940 steps   7.70M  ret  1.822  apex 1.020  det h(30) 1.027 mean 1.0266 (best 1.0287)  sps  8761  std [0.253 0.29 ]
+up  950 steps   7.78M  ret  2.232  apex 1.022  det h(30) 1.023 mean 1.0232 (best 1.0287)  sps  8658  std [0.251 0.282]
+up  960 steps   7.86M  ret  2.107  apex 1.019  det h(30) 1.022 mean 1.0218 (best 1.0287)  sps  8625  std [0.25  0.275]
+up  970 steps   7.95M  ret  2.059  apex 1.021  det h(30) 1.028 mean 1.0280 (best 1.0287)  sps  8622  std [0.265 0.281]
+up  980 steps   8.03M  ret  2.179  apex 1.021  det h(30) 1.024 mean 1.0240 (best 1.0287)  sps  8645  std [0.257 0.276]
+up  990 steps   8.11M  ret  2.380  apex 1.017  det h(30) 1.019 mean 1.0193 (best 1.0287)  sps  8598  std [0.259 0.276]
+up 1000 steps   8.19M  ret  2.720  apex 1.020  det h(30) 1.021 mean 1.0213 (best 1.0287)  sps  8592  std [0.264 0.283]
+up 1010 steps   8.27M  ret  2.620  apex 1.014  det h(30) 1.014 mean 1.0135 (best 1.0287)  sps  8735  std [0.263 0.273]
+up 1020 steps   8.36M  ret  2.765  apex 1.008  det h(30) 1.012 mean 1.0116 (best 1.0287)  sps  8623  std [0.262 0.265]
+up 1030 steps   8.44M  ret  2.589  apex 1.007  det h(30) 1.011 mean 1.0114 (best 1.0287)  sps  8661  std [0.285 0.28 ]
+up 1040 steps   8.52M  ret  2.538  apex 0.997  det h(30) 1.000 mean 0.9995 (best 1.0287)  sps  8719  std [0.287 0.301]
+up 1050 steps   8.60M  ret  2.154  apex 0.992  det h(30) 0.996 mean 0.9956 (best 1.0287)  sps  8554  std [0.284 0.306]
+up 1060 steps   8.68M  ret  2.478  apex 0.992  det h(30) 0.999 mean 0.9993 (best 1.0287)  sps  8628  std [0.295 0.31 ]
+up 1070 steps   8.77M  ret  2.324  apex 0.994  det h(30) 0.996 mean 0.9958 (best 1.0287)  sps  8577  std [0.274 0.312]
+up 1080 steps   8.85M  ret  2.220  apex 0.996  det h(30) 0.999 mean 0.9992 (best 1.0287)  sps  8463  std [0.274 0.301]
+up 1090 steps   8.93M  ret  2.785  apex 1.001  det h(30) 1.003 mean 1.0025 (best 1.0287)  sps  8635  std [0.256 0.281]
+up 1100 steps   9.01M  ret  2.347  apex 1.000  det h(30) 1.002 mean 1.0022 (best 1.0287)  sps  8667  std [0.257 0.285]
+up 1110 steps   9.09M  ret  2.569  apex 0.998  det h(30) 1.002 mean 1.0023 (best 1.0287)  sps  8563  std [0.256 0.279]
+up 1120 steps   9.18M  ret  2.643  apex 1.003  det h(30) 1.002 mean 1.0020 (best 1.0287)  sps  8686  std [0.26  0.289]
+up 1130 steps   9.26M  ret  2.356  apex 1.002  det h(30) 1.001 mean 1.0014 (best 1.0287)  sps  8688  std [0.258 0.296]
+up 1140 steps   9.34M  ret  2.018  apex 1.001  det h(30) 1.001 mean 1.0006 (best 1.0287)  sps  8666  std [0.261 0.295]
+up 1150 steps   9.42M  ret  2.150  apex 0.990  det h(30) 0.996 mean 0.9955 (best 1.0287)  sps  8612  std [0.27  0.294]
+up 1160 steps   9.50M  ret  2.502  apex 0.996  det h(30) 1.000 mean 0.9996 (best 1.0287)  sps  8619  std [0.267 0.298]
+up 1170 steps   9.58M  ret  2.228  apex 1.000  det h(30) 1.000 mean 1.0003 (best 1.0287)  sps  8713  std [0.254 0.303]
+up 1180 steps   9.67M  ret  2.569  apex 1.006  det h(30) 1.012 mean 1.0117 (best 1.0287)  sps  8638  std [0.249 0.296]
+up 1190 steps   9.75M  ret  2.193  apex 1.005  det h(30) 1.011 mean 1.0110 (best 1.0287)  sps  8688  std [0.25  0.294]
+up 1200 steps   9.83M  ret  2.379  apex 1.010  det h(30) 1.017 mean 1.0174 (best 1.0287)  sps  8735  std [0.238 0.3  ]
+up 1210 steps   9.91M  ret  2.610  apex 1.014  det h(30) 1.016 mean 1.0159 (best 1.0287)  sps  8668  std [0.228 0.286]
+up 1220 steps   9.99M  ret  2.608  apex 1.010  det h(30) 1.014 mean 1.0142 (best 1.0287)  sps  8636  std [0.235 0.282]
+up 1230 steps  10.08M  ret  2.617  apex 1.012  det h(30) 1.013 mean 1.0131 (best 1.0287)  sps  8710  std [0.237 0.29 ]
+up 1240 steps  10.16M  ret  2.741  apex 1.010  det h(30) 1.021 mean 1.0205 (best 1.0287)  sps  8582  std [0.233 0.295]
+up 1250 steps  10.24M  ret  1.871  apex 1.022  det h(30) 1.026 mean 1.0259 (best 1.0287)  sps  8675  std [0.233 0.302]
+up 1260 steps  10.32M  ret  2.516  apex 1.023  det h(30) 1.027 mean 1.0269 (best 1.0287)  sps  8600  std [0.229 0.296]
+up 1270 steps  10.40M  ret  2.222  apex 1.022  det h(30) 1.025 mean 1.0249 (best 1.0287)  sps  8614  std [0.241 0.305]
+up 1280 steps  10.49M  ret  2.636  apex 1.018  det h(30) 1.023 mean 1.0226 (best 1.0287)  sps  8596  std [0.236 0.299]
+up 1290 steps  10.57M  ret  2.391  apex 1.026  det h(30) 1.026 mean 1.0261 (best 1.0287)  sps  8685  std [0.236 0.293]
+up 1300 steps  10.65M  ret  2.469  apex 1.022  det h(30) 1.026 mean 1.0263 (best 1.0287)  sps  8643  std [0.222 0.293]
+up 1310 steps  10.73M  ret  2.468  apex 1.019  det h(30) 1.020 mean 1.0195 (best 1.0287)  sps  8717  std [0.22  0.291]
+up 1320 steps  10.81M  ret  2.752  apex 1.019  det h(30) 1.022 mean 1.0221 (best 1.0287)  sps  8598  std [0.218 0.3  ]
+up 1330 steps  10.90M  ret  2.441  apex 1.026  det h(30) 1.030 mean 1.0299 (best 1.0299)  sps  8715  std [0.221 0.301]
+up 1340 steps  10.98M  ret  2.491  apex 1.026  det h(30) 1.026 mean 1.0264 (best 1.0299)  sps  8642  std [0.218 0.301]
+up 1350 steps  11.06M  ret  2.428  apex 1.028  det h(30) 1.029 mean 1.0294 (best 1.0299)  sps  8674  std [0.218 0.284]
+up 1360 steps  11.14M  ret  2.216  apex 1.031  det h(30) 1.029 mean 1.0288 (best 1.0299)  sps  8728  std [0.223 0.29 ]
+up 1370 steps  11.22M  ret  2.723  apex 1.030  det h(30) 1.034 mean 1.0336 (best 1.0336)  sps  8660  std [0.216 0.285]
+up 1380 steps  11.30M  ret  2.587  apex 1.027  det h(30) 1.027 mean 1.0265 (best 1.0336)  sps  8721  std [0.216 0.274]
+up 1390 steps  11.39M  ret  2.433  apex 1.026  det h(30) 1.028 mean 1.0280 (best 1.0336)  sps  8647  std [0.216 0.28 ]
+up 1400 steps  11.47M  ret  2.530  apex 1.022  det h(30) 1.024 mean 1.0243 (best 1.0336)  sps  8700  std [0.228 0.271]
+up 1410 steps  11.55M  ret  2.324  apex 1.014  det h(30) 1.010 mean 1.0097 (best 1.0336)  sps  8638  std [0.242 0.276]
+up 1420 steps  11.63M  ret  2.360  apex 1.010  det h(30) 1.016 mean 1.0158 (best 1.0336)  sps  8688  std [0.239 0.285]
+up 1430 steps  11.71M  ret  2.116  apex 1.017  det h(30) 1.023 mean 1.0230 (best 1.0336)  sps  8703  std [0.251 0.284]
+up 1440 steps  11.80M  ret  2.291  apex 1.020  det h(30) 1.025 mean 1.0249 (best 1.0336)  sps  8586  std [0.247 0.286]
+up 1450 steps  11.88M  ret  2.803  apex 1.025  det h(30) 1.024 mean 1.0242 (best 1.0336)  sps  8620  std [0.249 0.289]
+up 1460 steps  11.96M  ret  2.410  apex 1.022  det h(30) 1.024 mean 1.0243 (best 1.0336)  sps  8645  std [0.249 0.284]
+up 1470 steps  12.04M  ret  2.362  apex 1.029  det h(30) 1.034 mean 1.0338 (best 1.0338)  sps  8558  std [0.246 0.27 ]
+up 1480 steps  12.12M  ret  2.429  apex 1.033  det h(30) 1.037 mean 1.0370 (best 1.0370)  sps  8736  std [0.238 0.259]
+up 1490 steps  12.21M  ret  2.490  apex 1.035  det h(30) 1.037 mean 1.0374 (best 1.0374)  sps  8581  std [0.232 0.259]
+up 1500 steps  12.29M  ret  2.259  apex 1.037  det h(30) 1.038 mean 1.0384 (best 1.0384)  sps  8688  std [0.23  0.256]
+up 1510 steps  12.37M  ret  2.625  apex 1.034  det h(30) 1.038 mean 1.0376 (best 1.0384)  sps  8665  std [0.221 0.261]
+up 1520 steps  12.45M  ret  2.398  apex 1.039  det h(30) 1.044 mean 1.0441 (best 1.0441)  sps  8637  std [0.224 0.27 ]
+up 1530 steps  12.53M  ret  2.599  apex 1.035  det h(30) 1.036 mean 1.0362 (best 1.0441)  sps  8639  std [0.221 0.265]
+up 1540 steps  12.62M  ret  2.099  apex 1.039  det h(30) 1.045 mean 1.0446 (best 1.0446)  sps  8640  std [0.225 0.261]
+up 1550 steps  12.70M  ret  2.776  apex 1.040  det h(30) 1.042 mean 1.0423 (best 1.0446)  sps  8833  std [0.23  0.259]
+up 1560 steps  12.78M  ret  2.238  apex 1.036  det h(30) 1.037 mean 1.0371 (best 1.0446)  sps  8721  std [0.226 0.258]
+up 1570 steps  12.86M  ret  2.525  apex 1.035  det h(30) 1.036 mean 1.0360 (best 1.0446)  sps  8717  std [0.226 0.25 ]
+up 1580 steps  12.94M  ret  2.338  apex 1.029  det h(30) 1.030 mean 1.0304 (best 1.0446)  sps  8703  std [0.226 0.253]
+up 1590 steps  13.03M  ret  2.168  apex 1.026  det h(30) 1.027 mean 1.0266 (best 1.0446)  sps  8702  std [0.23 0.25]
+up 1600 steps  13.11M  ret  1.872  apex 1.024  det h(30) 1.026 mean 1.0260 (best 1.0446)  sps  8712  std [0.229 0.254]
+up 1610 steps  13.19M  ret  2.576  apex 1.020  det h(30) 1.026 mean 1.0264 (best 1.0446)  sps  8791  std [0.232 0.261]
+up 1620 steps  13.27M  ret  2.509  apex 1.014  det h(30) 1.020 mean 1.0197 (best 1.0446)  sps  8633  std [0.235 0.268]
+up 1630 steps  13.35M  ret  2.461  apex 1.017  det h(30) 1.021 mean 1.0212 (best 1.0446)  sps  8654  std [0.238 0.268]
+up 1640 steps  13.43M  ret  2.696  apex 1.017  det h(30) 1.021 mean 1.0208 (best 1.0446)  sps  8684  std [0.236 0.27 ]
+up 1650 steps  13.52M  ret  2.278  apex 1.025  det h(30) 1.025 mean 1.0254 (best 1.0446)  sps  8662  std [0.247 0.275]
+up 1660 steps  13.60M  ret  2.004  apex 1.023  det h(30) 1.024 mean 1.0236 (best 1.0446)  sps  8708  std [0.247 0.261]
+up 1670 steps  13.68M  ret  1.886  apex 1.018  det h(30) 1.022 mean 1.0223 (best 1.0446)  sps  8521  std [0.249 0.255]
+up 1680 steps  13.76M  ret  2.591  apex 1.021  det h(30) 1.026 mean 1.0265 (best 1.0446)  sps  8534  std [0.242 0.261]
+up 1690 steps  13.84M  ret  2.304  apex 1.029  det h(30) 1.031 mean 1.0314 (best 1.0446)  sps  8723  std [0.236 0.255]
+up 1700 steps  13.93M  ret  2.142  apex 1.029  det h(30) 1.032 mean 1.0319 (best 1.0446)  sps  8628  std [0.235 0.26 ]
+up 1710 steps  14.01M  ret  1.947  apex 1.023  det h(30) 1.023 mean 1.0229 (best 1.0446)  sps  8696  std [0.227 0.263]
+up 1720 steps  14.09M  ret  2.193  apex 1.024  det h(30) 1.029 mean 1.0292 (best 1.0446)  sps  8659  std [0.234 0.263]
+up 1730 steps  14.17M  ret  2.439  apex 1.027  det h(30) 1.028 mean 1.0277 (best 1.0446)  sps  8624  std [0.229 0.257]
+up 1740 steps  14.25M  ret  2.430  apex 1.027  det h(30) 1.032 mean 1.0324 (best 1.0446)  sps  8670  std [0.233 0.265]
+up 1750 steps  14.34M  ret  2.548  apex 1.034  det h(30) 1.036 mean 1.0364 (best 1.0446)  sps  8716  std [0.237 0.264]
+up 1760 steps  14.42M  ret  2.621  apex 1.032  det h(30) 1.040 mean 1.0400 (best 1.0446)  sps  8709  std [0.228 0.258]
+up 1770 steps  14.50M  ret  2.355  apex 1.031  det h(30) 1.037 mean 1.0368 (best 1.0446)  sps  8686  std [0.227 0.256]
+up 1780 steps  14.58M  ret  2.438  apex 1.027  det h(30) 1.031 mean 1.0313 (best 1.0446)  sps  8714  std [0.224 0.251]
+up 1790 steps  14.66M  ret  1.915  apex 1.025  det h(30) 1.027 mean 1.0270 (best 1.0446)  sps  8705  std [0.243 0.248]
+up 1800 steps  14.75M  ret  2.258  apex 1.029  det h(30) 1.036 mean 1.0356 (best 1.0446)  sps  8520  std [0.245 0.249]
+up 1810 steps  14.83M  ret  2.211  apex 1.033  det h(30) 1.037 mean 1.0365 (best 1.0446)  sps  8674  std [0.248 0.244]
+up 1820 steps  14.91M  ret  2.592  apex 1.029  det h(30) 1.033 mean 1.0330 (best 1.0446)  sps  8690  std [0.244 0.242]
+up 1830 steps  14.99M  ret  2.429  apex 1.034  det h(30) 1.039 mean 1.0390 (best 1.0446)  sps  8716  std [0.238 0.239]
+up 1840 steps  15.07M  ret  2.664  apex 1.033  det h(30) 1.034 mean 1.0343 (best 1.0446)  sps  8598  std [0.244 0.243]
+up 1850 steps  15.16M  ret  2.301  apex 1.028  det h(30) 1.026 mean 1.0262 (best 1.0446)  sps  8614  std [0.233 0.244]
+up 1860 steps  15.24M  ret  2.587  apex 1.026  det h(30) 1.035 mean 1.0351 (best 1.0446)  sps  8516  std [0.234 0.247]
+up 1870 steps  15.32M  ret  2.321  apex 1.028  det h(30) 1.036 mean 1.0355 (best 1.0446)  sps  8532  std [0.232 0.247]
+up 1880 steps  15.40M  ret  2.594  apex 1.029  det h(30) 1.032 mean 1.0319 (best 1.0446)  sps  8692  std [0.227 0.25 ]
+up 1890 steps  15.48M  ret  2.504  apex 1.029  det h(30) 1.035 mean 1.0353 (best 1.0446)  sps  8653  std [0.222 0.246]
+up 1900 steps  15.56M  ret  2.434  apex 1.029  det h(30) 1.030 mean 1.0301 (best 1.0446)  sps  8617  std [0.218 0.249]
+up 1910 steps  15.65M  ret  2.614  apex 1.031  det h(30) 1.033 mean 1.0331 (best 1.0446)  sps  8634  std [0.226 0.253]
+up 1920 steps  15.73M  ret  2.546  apex 1.029  det h(30) 1.031 mean 1.0313 (best 1.0446)  sps  8672  std [0.228 0.251]
+up 1930 steps  15.81M  ret  2.125  apex 1.025  det h(30) 1.026 mean 1.0260 (best 1.0446)  sps  8631  std [0.224 0.256]
+up 1940 steps  15.89M  ret  2.183  apex 1.020  det h(30) 1.020 mean 1.0204 (best 1.0446)  sps  8696  std [0.226 0.254]
+up 1950 steps  15.97M  ret  2.401  apex 1.023  det h(30) 1.025 mean 1.0248 (best 1.0446)  sps  8753  std [0.227 0.257]
+up 1960 steps  16.06M  ret  2.832  apex 1.024  det h(30) 1.026 mean 1.0261 (best 1.0446)  sps  8757  std [0.228 0.249]
+up 1970 steps  16.14M  ret  2.827  apex 1.021  det h(30) 1.023 mean 1.0225 (best 1.0446)  sps  8581  std [0.224 0.252]
+up 1980 steps  16.22M  ret  2.027  apex 1.024  det h(30) 1.029 mean 1.0290 (best 1.0446)  sps  8734  std [0.226 0.261]
+up 1990 steps  16.30M  ret  2.474  apex 1.024  det h(30) 1.025 mean 1.0255 (best 1.0446)  sps  8598  std [0.224 0.257]
+up 2000 steps  16.38M  ret  2.652  apex 1.025  det h(30) 1.026 mean 1.0264 (best 1.0446)  sps  8663  std [0.222 0.26 ]
+up 2010 steps  16.47M  ret  1.831  apex 1.022  det h(30) 1.026 mean 1.0257 (best 1.0446)  sps  8741  std [0.218 0.265]
+up 2020 steps  16.55M  ret  2.607  apex 1.013  det h(30) 1.022 mean 1.0217 (best 1.0446)  sps  8729  std [0.216 0.266]
+up 2030 steps  16.63M  ret  2.063  apex 1.021  det h(30) 1.024 mean 1.0237 (best 1.0446)  sps  8547  std [0.22  0.264]
+up 2040 steps  16.71M  ret  2.172  apex 1.026  det h(30) 1.028 mean 1.0275 (best 1.0446)  sps  8615  std [0.227 0.264]
+up 2050 steps  16.79M  ret  2.382  apex 1.026  det h(30) 1.029 mean 1.0294 (best 1.0446)  sps  8617  std [0.226 0.262]
+up 2060 steps  16.88M  ret  2.497  apex 1.026  det h(30) 1.027 mean 1.0274 (best 1.0446)  sps  8585  std [0.224 0.255]
+up 2070 steps  16.96M  ret  2.307  apex 1.021  det h(30) 1.025 mean 1.0245 (best 1.0446)  sps  8751  std [0.227 0.254]
+up 2080 steps  17.04M  ret  2.407  apex 1.019  det h(30) 1.021 mean 1.0213 (best 1.0446)  sps  8659  std [0.235 0.256]
+up 2090 steps  17.12M  ret  2.356  apex 1.018  det h(30) 1.019 mean 1.0194 (best 1.0446)  sps  8560  std [0.23 0.26]
+up 2100 steps  17.20M  ret  2.353  apex 1.020  det h(30) 1.027 mean 1.0268 (best 1.0446)  sps  8733  std [0.238 0.265]
+up 2110 steps  17.29M  ret  2.541  apex 1.027  det h(30) 1.030 mean 1.0303 (best 1.0446)  sps  8637  std [0.228 0.264]
+up 2120 steps  17.37M  ret  1.845  apex 1.029  det h(30) 1.033 mean 1.0334 (best 1.0446)  sps  8782  std [0.23  0.268]
+early stop: plateau (best 1.0441 이후 60회 미개선)
+done — steps 17367040 wall 33.8min best_h 1.0446 (plateau (best 1.0441 이후 60회 미개선))
+curve saved: t0wc_ppo_curve_lifix30_long.png
+===== t0_rollout_long.py fix:30 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[final] l_i= 30.00mm  h=1.0334  audit=PASS  stance=0.140s  내삽
+[best] l_i= 30.00mm  h=1.0446  audit=PASS  stance=0.140s  내삽
+
+l_i* = 30.00 mm (best ckpt)  h=1.0446 m  pass_all=True  extrapolated=False
+saved: t0wc_ppo_lifix30_long.npz / t0wc_ppo_audit_lifix30_long.json [1s]
+===== t0_train_long.py fix:26.25:1 =====
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [2s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+  golden A — 0429/60_0.75_60_2    : dq2 RMSE=1.8560
+  golden A — 0429/60_1.5_60_1.5   : dq2 RMSE=2.1339
+  golden A — 0429/90_0.75_90_2    : dq2 RMSE=2.3594
+  golden A — 0429/90_1.5_90_2.5   : dq2 RMSE=2.3440
+  golden A — 0429/120_2_120_2     : dq2 RMSE=2.4115
+  golden A — 0429/120_2.2_150_2.5 : dq2 RMSE=2.4855
+  golden A — 0429/120_2.2_200_2.8 : dq2 RMSE=2.3865
+  golden A — 0429/150_2.2_250_3   : dq2 RMSE=3.3899
+  golden A — 0429/150_2.2_350_3.5 : dq2 RMSE=3.7922
+  golden A — 0429/150_2.2_500_4   : dq2 RMSE=2.8979
+  golden A — session mean 2.6057 (canonical 2.6057) PASS
+  golden B — 0429/60_0.75_60_2 env vs cl_run23(is_cvt, l_i=25.08, clip=25.581) max|Δ|=0.000e+00 PASS
+GOLDEN PASS (A: 0429 재생 세션평균 / B: env CVT 스텝 비트일치, clip=25.581)
+[dev] NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.247s / gpu 0.267s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용
+[bc] teacher t0wc_cl_liopt.npz (li=26.25): 600 pairs, replay apex=1.106 (teacher h=1.123)
+[bc] fit: MSE 0.3343 → 0.000498 (4000 iters)
+[bc] det-eval h: {'26.25': 0.2147}
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+setup done [3s] — clip=25.581 law=(-0.3823, 0.6301, 7.2968) c_cvt=0.7926 k_rise=0.2656 tm=1.31ms n429=10
+[mp] 8 workers × 2 envs = 16 — ready [13s]
+PPO start — 5859 updates × batch 8192 (dev cpu, clip=25.581)
+up   10 steps   0.08M  ret -0.143  apex 0.499  det h(26.25) 0.215 mean 0.2147 (best 0.2147)  sps 13355  std [0.4 0.4]  [VF-warm]
+up   20 steps   0.16M  ret -0.031  apex 0.503  det h(26.25) 0.215 mean 0.2147 (best 0.2147)  sps 13337  std [0.4 0.4]  [VF-warm]
+up   30 steps   0.25M  ret  0.466  apex 0.516  det h(26.25) 0.236 mean 0.2364 (best 0.2364)  sps  9103  std [0.388 0.392]
+up   40 steps   0.33M  ret  0.155  apex 0.558  det h(26.25) 0.389 mean 0.3892 (best 0.3892)  sps  9172  std [0.385 0.371]
+up   50 steps   0.41M  ret  0.666  apex 0.616  det h(26.25) 0.424 mean 0.4238 (best 0.4238)  sps  9262  std [0.378 0.354]
+up   60 steps   0.49M  ret  1.060  apex 0.644  det h(26.25) 0.687 mean 0.6874 (best 0.6874)  sps  9308  std [0.357 0.338]
+up   70 steps   0.57M  ret  0.659  apex 0.655  det h(26.25) 0.193 mean 0.1931 (best 0.6874)  sps  9205  std [0.354 0.343]
+up   80 steps   0.66M  ret  2.028  apex 0.653  det h(26.25) 0.710 mean 0.7103 (best 0.7103)  sps  9301  std [0.354 0.338]
+up   90 steps   0.74M  ret  2.063  apex 0.707  det h(26.25) 0.755 mean 0.7554 (best 0.7554)  sps  9204  std [0.372 0.347]
+up  100 steps   0.82M  ret  2.162  apex 0.737  det h(26.25) 0.787 mean 0.7873 (best 0.7873)  sps  9117  std [0.365 0.353]
+up  110 steps   0.90M  ret  2.502  apex 0.742  det h(26.25) 0.818 mean 0.8182 (best 0.8182)  sps  9238  std [0.369 0.35 ]
+up  120 steps   0.98M  ret  2.748  apex 0.785  det h(26.25) 0.816 mean 0.8163 (best 0.8182)  sps  9262  std [0.389 0.365]
+up  130 steps   1.06M  ret  2.864  apex 0.823  det h(26.25) 0.838 mean 0.8375 (best 0.8375)  sps  9391  std [0.38  0.352]
+up  140 steps   1.15M  ret  2.801  apex 0.837  det h(26.25) 0.849 mean 0.8494 (best 0.8494)  sps  9262  std [0.375 0.37 ]
+up  150 steps   1.23M  ret  2.956  apex 0.845  det h(26.25) 0.871 mean 0.8715 (best 0.8715)  sps  9214  std [0.361 0.361]
+up  160 steps   1.31M  ret  3.150  apex 0.857  det h(26.25) 0.872 mean 0.8720 (best 0.8720)  sps  9260  std [0.363 0.364]
+up  170 steps   1.39M  ret  3.256  apex 0.873  det h(26.25) 0.880 mean 0.8798 (best 0.8798)  sps  9237  std [0.354 0.357]
+up  180 steps   1.47M  ret  3.331  apex 0.876  det h(26.25) 0.885 mean 0.8855 (best 0.8855)  sps  9190  std [0.311 0.33 ]
+up  190 steps   1.56M  ret  3.338  apex 0.881  det h(26.25) 0.885 mean 0.8851 (best 0.8855)  sps  9324  std [0.3   0.338]
+up  200 steps   1.64M  ret  3.356  apex 0.883  det h(26.25) 0.886 mean 0.8864 (best 0.8864)  sps  9293  std [0.294 0.345]
+up  210 steps   1.72M  ret  3.356  apex 0.882  det h(26.25) 0.880 mean 0.8803 (best 0.8864)  sps  9367  std [0.296 0.33 ]

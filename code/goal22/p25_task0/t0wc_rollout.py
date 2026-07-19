@@ -80,7 +80,7 @@ def det_rollout(env, ac):
         q1c, q2c, _, _ = env._read()
         if not (T0.Q1_LB <= q1c <= T0.Q1_UB) or \
            not (T0.QM_LB <= q2c <= T0.QM_UB):
-            range_viol = dict(k_ctrl=kc, t=float((kc + 1) * EV.CTRL_DT),
+            range_viol = dict(k_ctrl=kc, t=float((kc + 1) * env.ctrl_dt),
                               q1=float(q1c), qm=float(q2c))
             break
     # ── 수동 연장 (기록 끝 이후 규약: s=0, 무릎 extra=LAW_A, 힙 e1=a1, qfrc=0) ──
@@ -174,7 +174,8 @@ def main():
     ck_clip = ck.get("hyper", {}).get("clip_raw", None)
     assert ck_clip is not None and abs(ck_clip - float(EV.R19.CLIP)) < 1e-9, \
         f"클립 불일치: 체크포인트 {ck_clip} vs 현재 env {EV.R19.CLIP} (P25_CLIP_RAW 확인)"
-    env = JumpEnv(seed=12345, reset_noise=False, li_fixed=EV.LI_FIT_MM)
+    cdt = float(os.environ.get("T0_CTRL_DT_MS", "2")) / 1000.0   # 이산화 프로브 수확용
+    env = JumpEnv(seed=12345, reset_noise=False, li_fixed=EV.LI_FIT_MM, ctrl_dt=cdt)
     n_act = env.n_ep * env.nsub
     curves = {}
     logs = {}
@@ -294,7 +295,7 @@ def main():
                       n_evals=len(tlog.get("evals", []))),
         hyper=tlog.get("hyper"),
         golden=golden,
-        env=dict(ctrl_dt=EV.CTRL_DT, ep_t=EV.EP_T, sim_dt=env.dt,
+        env=dict(ctrl_dt=env.ctrl_dt, ep_t=EV.EP_T, sim_dt=env.dt,
                  crouch=("teacher CROUCH_FN(l_i) 보간 (t0_train_long)"
                          if EV.CROUCH_FN is not None else list(EV.CROUCH_T0)),
                  li_sample="U[15,30]mm (train)",
