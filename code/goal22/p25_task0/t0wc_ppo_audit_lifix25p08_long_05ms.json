@@ -1,28 +1,28 @@
 {
- "gen": "2026-07-19 21:30",
+ "gen": "2026-07-20 03:14",
  "campaign": "P25-task0 with_cvt (PPO l_i-조건부, task0 제약)",
  "method": "ppo_licond",
  "clip_raw": 25.581,
  "primary_ckpt": "final",
  "li_star_mm": 25.08,
- "h_plan": 1.0156556490494366,
+ "h_plan": 1.0119129667697304,
  "pass_all": true,
  "extrapolated": false,
  "audit_star": {
   "tau_hip": -2.430272432007996e-05,
   "tau_knee": -2.430272432007996e-05,
-  "tn_hip": -25.38990752929525,
-  "tn_knee": -8.359208332447434,
-  "dq_hip": -37.4801619795493,
-  "dq_knee": -20.420884361924845,
-  "q1_lo": -0.09360796599480792,
+  "tn_hip": -25.301172562539406,
+  "tn_knee": -7.720102022314851,
+  "dq_hip": -37.46596292970146,
+  "dq_knee": -19.973824273053115,
+  "q1_lo": -0.038537875684246936,
   "q1_hi": -0.0848163566766999,
   "q2_lo": -0.24656055536283983,
-  "q2_hi": -0.3114791846681414,
+  "q2_hi": -0.011860369699318599,
   "pass": true
  },
  "stance_star": {
-  "t_stance": 0.11800000000000001,
+  "t_stance": 0.1225,
   "ok": true,
   "max": 0.3
  },
@@ -31,35 +31,35 @@
   "peak_raw2": 25.580999999999996,
   "peak_tau1_nm": 14.99997569727568,
   "peak_tau2_nm": 14.99997569727568,
-  "peak_dq1": 12.519838020450697,
-  "peak_dq2": 37.01653784589414,
-  "ceil_frac_raw1": 0.19,
-  "ceil_frac_raw2": 0.18666666666666668,
-  "ceil_frac_cmd1": 0.20583333333333334,
-  "ceil_frac_cmd2": 0.2025,
-  "tn_gap_max_1": -25.38990752929525,
+  "peak_dq1": 12.534037070298536,
+  "peak_dq2": 30.026175726946885,
+  "ceil_frac_raw1": 0.165,
+  "ceil_frac_raw2": 0.19166666666666668,
+  "ceil_frac_cmd1": 0.18833333333333332,
+  "ceil_frac_cmd2": 0.20833333333333334,
+  "tn_gap_max_1": -25.301172562539406,
   "tn_active0.5_frac_1": 0.0,
   "tn_active1.0_frac_1": 0.0,
   "tn_active2.0_frac_1": 0.0,
   "tn_active5.0_frac_1": 0.0,
-  "tn_gap_max_2": -8.359208332447434,
+  "tn_gap_max_2": -7.720102022314851,
   "tn_active0.5_frac_2": 0.0,
   "tn_active1.0_frac_2": 0.0,
   "tn_active2.0_frac_2": 0.0,
   "tn_active5.0_frac_2": 0.0,
-  "n_liftoffs": 2,
+  "n_liftoffs": 1,
   "n_touchdowns": 1,
   "n_hops_before_apex": 0,
-  "t_liftoff": 0.11800000000000001,
-  "t_apex": 0.46,
-  "t_stance": 0.11800000000000001,
+  "t_liftoff": 0.1225,
+  "t_apex": 0.456,
+  "t_stance": 0.1225,
   "stance_ok": true
  },
  "range_viol_star": null,
  "li_star_by_ckpt": {
   "final": {
    "l_i_mm": 25.08,
-   "h_plan": 1.0156556490494366,
+   "h_plan": 1.0119129667697304,
    "pass_all": true,
    "from_pass_pool": true,
    "extrapolated": false
@@ -76,30 +76,30 @@
   "final": [
    {
     "l_i_mm": 25.08,
-    "h_plan": 1.0156556490494366,
+    "h_plan": 1.0119129667697304,
     "bz_settle": 0.2202603550600189,
     "audit": {
      "tau_hip": -2.430272432007996e-05,
      "tau_knee": -2.430272432007996e-05,
-     "tn_hip": -25.38990752929525,
-     "tn_knee": -8.359208332447434,
-     "dq_hip": -37.4801619795493,
-     "dq_knee": -20.420884361924845,
-     "q1_lo": -0.09360796599480792,
+     "tn_hip": -25.301172562539406,
+     "tn_knee": -7.720102022314851,
+     "dq_hip": -37.46596292970146,
+     "dq_knee": -19.973824273053115,
+     "q1_lo": -0.038537875684246936,
      "q1_hi": -0.0848163566766999,
      "q2_lo": -0.24656055536283983,
-     "q2_hi": -0.3114791846681414,
+     "q2_hi": -0.011860369699318599,
      "pass": true
     },
     "audit_pass": true,
-    "stance_s": 0.11800000000000001,
+    "stance_s": 0.1225,
     "stance_ok": true,
     "range_viol": null,
     "pass_all": true,
     "extrapolated": false,
     "r_range": [
-     -0.8829109241258631,
-     -0.3308680604569717
+     -0.8829101203407614,
+     0.009808515022656533
     ]
    }
   ],
@@ -135,7 +135,7 @@
   ]
  },
  "h_anchor_2508": {
-  "final": 1.0156556490494366,
+  "final": 1.0119129667697304,
   "best": 1.1009488051042253
  },
  "h_anchor_30": {
@@ -179,13 +179,13 @@
   25.08
  ],
  "training": {
-  "steps": 24002560,
-  "wall_s": 2561.2110500335693,
-  "stop": "plateau (best 1.1009 이후 120회 미개선)",
+  "steps": 70205440,
+  "wall_s": 4784.7462685108185,
+  "stop": "plateau (best 1.0597 이후 60회 미개선)",
   "best_h_mean3_during_train": 1.100948435397127,
   "best_step": 81920,
-  "n_updates": 2930,
-  "n_evals": 293
+  "n_updates": 5640,
+  "n_evals": 141
  },
  "hyper": {
   "campaign": "fix:25.08:0.5",
@@ -210,13 +210,14 @@
   "log_std0": -0.916290731874155,
   "clip_raw": 25.581,
   "device": "cpu",
-  "gpu_note": "NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.263s / gpu 0.262s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용",
+  "gpu_note": "NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.249s / gpu 0.253s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용",
   "vf_warm": 25,
   "hid": 128,
   "net": "MLP 2x128 tanh (obs 8, mean linear out, v2)",
   "plateau": {
-   "after": 6000000,
+   "after": 24000000,
    "patience": 60,
+   "eval_every": 40,
    "delta": 0.005
   },
   "std_floor": {
@@ -239,11 +240,11 @@
     "iters": 4000,
     "lr": 0.001,
     "mse": [
-     0.358663946390152,
-     0.0005026065045967698
+     NaN,
+     NaN
     ],
     "det_h_after_bc": {
-     "25.08": 1.1009
+     "25.08": 1.0157
     }
    },
    "noise_q": 0.015,
@@ -251,7 +252,11 @@
    "log_std0": -0.916290731874155,
    "crouch": "teacher q0 고정 (-0.38451953334942024, -2.697489218056553)"
   },
-  "sps_before": "nc 4.5k / wc 4.1k steps/s (4 env 직렬, 기존 캠페인)"
+  "sps_before": "nc 4.5k / wc 4.1k steps/s (4 env 직렬, 기존 캠페인)",
+  "resume": {
+   "from_steps": 24002560,
+   "best_h": 1.100948435397127
+  }
  },
  "golden": {
   "golden_A_mean": 2.605677176947612,
@@ -302,6 +307,6 @@
   "policy": "t0wc_ppo_policy_lifix25p08_long_05ms.pt",
   "train_log": "t0wc_train_log_lifix25p08_long_05ms.json"
  },
- "wall_s_rollout": 0.9291250705718994,
+ "wall_s_rollout": 0.9661357402801514,
  "mode": "fixed-l_i 폴백 (25.08 mm) — 조건부 저성과 시 개별 학습 (코디 07-18)"
 }
