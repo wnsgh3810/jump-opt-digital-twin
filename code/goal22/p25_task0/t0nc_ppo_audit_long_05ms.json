@@ -1,0 +1,242 @@
+{
+ "gen": "2026-07-19 22:56",
+ "campaign": "P25-task0 no_cvt (PPO 재학습, task0 제약)",
+ "method": "ppo",
+ "clip_raw": 25.581,
+ "h_plan": 0.7830657248182604,
+ "h_plan_best_ckpt": 0.9614376174991458,
+ "audit_final": {
+  "tau_hip": -2.430272432007996e-05,
+  "tau_knee": -2.430272432007996e-05,
+  "tn_hip": -29.451323872891777,
+  "tn_knee": -21.20683302289254,
+  "dq_hip": -41.79970904947257,
+  "dq_knee": -33.69522225713931,
+  "q1_lo": -0.08366394627846496,
+  "q1_hi": -0.0042888118172407785,
+  "q2_lo": -0.005306610958178304,
+  "q2_hi": -0.34801128142575266,
+  "pass": true
+ },
+ "audit_best": {
+  "tau_hip": -2.4302724570546275e-05,
+  "tau_knee": -2.4458536948657184e-05,
+  "tn_hip": -31.004324166031992,
+  "tn_knee": -16.091053889543858,
+  "dq_hip": -38.010102664311944,
+  "dq_knee": -25.66363684574017,
+  "q1_lo": 0.10697415350950479,
+  "q1_hi": -0.004304438476667671,
+  "q2_lo": -0.005146342569783968,
+  "q2_hi": -0.038918027999356064,
+  "pass": false
+ },
+ "pass_final": true,
+ "pass_best": false,
+ "stance_final": {
+  "t_stance": 0.1215,
+  "ok": true,
+  "max": 0.3
+ },
+ "stance_best": {
+  "t_stance": 0.2545,
+  "ok": true,
+  "max": 0.3
+ },
+ "stats_final": {
+  "peak_raw1": 25.580999999999996,
+  "peak_raw2": 25.580999999999996,
+  "peak_tau1_nm": 14.99997569727568,
+  "peak_tau2_nm": 14.99997569727568,
+  "peak_dq1": 12.740187525950121,
+  "peak_dq2": 16.304777742860693,
+  "ceil_frac_raw1": 0.14666666666666667,
+  "ceil_frac_raw2": 0.1775,
+  "ceil_frac_cmd1": 0.17083333333333334,
+  "ceil_frac_cmd2": 0.18666666666666668,
+  "tn_gap_max_1": -29.451323872891777,
+  "tn_active0.5_frac_1": 0.0,
+  "tn_active1.0_frac_1": 0.0,
+  "tn_active2.0_frac_1": 0.0,
+  "tn_active5.0_frac_1": 0.0,
+  "tn_gap_max_2": -21.20683302289254,
+  "tn_active0.5_frac_2": 0.0,
+  "tn_active1.0_frac_2": 0.0,
+  "tn_active2.0_frac_2": 0.0,
+  "tn_active5.0_frac_2": 0.0,
+  "n_liftoffs": 12,
+  "n_touchdowns": 12,
+  "n_hops_before_apex": 0,
+  "t_liftoff": 0.1215,
+  "t_liftoff_last_before_apex": 0.1215,
+  "t_apex": 0.4,
+  "t_stance": 0.1215,
+  "stance_ok": true
+ },
+ "stats_best": {
+  "peak_raw1": 25.58099999999954,
+  "peak_raw2": 25.580999715150682,
+  "peak_tau1_nm": 14.99997569727543,
+  "peak_tau2_nm": 14.999975541463051,
+  "peak_dq1": 11.989897335688052,
+  "peak_dq2": 24.33636315425983,
+  "ceil_frac_raw1": 0.04833333333333333,
+  "ceil_frac_raw2": 0.029166666666666667,
+  "ceil_frac_cmd1": 0.08166666666666667,
+  "ceil_frac_cmd2": 0.1,
+  "tn_gap_max_1": -31.004324166031992,
+  "tn_active0.5_frac_1": 0.0,
+  "tn_active1.0_frac_1": 0.0,
+  "tn_active2.0_frac_1": 0.0,
+  "tn_active5.0_frac_1": 0.0,
+  "tn_gap_max_2": -16.091053889543858,
+  "tn_active0.5_frac_2": 0.0,
+  "tn_active1.0_frac_2": 0.0,
+  "tn_active2.0_frac_2": 0.0,
+  "tn_active5.0_frac_2": 0.0,
+  "n_liftoffs": 2,
+  "n_touchdowns": 2,
+  "n_hops_before_apex": 0,
+  "t_liftoff": 0.2545,
+  "t_liftoff_last_before_apex": 0.2545,
+  "t_apex": 0.5700000000000001,
+  "t_stance": 0.2545,
+  "stance_ok": true
+ },
+ "range_viol_final": null,
+ "range_viol_best": {
+  "k_ctrl": 566,
+  "t": 0.28350000000000003,
+  "q1": -1.2569158165938104,
+  "q2": -0.7525368683211272
+ },
+ "training": {
+  "steps": 24002560,
+  "episodes": 20002,
+  "wall_s": 2550.821733236313,
+  "stop": "plateau (best 0.9614 이후 120회 미개선)",
+  "best_h_during_train": 0.9614384681414022,
+  "best_step": 81920,
+  "n_updates": 2930,
+  "n_evals": 293
+ },
+ "hyper": {
+  "campaign": "nc05",
+  "n_envs": 16,
+  "n_workers": 8,
+  "t_roll": 512,
+  "total_steps": 96000000,
+  "li_fixed": null,
+  "ctrl_dt": 0.0005,
+  "tag": "_long_05ms",
+  "gamma": 0.999,
+  "lam": 0.95,
+  "clip": 0.2,
+  "epochs": 10,
+  "mb": 256,
+  "lr": [
+   0.0003,
+   0.0001
+  ],
+  "ent": 0.003,
+  "vf": 0.5,
+  "log_std0": -0.916290731874155,
+  "clip_raw": 25.581,
+  "device": "cpu",
+  "gpu_note": "NVIDIA GeForce RTX 5080 (hid 128): 400 mb-updates cpu 0.257s / gpu 0.263s → 2x128 넷이 작아 CPU가 빠름 (물리 스텝이 병목) — CPU 사용",
+  "vf_warm": 25,
+  "hid": 128,
+  "net": "MLP 2x128 tanh (obs 7, mean linear out, v2)",
+  "plateau": {
+   "after": 6000000,
+   "patience": 60,
+   "delta": 0.005
+  },
+  "std_floor": {
+   "floor": 0.25,
+   "until": 38400000
+  },
+  "explore": {
+   "bc": {
+    "teachers": [
+     {
+      "npz": "t0nc_cl.npz",
+      "li": null,
+      "n": 1200,
+      "mode": "closed-loop PD (qd 스플라인+게인 온라인)",
+      "apex_replay": 0.9817806518857037,
+      "range_term": false,
+      "teacher_h": 0.9771947673331236
+     }
+    ],
+    "iters": 4000,
+    "lr": 0.001,
+    "mse": [
+     0.21581242978572845,
+     0.0004142771358601749
+    ],
+    "det_h_after_bc": {
+     "q0": 0.9614
+    }
+   },
+   "noise_q": 0.005,
+   "noise_dq": 0.1,
+   "log_std0": -0.916290731874155,
+   "crouch": "teacher q0 (-0.30679922533159476, -2.533139788636797)"
+  },
+  "sps_before": "nc 4.5k / wc 4.1k steps/s (4 env 직렬, 기존 캠페인)"
+ },
+ "golden": {
+  "golden_A_mean": 1.2850899929228805,
+  "golden_A_canonical": 1.2851,
+  "golden_B_maxdiff": 0.0,
+  "clip_raw": 25.581
+ },
+ "env": {
+  "ctrl_dt": 0.0005,
+  "ep_t": 0.6,
+  "sim_dt": 0.0005,
+  "crouch": [
+   -0.30679922533159476,
+   -2.533139788636797
+  ],
+  "crouch_sub": "task0",
+  "q1_range": [
+   -1.2566,
+   -0.2967
+  ],
+  "q2_range": [
+   -2.5482,
+   -0.6283
+  ],
+  "obs": "[(bz-0.6)/0.4, q1/1.5, q2/1.5, dq1/10, dq2/10, vbz/3, t/0.6]",
+  "action": "raw torque (2,) [-25.581,25.581] → tm필터→클립→ahat→supp/rise/스프링/힙층",
+  "w_tn": 50.0,
+  "w_dq": 50.0,
+  "w_tau": 50.0,
+  "m_tn": 0.0,
+  "m_tau": 0.0,
+  "reset_noise": {
+   "q_std": 0.005,
+   "dq_std": 0.1
+  }
+ },
+ "caveats": [
+  "P25-task0 캠페인 — 제약은 AVT LEG task0_vertjump_no_cvt 기준 (t0_spec): |â|≤15Nm(raw 박스 25.5810) · T-N |dq|≤-0.731|â|+48.48 · |dq|≤50 · q1∈[-1.2566,-0.2967] q2∈[-2.5482,-0.6283] · 스탠스≤0.3s(감사)",
+  "관절바운드 = 학습 종료조건(hard-ish), T-N/dq50 = 스텝당 위반량² 소프트 페널티 (w=50, t0_spec.penalty 규모) — task0(NLP)의 hard 제약과 처리 방식이 달라 h_plan 직접 비교에 유의",
+  "토크 박스는 공급 클립 25.5810이 구조적으로 강제 (a_hat 운동방향 가지 15.00Nm — 제동 가지에서 |â|가 15를 넘을 수 있는지는 감사(tau_hip/tau_knee)로 확인)",
+  "시작 웅크림 = task0 초기추정 (q1=-0.32, q2=-2.50) settle — task0은 시작 자세도 최적화 대상(바운드 내 자유)이므로 본 캠페인은 그 부분공간의 한 점에서 출발",
+  "학습 중 apex 보상은 탄도 외삽 추정, 본 h_plan은 수동 연장 0.6s 실측",
+  "감사 창(t≤0.6s)은 이륙 후 공중 자세까지 포함 — task0 NLP는 스탠스 구간만 제약하므로 본 감사가 더 엄격한 쪽",
+  "best 정책 롤아웃 중 관절범위 이탈: {'k_ctrl': 566, 't': 0.28350000000000003, 'q1': -1.2569158165938104, 'q2': -0.7525368683211272}"
+ ],
+ "files": {
+  "npz": "t0nc_ppo_long_05ms.npz",
+  "npz_best": "t0nc_ppo_best_long_05ms.npz",
+  "curve": "t0nc_ppo_curve.png",
+  "policy": "t0nc_ppo_policy_long_05ms.pt",
+  "train_log": "t0nc_train_log_long_05ms.json",
+  "traj": "t0nc_ppo_traj_long_05ms.png"
+ },
+ "wall_s_rollout": 0.5063581466674805
+}

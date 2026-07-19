@@ -359,8 +359,12 @@ def main(campaign):
         hid = HID[campaign]
     total = int(TOTAL_STEPS * ratio)
     plateau_after = int(PLATEAU_AFTER * ratio)
-    patience = min(120, int(round(PLATEAU_PATIENCE * ratio))) \
-        if (is_fix or campaign == "nc05") else PLATEAU_PATIENCE
+    # ★ 07-20 예산버그 픽스: patience를 min(120)으로 캡하면 sim-시간 창이 절반이 되어
+    # plateau_after 게이트 도달 즉시 조기 플래토 판정 (0.5ms 4점이 24M 일제 정지 사인).
+    # → eval '주기'를 ×ratio로 늘려 sim-시간 등가로 만들고 patience는 60 유지.
+    eval_every = int(round(EVAL_EVERY * ratio)) if (is_fix or campaign == "nc05") \
+        else EVAL_EVERY
+    patience = PLATEAU_PATIENCE
     # 엔트로피 플로어 종료점: fix/nc05=예산 40% (코디 처방), wc2=10M, 그 외 없음
     floor_until = int(0.4 * total) if (is_fix or campaign == "nc05") else \
         (STD_FLOOR_UNTIL if campaign == "wc2" else -1)
@@ -467,8 +471,8 @@ def main(campaign):
         log_std0=LOG_STD0, clip_raw=float(EVm.R19.CLIP), device=dev,
         gpu_note=gpu_note, vf_warm=VF_WARM, hid=hid,
         net=f"MLP 2x{hid} tanh (obs {obs_dim}, mean linear out, v2)",
-        plateau=dict(after=PLATEAU_AFTER, patience=PLATEAU_PATIENCE,
-                     delta=PLATEAU_DELTA),
+        plateau=dict(after=plateau_after, patience=patience,
+                     eval_every=eval_every, delta=PLATEAU_DELTA),
         std_floor=(dict(floor=STD_FLOOR, until=floor_until)
                    if floor_until > 0 else None),
         explore=dict(bc=dict(teachers=t_meta, iters=BC_ITERS, lr=BC_LR,
@@ -487,7 +491,15 @@ def main(campaign):
         best_h = float(resume_ck.get("best_h", -1.0))
         best_state = resume_ck.get("best")
         best_step = int(resume_ck.get("best_step", 0))
-        steps0 = int(resume_ck.get("steps", 0))
+        steps0 = int(resume_ck.get("steps") or 0)
+        if steps0 == 0:      # 완주 ckpt(최종저장)에 steps 키가 없던 구버전 폴백
+            try:
+                tl_ = json.load(open(HERE / f"{prefix}_train_log{tag}.json",
+                                     encoding="utf-8"))
+                steps0 = int((tl_.get("final") or {}).get("steps")
+                             or (tl_["evals"][-1]["steps"] if tl_.get("evals") else 0))
+            except Exception:
+                pass
         log["hyper"]["resume"] = dict(from_steps=steps0, best_h=best_h)
     ep_rets = np.zeros(N_ENVS)
     fin_ret, fin_apex, fin_pen = [], [], []
@@ -591,7 +603,7 @@ def main(campaign):
                                    pen=mpen, sps=round(sps), sps_roll=round(sps_roll),
                                    std=[float(x) for x in
                                         ac.log_std.exp().detach().cpu()]))
-        if up % EVAL_EVERY == 0 or up == n_updates:
+        if up % eval_every == 0 or up == n_updates:
             evs = {nm: det_eval(torch, e, ac, EVm, campaign, dev) for nm, e in eval_envs}
             hs = [v["h_eval"] for v in evs.values()]
             ev = dict(up=up, steps=steps_done,
@@ -636,7 +648,7 @@ def main(campaign):
     torch.save(dict(final={k: v.detach().cpu().clone()
                            for k, v in ac.state_dict().items()},
                     best=best_state, best_h=best_h, best_step=best_step,
-                    hyper=log["hyper"]),
+                    steps=steps_done, hyper=log["hyper"]),
                HERE / f"{prefix}_ppo_policy{tag}.pt")
     import safe
     safe.atomic_json_write(HERE / f"{prefix}_train_log{tag}.json", log)

@@ -244,6 +244,7 @@ def main():
                  action=f"raw torque (2,) [-{EV.R19.CLIP},{EV.R19.CLIP}] → "
                         "tm필터→클립→ahat→supp/rise/스프링/힙층",
                  w_tn=EV.W_TN, w_dq=EV.W_DQ, w_tau=EV.W_TAU, m_tn=EV.M_TN, m_tau=EV.M_TAU,
+                 w_q1margin=getattr(EV, "W_Q1M", 0.0),
                  reset_noise=dict(q_std=EV.NOISE_Q, dq_std=EV.NOISE_DQ)),
         caveats=caveats,
         files=files,

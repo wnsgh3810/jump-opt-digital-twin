@@ -88,6 +88,10 @@ W_DQ = float(os.environ.get("T0_W_DQ", 50.0))
 W_TAU = float(os.environ.get("T0_W_TAU", 50.0))     # |â|>15 페널티 (docstring 3b)
 M_TN = float(os.environ.get("T0_TN_MARGIN", 0.0))   # 페널티 기준선 여유 [rad/s]
 M_TAU = float(os.environ.get("T0_TAU_MARGIN", 0.0))  # 페널티 기준선 여유 [Nm]
+# q1 바운드 마진 소프트 페널티 (코디 07-20, nc05 연장판): 바운드 안쪽 0.01 rad부터
+# 완만 벌점 — 감사 경계 스침/비행 이탈로 audit-PASS best가 안 잡히는 문제 방지.
+W_Q1M = float(os.environ.get("T0_W_Q1MARGIN", 0.0))  # 0 = OFF (기존 동작 불변)
+Q1M_D = 0.01
 CROUCH_T0 = (-0.32, -2.50)   # task0 초기추정 웅크림 (task0 set_initial 시작점)
 
 G = {}
@@ -328,6 +332,13 @@ class JumpEnv:
             info["crash"] = True
         else:
             q1c, q2c, _, _ = self._read()
+            if W_Q1M > 0.0:      # q1 마진 완만 벌점 (양쪽 에지, 제어스텝당)
+                mv = max(0.0, q1c - (G["Q1R"][1] - Q1M_D)) \
+                    + max(0.0, (G["Q1R"][0] + Q1M_D) - q1c)
+                if mv > 0.0:
+                    pm = W_Q1M * mv * mv / self.n_ep
+                    rew -= pm
+                    self.pen_total += pm
             if not (G["Q1R"][0] <= q1c <= G["Q1R"][1]) or \
                not (G["Q2R"][0] <= q2c <= G["Q2R"][1]):
                 rew -= RANGE_PEN
