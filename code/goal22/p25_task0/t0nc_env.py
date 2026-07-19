@@ -133,15 +133,18 @@ class JumpEnv:
     OBS_DIM = 7
     ACT_DIM = 2
 
-    def __init__(self, seed=0, reset_noise=True):
+    def __init__(self, seed=0, reset_noise=True, ctrl_dt=None):
         setup()
         self.mj = G["mj"]
         self.model = G["model"]           # 공유 (읽기 전용) — MjData만 개별
         self.md = self.mj.MjData(self.model)
         self.dt = float(self.model.opt.timestep)
-        self.nsub = int(round(CTRL_DT / self.dt))
-        assert abs(self.nsub * self.dt - CTRL_DT) < 1e-12, "CTRL_DT가 트윈 dt 배수 아님"
-        self.n_ep = int(round(EP_T / CTRL_DT))
+        # ctrl_dt: 액션 주기 [s] (기본 2ms) — 0.5ms 전면 비교(07-19)용. 물리 dt 불변,
+        # 페널티 정규화 n_ep·nsub = EP_T/dt 는 ctrl_dt 불변.
+        self.ctrl_dt = float(ctrl_dt) if ctrl_dt else CTRL_DT
+        self.nsub = int(round(self.ctrl_dt / self.dt))
+        assert abs(self.nsub * self.dt - self.ctrl_dt) < 1e-12, "ctrl_dt가 트윈 dt 배수 아님"
+        self.n_ep = int(round(EP_T / self.ctrl_dt))
         self.dof_knee = safe.dofadr(self.model, "knee", self.mj)
         self.iq_k = safe.qadr(self.model, "knee", self.mj)
         self.fg = self.mj.mj_name2id(self.model, self.mj.mjtObj.mjOBJ_GEOM, "foot")

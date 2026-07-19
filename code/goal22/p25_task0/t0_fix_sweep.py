@@ -19,6 +19,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent.parent / "bench"))   # safe (그림 단계 — 07-19 픽스)
 import t0_train_long as TL   # parse_fix 재사용 (부작용 없음)
 
 POINTS = ["fix:24", "fix:25.08", "fix:26.25", "fix:28", "fix:30"]

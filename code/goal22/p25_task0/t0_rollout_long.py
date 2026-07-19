@@ -15,20 +15,23 @@ import sys
 import t0_train_long as TL
 
 camp = sys.argv[1] if len(sys.argv) > 1 else "nc"
-assert camp in ("nc", "wc", "wc2") or camp.startswith("fix:"), \
-    "usage: python t0_rollout_long.py nc|wc|wc2|fix:<li>[:<ctrl_ms>]"
+assert camp in ("nc", "nc05", "wc", "wc2") or camp.startswith("fix:"), \
+    "usage: python t0_rollout_long.py nc|nc05|wc|wc2|fix:<li>[:<ctrl_ms>]"
 if camp.startswith("fix:"):
     li, cdt, tag = TL.parse_fix(camp)
     os.environ["T0_TAG"] = tag
     os.environ["T0_LI_FIXED"] = repr(li)
     os.environ["T0_CTRL_DT_MS"] = repr(cdt * 1000.0)
+elif camp == "nc05":
+    os.environ["T0_TAG"] = "_long_05ms"
+    os.environ["T0_CTRL_DT_MS"] = "0.5"
 else:
     os.environ["T0_TAG"] = "_long2" if camp == "wc2" else "_long"
 
 
 def main(campaign):
     TL.load_env_module(campaign)     # env import + crouch 패치 (롤아웃 전 필수)
-    if campaign == "nc":
+    if campaign in ("nc", "nc05"):
         import t0nc_rollout as RO
     else:
         import t0wc_rollout as RO

@@ -69,7 +69,7 @@ BAR_MARGIN = 0.02      # 티처 재생 바운드 배리어 [rad] — 이탈 직�
                        # (0.01은 li15 비행 오버슈트를 못 잡음 — 0.02 확정)
 
 NOISE_DQ_LONG = 0.10
-NOISE_Q_LONG = {"nc": 0.005, "wc": 0.015, "wc2": 0.015}
+NOISE_Q_LONG = {"nc": 0.005, "nc05": 0.005, "wc": 0.015, "wc2": 0.015}
 
 # ── wc2 재시도 처방 (코디 07-18) ──
 STD_FLOOR = 0.25                 # 엔트로피 플로어 (std 하한)
@@ -103,7 +103,9 @@ def parse_fix(campaign):
 
 def fix_teacher_of(campaign):
     li, ctrl_dt, _ = parse_fix(campaign)
-    if ctrl_dt < 0.002 - 1e-12:
+    # ★ 07-19 픽스: 프로브 교사(liopt)는 26.25 전용 — 24/25.08/28@0.5ms는 자기 점
+    # CMA 교사를 해당 주기로 재샘플 (0.5ms = CMA 네이티브 주기라 재생 충실도 최상)
+    if ctrl_dt < 0.002 - 1e-12 and abs(li - 26.25) < 1e-9:
         return FIX_TEACHER_PROBE
     return FIX_TEACHER[li]
 
@@ -140,7 +142,7 @@ def crouch_fn_of(knots):
 
 def load_env_module(campaign):
     """env 모듈 import + crouch/노이즈 패치 (main·worker 공용)."""
-    if campaign == "nc":
+    if campaign in ("nc", "nc05"):
         import t0nc_env as EVm
         EVm.setup()
         q0, _ = teacher_nc()
@@ -169,6 +171,8 @@ def worker_main(conn, campaign, seeds):
     if campaign.startswith("fix:"):
         li, cdt, _ = parse_fix(campaign)
         kw = dict(li_fixed=li, ctrl_dt=cdt)
+    elif campaign == "nc05":
+        kw = dict(ctrl_dt=0.0005)
     envs = [EVm.JumpEnv(seed=s, reset_noise=True, **kw) for s in seeds]
     conn.send(np.stack([e.reset() for e in envs]))
     while True:
@@ -201,7 +205,7 @@ def gpu_bench_decide(torch, hid=64, obs_dim=8):
         net = nn.Sequential(nn.Linear(obs_dim, hid), nn.Tanh(), nn.Linear(hid, hid),
                             nn.Tanh(), nn.Linear(hid, 2)).to(dev)
         opt = torch.optim.Adam(net.parameters(), lr=3e-4)
-        x = torch.randn(MB, 8, device=dev)
+        x = torch.randn(MB, obs_dim, device=dev)
         y = torch.randn(MB, 2, device=dev)
         for _ in range(20):
             loss = (net(x) - y).pow(2).mean()
@@ -237,7 +241,8 @@ def collect_teacher(EVm, campaign, npz_name, li, ctrl_dt=None):
     # q1_lo −0.0005 등), 2ms PD 재이산화의 추종오차가 바운드를 넘겨 env가 조기 종료
     # (li15/li2508에서 t≈0.15s 이탈 확인) → q_des를 δ만큼 안쪽으로 (h 손실 ~mm 규모)
     d_m = QD_MARGIN
-    q2lb, q2ub = (T0.Q2_LB, T0.Q2_UB) if campaign == "nc" else (T0.QM_LB, T0.QM_UB)
+    q2lb, q2ub = (T0.Q2_LB, T0.Q2_UB) if campaign in ("nc", "nc05") \
+        else (T0.QM_LB, T0.QM_UB)
     qd1_c = np.clip(z["qd1"], T0.Q1_LB + d_m, T0.Q1_UB - d_m)
     qd2_c = np.clip(z["qd2"], q2lb + d_m, q2ub - d_m)
     kw = dict(li_fixed=li) if li is not None else {}
@@ -319,7 +324,7 @@ def det_eval(torch, env, ac, EVm, campaign, dev):
 
 
 def passive_apex(EVm, campaign, env, t_after=0.6):
-    G = EVm.G if campaign == "nc" else EVm.W.G
+    G = EVm.G if campaign in ("nc", "nc05") else EVm.W.G
     law_a = G["LAW"][0]
     e1 = EVm.RU.HIP["a1"] if EVm.RU.HIP_LAW else 0.0
     md, mj, model = env.md, env.mj, env.model
@@ -344,20 +349,24 @@ def main(campaign):
         li_fix, cdt_fix, tag = parse_fix(campaign)
         hid = 128                              # wc2 레시피 고정
         ratio = 0.002 / cdt_fix               # sim-time 등가 예산 보정
+    elif campaign == "nc05":                   # no_cvt @0.5ms (07-19 전면 비교)
+        li_fix, cdt_fix, ratio = None, 0.0005, 4.0
+        tag = "_long_05ms"
+        hid = 128                              # 0.5ms 프로브 레시피 고정
     else:
         li_fix, cdt_fix, ratio = None, None, 1.0
         tag = TAGS[campaign]
         hid = HID[campaign]
     total = int(TOTAL_STEPS * ratio)
     plateau_after = int(PLATEAU_AFTER * ratio)
-    patience = min(120, int(round(PLATEAU_PATIENCE * ratio))) if is_fix \
-        else PLATEAU_PATIENCE
-    # 엔트로피 플로어 종료점: fix=예산 40% (코디 처방), wc2=10M, 그 외 없음
-    floor_until = int(0.4 * total) if is_fix else \
+    patience = min(120, int(round(PLATEAU_PATIENCE * ratio))) \
+        if (is_fix or campaign == "nc05") else PLATEAU_PATIENCE
+    # 엔트로피 플로어 종료점: fix/nc05=예산 40% (코디 처방), wc2=10M, 그 외 없음
+    floor_until = int(0.4 * total) if (is_fix or campaign == "nc05") else \
         (STD_FLOOR_UNTIL if campaign == "wc2" else -1)
     EVm = load_env_module(campaign)
     golden = EVm.run_golden()      # 골든 재확인 (지시 5)
-    prefix = "t0nc" if campaign == "nc" else "t0wc"
+    prefix = "t0nc" if campaign in ("nc", "nc05") else "t0wc"
     obs_dim = EVm.JumpEnv.OBS_DIM
 
     sys.path.insert(0, "C:/Users/junho/AppData/Local/torchcpu311")   # 폴백
@@ -370,7 +379,7 @@ def main(campaign):
     print(f"[dev] {gpu_note}", flush=True)
 
     # AC (기존 캠페인 클래스 재사용 — 아키텍처/이름 동일 → 롤아웃 스크립트 호환)
-    if campaign == "nc":
+    if campaign in ("nc", "nc05"):
         import t0nc_train as TRb
         ac = TRb.ActorCritic(hid=hid)
     else:
@@ -394,7 +403,7 @@ def main(campaign):
     if is_fix:
         teachers = [(fix_teacher_of(campaign), li_fix)]
     else:
-        teachers = ([("t0nc_cl.npz", None)] if campaign == "nc" else
+        teachers = ([("t0nc_cl.npz", None)] if campaign in ("nc", "nc05") else
                     [("t0wc_cl_li15.npz", 15.0), ("t0wc_cl_li20.npz", 20.0),
                      ("t0wc_cl_li2508.npz", 25.08)])
     # wc2 4앵커 시도 결과 (07-18): liopt(26.25, h=1.1233, 스탠스 0.044s)는 2ms 액션
@@ -420,8 +429,10 @@ def main(campaign):
         mse0 = mse1 = float("nan")
 
     # eval env (메인 프로세스, 노이즈 없음)
-    if campaign == "nc":
-        eval_envs = [("q0", EVm.JumpEnv(seed=999, reset_noise=False))]
+    if campaign in ("nc", "nc05"):
+        eval_envs = [("q0", EVm.JumpEnv(
+            seed=999, reset_noise=False,
+            **(dict(ctrl_dt=cdt_fix) if cdt_fix else {})))]
     elif is_fix:
         eval_envs = [(f"{li_fix:g}", EVm.JumpEnv(seed=999, reset_noise=False,
                                                  li_fixed=li_fix, ctrl_dt=cdt_fix))]
@@ -464,7 +475,8 @@ def main(campaign):
                              mse=[mse0, mse1], det_h_after_bc=bc_h),
                      noise_q=NOISE_Q_LONG.get(campaign, 0.015), noise_dq=NOISE_DQ_LONG,
                      log_std0=LOG_STD0,
-                     crouch=("teacher q0 " + str(EVm.G["CROUCH"]) if campaign == "nc"
+                     crouch=("teacher q0 " + str(EVm.G["CROUCH"])
+                             if campaign in ("nc", "nc05")
                              else ("teacher q0 고정 " + str(EVm.CROUCH_FN(li_fix))
                                    if is_fix else "teacher q0(l_i) 선형보간 "
                                    + str(teacher_wc_knots(campaign == "wc2"))))),
@@ -683,8 +695,8 @@ def make_curve(log, prefix, tag=TAG):
 if __name__ == "__main__":
     mp.freeze_support()
     camp = sys.argv[1] if len(sys.argv) > 1 else "nc"
-    assert camp in ("nc", "wc", "wc2") or camp.startswith("fix:"), \
-        "usage: python t0_train_long.py nc|wc|wc2|fix:<li>[:<ctrl_ms>] [steps]"
+    assert camp in ("nc", "nc05", "wc", "wc2") or camp.startswith("fix:"), \
+        "usage: python t0_train_long.py nc|nc05|wc|wc2|fix:<li>[:<ctrl_ms>] [steps]"
     if len(sys.argv) > 2:
         TOTAL_STEPS = int(sys.argv[2])
     main(camp)
