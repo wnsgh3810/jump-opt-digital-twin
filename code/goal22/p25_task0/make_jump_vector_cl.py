@@ -22,8 +22,10 @@ IKDIR = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/FKnIK")
 sys.path.insert(0, str(IKDIR))
 from IK2 import q2_to_qm, generate_bezier_curve, rot_matrix  # noqa
 
-SRC = "t0nc_cl_pd15.npz"
-GAIN_STR = "150 / 2.2 / 500 / 4  (hip_kp/kd, knee_kp/kd)"
+import os
+SRC = os.environ.get("CL_SRC", "t0nc_cl_pd15.npz")
+GAIN_STR = os.environ.get("CL_GAINSTR", "150 / 2.2 / 500 / 4  (hip_kp/kd, knee_kp/kd)")
+OUT_NAME = os.environ.get("CL_OUT", "jump_vector_CL_nocvt_pd.xlsx")
 DT = 0.002
 L, L_O, LI = 0.25, 0.03, 30.0
 Q1_HOME_DEG, Q2_HOME_DEG = -45.0, -90.0
@@ -106,7 +108,7 @@ def main():
     cols = ["q_1", "q_m", "l_1", "tau_1", "tau_m", "q_1_dot", "q_m_dot"]
     df = pd.DataFrame({c: np.concatenate([s[c] for s in segs]) for c in cols})
 
-    out = HERE / "jump_vector_CL_nocvt_pd.xlsx"
+    out = HERE / OUT_NAME
     df.to_excel(out, index=False)
     N = len(df)
     print(f"저장: {out}  (총 {N}행, {N * DT:.2f}s @ {DT * 1000:.0f}ms)")

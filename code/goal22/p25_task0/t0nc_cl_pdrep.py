@@ -90,11 +90,21 @@ def optimize():
     tw = TW.twin()
     C.TG = np.arange(0.0, TW.T_END + tw["dt"], tw["dt"])
     lb, ub = C.bounds("cl")
+    # ★ 깊은 크라우치 (env P25_CROUCH_Q1UB [deg]): q0 hip 상한을 더 깊게(음수↑) 제한.
+    _q1ub = os.environ.get("P25_CROUCH_Q1UB", "").strip()
+    if _q1ub:
+        ub[0] = np.radians(float(_q1ub))
+        print(f"★깊은 크라우치: q0 hip ∈ [{np.degrees(lb[0]):.0f}, {float(_q1ub):.0f}]°", flush=True)
     W = dict(C.W0)
     # ★ 15Nm 강제는 페널티 단독 (클립 35.5는 배포용 하드웨어 천장 — 15Nm 안 걸림).
     #   가중치 강화 + 목표 마진 0.3 (감사 max|â|≤15 통과 + 배포 여유).
     W["tau"] = 200.0
     W["d_tau"] = 0.3
+    # ★ 스탠스 0.3s 제약 제거 (env P25_NO_STANCE=1): 긴 푸시 허용
+    NO_STANCE = os.environ.get("P25_NO_STANCE", "").strip() == "1"
+    if NO_STANCE:
+        W["st"] = 0.0
+        print("★스탠스 0.3s 제약 제거 (W_st=0)", flush=True)
     nfev = [0]; ncrash = [0]
 
     def f(x):
@@ -106,7 +116,7 @@ def optimize():
             return TW.CRASH_F
         return C.fval(L, W)
 
-    x0 = seed_from_existing(tw, lb, ub)
+    x0 = np.clip(seed_from_existing(tw, lb, ub), 0.0, 1.0)   # 새 바운드(깊은 크라우치) 밖 시드 클립
     f0 = f(x0)
     print(f"=== t0nc CL 재최적 (순수 PD) — 게인 {GAIN}  ★clip ±{TW.CLIP_RAW}(배포동일)  "
           f"15Nm=페널티단독(W_tau={W['tau']:.0f})  dim {len(lb)} ===", flush=True)
@@ -133,7 +143,7 @@ def optimize():
         aud = T0.audit(L, t_end=TW.T_END, cvt=False)
         ts = C.stance_of(L)
         h = TW.apex_of(L)
-        ok = aud["pass"] and ts <= T0.T_ST_MAX + 1e-6
+        ok = aud["pass"] and (NO_STANCE or ts <= T0.T_ST_MAX + 1e-6)
         worst = max((v, k) for k, v in aud.items() if k != "pass")
         rounds.append(dict(round=rnd, budget=budget, f_best=float(es.result.fbest),
                            h=float(h), audit_pass=bool(aud["pass"]), stance=float(ts),
