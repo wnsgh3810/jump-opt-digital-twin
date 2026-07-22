@@ -42,8 +42,10 @@ def main():
     q2 = np.asarray(z["q2"], float)[m]
     dq1 = np.asarray(z["dq1"], float)[m]
     dq2 = np.asarray(z["dq2"], float)[m]
-    tn1 = np.asarray(z["tau1_nm"], float)[m]
+    tn1 = np.asarray(z["tau1_nm"], float)[m]     # a_hat 출력(축토크 Nm) — 검증용
     tn2 = np.asarray(z["tau2_nm"], float)[m]
+    rw1 = np.asarray(z["raw1"], float)[m]        # ★ FF 명령 = raw (실측 desiredTorque와 동일 단위)
+    rw2 = np.asarray(z["raw2"], float)[m]        #   로봇이 a_hat 적용 → a_hat(raw)=축토크
     grf = np.asarray(z["grf"], float)[m]
     on = grf > 1.0
     idx = np.where((tt > 0.02) & ~on)[0]
@@ -63,8 +65,10 @@ def main():
         return np.interp(tj_new, tj, a[js])
     j_q1 = rs(q1)                       # rad (hip)
     j_qm = np.pi + rs(q2)              # rad (q_m = π + q2)
-    j_tau1 = rs(tn1)                    # Nm (hip)
-    j_taum = rs(tn2)                    # Nm (knee=crank, TR=1)
+    j_tau1 = rs(rw1)                    # ★ raw FF 명령 (hip) — 로봇이 a_hat 적용
+    j_taum = rs(rw2)                    # ★ raw FF 명령 (knee=crank, TR=1)
+    j_ah1 = rs(tn1)                     # 참고: a_hat(raw)=실제 축토크 Nm
+    j_ah2 = rs(tn2)
     j_q1d = rs(dq1)                     # rad/s
     j_qmd = rs(dq2)                     # rad/s (dq_m = dq2)
     n_jump = len(tj_new)
@@ -109,16 +113,19 @@ def main():
     cols = ["q_1", "q_m", "l_1", "tau_1", "tau_m", "q_1_dot", "q_m_dot"]
     df = pd.DataFrame({c: np.concatenate([s[c] for s in segs]) for c in cols})
 
-    out = HERE / "jump_vector_OL_nocvt.xlsx"
+    out = HERE / "jump_vector_OL_nocvt_raw.xlsx"
     df.to_excel(out, index=False)
     N = len(df)
     print(f"저장: {out}  (총 {N}행, {N * DT:.2f}s @ {DT * 1000:.0f}ms)")
+    print(f"  ★ tau 열 = raw FF 명령 (로봇이 a_hat 적용 → 축토크). a_hat 미적용 채널이면 이 파일 아님")
     print(f"  홈 hold {n_home}행({HOLD_HOME_S}s) + 접근 {n_appr}행({APPROACH_S}s) + "
           f"크라우치 hold {n_crh}행({HOLD_CROUCH_S}s) + 점프 {n_jump}행({n_jump*DT:.3f}s)")
     print(f"  홈: q_1={np.degrees(q1_home_r):+.1f}° q_m={np.degrees(qm_home_r):+.1f}° l_1={LI}")
     print(f"  OL 시작: q_1={np.degrees(j_q1[0]):+.1f}° q_m={np.degrees(j_qm[0]):+.1f}°")
     print(f"  점프 끝(이지): q_1={np.degrees(j_q1[-1]):+.1f}° q_m={np.degrees(j_qm[-1]):+.1f}°")
-    print(f"  FF 범위: tau_1 [{j_tau1.min():+.2f},{j_tau1.max():+.2f}] tau_m [{j_taum.min():+.2f},{j_taum.max():+.2f}] Nm")
+    print(f"  FF(raw) 범위: tau_1 [{j_tau1.min():+.2f},{j_tau1.max():+.2f}] tau_m [{j_taum.min():+.2f},{j_taum.max():+.2f}] (iTM)")
+    print(f"  → a_hat 적용 시 축토크: [{j_ah1.min():+.2f},{j_ah1.max():+.2f}] / [{j_ah2.min():+.2f},{j_ah2.max():+.2f}] Nm (≤15 계획캡)")
+    print(f"  ⚠ raw 최대 {max(abs(j_tau1).max(), abs(j_taum).max()):.1f} > MIT t_ff ±18 — 로봇 FF채널이 raw전류명령이어야 함")
     print(f"  속도 범위: q_1_dot [{j_q1d.min():+.1f},{j_q1d.max():+.1f}] q_m_dot [{j_qmd.min():+.1f},{j_qmd.max():+.1f}] rad/s")
     # 연속성 체크
     print(f"  접근→크라우치 갭: q_1 {abs(a_q1[-1]-j_q1[0])*180/np.pi:.3f}° q_m {abs(a_qm[-1]-j_qm[0])*180/np.pi:.3f}°")
