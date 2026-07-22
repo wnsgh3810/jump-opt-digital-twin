@@ -74,19 +74,19 @@ def main():
     q1_home_r = np.radians(Q1_HOME_DEG)
     qm_home_r = np.radians(q2_to_qm(Q2_HOME_DEG, L, LI / 1000.0, L_O))   # = π/2
 
-    # ── 접근 (IK2 foot-z 베지어: home → 크라우치, 위치만) ──
+    # ── 접근 (관절공간 베지어: home → OL 정확 시작, q_m은 IK2 q2_to_qm) ──
+    # 발끝-z 방식은 IK2의 x=0 가정 탓에 hip이 0.6° 어긋남(트윈≠IK2 모델차).
+    # 관절공간 보간으로 접근 끝을 트윈 최적화 시작자세에 정확히 맞춤 (블렌드 없음).
     n_appr = int(round(APPROACH_S / DT))
-    zf = generate_bezier_curve(z_home, z_home, z_crouch, z_crouch, n_appr)
-    a_q1 = np.zeros(n_appr)
-    a_qm = np.zeros(n_appr)
-    for i in range(n_appr):
-        q1d, q2d = inverse_kinematics(0.0, zf[i], L)
-        a_q1[i] = np.radians(q1d)
-        a_qm[i] = np.radians(q2_to_qm(q2d, L, LI / 1000.0, L_O))
-    # 접근 끝을 정확한 OL 시작자세로 부드럽게 정렬 (IK foot_x≈0 근사 보정)
-    blend = np.clip((np.arange(n_appr) - 0.8 * n_appr) / (0.2 * n_appr), 0, 1)
-    a_q1 = a_q1 * (1 - blend) + j_q1[0] * blend
-    a_qm = a_qm * (1 - blend) + j_qm[0] * blend
+    s = generate_bezier_curve(0.0, 0.0, 1.0, 1.0, n_appr)   # 0→1 부드러운 s-커브
+    q1_start_rad = np.radians(q1_start_deg)
+    q2_start_rad = np.radians(q2_start_deg)
+    a_q1 = q1_home_r + (q1_start_rad - q1_home_r) * s
+    a_q2 = np.radians(Q2_HOME_DEG) + (q2_start_rad - np.radians(Q2_HOME_DEG)) * s
+    a_qm = np.array([np.radians(q2_to_qm(np.degrees(v), L, LI / 1000.0, L_O)) for v in a_q2])
+    # 접근 끝 = 정확히 OL 시작 (q_m도 q2_to_qm이 점프 시작 q2를 그대로 변환)
+    a_q1[-1] = j_q1[0]
+    a_qm[-1] = j_qm[0]
 
     # ── 크라우치 hold (정확한 OL 시작) ──
     n_crh = int(round(HOLD_CROUCH_S / DT))
