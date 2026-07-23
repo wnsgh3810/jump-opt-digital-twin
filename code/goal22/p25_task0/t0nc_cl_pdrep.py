@@ -45,6 +45,10 @@ ALPHA = tuple(float(x) for x in _a.split(",")) if _a else (1.0, 1.0, 1.0, 1.0)
 assert len(ALPHA) == 4, f"P25_CL_ALPHA must be ap1,ad1,ap2,ad2 (got {ALPHA})"
 EFF = tuple(g * a for g, a in zip(GAIN, ALPHA))     # 실효 게인 (트윈이 실제 쓰는 값)
 TAG = os.environ.get("P25_CL_TAG", "pdrep").strip()
+# ★ hip 굽힘 제한 (env P25_Q1_FLEXLIM [deg, 음수]) — 미끄럼-안전 얕은 자세 강제.
+#   실제 q1이 이보다 더 굽으면(더 음수) 페널티. pd15(-59.5) 안전·v4(-66.4) 미끄럼 → 중간 -63 권장.
+_fl = os.environ.get("P25_Q1_FLEXLIM", "").strip()
+FLEXLIM = np.radians(float(_fl)) if _fl else None
 
 BUDGET = 3600
 ESC_BUDGET = 1600
@@ -114,7 +118,12 @@ def optimize():
         if L is None:
             ncrash[0] += 1
             return TW.CRASH_F
-        return C.fval(L, W)
+        val = C.fval(L, W)
+        if FLEXLIM is not None:      # ★ hip 굽힘 제한 페널티 (실제 q1 < FLEXLIM 이면 벌점)
+            m = (L["t"] >= 0) & (L["t"] <= TW.T_END)
+            viol = np.maximum(0.0, FLEXLIM - L["q1"][m])
+            val += 1000.0 * float(np.sum(viol * viol + 0.3 * viol)) / max(int(m.sum()), 1)
+        return val
 
     x0 = np.clip(seed_from_existing(tw, lb, ub), 0.0, 1.0)   # 새 바운드(깊은 크라우치) 밖 시드 클립
     f0 = f(x0)
