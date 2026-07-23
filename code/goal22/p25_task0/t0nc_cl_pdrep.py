@@ -70,7 +70,7 @@ def roll_cl(tw, z):
 
 def seed_from_existing(tw, lb, ub):
     """시드 = 기존 t0nc_cl.npz 매듭 (이미 task0 실현). 부재 시 t0nc_cma.seed_x0 폴백."""
-    src = HERE / "t0nc_cl.npz"
+    src = HERE / os.environ.get("P25_SEED_NPZ", "t0nc_cl.npz")
     if src.exists():
         z0 = np.load(src)
         if "knots_qd1" in z0.files:

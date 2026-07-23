@@ -52,8 +52,11 @@ def main():
     dqd2 = np.asarray(z["dqd2"], float)[m]
     grf = np.asarray(z["grf"], float)[m]
     on = grf > 1.0
-    idx = np.where((tt > 0.02) & ~on)[0]
-    t_lo = float(tt[idx[0]]) if len(idx) else float(tt[-1])
+    dt_g = float(tt[1] - tt[0]); w = int(round(0.05 / dt_g))
+    t_lo = float(tt[-1])                        # ★첫 '지속' 이지 (다음 0.05s 내내 grf<1) = 진짜 이지
+    for i in range(len(grf) - w):              #   반동 딥(짧아 곧 재접지)·착지(이지 후) 둘 다 안 잡힘
+        if not on[i] and not on[i:i + w].any():
+            t_lo = float(tt[i]); break
     js = tt <= (t_lo + 0.01)                  # 스탠스 + 이지 직후 살짝 (비행 미끼 미포함)
 
     # ── 점프 명령을 DT로 리샘플 ──
