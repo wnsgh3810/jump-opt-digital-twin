@@ -1,0 +1,19 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+seed: 기존 t0nc_cl.npz 매듭  q0=(-0.3068,-2.5331) rad
+=== t0nc CL 재최적 (순수 PD) — 라벨 (150.0, 2.2, 500.0, 4.0) × β(0.77, 0.2, 0.36, 0.13) = 실효 (115.5,0.44,180.0,0.52)  clip ±25.581  dim 16 ===
+seed f=27.4035
+  r0 it   25  nfev   401  best f=-0.5597  [43s]
+  r0 it   50  nfev   801  best f=-0.7526  [94s]
+  r0 it   75  nfev  1201  best f=-0.7841  [152s]
+  r0 it  100  nfev  1601  best f=-0.8115  [203s]
+  r0 it  125  nfev  2001  best f=-0.8188  [243s]
+  r0 it  150  nfev  2401  best f=-0.8211  [293s]
+  r0 it  175  nfev  2801  best f=-0.8229  [338s]
+  r0 it  200  nfev  3201  best f=-0.8241  [377s]
+  r0 it  225  nfev  3601  best f=-0.8245  [420s]
+round 0: h=0.9374 stance=0.148 audit_pass=True worst=tau_knee:-0.0000  [422s]
+
+h_plan=0.9374 m  stance=0.148s  q0=(-17.5°,-133.0°)  게인 (150.0, 2.2, 500.0, 4.0)
+audit: tau_hip=-0.0499  tau_knee=-0.0000  tn_hip=-30.2619  tn_knee=-16.1130  dq_hip=-37.0474  dq_knee=-25.3351  q1_lo=-0.0084  q1_hi=-0.0031  q2_lo=-0.2094  q2_hi=-0.0029  PASS=True
+saved t0nc_cl_pdrep.npz + audit  [7.0m, evals=3617]
