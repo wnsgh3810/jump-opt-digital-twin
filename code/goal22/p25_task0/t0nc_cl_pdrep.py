@@ -49,6 +49,42 @@ TAG = os.environ.get("P25_CL_TAG", "pdrep").strip()
 #   실제 q1이 이보다 더 굽으면(더 음수) 페널티. pd15(-59.5) 안전·v4(-66.4) 미끄럼 → 중간 -63 권장.
 _fl = os.environ.get("P25_Q1_FLEXLIM", "").strip()
 FLEXLIM = np.radians(float(_fl)) if _fl else None
+# ★ 자코비안 수평력 페널티 (env P25_FH_W>0 활성, v8) — 계획 토크→발끝 힘 F=J^{-T}τ (준정적
+#   CAD 지렛대 산수, 접촉모델 불사용). 스탠스 |F_h|/F_v 비가 R0 넘으면 벌점 → 수직으로 미는
+#   슬립-안전 궤적 유도. 근거: 슬립~hip일 r=0.70·hip 1Nm=수평력 2~6배(exp3 일원장 분석),
+#   실측 비 exp1 0.25=안전 / exp2 0.84=슬립 100mm. α는 v7 그대로(OLD) — 변화는 F_h 하나만.
+FH_W = float(os.environ.get("P25_FH_W", "0") or 0)
+FH_R0 = float(os.environ.get("P25_FH_R0", "0.3"))
+_L_SEG = 0.25
+
+
+def fh_ratio(L):
+    """스탠스(grf>1N) 구간의 |F_h|/F_v 벡터 (준정적 자코비안 역산)."""
+    m = (L["t"] >= 0) & (L["t"] <= TW.T_END) & (L["grf"] > 1.0)
+    if int(m.sum()) < 3:
+        return np.zeros(0)
+    a = L["q1"][m]; b = L["q1"][m] + L["q2"][m]
+    t1 = L["sh1"][m]; t2 = L["sh2"][m]
+    j00 = -_L_SEG * np.sin(a) - _L_SEG * np.sin(b); j01 = -_L_SEG * np.sin(b)
+    j10 = _L_SEG * np.cos(a) + _L_SEG * np.cos(b); j11 = _L_SEG * np.cos(b)
+    det = j00 * j11 - j01 * j10
+    ok = np.abs(det) > 1e-6
+    fh = (j11 * t1 - j10 * t2)[ok] / det[ok]
+    fv = (-j01 * t1 + j00 * t2)[ok] / det[ok]
+    return np.abs(fh) / np.maximum(np.abs(fv), 20.0)
+# ★ 시작(몸)높이 제약 (env P25_BZFK_MIN [m], v8) — FK 몸높이 = -L(sin q1 + sin(q1+q2)).
+#   스탠스 중 실현 몸높이가 이보다 낮으면 벌점. hip각도 FLEXLIM의 풍선효과(무릎 접기로 깊이
+#   우회) 차단. 실측 시작높이: exp1 0.208(슬립 최소)/exp2 0.146/exp3 0.152(깊은 스쿼트 변장).
+BZFK_MIN = float(os.environ.get("P25_BZFK_MIN", "0") or 0)
+
+
+def bzfk_min(L):
+    """스탠스(grf>1N) 중 FK 몸높이 최저 [m]."""
+    m = (L["t"] >= 0) & (L["t"] <= TW.T_END) & (L["grf"] > 1.0)
+    if int(m.sum()) < 3:
+        return 1.0
+    bh = -_L_SEG * (np.sin(L["q1"][m]) + np.sin(L["q1"][m] + L["q2"][m]))
+    return float(bh.min())
 
 BUDGET = 3600
 ESC_BUDGET = 1600
@@ -123,6 +159,14 @@ def optimize():
             m = (L["t"] >= 0) & (L["t"] <= TW.T_END)
             viol = np.maximum(0.0, FLEXLIM - L["q1"][m])
             val += 1000.0 * float(np.sum(viol * viol + 0.3 * viol)) / max(int(m.sum()), 1)
+        if FH_W > 0:                 # ★ 수평력 비 페널티 (살짝 — 높이와 균형)
+            r = fh_ratio(L)
+            if len(r):
+                e = np.maximum(0.0, r - FH_R0)
+                val += FH_W * float(np.mean(e * e + 0.3 * e))
+        if BZFK_MIN > 0:             # ★ 시작높이(몸) 제약 — 깊은 스쿼트 벌점 (풍선효과 차단)
+            e = max(0.0, BZFK_MIN - bzfk_min(L))
+            val += 1000.0 * (e * e + 0.3 * e)
         return val
 
     x0 = np.clip(seed_from_existing(tw, lb, ub), 0.0, 1.0)   # 새 바운드(깊은 크라우치) 밖 시드 클립
@@ -157,8 +201,11 @@ def optimize():
         rounds.append(dict(round=rnd, budget=budget, f_best=float(es.result.fbest),
                            h=float(h), audit_pass=bool(aud["pass"]), stance=float(ts),
                            worst=[worst[1], float(worst[0])]))
+        r_fh = fh_ratio(L)
         print(f"round {rnd}: h={h:.4f} stance={ts:.3f} audit_pass={aud['pass']} "
-              f"worst={worst[1]}:{worst[0]:+.4f}  [{time.time() - t0:.0f}s]", flush=True)
+              f"worst={worst[1]}:{worst[0]:+.4f}  Fh/Fv 중앙 {np.median(r_fh) if len(r_fh) else 0:.2f}"
+              f"/90% {np.percentile(r_fh, 90) if len(r_fh) else 0:.2f}  몸높이최저 {bzfk_min(L):.3f}m"
+              f"  [{time.time() - t0:.0f}s]", flush=True)
         if ok:
             break
         for k in ("tn", "dq", "q", "tau", "st"):
