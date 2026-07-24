@@ -76,6 +76,11 @@ def fh_ratio(L):
 #   스탠스 중 실현 몸높이가 이보다 낮으면 벌점. hip각도 FLEXLIM의 풍선효과(무릎 접기로 깊이
 #   우회) 차단. 실측 시작높이: exp1 0.208(슬립 최소)/exp2 0.146/exp3 0.152(깊은 스쿼트 변장).
 BZFK_MIN = float(os.environ.get("P25_BZFK_MIN", "0") or 0)
+# ★ 시작높이 밴드 (env P25_BZ0_MIN/MAX, v9b) — 크라우치(q0) FK 몸높이를 [MIN,MAX]로 강제.
+#   기존 BZFK_MIN은 한쪽 벽이라 F_h 페널티가 시작을 위로 밀어올림(v8 0.244→v9 0.280).
+#   높이 회수 위해 위쪽 벽 추가 (사용자: 0.20 부근 원함).
+BZ0_MIN = float(os.environ.get("P25_BZ0_MIN", "0") or 0)
+BZ0_MAX = float(os.environ.get("P25_BZ0_MAX", "0") or 0)
 
 
 def bzfk_min(L):
@@ -86,7 +91,7 @@ def bzfk_min(L):
     bh = -_L_SEG * (np.sin(L["q1"][m]) + np.sin(L["q1"][m] + L["q2"][m]))
     return float(bh.min())
 
-BUDGET = 3600
+BUDGET = int(os.environ.get("P25_BUDGET", "3600") or 3600)
 ESC_BUDGET = 1600
 MAX_ROUNDS = 3
 
@@ -175,6 +180,11 @@ def optimize():
                 val += FH_W * float(np.mean(e * e + 0.3 * e))
         if BZFK_MIN > 0:             # ★ 시작높이(몸) 제약 — 깊은 스쿼트 벌점 (풍선효과 차단)
             e = max(0.0, BZFK_MIN - bzfk_min(L))
+            val += 1000.0 * (e * e + 0.3 * e)
+        if BZ0_MAX > 0:              # ★ 크라우치(q0) 높이 밴드 — 위쪽 벽 (높이 회수)
+            q1_0, q2_0 = float(z[0]), float(z[1])
+            bh0 = -_L_SEG * (np.sin(q1_0) + np.sin(q1_0 + q2_0))
+            e = max(0.0, bh0 - BZ0_MAX) + max(0.0, (BZ0_MIN or 0.0) - bh0)
             val += 1000.0 * (e * e + 0.3 * e)
         return val
 
