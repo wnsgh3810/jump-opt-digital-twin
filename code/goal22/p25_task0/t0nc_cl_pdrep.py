@@ -91,13 +91,22 @@ ESC_BUDGET = 1600
 MAX_ROUNDS = 3
 
 
+# ★ 시작 속도 0 강제 (env P25_CLAMP0=1, v9) — 스플라인 시작 도함수=0 (clamped).
+#   미끼가 t=0에 속도 명령을 던지는 '급발진 킥'(v8 dqd1(0)=-8.5) 차단: 킥은 (a)몸 조기낙하
+#   →knee 조기하중 (b)실제 hip이 낙하 추종→계획(소프트 hip)의 지연-토크 소멸=hip 공백→knee 보상
+#   두 갈래로 knee 조기토크·hip q 어긋남을 만들었다(exp4 5층 해부). 배포 xlsx는 npz 밀집배열
+#   (qd/dqd)을 그대로 쓰므로 자동 일관. 주의: 분석 시 매듭 재구성하면 bc 동일하게 할 것.
+CLAMP0 = os.environ.get("P25_CLAMP0", "").strip() == "1"
+_BC = ((1, 0.0), "natural") if CLAMP0 else "natural"
+
+
 def roll_cl(tw, z):
     """t0nc_cma.roll_cl 미러 — 게인만 GAIN으로 교체 (alphas=(1,1,1,1))."""
     NKC = C.NKC
     k1 = np.concatenate([[z[0]], z[2:2 + NKC - 1]])
     k2 = np.concatenate([[z[1]], z[2 + NKC - 1:]])
-    s1 = CubicSpline(C.KTC, k1, bc_type="natural")
-    s2 = CubicSpline(C.KTC, k2, bc_type="natural")
+    s1 = CubicSpline(C.KTC, k1, bc_type=_BC)
+    s2 = CubicSpline(C.KTC, k2, bc_type=_BC)
     g1, g2, dg1, dg2 = s1(C.TG), s2(C.TG), s1(C.TG, 1), s2(C.TG, 1)
     L = TW.rollout_cl(tw, C.TG, g1, g2, dg1, dg2, GAIN, alphas=ALPHA,
                       t_end=TW.T_END, record=True)
