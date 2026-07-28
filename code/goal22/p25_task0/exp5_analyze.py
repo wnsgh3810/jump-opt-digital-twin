@@ -169,6 +169,18 @@ for lab in GAINS:
     ZOOM = OUT / "torque_zoom"; ZOOM.mkdir(exist_ok=True)
     ax[0, 2].set_ylim(top=20)                 # knee 토크 상한 20
     ax[1, 2].set_ylim(top=10)                 # hip 토크 상한 10
+    # ── 측정 â 토크 고점 표기 (확대 버전 전용) — 노이즈 완화: 고점 ±10ms(±5샘플) 평균 ──
+    st_pk = (t >= 0) & (t <= t_lo)
+    def robust_peak(a, positive):
+        sm = _smooth(a, 5); idx = np.where(st_pk)[0]
+        ip = idx[np.argmax(sm[idx])] if positive else idx[np.argmin(sm[idx])]
+        return float(np.mean(a[max(0, ip-5):ip+6])), float(t[ip])
+    for rr, a_meas, pos in [(0, a2, True), (1, a1, False)]:
+        pk, tp = robust_peak(a_meas, pos)
+        c = ax[rr, 2].lines[0].get_color()    # 측정 â 선 색 (auto) 매칭
+        ax[rr, 2].plot([tp], [pk], "o", color=c, ms=6)
+        ax[rr, 2].annotate(f"측정 고점 {pk:+.1f}Nm", (tp, pk), textcoords="offset points",
+                           xytext=(8, -12 if pos else 10), fontsize=11, fontweight="bold", color=c)
     fig.savefig(ZOOM / f"exp5_qdqtau_{lab}_tzoom.png", dpi=110); plt.close(fig)
     print(f"{lab}: h={rd['h_real']}m Fτ={ftau*100:.1f}% (hip {f_h*100:.0f}/knee {f_k*100:.0f}) "
           f"slip={RES[lab]['slip_mm']}mm v_lo={v_lo:.2f} t_lo={t_lo:.3f} W(h/k)={Wh:.1f}/{Wk:.1f}J "
