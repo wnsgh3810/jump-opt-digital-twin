@@ -1,0 +1,12 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+전체 NAMES: ['stiff', 'ref', 'fv_hip', 'fc_hip', 'fv_knee', 'fc_knee', 'solref', 'imp0', 'arm_knee', 'M_c', 'I_th', 'I_ca', 'dz_th', 'dz_ca', 'tm', 'LAW_A', 'LAW_V0', 'o1_429', 'o2_429', 'LAW_B', 'C_CVT', 'K_RISE', 'T_SPR', 'B1_HIP', 'V0_HIP', 'K1_HIP']
+기준: H29게이지 +5.35° | 골든(dq2) 1.285
+기하 후보 축: ['ref', 'solref', 'arm_knee']
+ref+: H29게이지 +5.36° (Δ+0.00) | 골든 1.287 (PASS)
+ref-: H29게이지 +5.35° (Δ-0.00) | 골든 1.285 (PASS)
+solref+: H29게이지 +5.37° (Δ+0.02) | 골든 1.294 (PASS)
+solref-: H29게이지 +5.34° (Δ-0.02) | 골든 1.284 (PASS)
+arm_knee+: H29게이지 +5.48° (Δ+0.12) | 골든 1.365 (PASS)
+arm_knee-: H29게이지 +5.23° (Δ-0.13) | 골든 1.206 (PASS)
+done
