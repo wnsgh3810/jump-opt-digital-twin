@@ -1,0 +1,9 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+기준: H29게이지 +5.35° | 골든 1.285
+스토퍼 @144° solref 0.01: 게이지 -1.71° (Δ-7.07) | 골든 2.581 (FAIL)
+스토퍼 @144° solref 0.02: 게이지 -2.71° (Δ-8.07) | 골든 2.782 (FAIL)
+스토퍼 @146° solref 0.01: 게이지 +0.77° (Δ-4.58) | 골든 1.651 (FAIL)
+스토퍼 @142° solref 0.01: 게이지 -4.14° (Δ-9.50) | 골든 4.032 (FAIL)
+스토퍼 @146° solref 0.005: 게이지 +1.61° (Δ-3.75) | 골든 1.523 (FAIL)
+done
