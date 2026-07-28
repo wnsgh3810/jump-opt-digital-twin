@@ -29,5 +29,32 @@
   "validation": "제로샷 전이 22 trial·5일·미끼 5종: q1 10.37→4.83°(−53%) q2 6.74→4.96°(−26%) τ1 4.63→4.82(+4%) τ2 4.33→3.94(−9%) vs OLD α 테이블",
   "gates": "플랜트 무변경 → 0602 재생 1.285 골든·0429 CVT·held-out 0324 구조적 보존 (정본 TW.golden PASS 07-28)",
   "limits": "수렴골든 온건판 3° CHECK(k>1000 수치한계) · b_s/J_m 실측 아님(둔감 확인) · exp3 350_3.5 1건 반전 · 영상 정적(0604)은 신호<계통으로 판정불가"
- }
+ },
+ "lodo_audit": {
+  "method": "날짜별 leave-one-out (5회전, 학습 4일 (q1+q2)/2 선택)",
+  "selection_stability": "5/5 동일 config (완전 안정)",
+  "lodo_mean_deg": 4.14,
+  "full_selection_mean_deg": 4.14,
+  "old_mean_deg": 7.93,
+  "verdict": "과적합 아님 — 누수 없는 평가와 전체선택 평가 일치"
+ },
+ "variants": {
+  "A_hip_only": {
+   "desc": "hip 2단만 (knee SEA 없음, α=1) — LODO (q1+q2) 기준 선택",
+   "q1": 4.43,
+   "q2": 5.1,
+   "t1": 4.65,
+   "t2": 4.39
+  },
+  "B_hip_knee650": {
+   "desc": "hip 2단+knee650 — τ2 우위 (τ-fidelity 최종목적 관점)",
+   "q1": 4.83,
+   "q2": 4.96,
+   "t1": 4.82,
+   "t2": 3.94
+  }
+ },
+ "open_items": [
+  "exp5 q2 ~9.8° 전 모델 공통 (미끼 v9 특이 냄새 — dqd(0)=0 클램프/knee 명령 형태 규명 필요)"
+ ]
 }
