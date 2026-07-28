@@ -1,0 +1,23 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+★스탠스 0.3s 제약 제거 (W_st=0)
+seed: 기존 t0nc_cl.npz 매듭  q0=(-0.3423,-2.2569) rad
+=== t0nc CL 재최적 (순수 PD) — 게인 (150.0, 2.2, 250.0, 3.0)  ★clip ±35.5(배포동일)  15Nm=페널티단독(W_tau=200)  dim 16 ===
+seed f=1322.4857
+  r0 it   25  nfev   401  best f=44.7086  [40s]
+  r0 it   50  nfev   801  best f=35.6175  [79s]
+  r0 it   75  nfev  1201  best f=-0.0594  [117s]
+  r0 it  100  nfev  1601  best f=-0.4942  [157s]
+  r0 it  125  nfev  2001  best f=-0.5853  [196s]
+  r0 it  150  nfev  2401  best f=-0.5989  [236s]
+  r0 it  175  nfev  2801  best f=-0.6162  [275s]
+  r0 it  200  nfev  3201  best f=-0.6320  [313s]
+  r0 it  225  nfev  3601  best f=-0.6616  [351s]
+  r0 it  250  nfev  4001  best f=-0.6690  [389s]
+  r0 it  275  nfev  4401  best f=-0.6751  [427s]
+  r0 it  300  nfev  4801  best f=-0.6769  [464s]
+round 0: h=0.7240 stance=0.164 audit_pass=True worst=q1_hi:-0.0028  Fh/Fv 중앙 0.47/90% 0.59  몸높이최저 0.207m  [484s]
+
+h_plan=0.7240 m  stance=0.164s  q0=(-17.7°,-129.9°)  게인 (150.0, 2.2, 250.0, 3.0)
+audit: tau_hip=-0.3442  tau_knee=-0.2990  tn_hip=-31.3372  tn_knee=-27.5024  dq_hip=-37.8097  dq_knee=-34.0866  q1_lo=-0.0516  q1_hi=-0.0028  q2_lo=-0.2693  q2_hi=-0.0030  PASS=True
+saved t0nc_cl_v9c.npz + audit  [8.1m, evals=5009]
