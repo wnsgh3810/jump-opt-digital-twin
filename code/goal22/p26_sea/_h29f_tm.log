@@ -1,0 +1,7 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+현행 tm = 1.31 ms
+tm=1.3ms  : 25창Δ +8.71°/rmse 7.84 | 27창Δ +3.33°/rmse 3.87 | 골든 1.285
+tm=4.0ms  : 25창Δ +9.70°/rmse 8.65 | 27창Δ +3.73°/rmse 4.67 | 골든 1.285
+tm=0.0ms  : 25창Δ +8.38°/rmse 7.58 | 27창Δ +3.19°/rmse 3.62 | 골든 1.285
+done
