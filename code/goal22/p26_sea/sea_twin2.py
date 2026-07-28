@@ -31,8 +31,15 @@ def ahat_np(raw, v):
 def rollout_cl_sea2(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains,
                     ks1=169.0, bs1=1.0, jm1=0.03,
                     ks2=None, bs2=1.0, jm2=0.03,
+                    ks1_hi=None, tau0_1=9.0,
                     t_end=None, t_after=None, record=False):
-    """모터상태 SEA-lite. ks2=None → knee는 정본 경로(강체, α 그대로 1)."""
+    """모터상태 SEA-lite. ks2=None → knee는 정본 경로(강체, α 그대로 1).
+    ks1_hi 지정 시 hip 스프링 2단(H2): |τ|<tau0_1까지 ks1(무른), 초과분 ks1_hi(단단) — 연속 조각선형."""
+    d0_1 = (tau0_1 / ks1) if ks1_hi else None      # 변곡 변형 [rad]
+    def spr1(d):
+        if not ks1_hi or abs(d) <= d0_1:
+            return ks1 * d
+        return np.sign(d) * (tau0_1 + ks1_hi * (abs(d) - d0_1))
     P = tw["P"]
     mj = P.J._P["mj"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = tw["law"]
@@ -83,8 +90,8 @@ def rollout_cl_sea2(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains,
         c1 = float(np.clip(c1, -R19.CLIP, R19.CLIP)); c2 = float(np.clip(c2, -R19.CLIP, R19.CLIP))
         s1 = float(P.J.ahat(A, np.array([c1]), np.array([dth1]))[0])
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([dth2 if ks2 else v2c]))[0])
-        # ── hip 모터-스프링 ──
-        tsp1 = ks1*(th1 - q1c) + bs1*(dth1 - v1c)
+        # ── hip 모터-스프링 (2단 옵션) ──
+        tsp1 = spr1(th1 - q1c) + bs1*(dth1 - v1c)
         ddth1 = (s1 - tsp1)/jm1
         dth1 += ddth1*dt; th1 += dth1*dt                 # semi-implicit
         # ── knee (옵션) ──

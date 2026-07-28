@@ -55,6 +55,8 @@ MODELS = {
     "SEA_hip140": dict(ks1=140.0, bs1=1.5, jm1=0.01),
     "SEA_hip200": dict(ks1=200.0, bs1=1.5, jm1=0.01),
     "SEA_hipknee": dict(ks1=169.0, bs1=1.5, jm1=0.01, ks2=650.0, bs2=1.5, jm2=0.01),
+    "SEA_2slope": dict(ks1=96.0, ks1_hi=323.0, tau0_1=9.0, bs1=1.5, jm1=0.01),
+    "SEA_2s_knee": dict(ks1=96.0, ks1_hi=323.0, tau0_1=9.0, bs1=1.5, jm1=0.01, ks2=650.0, bs2=1.5, jm2=0.01),
 }
 OUT = {}
 for sess, (day, bait) in SESS.items():
