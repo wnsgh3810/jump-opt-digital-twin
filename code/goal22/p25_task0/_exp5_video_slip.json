@@ -1,0 +1,216 @@
+{
+ "60_2_250_3": {
+  "hipkp": 60.0,
+  "n_track": 7,
+  "pad_ok": true,
+  "pad_spread": 0,
+  "coarse_err": 1087.0,
+  "disp_px": 9.0,
+  "disp_mm": [
+   6.3,
+   10.8
+  ],
+  "shank_rot_deg": 32.7,
+  "roll_mm": [
+   9.1,
+   14.2
+  ],
+  "true_slip_mm": [
+   0.0,
+   1.7
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   -1,
+   -5,
+   -9
+  ]
+ },
+ "80_2_250_3": {
+  "hipkp": 80.0,
+  "n_track": 8,
+  "pad_ok": true,
+  "pad_spread": 0,
+  "coarse_err": 996.0,
+  "disp_px": 11.0,
+  "disp_mm": [
+   7.7,
+   13.2
+  ],
+  "shank_rot_deg": 27.8,
+  "roll_mm": [
+   7.8,
+   12.2
+  ],
+  "true_slip_mm": [
+   0.0,
+   5.4
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   -3,
+   -11
+  ]
+ },
+ "100_1.5_250_3": {
+  "hipkp": 100.0,
+  "n_track": 8,
+  "pad_ok": false,
+  "pad_spread": 15,
+  "coarse_err": 458.0,
+  "disp_px": 8.0,
+  "disp_mm": [
+   5.6,
+   9.6
+  ],
+  "shank_rot_deg": 27.4,
+  "roll_mm": [
+   7.7,
+   12.0
+  ],
+  "true_slip_mm": [
+   0.0,
+   1.9
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   -1,
+   -8
+  ]
+ },
+ "120_2_250_3": {
+  "hipkp": 120.0,
+  "n_track": 7,
+  "pad_ok": true,
+  "pad_spread": 0,
+  "coarse_err": 212.0,
+  "disp_px": 8.0,
+  "disp_mm": [
+   5.6,
+   9.6
+  ],
+  "shank_rot_deg": 26.5,
+  "roll_mm": [
+   7.4,
+   11.6
+  ],
+  "true_slip_mm": [
+   0.0,
+   2.2
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   -4,
+   -8
+  ]
+ },
+ "150_2.2_250_3": {
+  "hipkp": 150.0,
+  "n_track": 8,
+  "pad_ok": true,
+  "pad_spread": 0,
+  "coarse_err": 151.0,
+  "disp_px": 14.0,
+  "disp_mm": [
+   9.8,
+   16.8
+  ],
+  "shank_rot_deg": 28.9,
+  "roll_mm": [
+   8.1,
+   12.6
+  ],
+  "true_slip_mm": [
+   0.0,
+   8.7
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   -4,
+   -14
+  ]
+ },
+ "200_2.5_250_3": {
+  "hipkp": 200.0,
+  "n_track": 8,
+  "pad_ok": true,
+  "pad_spread": 0,
+  "coarse_err": 97.0,
+  "disp_px": 17.0,
+  "disp_mm": [
+   11.9,
+   20.4
+  ],
+  "shank_rot_deg": 24.5,
+  "roll_mm": [
+   6.8,
+   10.7
+  ],
+  "true_slip_mm": [
+   1.2,
+   13.6
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   -1,
+   -7,
+   -17
+  ]
+ },
+ "250_3_250_3": {
+  "hipkp": 250.0,
+  "n_track": 7,
+  "pad_ok": true,
+  "pad_spread": 0,
+  "coarse_err": 0.0,
+  "disp_px": 13.0,
+  "disp_mm": [
+   9.1,
+   15.6
+  ],
+  "shank_rot_deg": 26.0,
+  "roll_mm": [
+   7.3,
+   11.4
+  ],
+  "true_slip_mm": [
+   0.0,
+   8.3
+  ],
+  "dxs": [
+   0,
+   0,
+   0,
+   0,
+   -1,
+   -8,
+   -13
+  ]
+ }
+}
