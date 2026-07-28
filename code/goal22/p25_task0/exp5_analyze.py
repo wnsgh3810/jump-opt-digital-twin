@@ -164,7 +164,12 @@ for lab in GAINS:
             ax[r,cx].set_xlabel("t[s]")
     fig.suptitle(f"exp5 실기 {lab} | 정렬 knee xcorr (hip Δ{RES[lab]['lag_ms']['hip']:+.1f}ms) | 계획=v9 150/2.2/250/3 OLD α | 회색점선=측정이륙 {t_lo:.3f}s | 점프 높이 {rd['h_real']:.2f}m (계획 {float(Z['h_plan']):.2f}m)")
     fig.tight_layout()
-    fig.savefig(OUT / f"exp5_qdqtau_{lab}.png", dpi=110); plt.close(fig)
+    fig.savefig(OUT / f"exp5_qdqtau_{lab}.png", dpi=110)
+    # ── 토크 확대 변형 (별도 폴더, 기존 그래프는 그대로) — knee 상한 20 / hip 상한 10, 하한 자동 유지 ──
+    ZOOM = OUT / "torque_zoom"; ZOOM.mkdir(exist_ok=True)
+    ax[0, 2].set_ylim(top=20)                 # knee 토크 상한 20
+    ax[1, 2].set_ylim(top=10)                 # hip 토크 상한 10
+    fig.savefig(ZOOM / f"exp5_qdqtau_{lab}_tzoom.png", dpi=110); plt.close(fig)
     print(f"{lab}: h={rd['h_real']}m Fτ={ftau*100:.1f}% (hip {f_h*100:.0f}/knee {f_k*100:.0f}) "
           f"slip={RES[lab]['slip_mm']}mm v_lo={v_lo:.2f} t_lo={t_lo:.3f} W(h/k)={Wh:.1f}/{Wk:.1f}J "
           f"peak(h/k)={RES[lab]['peak_hip']}/{RES[lab]['peak_knee']}Nm", flush=True)
