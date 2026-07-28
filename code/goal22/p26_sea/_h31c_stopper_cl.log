@@ -1,0 +1,8 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+trial 22
+변형C(무스토퍼): J 5.999 | q1 2.40 q2 2.25 dq1 1.05 dq2 1.09 τ1 3.86 τ2 3.09
+   날짜별 q1: {'22': np.float64(2.65), '23': np.float64(2.69), '24': np.float64(3.15), '25': np.float64(3.89), '27': np.float64(0.93)}
+변형C+스토퍼147: J 5.999 | q1 2.40 q2 2.25 dq1 1.05 dq2 1.09 τ1 3.86 τ2 3.09
+   날짜별 q1: {'22': np.float64(2.65), '23': np.float64(2.69), '24': np.float64(3.15), '25': np.float64(3.89), '27': np.float64(0.93)}
+done
