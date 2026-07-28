@@ -162,7 +162,7 @@ for lab in GAINS:
             ax[r,cx].set_xlim(0, xmax); ax[r,cx].grid(alpha=.3); ax[r,cx].legend(fontsize=8)
             ax[r,cx].axvline(t_lo, color="gray", ls=":", lw=1)
             ax[r,cx].set_xlabel("t[s]")
-    fig.suptitle(f"exp5 실기 {lab} | 정렬 knee xcorr (hip Δ{RES[lab]['lag_ms']['hip']:+.1f}ms) | 계획=v9 150/2.2/250/3 OLD α | 회색점선=측정이륙 {t_lo:.3f}s")
+    fig.suptitle(f"exp5 실기 {lab} | 정렬 knee xcorr (hip Δ{RES[lab]['lag_ms']['hip']:+.1f}ms) | 계획=v9 150/2.2/250/3 OLD α | 회색점선=측정이륙 {t_lo:.3f}s | 점프 높이 {rd['h_real']:.2f}m (계획 {float(Z['h_plan']):.2f}m)")
     fig.tight_layout()
     fig.savefig(OUT / f"exp5_qdqtau_{lab}.png", dpi=110); plt.close(fig)
     print(f"{lab}: h={rd['h_real']}m Fτ={ftau*100:.1f}% (hip {f_h*100:.0f}/knee {f_k*100:.0f}) "
