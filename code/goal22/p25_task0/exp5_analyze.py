@@ -25,7 +25,9 @@ DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.07.27")
 OUT = HERE / "graphs" / "exp5"
 OUT.mkdir(parents=True, exist_ok=True)
 
-GAINS = ["100_1.5_250_3", "120_2_250_3", "150_2.2_250_3", "200_2.5_250_3", "250_3_250_3"]
+GAINS = sorted([p.name for p in DATA.iterdir() if p.is_dir() and (p / "hip.xlsx").exists()],
+               key=lambda s: float(s.split("_")[0]))     # hip kp 오름차순 자동 발견 (60/80 추가)
+HIPKP = [float(g.split("_")[0]) for g in GAINS]
 L_SEG = 0.25                     # 두 링크 공통 (t0nc_cl_pdrep._L_SEG와 동일)
 
 # ── a_hat (p14_ahat/p14_judge.py 복제 — Paper 식, sgn(v) only) ──
@@ -170,7 +172,7 @@ for lab in GAINS:
 json.dump(RES, open(HERE / "_exp5.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 # ── 요약 4패널: 예측 채점 (h / F_τ / slip / v_lo vs hip 게인) ──
-hips = [100, 120, 150, 200, 250]
+hips = HIPKP
 fig, ax = plt.subplots(1, 4, figsize=(20, 4.2))
 h = [RES[g]["h_real"] for g in GAINS]
 ax[0].plot(hips, h, "o-"); ax[0].set_title("점프 높이 [m]"); ax[0].axhline(float(Z["h_plan"]), ls="--", lw=1, color="gray")
