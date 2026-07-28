@@ -1,0 +1,27 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE: gauge +5.35 | golden 1.285 | HO0324 3.094
+@148 sr0.01: gauge +3.28 | golden 1.354 P | HO 5.096 F
+@148 sr0.02: gauge +3.27 | golden 1.393 P | HO 4.630 F
+@148 sr0.04: gauge +3.78 | golden 1.323 P | HO 4.079 F
+@148 sr0.02 imp: gauge +3.86 | golden 1.348 P | HO 4.337 F
+@149 sr0.01: gauge +4.14 | golden 1.347 P | HO 4.490 F
+@149 sr0.02: gauge +4.27 | golden 1.350 P | HO 4.100 F
+@149 sr0.04: gauge +4.55 | golden 1.316 P | HO 3.786 F
+@149 sr0.02 imp: gauge +4.65 | golden 1.306 P | HO 3.938 F
+@150 sr0.01: gauge +4.68 | golden 1.307 P | HO 4.046 F
+@150 sr0.02: gauge +4.81 | golden 1.295 P | HO 3.786 F
+@150 sr0.04: gauge +5.00 | golden 1.289 P | HO 3.668 F
+@150 sr0.02 imp: gauge +5.15 | golden 1.283 P | HO 3.604 F
+@151 sr0.01: gauge +5.35 | golden 1.285 P | HO 3.732 F
+@151 sr0.02: gauge +5.35 | golden 1.285 P | HO 3.589 F
+@151 sr0.04: gauge +5.35 | golden 1.285 P | HO 3.554 F
+@151 sr0.02 imp: gauge +5.35 | golden 1.285 P | HO 3.390 P
+@152 sr0.01: gauge +5.35 | golden 1.285 P | HO 3.465 F
+@152 sr0.02: gauge +5.35 | golden 1.285 P | HO 3.361 P
+@152 sr0.04: gauge +5.35 | golden 1.285 P | HO 3.313 P
+@152 sr0.02 imp: gauge +5.35 | golden 1.285 P | HO 3.201 P
+
+양립 (골든 P + HO P + 게이지 -0.5 이상 개선):
+  없음 — 반증 유지
+done
