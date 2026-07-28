@@ -79,10 +79,10 @@ fig, ax = plt.subplots(1, 3, figsize=(19, 5.4))
 lab0 = "150_2.2_250_3"
 if lab0 in R:
     d = R[lab0]; ks = d["hip"]["k_hat"]
-    ax[0].plot(d["tgm"], d["e1"], label="e1 = 측정 − ModeA [°]")
+    ax[0].plot(d["tgm"], d["e1"], label="e1 = 측정 - ModeA [°]")
     ax[0].plot(d["tgm"], np.degrees(np.array(d["a1"])/ks*np.sign(d["hip"]["slope"])), "--",
-               label=f"â1/k̂ (k̂={ks:.0f} Nm/rad)")
-    ax[0].set_title(f"① {lab0}: Mode A hip 오차 vs 토크/k̂ (r={d['hip']['r']:+.2f})")
+               label=f"a1/k_s (k_s={ks:.0f} Nm/rad)")
+    ax[0].set_title(f"① {lab0}: Mode A hip 오차 vs 토크/k_s (r={d['hip']['r']:+.2f})")
     ax[0].set_xlabel("t [s]"); ax[0].legend(fontsize=9)
 allA = np.concatenate([np.array(R[g]["a1"]) for g in R])
 allE = np.concatenate([np.array(R[g]["e1"]) for g in R])
@@ -91,15 +91,15 @@ bp = np.polyfit(allA, allE, 1)
 xs = np.linspace(allA.min(), allA.max(), 50)
 ax[1].plot(xs, np.polyval(bp, xs), lw=2)
 kpool = 1/abs(np.radians(bp[0]))
-ax[1].set_title(f"② 풀드 (7게인): e1 vs â1 — k̂_pool={kpool:.0f} Nm/rad, r={np.corrcoef(allA,allE)[0,1]:+.2f}")
+ax[1].set_title(f"② 풀드 (7게인): e1 vs a1 — k_s(풀드)={kpool:.0f} Nm/rad, r={np.corrcoef(allA,allE)[0,1]:+.2f}")
 ax[1].set_xlabel("â1 [Nm]"); ax[1].set_ylabel("e1 [°]")
 kps = [R[g]["hipkp"] for g in R]
 r0 = [R[g]["hip"]["rms_deg"] for g in R]; r1_ = [R[g]["hip"]["rms_corr_deg"] for g in R]
 w = 8
 ax[2].bar([k-w/2 for k in kps], r0, width=w, label="Mode A hip RMSE [°]")
-ax[2].bar([k+w/2 for k in kps], r1_, width=w, label="τ/k̂ 보정 후 [°]")
+ax[2].bar([k+w/2 for k in kps], r1_, width=w, label="τ/k_s 보정 후 [°]")
 ax[2].set_title("③ 탄성 보정 후 Mode A hip 오차"); ax[2].set_xlabel("hip kp"); ax[2].legend(fontsize=9)
 for a_ in ax: a_.grid(alpha=.3)
-fig.suptitle("Mode A 검증 — hip 직렬탄성 가설 (e1 ≈ â1/k_s?)", fontsize=13)
+fig.suptitle("Mode A 검증 — hip 직렬탄성 가설 (오차 e1 = 토크/k_s 인가?)", fontsize=13)
 fig.tight_layout(); fig.savefig(OUT/"modea_sea_verify.png", dpi=115)
 print("done →", OUT/"modea_sea_verify.png")
