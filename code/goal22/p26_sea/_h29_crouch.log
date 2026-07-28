@@ -1,0 +1,10 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+기준(현행)        : 25창Δ +8.54°/rmse 7.68 | 27창Δ +3.31°/rmse 3.7 | 골든0602 1.233 (PASS)
+힙감쇠 0.15      : 25창Δ +8.33°/rmse 7.49 | 27창Δ +3.27°/rmse 3.5 | 골든0602 1.344 (PASS)
+힙감쇠 0.05      : 25창Δ +8.20°/rmse 7.38 | 27창Δ +3.24°/rmse 3.4 | 골든0602 1.487 (FAIL)
+B1_HIP x0.5   : 25창Δ +8.54°/rmse 7.68 | 27창Δ +3.31°/rmse 3.7 | 골든0602 1.233 (PASS)
+B1_HIP x0.0   : 25창Δ +8.54°/rmse 7.68 | 27창Δ +3.31°/rmse 3.7 | 골든0602 1.233 (PASS)
+V0_HIP 10.0   : 25창Δ +8.54°/rmse 7.68 | 27창Δ +3.31°/rmse 3.7 | 골든0602 1.233 (PASS)
+V0_HIP 16.0   : 25창Δ +8.54°/rmse 7.68 | 27창Δ +3.31°/rmse 3.7 | 골든0602 1.233 (PASS)
+done
