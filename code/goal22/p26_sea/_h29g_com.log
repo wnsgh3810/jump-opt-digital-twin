@@ -1,0 +1,12 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+기준                    : 25푸시Δ +8.71° | 27푸시Δ +3.33° | 골든 1.285 (PASS)
+thigh CoM z+0.02      : 25푸시Δ +9.14° | 27푸시Δ +3.52° | 골든 1.473 (FAIL)
+thigh CoM z-0.02      : 25푸시Δ +8.29° | 27푸시Δ +3.14° | 골든 1.239 (PASS)
+calf CoM z+0.02       : 25푸시Δ +8.94° | 27푸시Δ +3.35° | 골든 1.298 (PASS)
+calf CoM z-0.02       : 25푸시Δ +8.67° | 27푸시Δ +3.32° | 골든 1.282 (PASS)
+base CoM z+0.02       : 25푸시Δ +8.71° | 27푸시Δ +3.33° | 골든 1.285 (PASS)
+base CoM z-0.02       : 25푸시Δ +8.71° | 27푸시Δ +3.33° | 골든 1.285 (PASS)
+base m x0.9           : 25푸시Δ +7.71° | 27푸시Δ +2.87° | 골든 1.599 (FAIL)
+thigh m x0.9          : 25푸시Δ +8.29° | 27푸시Δ +3.13° | 골든 1.228 (PASS)
+done
