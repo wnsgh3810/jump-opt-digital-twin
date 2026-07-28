@@ -1,0 +1,7 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+BASE: gauge +5.35 | golden 1.285 | HO 3.094
+hip armature 0.005: gauge +5.63 (d+0.27) | golden 1.374 P | HO 2.754 P
+hip armature 0.01: gauge +5.89 (d+0.54) | golden 1.463 F | HO 2.451 P
+hip armature 0.017: gauge +6.25 (d+0.90) | golden 1.582 F | HO 2.062 P
+done
