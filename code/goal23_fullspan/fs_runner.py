@@ -655,6 +655,48 @@ def modea_fs3():
         print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
     print("done")
 
+def tauobs_compare():
+    """τ1 관측 4안 동시 채점 (푸시 창) — 한 패스: s1 / lpf10(s1f) / 스프링측(tsp1) / 블렌드 0.5."""
+    import fs_data as FD
+    ft = fs_twin()
+    TKK = np.array([60, 120, 250, 500]); TKV = np.array([0.85, 0.789, 0.656, 0.40])
+    SP = _sess_params()
+    OUT = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if cvt or ho or not g or s == "26.04.21":
+            continue
+        sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+            gm = (g[0], g[1], g[2] * float(np.interp(g[2], TKK, TKV)) if False else g[2] * {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}.get(g[2], 0.656), g[3] * 0.20)
+            gm = (g[0], g[1], gm[2], gm[3])
+            i0 = max(0, seg["i_desc"] - 5)
+            t = d["t"][i0:] - d["t"][i0]
+            L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+                              gm, seg["t_lo"] - d["t"][i0], two_stage=True,
+                              bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
+            if L is None:
+                continue
+            m = seg["push"][i0:][: len(t)]
+            a1 = d["a1"][i0:][: len(t)]
+            res = {}
+            for nm, key in (("s1", "s1"), ("lpf", "s1f"), ("spr", "tsp1")):
+                o = np.interp(t, L["t"], L[key])
+                res[nm] = float(np.sqrt(np.mean((a1[m] - o[m]) ** 2)))
+            ob = 0.5 * np.interp(t, L["t"], L["s1f"]) + 0.5 * np.interp(t, L["t"], L["tsp1"])
+            res["blend"] = float(np.sqrt(np.mean((a1[m] - ob[m]) ** 2)))
+            OUT.setdefault(s, []).append(res)
+        except Exception as ex:
+            print(f"{s}/{p.name}: ERR {type(ex).__name__}", flush=True)
+    print("\n=== 푸시 τ1 관측 4안 (세션 평균) ===")
+    tot = {k: [] for k in ("s1", "lpf", "spr", "blend")}
+    for s, rows in OUT.items():
+        a = {k: float(np.mean([r[k] for r in rows])) for k in tot}
+        for k in tot:
+            tot[k].append(a[k])
+        print(f"{s}: s1 {a['s1']:.2f} | lpf10 {a['lpf']:.2f} | spr {a['spr']:.2f} | blend {a['blend']:.2f}")
+    print("전체 평균: " + " | ".join(f"{k} {np.mean(v):.2f}" for k, v in tot.items()))
+    print("done")
 
 if __name__ == "__main__":
     import sys as _s
@@ -667,6 +709,8 @@ if __name__ == "__main__":
         modea_fs()
     elif a == "kneedeep":
         fit_knee_deep()
+    elif a == "tauobs":
+        tauobs_compare()
     elif a == "fs3":
         baseline_fs3(); modea_fs3()
     else:

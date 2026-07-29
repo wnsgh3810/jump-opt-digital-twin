@@ -1,0 +1,13 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+
+=== 푸시 τ1 관측 4안 (세션 평균) ===
+26.07.22: s1 3.10 | lpf10 2.39 | spr 2.36 | blend 2.23
+26.07.23: s1 3.07 | lpf10 3.84 | spr 3.11 | blend 3.40
+26.07.24: s1 2.44 | lpf10 2.42 | spr 2.67 | blend 2.43
+26.07.25: s1 2.27 | lpf10 2.18 | spr 3.60 | blend 2.73
+26.07.27: s1 2.48 | lpf10 2.11 | spr 2.83 | blend 2.35
+26.04.24: s1 3.03 | lpf10 2.74 | spr 1.94 | blend 2.28
+26.06.02: s1 2.66 | lpf10 2.07 | spr 1.74 | blend 1.77
+전체 평균: s1 2.72 | lpf 2.54 | spr 2.61 | blend 2.46
+done
