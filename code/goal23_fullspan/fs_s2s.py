@@ -7,7 +7,7 @@ base가 엔드스톱(0.169) 위 = 다리가 실제 하중을 받는 창만 채�
 h14b 문자 미러 (0.4s 창/0.3 stride/시간창/페이로드 질량 패치) + fs 러너(rollout_ol_fs_b,
 엔드스톱 XML) + 실측 FK off-stop 판정 (창 시작/중간/끝 3점 min > 0.171).
 데이터: 0604 s2s는 *2 미제공 (참관 전용) → raw_unwrap 원본 사용 (fs_data 금지목록은 점프 *2 규약).
-CLI: python fs_s2s.py
+CLI: python fs_s2s.py [kd]  (kd 인자: 0602 간섭 항 적용 변형 — F9 교차 검증)
 """
 import os, sys, json, copy
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
@@ -62,7 +62,16 @@ def bz_fk(ft, md, q1, q2):
     return 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
 
 
+KNEE_DEEP = None
+
+
 def main():
+    global KNEE_DEEP
+    if len(sys.argv) > 1 and sys.argv[1] == "kd":
+        import numpy as _np
+        kdj = safe.read_json(HERE / "_fs_knee_deep.json")["26.06.02"]
+        KNEE_DEEP = (float(kdj["kd"]), float(_np.radians(kdj["q20_deg"])))
+        print(f"0602 간섭 항 적용: k_d {KNEE_DEEP[0]} 결합 {kdj['q20_deg']}°", flush=True)
     OUT = {}
     for lab, fold, PL, (t0, t1) in TRIALS:
         hip = pd.read_excel(fold / "hip.xlsx"); knee = pd.read_excel(fold / "knee.xlsx")
@@ -88,7 +97,7 @@ def main():
             off = min(bzs) > Z_STOP + Z_MARGIN
             L = FR.rollout_ol_fs_b(ft, tg, raw1[seg], raw2[seg],
                                    float(q1m[i0]), float(q2m[i0]), float(dq1m[i0]), float(dq2m[i0]),
-                                   float(tg[-1] - 0.005), bias1=0.0, knee_deep=None, fade=True,
+                                   float(tg[-1] - 0.005), bias1=0.0, knee_deep=KNEE_DEEP, fade=True,
                                    bz_floor=Z_STOP, knee_rel=0.1)
             if L is None:
                 w0 += STRIDE
