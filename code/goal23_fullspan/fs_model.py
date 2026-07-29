@@ -38,9 +38,12 @@ def capture_base_xml():
         return orig(xml, *a, **k)
     mjm.MjModel.from_xml_string = staticmethod(cap)
     try:
+        TW._T["tw"] = None          # twin 캐시 무효화 — 캡처를 위해 재컴파일 강제
         tw = TW.twin()
     finally:
         mjm.MjModel.from_xml_string = orig
+    if not captured:
+        raise RuntimeError("XML 캡처 실패 — twin 컴파일 경로 변경 여부 확인")
     return captured[-1], tw
 
 
