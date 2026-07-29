@@ -138,6 +138,8 @@ def main():
     tw = ctx["tw"]; nm = ctx["nm"]
     SP = FR._sess_params()
     b = SP.get("26.04.29", {}).get("bias1", 0.53)
+    wj = HERE / "_fs_tauobs_w.json"
+    w29 = float(safe.read_json(wj).get("26.04.29", 0.5)) if wj.exists() else 0.5
     o1 = float(nm["o1_429"]); o2 = float(nm["o2_429"])
     OUT = {"score": [], "push": []}
     for s, p, g, cvt, ho in FD.registry():
@@ -159,7 +161,7 @@ def main():
             continue
         t = dd["t"]
         gi = lambda k: np.interp(t, L["t"], L[k])
-        obs = np.clip(0.5 * gi("s1f") + 0.5 * gi("tsp1"), -TAU_LIM_DOC, TAU_LIM_DOC)
+        obs = np.clip(w29 * gi("s1f") + (1 - w29) * gi("tsp1"), -TAU_LIM_DOC, TAU_LIM_DOC)
         res = {}
         for wn in ("score", "push"):
             m = seg[wn][i0:][: len(t)]
