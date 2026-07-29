@@ -28,14 +28,16 @@ _CACHE = {}
 
 
 def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
-    """fs 모델 + 정본 층 파라미터 캐시."""
-    key = (ks, bs, arm)
+    """fs 모델 + 정본 층 파라미터 캐시. FS_HIPM_DAMP/FS_HIPM_FL로 hip_m 감쇠/마찰 재검 (F30)."""
+    dm = float(os.environ.get("FS_HIPM_DAMP", "0.312066"))
+    fl = float(os.environ.get("FS_HIPM_FL", "0.238254"))
+    key = (ks, bs, arm, dm, fl)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
             _CACHE["base"] = (base_xml, tw)
         base_xml, tw = _CACHE["base"]
-        model, xml = FM.build_fs(ks=ks, bs=bs, arm=arm, base_xml=base_xml)
+        model, xml = FM.build_fs(ks=ks, bs=bs, arm=arm, base_xml=base_xml, dm=dm, fl=fl)
         iq = {n: safe.qadr(model, n, mjm) for n in
               ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
         dof = {n: safe.dofadr(model, n, mjm) for n in iq}

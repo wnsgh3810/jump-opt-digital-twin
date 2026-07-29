@@ -47,14 +47,15 @@ def capture_base_xml():
     return captured[-1], tw
 
 
-def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None, endstop=False):
-    """직렬 힌지 패치 모델 컴파일. 반환 (model, xml)."""
+def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None, endstop=False,
+             dm=0.312066, fl=0.238254):
+    """직렬 힌지 패치 모델 컴파일. 반환 (model, xml). dm/fl = hip_m 감쇠/마찰 (OLD 적합 유산 — F30 재검 축)."""
     if base_xml is None:
         base_xml, _ = capture_base_xml()
     old_j = '<body name="thigh" pos="0 0 -0.025">\n      <joint name="hip" type="hinge" armature="0" damping="0.312066" frictionloss="0.238254"/>'
     # 구 hip 감쇠/마찰(기어박스 몫)은 모터 힌지로 이동, 스프링 힌지는 k_s·b_s만
     new_j = ('<body name="hip_rotor" pos="0 0 -0.025">\n'
-             f'      <joint name="hip_m" type="hinge" armature="{arm}" damping="0.312066" frictionloss="0.238254"/>\n'
+             f'      <joint name="hip_m" type="hinge" armature="{arm}" damping="{dm}" frictionloss="{fl}"/>\n'
              '      <inertial pos="0 0 0" mass="0.001" diaginertia="1e-07 1e-07 1e-07"/>\n'
              '      <body name="thigh" pos="0 0 0">\n'
              f'      <joint name="hip" type="hinge" armature="0" damping="{bs}" stiffness="{ks}" springref="0"/>')
