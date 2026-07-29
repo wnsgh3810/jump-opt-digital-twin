@@ -1,0 +1,4 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+24일 현행 상수: {'bias1': 0.27960503344385546, 'knee_deep': (10.0, -2.2008601867648494)}
+현행 -> score_modea_one 부재 — modea_fs3 경로 필요
