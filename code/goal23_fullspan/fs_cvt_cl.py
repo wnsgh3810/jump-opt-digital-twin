@@ -5,7 +5,7 @@
 CVT 층의 CL화 (데이터 벡터 → 순간값 스칼라 미러):
   supp = supp_scalar(s2,v2)+rise · hip_supp_scalar · hl = h_load(|s2|, spr[2]) ·
   C_CVT qfrc(rtab 전달비) · 2단 스프링 qfrc + bias1(F21 하강 감사) + fade.
-τ1 관측: 0429 하강 w 캘리브 부재 → blend 0.5 + tau_lim=15 클립 (What.txt 문서 출처 — 판독 아님).
+τ1 관측: w 세션 상수(_fs_tauobs_w, F35: 0429=0.0 스프링측) + tau_lim=15 클립 (What.txt 문서 출처).
 knee_deep 미적용 (크랭크↔무릎 매핑 미정). 게이트: 동일 모델의 재생 골든(golden3 2.389) 기재현으로 갈음.
 CLI: python fs_cvt_cl.py [tk0]  (tk0 = crank 게인 TK 스케일 미적용 변형 — 판별)
 """
@@ -72,7 +72,7 @@ def rollout_cl_cvt(model, tw, nm, d, gains, t_end, use_tk=True, bias1=0.53):
     t = d["t"]
     NT = int(round((P.J.T_SETTLE + t_end + 0.05) / dt))
     tl = np.arange(NT) * dt - P.J.T_SETTLE
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "tsp1", "s1f")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "tsp1", "s1f", "s2sup")
     Lg = {k: np.zeros(NT) for k in keys}
     for k in range(NT):
         tc = tl[k]
@@ -126,6 +126,7 @@ def rollout_cl_cvt(model, tw, nm, d, gains, t_end, use_tk=True, bias1=0.53):
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1
         Lg["s2"][k] = s2
+        Lg["s2sup"][k] = s2 + supp
         Lg["tsp1"][k] = FR._tau2s(dq_s) + b_eff
         s1f += af * (s1 - s1f)
         Lg["s1f"][k] = s1f

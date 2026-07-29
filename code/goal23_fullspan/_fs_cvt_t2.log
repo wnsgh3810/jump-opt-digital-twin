@@ -1,0 +1,7 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+=== 크랭크 τ2 관측 4안 (0429, 하강/푸시) ===
+s2      : 하강 0.83 | 푸시 5.12
+s2sup   : 하강 0.77 | 푸시 6.30
+lpf_s2  : 하강 0.82 | 푸시 5.98
+lpf_sup : 하강 0.75 | 푸시 6.98
