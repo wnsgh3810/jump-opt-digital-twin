@@ -65,9 +65,19 @@ def bz_fk(ft, md, q1, q2):
 KNEE_DEEP = None
 
 
-def main():
+def scan():
+    """0604 전용 k_d 스캔 (참관 진단): off-stop 창 q1/q2 vs k_d — 세션 고유 강도/하중의존 판별."""
     global KNEE_DEEP
-    if len(sys.argv) > 1 and sys.argv[1] == "kd":
+    import numpy as _np
+    for kd in (0.0, 2.5, 5.0, 10.0, 15.0):
+        KNEE_DEEP = (kd, float(_np.radians(-130.1))) if kd > 0 else None
+        print(f"--- k_d = {kd} ---", flush=True)
+        main(quiet=True)
+
+
+def main(quiet=False):
+    global KNEE_DEEP
+    if not quiet and len(sys.argv) > 1 and sys.argv[1] == "kd":
         import numpy as _np
         kdj = safe.read_json(HERE / "_fs_knee_deep.json")["26.06.02"]
         KNEE_DEEP = (float(kdj["kd"]), float(_np.radians(kdj["q20_deg"])))
@@ -117,9 +127,13 @@ def main():
         po = res.get("off_stop", {}); pn = res.get("on_stop", {})
         print(f"{lab}: off-stop 창 {po.get('n', 0)}개 q1 {po.get('q1', '—')} q2 {po.get('q2', '—')} || "
               f"on-stop(착좌) 창 {pn.get('n', 0)}개 q1 {pn.get('q1', '—')} q2 {pn.get('q2', '—')}", flush=True)
-    safe.atomic_json_write(HERE / "_fs_s2s.json", OUT)
-    print("done → _fs_s2s.json")
+    if not quiet:
+        safe.atomic_json_write(HERE / "_fs_s2s.json", OUT)
+        print("done → _fs_s2s.json")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "scan":
+        scan()
+    else:
+        main()
