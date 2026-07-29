@@ -622,11 +622,20 @@ def baseline_fs3():
             continue
         sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
         tl_ = None
-        if os.environ.get("FS_TAULIM") == "1":
+        _tlm = os.environ.get("FS_TAULIM")
+        if _tlm == "1":
             _tj = HERE / "_fs_taulim.json"
             if _tj.exists():
                 _te = safe.read_json(_tj).get(s)
                 tl_ = float(_te["lim"]) if (_te and _te.get("active")) else None
+        elif _tlm in ("2", "3"):              # F26 재공략: trial 입자도 (진단 — 판독원=푸시 창)
+            _tj = HERE / "_fs_taulim_trial.json"
+            if _tj.exists():
+                _te = safe.read_json(_tj).get(f"{s}/{p.name}")
+                tl_ = float(_te["lim"]) if (_te and _te.get("active")) else None
+        obs_lim = tl_ if _tlm == "3" else None
+        if _tlm == "3":
+            tl_ = None                        # 3 = 관측 전용 클립 (동역학 무손 — F30 트레이드오프 해소 시도)
         try:
             d = FD.load2(p); seg = FD.segment(d)
             gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
@@ -646,6 +655,8 @@ def baseline_fs3():
                     _wj = HERE / "_fs_tauobs_w.json"
                     _w = float(safe.read_json(_wj).get(s, 0.5)) if _wj.exists() else 0.5
                     t1obs = _w * gi("s1f") + (1 - _w) * gi("tsp1")
+                    if obs_lim is not None:
+                        t1obs = np.clip(t1obs, -obs_lim, obs_lim)
                 else:
                     t1obs = (gi("tsp1") if _to == "spr" else
                              gi("s1f") if _to == "lpf" else
