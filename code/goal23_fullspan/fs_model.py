@@ -47,7 +47,7 @@ def capture_base_xml():
     return captured[-1], tw
 
 
-def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None):
+def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None, endstop=False):
     """직렬 힌지 패치 모델 컴파일. 반환 (model, xml)."""
     if base_xml is None:
         base_xml, _ = capture_base_xml()
@@ -65,6 +65,10 @@ def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None):
     # 액추에이터/인코더 = 모터 힌지
     xml = safe.xml_patch(xml, '<motor name="hip_motor" joint="hip" gear="1"/>',
                          '<motor name="hip_motor" joint="hip_m" gear="1"/>', count=1)
+    if endstop:
+        # 레일 하단 엔드스톱 (SEA P4: z_stop=0.169 soft) — s2s '의자'. 점프 자세는 구조적 미접촉
+        xml = safe.xml_patch(xml, '<joint name="base_z" type="slide" axis="0 0 1"/>',
+                             '<joint name="base_z" type="slide" axis="0 0 1" limited="true" range="0.169 2.0" solreflimit="0.01 1"/>', count=1)
     return mjm.MjModel.from_xml_string(xml), xml
 
 

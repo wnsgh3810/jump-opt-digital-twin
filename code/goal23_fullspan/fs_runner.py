@@ -413,7 +413,7 @@ def modea_fs():
     print("done")
 
 
-def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False):
+def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False, bz_floor=None):
     """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경)."""
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -432,6 +432,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     mjm.mj_forward(model, md)
     fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
     md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+    if bz_floor is not None:
+        md.qpos[iq["base_z"]] = max(float(md.qpos[iq["base_z"]]), bz_floor)   # 엔드스톱 위 초기화 (착좌)
     Lseg = 0.25
     c1_, c12 = np.cos(q1_0), np.cos(q1_0 + q2_0)
     dbz = -Lseg * (c1_ * dq1_0 + c12 * (dq1_0 + dq2_0))
