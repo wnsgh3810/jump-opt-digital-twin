@@ -336,6 +336,131 @@ def baseline_fs2():
     print("done")
 
 
+
+
+
+def modea_fs():
+    """ModeA mshoot fs판 (0.4s 창·측정상태 리셋) — 양방향 심판의 나머지 절반. 세션 바이어스 동일 주입."""
+    import json
+    import fs_data as FD
+    import fs_metric as FMET
+    ft = fs_twin()
+    down = safe.read_json(HERE / "_fs_static_audit.json")
+    up = safe.read_json(HERE / "_fs_updown.json")
+    BIAS = {}
+    for s in down:
+        r1d = np.mean([r["a1"] - r["s1"] for tr in down[s].values() for r in tr["rows"] if r["ok"]])
+        r1u = np.mean([v["r1_up"] for v in up[s].values()]) if s in up and up[s] else r1d
+        BIAS[s] = float((r1d + r1u) / 2)
+    OUT = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if cvt:
+            continue
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+        except Exception:
+            continue
+        t = d["t"]
+        rows = []
+        w0 = seg["t_desc"]
+        while w0 + 0.05 < seg["t_lo"]:
+            wl = min(0.4, seg["t_lo"] - w0)
+            m = (t >= w0) & (t <= w0 + wl)
+            if m.sum() < 20:
+                w0 += 0.3
+                continue
+            i0 = int(np.argmax(m))
+            tg = t[m] - w0
+            L = rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
+                                float(d["q1"][i0]), float(d["q2"][i0]),
+                                float(d["dq1"][i0]), float(d["dq2"][i0]),
+                                float(tg[-1] - 0.004), bias1=BIAS.get(s, 0.0))
+            if L is None:
+                w0 += 0.3
+                continue
+            gi = lambda k: np.interp(tg, L["t"], L[k])
+            mm = tg >= 0.02
+            r = FMET._rmse6({k: d[k][m] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, mm,
+                            gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), gi("s1"), gi("s2"))
+            rows.append(r)
+            w0 += 0.3
+        if rows:
+            a = np.mean(rows, axis=0)
+            OUT.setdefault(s, []).append(list(a))
+            print(f"{s}/{p.name}: MA q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f}", flush=True)
+    json.dump(OUT, open(HERE / "_fs_modea_fs2.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("\n=== fs2 ModeA 세션 요약 ===")
+    for s, rows in OUT.items():
+        a = np.mean(rows, axis=0)
+        print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
+    print("done")
+
+
+def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0):
+    """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경)."""
+    model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
+    law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
+    iq, dof = ft["iq"], ft["dof"]
+    A = P.A_PAPER
+    md = mjm.MjData(model)
+    r1_0 = float(np.interp(0.0, tg, raw1g))
+    s1_0 = float(P.J.ahat(A, np.array([np.clip(r1_0, -TW.R19.CLIP, TW.R19.CLIP)]), np.array([float(dq1_0)]))[0])
+    defl0 = np.clip(np.sign(s1_0) * (abs(s1_0) / 96.0 if abs(s1_0) <= 9 else 9 / 96.0 + (abs(s1_0) - 9) / 323.0), -0.3, 0.3)
+    md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2 - defl0
+    md.qpos[iq["hip"]] = defl0
+    md.qpos[iq["knee_motor"]] = -q2_0
+    md.qpos[iq["cpin"]] = q2_0
+    md.qpos[iq["knee"]] = -q2_0
+    md.qpos[iq["base_z"]] = 1.0
+    mjm.mj_forward(model, md)
+    fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
+    md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+    Lseg = 0.25
+    c1_, c12 = np.cos(q1_0), np.cos(q1_0 + q2_0)
+    dbz = -Lseg * (c1_ * dq1_0 + c12 * (dq1_0 + dq2_0))
+    md.qvel[:] = 0
+    md.qvel[dof["base_z"]] = dbz
+    md.qvel[dof["hip_m"]] = -dq1_0
+    md.qvel[dof["knee_motor"]] = -dq2_0
+    md.qvel[dof["cpin"]] = dq2_0
+    md.qvel[dof["knee"]] = -dq2_0
+    mjm.mj_forward(model, md)
+    dt = model.opt.timestep
+    N = int(round((t_end + t_after) / dt))
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2")
+    Lg = {k: np.zeros(N) for k in keys}
+    for k in range(N):
+        tc = k * dt
+        v1c = -md.qvel[dof["hip_m"]]
+        v2c = -md.qvel[dof["knee_motor"]]
+        r1 = float(np.interp(tc, tg, raw1g)) if tc <= t_end else 0.0
+        r2 = float(np.interp(tc, tg, raw2g)) if tc <= t_end else 0.0
+        r1 = float(np.clip(r1, -TW.R19.CLIP, TW.R19.CLIP))
+        r2 = float(np.clip(r2, -TW.R19.CLIP, TW.R19.CLIP))
+        s1 = float(P.J.ahat(A, np.array([r1]), np.array([v1c]))[0])
+        s2 = float(P.J.ahat(A, np.array([r2]), np.array([v2c]))[0])
+        supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
+        if kr:
+            supp += float(RU.rise_term(v2c, kr, law_v0))
+        tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+        md.qfrc_applied[dof["knee"]] = tql
+        dq_s = float(md.qpos[iq["hip"]])
+        md.qfrc_applied[dof["hip"]] = (FM.KS_HIP * dq_s - _tau2s(dq_s)) + bias1
+        mjm.mj_step(model, md)
+        if not np.isfinite(md.qpos).all():
+            return None
+        Lg["t"][k] = tc
+        Lg["thm1"][k] = -md.qpos[iq["hip_m"]] - np.pi / 2
+        Lg["q1"][k] = -(md.qpos[iq["hip_m"]] + md.qpos[iq["hip"]]) - np.pi / 2
+        Lg["q2"][k] = -md.qpos[iq["knee_motor"]]
+        Lg["dq1"][k] = -md.qvel[dof["hip_m"]]
+        Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
+        Lg["s1"][k] = s1
+        Lg["s2"][k] = s2
+    return Lg
+
+
 if __name__ == "__main__":
     import sys as _s
     a = _s.argv[1] if len(_s.argv) > 1 else ""
@@ -343,5 +468,7 @@ if __name__ == "__main__":
         golden_g5(); baseline_fs()
     elif a == "baseline2":
         baseline_fs2()
+    elif a == "modea":
+        modea_fs()
     else:
         golden_g5()
