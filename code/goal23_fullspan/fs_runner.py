@@ -580,8 +580,7 @@ def baseline_fs3():
             print(f"{s}/{p.name}: ERR {type(ex).__name__}", flush=True)
     json.dump(OUT, open(HERE / "_fs3_cl.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     for wn in ("score", "push"):
-        print(f"
-=== fs3 CL {wn} 창 세션 요약 ===")
+        print(f"\n=== fs3 CL {wn} 창 세션 요약 ===")
         for s, d_ in OUT.items():
             a = np.mean(d_[wn], axis=0)
             print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
@@ -629,8 +628,7 @@ def modea_fs3():
             OUT.setdefault(s, []).append(list(np.mean(rows, axis=0)))
             print(f"{s}/{p.name}: OK", flush=True)
     json.dump(OUT, open(HERE / "_fs3_ma.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print("
-=== fs3 ModeA 세션 요약 ===")
+    print("\n=== fs3 ModeA 세션 요약 ===")
     for s, rows in OUT.items():
         a = np.mean(rows, axis=0)
         print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
