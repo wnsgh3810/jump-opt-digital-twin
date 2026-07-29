@@ -91,6 +91,8 @@ def main(quiet=False):
         dq1m = hip["currentAngleVelocity"].to_numpy(float); dq2m = knee["currentAngleVelocity"].to_numpy(float)
         raw1 = hip["currentTorque"].to_numpy(float); raw2 = knee["currentTorque"].to_numpy(float)
         ft = ft_payload(PL)
+        if KD_OF_PL is not None:
+            globals()["KNEE_DEEP"] = KD_OF_PL(PL)
         md_fk = mjm.MjData(ft["model"])
         rows_on, rows_off = [], []
         w0 = t0
@@ -132,8 +134,22 @@ def main(quiet=False):
         print("done → _fs_s2s.json")
 
 
+def load_law():
+    """F28 하중 비례 법칙 검증: k_d(PL) = 2.5·(1+PL/M_eff), M_eff=1.0kg — 파라미터 1개."""
+    global KNEE_DEEP, KD_OF_PL
+    import numpy as _np
+    KD_OF_PL = lambda PL: (2.5 * (1 + PL / 1.0), float(_np.radians(-130.1)))
+    print("법칙: k_d = 2.5·(1+PL/1.0) → 0kg 2.5 / 5kg 15 / 7.5kg 21.3", flush=True)
+    main(quiet=True)
+
+
+KD_OF_PL = None
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "scan":
         scan()
+    elif len(sys.argv) > 1 and sys.argv[1] == "law":
+        load_law()
     else:
         main()

@@ -1,0 +1,6 @@
+법칙: k_d = 2.5·(1+PL/1.0) → 0kg 2.5 / 5kg 15 / 7.5kg 21.3
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+0kg: off-stop 창 17개 q1 1.04 q2 2.11 || on-stop(착좌) 창 0개 q1 — q2 —
+5kg: off-stop 창 13개 q1 2.64 q2 5.0 || on-stop(착좌) 창 6개 q1 12.25 q2 2.55
+7.5kg: off-stop 창 11개 q1 5.65 q2 10.48 || on-stop(착좌) 창 7개 q1 13.43 q2 1.05
