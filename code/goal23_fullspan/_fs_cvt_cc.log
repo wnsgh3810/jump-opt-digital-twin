@@ -1,0 +1,6 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+C_CVT 정본 = 0.793
+C_CVT×0.5: push q1 1.60 q2 2.43 dq2 3.17
+C_CVT×1.0: push q1 1.74 q2 2.82 dq2 2.94
+C_CVT×1.5: push q1 1.92 q2 3.60 dq2 2.88
