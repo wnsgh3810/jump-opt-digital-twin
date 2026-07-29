@@ -124,5 +124,68 @@ def main():
     print("done →", jp)
 
 
+
+
+
+def audit_recovery(d, seg, step_s=0.10):
+    """착지 후 복귀(느린 상승) 창 정적 감사 — 하강과 마찰 부호가 반대인 판별 창.
+    복귀 창: 착지+0.4s 이후 저속(|dq|<0.6/0.9) 구간."""
+    t = d["t"]
+    t0 = seg["t_land"] + 0.4
+    idx = np.where(t >= t0)[0]
+    if len(idx) < 20:
+        return []
+    dt = float(np.median(np.diff(t)))
+    stride = max(1, int(step_s / dt))
+    rows = []
+    for i in idx[::stride]:
+        if abs(d["dq1"][i]) > 0.6 or abs(d["dq2"][i]) > 0.9:
+            continue
+        s1, s2, ok = hold_torque(float(d["q1"][i]), float(d["q2"][i]))
+        rows.append(dict(t=float(t[i]), q1=float(d["q1"][i]), q2=float(d["q2"][i]),
+                         a1=float(d["a1"][i]), a2=float(d["a2"][i]),
+                         s1=s1, s2=s2, ok=ok,
+                         mv1=float(d["dq1"][i]), mv2=float(d["dq2"][i])))
+    return rows
+
+
+def main_updown():
+    """하강 vs 복귀 잔차 → 마찰(차/2) vs 중력·오프셋(합/2) 분리."""
+    reg = FD.registry()
+    OUT = {}
+    for s, p, g, cvt, ho in reg:
+        if cvt:
+            continue
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+            up = audit_recovery(d, seg)
+        except Exception as ex:
+            print(f"{s}/{p.name}: FAIL {type(ex).__name__}", flush=True)
+            continue
+        if len(up) < 5:
+            continue
+        r1u = np.array([r["a1"] - r["s1"] for r in up if r["ok"]])
+        r2u = np.array([r["a2"] - r["s2"] for r in up if r["ok"]])
+        OUT.setdefault(s, {})[p.name] = dict(r1_up=float(r1u.mean()), r2_up=float(r2u.mean()), n=len(r1u))
+        print(f"{s}/{p.name}: 복귀 잔차 r1 {r1u.mean():+.2f}±{r1u.std():.2f} | r2 {r2u.mean():+.2f} (n={len(r1u)})", flush=True)
+    # 세션 합성: 하강(_fs_static_audit.json) + 복귀 → 분리
+    down = safe.read_json(HERE / "_fs_static_audit.json")
+    print("\n=== 세션별 성분 분리: 마찰 = (하강−복귀)/2 · 중력/오프셋 = (하강+복귀)/2 [Nm] ===")
+    for s in OUT:
+        if s not in down:
+            continue
+        r1d = np.mean([r["a1"] - r["s1"] for tr in down[s].values() for r in tr["rows"] if r["ok"]])
+        r1u = np.mean([v["r1_up"] for v in OUT[s].values()])
+        r2d = np.mean([r["a2"] - r["s2"] for tr in down[s].values() for r in tr["rows"] if r["ok"]])
+        r2u = np.mean([v["r2_up"] for v in OUT[s].values()])
+        print(f"{s}: hip 마찰성 {(r1d-r1u)/2:+.2f} | hip 중력/오프셋 {(r1d+r1u)/2:+.2f} || "
+              f"knee 마찰성 {(r2d-r2u)/2:+.2f} | 중력/오프셋 {(r2d+r2u)/2:+.2f}", flush=True)
+    safe.atomic_json_write(HERE / "_fs_updown.json", OUT)
+    print("done")
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "updown":
+        main_updown()
+    else:
+        main()

@@ -232,13 +232,7 @@ def golden_g5():
     return ok
 
 
-if __name__ == "__main__":
-    import sys as _s
-    if len(_s.argv) > 1 and _s.argv[1] == "baseline":
-        golden_g5()
-        baseline_fs()
-    else:
-        golden_g5()
+
 
 
 def baseline_fs():
@@ -276,3 +270,12 @@ def baseline_fs():
         a = np.mean(rows, axis=0)
         print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
     print("done")
+
+
+if __name__ == "__main__":
+    import sys as _s
+    if len(_s.argv) > 1 and _s.argv[1] == "baseline":
+        golden_g5()
+        baseline_fs()
+    else:
+        golden_g5()
