@@ -115,7 +115,8 @@ def main(quiet=False):
                 w0 += STRIDE
                 continue
             msk = (tg >= 0.02) & (tg <= tg[-1] - 0.02)
-            q1s = np.interp(tg[msk], L["t"], L["q1"]); q2s = np.interp(tg[msk], L["t"], L["q2"])
+            # q1 = 인코더(thm1) 기준 — 실측 q1은 모터측 (F15/F34c 교훈)
+            q1s = np.interp(tg[msk], L["t"], L["thm1"]); q2s = np.interp(tg[msk], L["t"], L["q2"])
             r = (float(np.degrees(np.sqrt(np.mean((q1m[seg][msk] - q1s) ** 2)))),
                  float(np.degrees(np.sqrt(np.mean((q2m[seg][msk] - q2s) ** 2)))))
             (rows_off if off else rows_on).append(r)
