@@ -1,0 +1,13 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+
+=== 관측 w 세션 상수화: 하강 캘리브 → 푸시 제로샷 (τ1 RMSE) ===
+26.07.22: w*_desc=0.9 → 푸시 2.34 | blend0.5 2.23 | 오라클 w=0.5 2.23
+26.07.23: w*_desc=0.2 → 푸시 3.20 | blend0.5 3.40 | 오라클 w=0.0 3.10
+26.07.24: w*_desc=0.0 → 푸시 2.49 | blend0.5 2.27 | 오라클 w=0.7 2.25
+26.07.25: w*_desc=1.0 → 푸시 2.18 | blend0.5 2.73 | 오라클 w=1.0 2.18
+26.07.27: w*_desc=1.0 → 푸시 2.11 | blend0.5 2.35 | 오라클 w=1.0 2.11
+26.04.24: w*_desc=0.0 → 푸시 1.97 | blend0.5 2.29 | 오라클 w=0.0 1.97
+26.06.02: w*_desc=0.1 → 푸시 1.78 | blend0.5 1.84 | 오라클 w=0.2 1.78
+전체: 제로샷 2.29 | blend0.5 2.45 | 오라클 2.23
+done → _fs_tauobs_w.json

@@ -1,0 +1,24 @@
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+100_1.5_250_3: fps 24 shift -1041ms | 말기 비틀림 +2.32° 예측 +7.01° → 초과 -4.69° (말미 3프레임: +2.8, -4.3, -4.7) | body 범위 0.00°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+120_2_250_3: fps 24 shift -325ms | 말기 비틀림 +12.20° 예측 +3.59° → 초과 +8.61° (말미 3프레임: -4.9, -6.7, +8.6) | body 범위 0.00°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+150_2.2_250_3: fps 24 shift -1204ms | 말기 비틀림 +0.34° 예측 +7.53° → 초과 -7.19° (말미 3프레임: +3.5, -5.0, -7.2) | body 범위 0.00°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+200_2.5_250_3: fps 24 shift -200ms | 말기 비틀림 -2.49° 예측 +7.80° → 초과 -10.28° (말미 3프레임: +2.9, -6.1, -10.3) | body 범위 0.00°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+250_3_250_3: fps 24 shift -1160ms | 말기 비틀림 -2.63° 예측 +8.18° → 초과 -10.81° (말미 3프레임: +2.1, -8.2, -10.8) | body 범위 0.00°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+60_2_250_3: fps 24 shift +133ms | 말기 비틀림 +10.17° 예측 +0.23° → 초과 +9.94° (말미 3프레임: -8.5, -4.9, +9.9) | body 범위 1.38°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+80_2_250_3: fps 24 shift -212ms | 말기 비틀림 +9.22° 예측 +0.67° → 초과 +8.54° (말미 3프레임: -4.8, -7.2, +8.5) | body 범위 0.00°
+done → C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_fs_video_gauge_260727.json
