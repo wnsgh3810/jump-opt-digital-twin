@@ -30,6 +30,7 @@ _CACHE = {}
 def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     """fs 모델 + 정본 층 파라미터 캐시. FS_HIPM_DAMP/FL/ARM으로 hip_m 감쇠/마찰/관성 재검 (F30)."""
     arm = float(os.environ.get("FS_HIPM_ARM", str(arm)))
+    bs = float(os.environ.get("FS_BS", str(bs)))
     dm = float(os.environ.get("FS_HIPM_DAMP", "0.312066"))
     fl = float(os.environ.get("FS_HIPM_FL", "0.238254"))
     key = (ks, bs, arm, dm, fl)
