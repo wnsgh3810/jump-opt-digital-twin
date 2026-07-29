@@ -96,7 +96,7 @@ def _tau2s(d, k_lo=96.0, k_hi=323.0, tau0=9.0):
     return np.sign(d) * t
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영)."""
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -135,11 +135,17 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if two_stage or bias1:
             dq_s = float(md.qpos[iq["hip"]])
             corr = (FM.KS_HIP * dq_s - _tau2s(dq_s)) if two_stage else 0.0
-            md.qfrc_applied[dof["hip"]] = corr + bias1   # bias1: 세션 상수 (MuJoCo dof 부호, 검증됨)
+            b_eff = bias1
+            if fade and abs(v1c) > 1.0:
+                b_eff = bias1 * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)
+            md.qfrc_applied[dof["hip"]] = corr + b_eff
         if knee_deep:
             kd_, q20_ = knee_deep
             q2r = -float(md.qpos[iq["knee_motor"]])
-            md.qfrc_applied[dof["knee_motor"]] = -(kd_ * max(0.0, q20_ - q2r))
+            tau_ext = kd_ * max(0.0, q20_ - q2r)
+            if fade and v2c > 1.0:
+                tau_ext *= max(0.0, 1.0 - (v2c - 1.0) / 2.0)
+            md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -400,7 +406,7 @@ def modea_fs():
     print("done")
 
 
-def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None):
+def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False):
     """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경)."""
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -450,12 +456,17 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         dq_s = float(md.qpos[iq["hip"]])
-        md.qfrc_applied[dof["hip"]] = (FM.KS_HIP * dq_s - _tau2s(dq_s)) + bias1
+        b_eff = bias1
+        if fade and abs(v1c) > 1.0:
+            b_eff = bias1 * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)   # 저속 전용 (마찰성 가설)
+        md.qfrc_applied[dof["hip"]] = (FM.KS_HIP * dq_s - _tau2s(dq_s)) + b_eff
         if knee_deep:
             kd_, q20_ = knee_deep
             q2r = -float(md.qpos[iq["knee_motor"]])
             tau_ext = kd_ * max(0.0, q20_ - q2r)     # 로봇 좌표 신전(+) 방향 받침
-            md.qfrc_applied[dof["knee_motor"]] = -tau_ext   # MuJoCo dof 부호 (검증 예정)
+            if fade and v2c > 1.0:
+                tau_ext *= max(0.0, 1.0 - (v2c - 1.0) / 2.0)         # 고속 신전 시 소산 (방출 무반환)
+            md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -566,7 +577,8 @@ def baseline_fs3():
             t = d["t"][i0:] - d["t"][i0]
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
                               gm, seg["t_lo"] - d["t"][i0], two_stage=True,
-                              bias1=sp["bias1"], knee_deep=sp["knee_deep"])
+                              bias1=sp["bias1"], knee_deep=sp["knee_deep"],
+                              fade=os.environ.get("FS_FADE") == "1")
             if L is None:
                 continue
             gi = lambda k: np.interp(t, L["t"], L[k])
@@ -615,7 +627,8 @@ def modea_fs3():
             L = rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
                                 float(d["q1"][i0]), float(d["q2"][i0]),
                                 float(d["dq1"][i0]), float(d["dq2"][i0]),
-                                float(tg[-1] - 0.004), bias1=sp["bias1"], knee_deep=sp["knee_deep"])
+                                float(tg[-1] - 0.004), bias1=sp["bias1"], knee_deep=sp["knee_deep"],
+                                fade=os.environ.get("FS_FADE") == "1")
             if L is None:
                 w0 += 0.3
                 continue
