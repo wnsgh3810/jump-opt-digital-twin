@@ -163,7 +163,8 @@ def main():
         res = {}
         for wn in ("score", "push"):
             m = seg[wn][i0:][: len(t)]
-            r = [float(np.degrees(np.sqrt(np.mean((dd["q1"][m] + o1 - gi("q1")[m]) ** 2)))),
+            # q1 채널 = 인코더(thm1) 기준 — 실측 q1은 모터측 (F15 교훈: 사지각 비교는 처짐 유령)
+            r = [float(np.degrees(np.sqrt(np.mean((dd["q1"][m] + o1 - gi("thm1")[m]) ** 2)))),
                  float(np.degrees(np.sqrt(np.mean((dd["q2"][m] + o2 - gi("q2")[m]) ** 2)))),
                  float(np.sqrt(np.mean((dd["dq1"][m] - gi("dq1")[m]) ** 2))),
                  float(np.sqrt(np.mean((dd["dq2"][m] - gi("dq2")[m]) ** 2))),
