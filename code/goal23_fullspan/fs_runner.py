@@ -147,7 +147,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             kd_, q20_ = knee_deep
             q2r = -float(md.qpos[iq["knee_motor"]])
             tau_ext = kd_ * max(0.0, q20_ - q2r)
-            if fade and v2c > 1.0:
+            _rel = os.environ.get("FS_KNEE_REL")
+            if _rel is not None and v2c > 0.2:
+                tau_ext *= float(_rel)
+            elif fade and v2c > 1.0:
                 tau_ext *= max(0.0, 1.0 - (v2c - 1.0) / 2.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         mjm.mj_step(model, md)
@@ -473,9 +476,10 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
             kd_, q20_ = knee_deep
             q2r = -float(md.qpos[iq["knee_motor"]])
             tau_ext = kd_ * max(0.0, q20_ - q2r)     # 로봇 좌표 신전(+) 방향 받침
-            if knee_rel is not None:
+            _rel = knee_rel if knee_rel is not None else (float(os.environ["FS_KNEE_REL"]) if "FS_KNEE_REL" in os.environ else None)
+            if _rel is not None:
                 if v2c > 0.2:
-                    tau_ext *= knee_rel                               # 방출 분율 (부분 소산 모델)
+                    tau_ext *= _rel                                   # 방출 분율 (부분 소산 모델)
             elif fade and v2c > 1.0:
                 tau_ext *= max(0.0, 1.0 - (v2c - 1.0) / 2.0)         # 고속 신전 시 소산 (방출 무반환)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
@@ -596,7 +600,10 @@ def baseline_fs3():
             gi = lambda k: np.interp(t, L["t"], L[k])
             for wn in ("score", "push"):
                 m = seg[wn][i0:][: len(t)]
-                t1obs = gi("tsp1") if os.environ.get("FS_TAUOBS") == "spr" else (gi("s1f") if os.environ.get("FS_TAUOBS") == "lpf" else gi("s1"))
+                _to = os.environ.get("FS_TAUOBS")
+                t1obs = (gi("tsp1") if _to == "spr" else
+                         gi("s1f") if _to == "lpf" else
+                         0.5 * gi("s1f") + 0.5 * gi("tsp1") if _to == "blend" else gi("s1"))
                 r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
                                 gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), t1obs, gi("s2"))
                 OUT.setdefault(s, {}).setdefault(wn, []).append(list(r))
