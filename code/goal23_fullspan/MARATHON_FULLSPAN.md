@@ -45,3 +45,5 @@ held-out: 0324 Jump_No_Tr(3) · 참관: s2s 계열(0324 s2s, 0319 air/gnd, 0604 
   (armature=병조건 해소 — goal19 실패의 정답), 히스테리시스는 관측면 유지, 원판 발 림 접촉 검증 우선,
   PACE q̃b=세션 잔차 표준화, ★신규 축 η^sign(τω) 방향의존 효율(H29 부호 일치). fs_design_inputs.md 종합.
   다음 틱 큐: ①fs_model v1 구현(Cassie 패턴)+수치 골든 ②원판 발 림 접촉 거동 검증 ③η^sign(τω) 판별 설계.
+
+| F2 | 플랜트 내장 hip 직렬 스프링 (Cassie 패턴) 수치 성립 | fs_model v1 sanity 3종 | **PASS — goal19 실패 축 부활** | 구조: hip_m(armature 0.01+기어박스 마찰)→rotor(1e-7 관성)→hip 스프링 힌지(k150·b1.5·springref0=순수 처짐좌표). ①정적 처짐 −0.663° = τ/k 예측 −0.667° (오차 0.004°) ②수동 낙하 2s 안정 ③k=1000 극한 안정 (goal19 발산 영역). 관례: q1=−(hip_m+hip)−π/2, θ_m=−hip_m−π/2, 처짐=+hip. 다음: fs 러너(CL/ModeA, 이름 기반 어드레싱) + 2단 qfrc 보정 + 변형 C 등가성 골든 |

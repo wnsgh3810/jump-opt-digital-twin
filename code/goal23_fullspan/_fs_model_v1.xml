@@ -1,0 +1,51 @@
+<mujoco model="fourbar_flip">
+<option cone="elliptic" impratio="100" gravity="0 0 -9.81" timestep="0.0005" integrator="implicitfast"/>
+<default><default class="leg">
+  <geom friction="1.00000 0.02000 0.01000" margin="0.001" condim="6"/>
+  <joint axis="0 1 0"/>
+  <motor ctrlrange="-200 200" ctrllimited="false"/>
+  <default class="foot">
+    <geom type="cylinder" size="0.0210" priority="1" solref="0.011731 1.6072" solimp="0.472998 0.72007 0.005409 0.5 2" condim="6" friction="1.00000 0.02000 0.01000" margin="0.001"/>
+  </default>
+</default></default>
+<worldbody>
+  <geom name="floor" size="0 0 0.05" type="plane" solref="0.011731 1.6072" solimp="0.472998 0.72007 0.005409 0.5 2" friction="1.00000 0.02000 0.01000" margin="0.001"/>
+  <body name="base" pos="0 0 0" childclass="leg">
+    <joint name="base_z" type="slide" axis="0 0 1"/>
+    <inertial pos="0 0 0" mass="1.387808" diaginertia="0.005 0.005 0.005"/>
+    <geom type="box" size="0.06 0.03 0.025" contype="0" conaffinity="0"/>
+    <body name="hip_rotor" pos="0 0 -0.025">
+      <joint name="hip_m" type="hinge" armature="0.01" damping="0.312066" frictionloss="0.238254"/>
+      <inertial pos="0 0 0" mass="0.001" diaginertia="1e-07 1e-07 1e-07"/>
+      <body name="thigh" pos="0 0 0">
+      <joint name="hip" type="hinge" armature="0" damping="1.5" stiffness="150.0" springref="0"/>
+      <inertial pos="0 0 -0.10943" mass="0.98583" diaginertia="0.003234 0.003234 0.0002"/>
+      <geom type="capsule" size="0.02" fromto="0 0 0 0 0 -0.25" contype="1" conaffinity="1"/>
+      <body name="crank" pos="0 0 0">
+        <joint name="knee_motor" type="hinge" armature="0.00795495" damping="0.149630" frictionloss="0.246893" stiffness="0.000000" springref="1.87751"/>
+        <inertial pos="0 0 0.02078" mass="0.43700" diaginertia="0.000628 0.000628 0.000628"/>
+        <geom type="capsule" size="0.008" fromto="0 0 0 0 0 0.03" contype="0" conaffinity="0"/>
+        <body name="coupler" pos="0 0 0.03">
+          <joint name="cpin" type="hinge" damping="0.00040"/>
+          <inertial pos="0 0 -0.10659" mass="0.15002" diaginertia="0.001235 0.001235 0.00005"/>
+          <geom type="capsule" size="0.006" fromto="0 0 0 0 0 -0.25" contype="0" conaffinity="0"/>
+        </body>
+      </body>
+      <body name="calf" pos="0 0 -0.25">
+        <joint name="knee" type="hinge" damping="0.02309" stiffness="0.000000" springref="1.87751"/>
+        <inertial pos="0 0 -0.11380" mass="0.23934" diaginertia="0.002689 0.002689 0.00005"/>
+        <geom type="capsule" size="0.015" fromto="0 0 0 0 0 -0.25" contype="1" conaffinity="1"/>
+        <geom name="foot" class="foot" type="cylinder" size="0.0210 0.0065" pos="0 0 -0.25" euler="90 0 0"/>
+      </body>
+    </body>
+    </body>
+  </body>
+</worldbody>
+<equality>
+  <connect body1="coupler" body2="calf" anchor="0 0 -0.25" solref="0.00080 1"/>
+</equality>
+<actuator>
+  <motor name="hip_motor" joint="hip_m" gear="1"/>
+  <motor name="knee_motor" joint="knee_motor" gear="1"/>
+</actuator>
+</mujoco>
