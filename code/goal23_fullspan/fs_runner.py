@@ -111,6 +111,12 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     N = int(round((t_end + t_after) / dt))
     keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f")
     Lg = {k: np.zeros(N) for k in keys}
+    # F28b 하중 인식 간섭: N(t)=sim 발 접촉 수직력 / mg 스케일 (하강≈1 → 세션 적합 보존)
+    load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
+    if load_on:
+        _fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
+        _Nmg = float(model.body_mass.sum() * 9.81)
+        _cf = np.zeros(6)
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -154,6 +160,14 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                 tau_ext *= float(_rel)
             elif fade and v2c > 1.0:
                 tau_ext *= max(0.0, 1.0 - (v2c - 1.0) / 2.0)
+            if load_on:
+                Nf = 0.0
+                for ci in range(md.ncon):
+                    _c = md.contact[ci]
+                    if _c.geom1 == _fg or _c.geom2 == _fg:
+                        mjm.mj_contactForce(model, md, ci, _cf)
+                        Nf += abs(float(_cf[0]))
+                tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
@@ -453,6 +467,10 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     N = int(round((t_end + t_after) / dt))
     keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2")
     Lg = {k: np.zeros(N) for k in keys}
+    load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
+    if load_on:
+        _Nmg = float(model.body_mass.sum() * 9.81)
+        _cf = np.zeros(6)
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -484,6 +502,14 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
                     tau_ext *= _rel                                   # 방출 분율 (부분 소산 모델)
             elif fade and v2c > 1.0:
                 tau_ext *= max(0.0, 1.0 - (v2c - 1.0) / 2.0)         # 고속 신전 시 소산 (방출 무반환)
+            if load_on:
+                Nf = 0.0
+                for ci in range(md.ncon):
+                    _c = md.contact[ci]
+                    if _c.geom1 == fg or _c.geom2 == fg:
+                        mjm.mj_contactForce(model, md, ci, _cf)
+                        Nf += abs(float(_cf[0]))
+                tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
