@@ -608,9 +608,14 @@ def baseline_fs3():
             for wn in ("score", "push"):
                 m = seg[wn][i0:][: len(t)]
                 _to = os.environ.get("FS_TAUOBS")
-                t1obs = (gi("tsp1") if _to == "spr" else
-                         gi("s1f") if _to == "lpf" else
-                         0.5 * gi("s1f") + 0.5 * gi("tsp1") if _to == "blend" else gi("s1"))
+                if _to == "sess":
+                    _wj = HERE / "_fs_tauobs_w.json"
+                    _w = float(safe.read_json(_wj).get(s, 0.5)) if _wj.exists() else 0.5
+                    t1obs = _w * gi("s1f") + (1 - _w) * gi("tsp1")
+                else:
+                    t1obs = (gi("tsp1") if _to == "spr" else
+                             gi("s1f") if _to == "lpf" else
+                             0.5 * gi("s1f") + 0.5 * gi("tsp1") if _to == "blend" else gi("s1"))
                 r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
                                 gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), t1obs, gi("s2"))
                 OUT.setdefault(s, {}).setdefault(wn, []).append(list(r))
@@ -721,6 +726,52 @@ def tauobs_compare():
     print("전체 평균: " + " | ".join(f"{k} {np.mean(v):.2f}" for k, v in tot.items()))
     print("done")
 
+
+def tauobs_desc():
+    """관측 블렌드 w의 세션 상수화 판별: 하강 창에서 w* 캘리브 → 푸시 제로샷 평가.
+    w=0(스프링측)~1(lpf10) 11단계. 누수 없음 (w 선정에 푸시 창 미사용). 오라클 병기."""
+    import fs_data as FD
+    ft = fs_twin()
+    SP = _sess_params()
+    W = np.linspace(0, 1, 11)
+    ACC = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if cvt or ho or not g or s == "26.04.21":
+            continue
+        sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+            gm = (g[0], g[1], g[2] * {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}.get(g[2], 0.656), g[3] * 0.20)
+            i0 = max(0, seg["i_desc"] - 5)
+            t = d["t"][i0:] - d["t"][i0]
+            L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+                              gm, seg["t_lo"] - d["t"][i0], two_stage=True,
+                              bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
+            if L is None:
+                continue
+            a1 = d["a1"][i0:][: len(t)]
+            lp = np.interp(t, L["t"], L["s1f"]); tp = np.interp(t, L["t"], L["tsp1"])
+            row = {}
+            for wn in ("desc", "push"):
+                m = seg[wn][i0:][: len(t)]
+                row[wn] = [float(np.sqrt(np.mean((a1[m] - (w * lp + (1 - w) * tp)[m]) ** 2))) for w in W]
+            ACC.setdefault(s, []).append(row)
+        except Exception as ex:
+            print(f"{s}/{p.name}: ERR {type(ex).__name__}", flush=True)
+    print("\n=== 관측 w 세션 상수화: 하강 캘리브 → 푸시 제로샷 (τ1 RMSE) ===")
+    zs, bl, orc, WS = [], [], [], {}
+    for s, rows in ACC.items():
+        dmean = np.mean([r["desc"] for r in rows], axis=0)
+        pmean = np.mean([r["push"] for r in rows], axis=0)
+        iw = int(np.argmin(dmean)); io = int(np.argmin(pmean))
+        zs.append(pmean[iw]); bl.append(pmean[5]); orc.append(pmean[io])
+        WS[s] = float(W[iw])
+        print(f"{s}: w*_desc={W[iw]:.1f} → 푸시 {pmean[iw]:.2f} | blend0.5 {pmean[5]:.2f} | "
+              f"오라클 w={W[io]:.1f} {pmean[io]:.2f}", flush=True)
+    print(f"전체: 제로샷 {np.mean(zs):.2f} | blend0.5 {np.mean(bl):.2f} | 오라클 {np.mean(orc):.2f}")
+    safe.atomic_json_write(HERE / "_fs_tauobs_w.json", WS)
+    print("done → _fs_tauobs_w.json")
+
 if __name__ == "__main__":
     import sys as _s
     a = _s.argv[1] if len(_s.argv) > 1 else ""
@@ -734,6 +785,8 @@ if __name__ == "__main__":
         fit_knee_deep()
     elif a == "tauobs":
         tauobs_compare()
+    elif a == "tauobs2":
+        tauobs_desc()
     elif a == "fs3":
         baseline_fs3(); modea_fs3()
     else:
