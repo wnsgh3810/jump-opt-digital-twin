@@ -96,7 +96,7 @@ def _tau2s(d, k_lo=96.0, k_hi=323.0, tau0=9.0):
     return np.sign(d) * t
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영)."""
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -136,6 +136,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             dq_s = float(md.qpos[iq["hip"]])
             corr = (FM.KS_HIP * dq_s - _tau2s(dq_s)) if two_stage else 0.0
             md.qfrc_applied[dof["hip"]] = corr + bias1   # bias1: 세션 상수 (MuJoCo dof 부호, 검증됨)
+        if knee_deep:
+            kd_, q20_ = knee_deep
+            q2r = -float(md.qpos[iq["knee_motor"]])
+            md.qfrc_applied[dof["knee_motor"]] = -(kd_ * max(0.0, q20_ - q2r))
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -465,22 +469,6 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         Lg["s2"][k] = s2
     return Lg
 
-
-if __name__ == "__main__":
-    import sys as _s
-    a = _s.argv[1] if len(_s.argv) > 1 else ""
-    if a == "baseline":
-        golden_g5(); baseline_fs()
-    elif a == "baseline2":
-        baseline_fs2()
-    elif a == "modea":
-        modea_fs()
-    elif a == "kneedeep":
-        fit_knee_deep()
-    else:
-        golden_g5()
-
-
 def fit_knee_deep():
     """세션별 (q2_0, k_d) 적합 — 하강 창(깊은 부분)만 사용 (규칙 4). HO 0324 포함(자체 캘리브 관찰용)."""
     import json
@@ -541,3 +529,126 @@ def fit_knee_deep():
     import json as _j
     safe.atomic_json_write(HERE / "_fs_knee_deep.json", FIT)
     print("done")
+def _sess_params():
+    import fs_data as FD
+    down = safe.read_json(HERE / "_fs_static_audit.json")
+    up = safe.read_json(HERE / "_fs_updown.json")
+    kd = safe.read_json(HERE / "_fs_knee_deep.json")
+    P = {}
+    for s in list(down.keys()) + ["26.07.25"]:
+        if s in P:
+            continue
+        r1d = np.mean([r["a1"] - r["s1"] for tr in down[s].values() for r in tr["rows"] if r["ok"]]) if s in down else 0.0
+        r1u = np.mean([v["r1_up"] for v in up[s].values()]) if s in up and up[s] else r1d
+        b = float((r1d + r1u) / 2)
+        k = kd.get(s)
+        knee = (float(k["kd"]), float(np.radians(k["q20_deg"]))) if (k and k.get("kd")) else None
+        P[s] = dict(bias1=b, knee_deep=knee)
+    return P
+
+
+def baseline_fs3():
+    import json
+    import fs_data as FD
+    import fs_metric as FMET
+    ft = fs_twin()
+    TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
+    SP = _sess_params()
+    OUT = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if cvt or ho or not g:
+            continue
+        sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+            gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
+            i0 = max(0, seg["i_desc"] - 5)
+            t = d["t"][i0:] - d["t"][i0]
+            L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+                              gm, seg["t_lo"] - d["t"][i0], two_stage=True,
+                              bias1=sp["bias1"], knee_deep=sp["knee_deep"])
+            if L is None:
+                continue
+            gi = lambda k: np.interp(t, L["t"], L[k])
+            for wn in ("score", "push"):
+                m = seg[wn][i0:][: len(t)]
+                r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
+                                gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), gi("s1"), gi("s2"))
+                OUT.setdefault(s, {}).setdefault(wn, []).append(list(r))
+            print(f"{s}/{p.name}: OK", flush=True)
+        except Exception as ex:
+            print(f"{s}/{p.name}: ERR {type(ex).__name__}", flush=True)
+    json.dump(OUT, open(HERE / "_fs3_cl.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    for wn in ("score", "push"):
+        print(f"
+=== fs3 CL {wn} 창 세션 요약 ===")
+        for s, d_ in OUT.items():
+            a = np.mean(d_[wn], axis=0)
+            print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
+    print("done")
+
+
+def modea_fs3():
+    import json
+    import fs_data as FD
+    import fs_metric as FMET
+    ft = fs_twin()
+    SP = _sess_params()
+    OUT = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if cvt:
+            continue
+        sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+        except Exception:
+            continue
+        t = d["t"]
+        rows = []
+        w0 = seg["t_desc"]
+        while w0 + 0.05 < seg["t_lo"]:
+            wl = min(0.4, seg["t_lo"] - w0)
+            m = (t >= w0) & (t <= w0 + wl)
+            if m.sum() < 20:
+                w0 += 0.3
+                continue
+            i0 = int(np.argmax(m)); tg = t[m] - w0
+            L = rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
+                                float(d["q1"][i0]), float(d["q2"][i0]),
+                                float(d["dq1"][i0]), float(d["dq2"][i0]),
+                                float(tg[-1] - 0.004), bias1=sp["bias1"], knee_deep=sp["knee_deep"])
+            if L is None:
+                w0 += 0.3
+                continue
+            gi = lambda k: np.interp(tg, L["t"], L[k])
+            mm = tg >= 0.02
+            rows.append(FMET._rmse6({k: d[k][m] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, mm,
+                                    gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), gi("s1"), gi("s2")))
+            w0 += 0.3
+        if rows:
+            OUT.setdefault(s, []).append(list(np.mean(rows, axis=0)))
+            print(f"{s}/{p.name}: OK", flush=True)
+    json.dump(OUT, open(HERE / "_fs3_ma.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("
+=== fs3 ModeA 세션 요약 ===")
+    for s, rows in OUT.items():
+        a = np.mean(rows, axis=0)
+        print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
+    print("done")
+
+
+if __name__ == "__main__":
+    import sys as _s
+    a = _s.argv[1] if len(_s.argv) > 1 else ""
+    if a == "baseline":
+        golden_g5(); baseline_fs()
+    elif a == "baseline2":
+        baseline_fs2()
+    elif a == "modea":
+        modea_fs()
+    elif a == "kneedeep":
+        fit_knee_deep()
+    elif a == "fs3":
+        baseline_fs3(); modea_fs3()
+    else:
+        golden_g5()

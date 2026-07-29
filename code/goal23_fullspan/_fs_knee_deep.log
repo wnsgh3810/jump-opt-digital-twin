@@ -1,5 +1,11 @@
-Traceback (most recent call last):
-  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\fs_runner.py", line 479, in <module>
-    fit_knee_deep()
-    ^^^^^^^^^^^^^
-NameError: name 'fit_knee_deep' is not defined
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+26.07.22: 1.31° → 1.31° (k_d 0.0, 결합 None°)
+26.07.23: 10.86° → 2.33° (k_d 5.0, 결합 -126.1°)
+26.07.24: 10.35° → 3.78° (k_d 10.0, 결합 -126.1°)
+26.07.25: 깊은 창 없음 — 요소 불필요
+26.07.27: 1.11° → 1.11° (k_d 0.0, 결합 None°)
+26.04.24: 5.42° → 1.25° (k_d 5.0, 결합 -130.1°)
+26.06.02: 10.91° → 2.34° (k_d 10.0, 결합 -130.1°)
+26.04.21: 2.85° → 1.24° (k_d 2.5, 결합 -130.1°)
+done

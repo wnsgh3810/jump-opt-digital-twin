@@ -1,0 +1,4 @@
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\fs_runner.py", line 583
+    print(f"
+          ^
+SyntaxError: unterminated string literal (detected at line 583)
