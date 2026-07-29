@@ -53,11 +53,19 @@ def trials_of(base: Path):
 
 
 def gains_of(name: str):
+    """게인 파싱: 'kp1_kd1_kp2_kd2' 또는 'P100_D0.75_P100_D2' (0421 형식)."""
+    toks = name.split("_")
     try:
-        g = [float(x) for x in name.split("_")]
+        g = [float(x) for x in toks]
         return tuple(g) if len(g) == 4 else None
     except ValueError:
-        return None
+        pass
+    if len(toks) == 4 and toks[0].startswith("P") and toks[1].startswith("D"):
+        try:
+            return (float(toks[0][1:]), float(toks[1][1:]), float(toks[2][1:]), float(toks[3][1:]))
+        except ValueError:
+            return None
+    return None
 
 
 def load2(fold: Path):
