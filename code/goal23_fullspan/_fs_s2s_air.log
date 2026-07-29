@@ -1,0 +1,8 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+0324 s2s 공중 참관 (bias1=+0.73)
+sit2stand_P10_D0: 창 464개 | q1 4.84° | q2 2.41°
+sit2stand_P10_D1: 창 364개 | q1 6.22° | q2 2.37°
+sit2stand_P20_D1: 창 447개 | q1 5.29° | q2 2.20°
+sit2stand_P30_D1: 창 384개 | q1 5.29° | q2 2.51°
+sit2stand_P60_D1.5_P60_D2: 창 361개 | q1 5.32° | q2 2.70°
