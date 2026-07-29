@@ -522,6 +522,12 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
                         Nf += abs(float(_cf[0]))
                 tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
+        _dc = os.environ.get("FS_DEEP_DMPCUT")
+        if _dc is not None:
+            q2r_ = -float(md.qpos[iq["knee_motor"]])
+            _th = float(os.environ.get("FS_DEEP_TH", "-120.0"))
+            gg = 1.0 / (1.0 + np.exp((q2r_ - np.radians(_th)) / np.radians(4.0)))
+            md.qfrc_applied[dof["hip_m"]] = float(_dc) * gg * float(md.qvel[dof["hip_m"]])
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
