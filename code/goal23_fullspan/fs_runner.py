@@ -105,8 +105,11 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     kp1, kd1, kp2, kd2 = gains
     md, _, _ = _settle(ft, float(qd1g[0]), float(qd2g[0]))
     dt = model.opt.timestep
+    tc_f = float(os.environ.get("FS_TC", "0.010"))
+    s1f = 0.0
+    af = dt / max(tc_f, dt)
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f")
     Lg = {k: np.zeros(N) for k in keys}
     for k in range(N):
         tc = k * dt
@@ -161,6 +164,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
+        s1f += af * (s1 - s1f)
+        Lg["s1f"][k] = s1f
     return Lg
 
 
@@ -586,7 +591,7 @@ def baseline_fs3():
             gi = lambda k: np.interp(t, L["t"], L[k])
             for wn in ("score", "push"):
                 m = seg[wn][i0:][: len(t)]
-                t1obs = gi("tsp1") if os.environ.get("FS_TAUOBS") == "spr" else gi("s1")
+                t1obs = gi("tsp1") if os.environ.get("FS_TAUOBS") == "spr" else (gi("s1f") if os.environ.get("FS_TAUOBS") == "lpf" else gi("s1"))
                 r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
                                 gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), t1obs, gi("s2"))
                 OUT.setdefault(s, {}).setdefault(wn, []).append(list(r))
