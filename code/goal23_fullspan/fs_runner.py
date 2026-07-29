@@ -106,7 +106,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     md, _, _ = _settle(ft, float(qd1g[0]), float(qd2g[0]))
     dt = model.opt.timestep
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1")
     Lg = {k: np.zeros(N) for k in keys}
     for k in range(N):
         tc = k * dt
@@ -117,6 +117,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         q2c = -md.qpos[iq["knee_motor"]]
         v1c = -md.qvel[dof["hip_m"]]
         v2c = -md.qvel[dof["knee_motor"]]
+        b_eff = 0.0
         if tc <= t_end:
             c1 = kp1 * (qd1 - thm) + kd1 * (dqd1 - v1c)
             c2 = kp2 * (qd2 - q2c) + kd2 * (dqd2 - v2c)
@@ -159,6 +160,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["s2"][k] = s2
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
+        Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
     return Lg
 
 
@@ -584,8 +586,9 @@ def baseline_fs3():
             gi = lambda k: np.interp(t, L["t"], L[k])
             for wn in ("score", "push"):
                 m = seg[wn][i0:][: len(t)]
+                t1obs = gi("tsp1") if os.environ.get("FS_TAUOBS") == "spr" else gi("s1")
                 r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
-                                gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), gi("s1"), gi("s2"))
+                                gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), t1obs, gi("s2"))
                 OUT.setdefault(s, {}).setdefault(wn, []).append(list(r))
             print(f"{s}/{p.name}: OK", flush=True)
         except Exception as ex:
