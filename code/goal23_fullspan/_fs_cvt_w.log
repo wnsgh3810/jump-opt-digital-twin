@@ -1,0 +1,4 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+0429 w*_desc=0.0 -> push tau1 2.25 | blend0.5 2.72 | oracle w=0.0 2.25
+push curve: 0.0:2.25 0.1:2.33 0.2:2.41 0.3:2.50 0.4:2.61 0.5:2.72 0.6:2.83 0.7:2.96 0.8:3.09 0.9:3.22 1.0:3.36
