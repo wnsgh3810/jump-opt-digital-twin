@@ -8,6 +8,7 @@
   ④ fs_calib_cvt        → _fs_cvt_audit.json     (0429 CVT 크랭크 감사)
   ⑤ fs_runner tauobs2   → _fs_tauobs_w.json      (관측 w 세션 상수)
 순서 고정 (⑤는 ①~③ 산출물을 소비). 전 단계 하강/복귀 창만 사용 — 점프 창 무접촉 (규칙 4).
+권고 (F51): ⑤의 w 캘리브는 차기부터 desc+prehold 합산 창 사용 (miss 3→1, 23일·0602 오라클 도달).
 CLI: python fs_calib_all.py [--dry]  (--dry: 실행 없이 단계·산출물 나열)
 """
 import os, sys, subprocess
