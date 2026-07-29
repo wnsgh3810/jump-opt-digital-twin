@@ -155,6 +155,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             if fade and abs(v1c) > 1.0:
                 b_eff = bias1 * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)
             md.qfrc_applied[dof["hip"]] = corr + b_eff
+        _dc = os.environ.get("FS_DEEP_DMPCUT")
+        if _dc is not None:
+            # F49 정찰: 운영영역(깊이) 게이트 hip 감쇠 절감 — 깊은 굴곡(q2<-120°)에서만 XML 감쇠 일부 상쇄
+            q2r_ = -float(md.qpos[iq["knee_motor"]])
+            _th = float(os.environ.get("FS_DEEP_TH", "-120.0"))
+            gg = 1.0 / (1.0 + np.exp((q2r_ - np.radians(_th)) / np.radians(4.0)))
+            md.qfrc_applied[dof["hip_m"]] = float(_dc) * gg * float(md.qvel[dof["hip_m"]])
         if knee_deep:
             kd_, q20_ = knee_deep
             q2r = -float(md.qpos[iq["knee_motor"]])
