@@ -87,7 +87,16 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
     return md, c1f, c2f
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05):
+
+def _tau2s(d, k_lo=96.0, k_hi=323.0, tau0=9.0):
+    """2단 스프링 토크 (처짐 d[rad] → Nm). d0=tau0/k_lo에서 연속."""
+    d0 = tau0 / k_lo
+    a = abs(d)
+    t = k_lo * a if a <= d0 else tau0 + k_hi * (a - d0)
+    return np.sign(d) * t
+
+
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영)."""
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -123,6 +132,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05):
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
+        if two_stage or bias1:
+            dq_s = float(md.qpos[iq["hip"]])
+            corr = (FM.KS_HIP * dq_s - _tau2s(dq_s)) if two_stage else 0.0
+            md.qfrc_applied[dof["hip"]] = corr + bias1   # bias1: 세션 상수 (MuJoCo dof 부호, 검증됨)
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -272,10 +285,63 @@ def baseline_fs():
     print("done")
 
 
+
+
+
+def baseline_fs2():
+    """fs 2단+세션 바이어스 (캘리브: 하강·복귀 정적 감사 → (r1d+r1u)/2, 채점 창 밖 = 무누수)."""
+    import json
+    import fs_data as FD
+    import fs_metric as FMET
+    ft = fs_twin()
+    TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
+    down = safe.read_json(HERE / "_fs_static_audit.json")
+    up = safe.read_json(HERE / "_fs_updown.json")
+    BIAS = {}
+    for s in down:
+        r1d = np.mean([r["a1"] - r["s1"] for tr in down[s].values() for r in tr["rows"] if r["ok"]])
+        if s in up and up[s]:
+            r1u = np.mean([v["r1_up"] for v in up[s].values()])
+            BIAS[s] = float((r1d + r1u) / 2)
+        else:
+            BIAS[s] = float(r1d)
+    print("세션 바이어스:", {k: round(v, 2) for k, v in BIAS.items()})
+    OUT = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if cvt or ho or not g:
+            continue
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+            gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
+            i0 = max(0, seg["i_desc"] - 5)
+            t = d["t"][i0:] - d["t"][i0]
+            L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+                              gm, seg["t_lo"] - d["t"][i0], two_stage=True, bias1=BIAS.get(s, 0.0))
+            if L is None:
+                print(f"{s}/{p.name}: 발산", flush=True)
+                continue
+            m = seg["score"][i0:][: len(t)]
+            gi = lambda k: np.interp(t, L["t"], L[k])
+            r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
+                            gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), gi("s1"), gi("s2"))
+            OUT.setdefault(s, []).append(list(r))
+            print(f"{s}/{p.name}: q1 {r[0]:.2f} q2 {r[1]:.2f} dq1 {r[2]:.2f} dq2 {r[3]:.2f} τ1 {r[4]:.2f} τ2 {r[5]:.2f}", flush=True)
+        except Exception as ex:
+            print(f"{s}/{p.name}: ERR {type(ex).__name__} {ex}", flush=True)
+    json.dump(OUT, open(HERE / "_fs_baseline_fs2.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("\n=== fs2(2단+세션바이어스) 세션 요약 ===")
+    for s, rows in OUT.items():
+        a = np.mean(rows, axis=0)
+        print(f"{s}: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}")
+    print("done")
+
+
 if __name__ == "__main__":
     import sys as _s
-    if len(_s.argv) > 1 and _s.argv[1] == "baseline":
-        golden_g5()
-        baseline_fs()
+    a = _s.argv[1] if len(_s.argv) > 1 else ""
+    if a == "baseline":
+        golden_g5(); baseline_fs()
+    elif a == "baseline2":
+        baseline_fs2()
     else:
         golden_g5()
