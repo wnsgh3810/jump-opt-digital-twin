@@ -77,10 +77,10 @@ def golden():
                 print(f"  {sub}: ERR {type(ex).__name__}", flush=True)
         print(f"{tag}: 0429 재생 dq2 RMSE 평균 {np.mean(rms):.3f} (n={len(rms)}, 골든 앵커 ~3.31)", flush=True)
 
-def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=True):
+def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=True, bias1=0.0):
     """a_full23 CVT 가지 문자 미러 (fs=False: 5q 검증 경로 → 정본 2.705 재현이 골든 /
-    fs=True: 6q 직렬힌지 경로 — hip 분할 init + 2단 qfrc + 소산 게이트).
-    반환 (dq2 RMSE, h_sim) | None."""
+    fs=True: 6q 직렬힌지 경로 — hip 분할 init + 2단 qfrc + 소산 게이트 + 세션 bias1).
+    반환 (dq2 RMSE, q1 RMSE, h_sim) | None."""
     import fs_runner as FR
     P = TW.C._W["P"]; mj = TW.C._W["mj"]; S = P.J._P["S"]
     law = tw["law"]; spr = tw["spr"]; kr = tw["kr"]
@@ -136,7 +136,7 @@ def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=Tru
     dt = model.opt.timestep
     N = int((P.J.T_SETTLE + t[-1] + P.J.T_AFTER) / dt)
     tl = np.arange(N) * dt - P.J.T_SETTLE
-    dq2s = np.zeros(N); bzs = np.zeros(N)
+    dq2s = np.zeros(N); bzs = np.zeros(N); q1s = np.zeros(N)
     for k in range(N):
         tc = tl[k]
         if tc < 0:
@@ -178,15 +178,20 @@ def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=Tru
             v1c_now = -md.qvel[d_hipm]
             dq_s = float(md.qpos[iq["hip"]])
             corr = (FM.KS_HIP * dq_s - FR._tau2s(dq_s)) if two_stage else 0.0
-            md.qfrc_applied[dofm["hip"]] = corr
+            b_eff = bias1
+            if fade and abs(v1c_now) > 1.0:
+                b_eff = bias1 * max(0.0, 1.0 - (abs(v1c_now) - 1.0) / 2.0)
+            md.qfrc_applied[dofm["hip"]] = corr + b_eff
         mj.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
         dq2s[k] = -md.qvel[d_crank]
+        q1s[k] = (-(md.qpos[i_hipm] + md.qpos[iq["hip"]]) - np.pi / 2) if fs else (-md.qpos[i_hipm] - np.pi / 2)
         bzs[k] = md.qpos[0]
     m = (tl >= 0) & (tl <= t[-1])
     rmse = float(np.sqrt(np.mean((np.interp(tl[m], t, d["dq2"]) - dq2s[m]) ** 2)))
-    return rmse, float(bzs[tl > 0].max())
+    rq1 = float(np.degrees(np.sqrt(np.mean((np.interp(tl[m], t, d["q1"]) + o1 - q1s[m]) ** 2))))
+    return rmse, rq1, float(bzs[tl > 0].max())
 
 
 def golden2():
@@ -207,9 +212,35 @@ def golden2():
                 print(f"  {sub}: ERR {type(ex).__name__} {ex}", flush=True)
         print(f"{tag}: 0429 재생 {np.mean(rms):.3f} (정본 앵커 2.705)", flush=True)
 
+def golden3():
+    """0429 세션 bias1(정적 감사) 편입 판별: fs 6q에서 bias 유/무 dq2·q1 비교."""
+    model_c, model_cf, ctx = build_cvt_pair()
+    tw = ctx["tw"]; nm = ctx["nm"]
+    o1, o2, cc = nm["o1_429"], nm["o2_429"], nm["C_CVT"]
+    cv = safe.read_json(HERE / "_fs_cvt_audit.json")
+    rr = [r["a1"] - r["s1"] for tr in cv.values() for r in tr["down"] if r["ok"]]
+    b = float(np.mean(rr))
+    print(f"0429 감사 bias1 = {b:+.3f} Nm (n={len(rr)})", flush=True)
+    for tag, bb in [("bias=0", 0.0), (f"bias={b:+.2f}", b)]:
+        rms, rq = [], []
+        for ds, sub, d, gains, dqon, ffk, m, is_cvt, l_i in TW.R19.TRIALS:
+            if ds != "jump_0429":
+                continue
+            try:
+                res = a_cvt_mirror(model_cf, d, tw, o1, o2, cc, fs=True, bias1=bb)
+                rms.append(res[0] if res else 9.9)
+                rq.append(res[1] if res else 99.9)
+            except Exception as ex:
+                rms.append(9.9); rq.append(99.9)
+                print(f"  {sub}: ERR {type(ex).__name__} {ex}", flush=True)
+        print(f"{tag}: dq2 {np.mean(rms):.3f} | q1 {np.mean(rq):.2f}° (n={len(rms)})", flush=True)
+
+
 if __name__ == "__main__":
     import sys as _s
     if len(_s.argv) > 1 and _s.argv[1] == "golden2":
         golden2()
+    elif len(_s.argv) > 1 and _s.argv[1] == "golden3":
+        golden3()
     else:
         golden()

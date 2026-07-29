@@ -571,6 +571,13 @@ def _sess_params():
         k = kd.get(s)
         knee = (float(k["kd"]), float(np.radians(k["q20_deg"]))) if (k and k.get("kd")) else None
         P[s] = dict(bias1=b, knee_deep=knee)
+    # 0429 CVT: fs_calib_cvt 감사 (복귀 표본 없음 → 하강 단독; 크랭크 잔차 +0.08≈0라 knee_deep 없음)
+    cvt_p = HERE / "_fs_cvt_audit.json"
+    if cvt_p.exists():
+        cv = safe.read_json(cvt_p)
+        rr = [r["a1"] - r["s1"] for tr in cv.values() for r in tr["down"] if r["ok"]]
+        if rr:
+            P["26.04.29"] = dict(bias1=float(np.mean(rr)), knee_deep=None)
     return P
 
 
@@ -697,16 +704,20 @@ def tauobs_compare():
                 res[nm] = float(np.sqrt(np.mean((a1[m] - o[m]) ** 2)))
             ob = 0.5 * np.interp(t, L["t"], L["s1f"]) + 0.5 * np.interp(t, L["t"], L["tsp1"])
             res["blend"] = float(np.sqrt(np.mean((a1[m] - ob[m]) ** 2)))
+            # 게인 인식 (trial 입자도): 전류루프 지연 관점 — 저게인(60)=스프링측, 고게인(120+)=lpf10
+            w = float(np.clip((g[0] - 60.0) / 60.0, 0.0, 1.0))
+            og = w * np.interp(t, L["t"], L["s1f"]) + (1 - w) * np.interp(t, L["t"], L["tsp1"])
+            res["gain"] = float(np.sqrt(np.mean((a1[m] - og[m]) ** 2)))
             OUT.setdefault(s, []).append(res)
         except Exception as ex:
             print(f"{s}/{p.name}: ERR {type(ex).__name__}", flush=True)
-    print("\n=== 푸시 τ1 관측 4안 (세션 평균) ===")
-    tot = {k: [] for k in ("s1", "lpf", "spr", "blend")}
+    print("\n=== 푸시 τ1 관측 5안 (세션 평균) ===")
+    tot = {k: [] for k in ("s1", "lpf", "spr", "blend", "gain")}
     for s, rows in OUT.items():
         a = {k: float(np.mean([r[k] for r in rows])) for k in tot}
         for k in tot:
             tot[k].append(a[k])
-        print(f"{s}: s1 {a['s1']:.2f} | lpf10 {a['lpf']:.2f} | spr {a['spr']:.2f} | blend {a['blend']:.2f}")
+        print(f"{s}: s1 {a['s1']:.2f} | lpf10 {a['lpf']:.2f} | spr {a['spr']:.2f} | blend {a['blend']:.2f} | gain {a['gain']:.2f}")
     print("전체 평균: " + " | ".join(f"{k} {np.mean(v):.2f}" for k, v in tot.items()))
     print("done")
 
