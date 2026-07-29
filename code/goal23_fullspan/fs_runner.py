@@ -396,7 +396,7 @@ def modea_fs():
     print("done")
 
 
-def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0):
+def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None):
     """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경)."""
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -447,6 +447,11 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         md.qfrc_applied[dof["knee"]] = tql
         dq_s = float(md.qpos[iq["hip"]])
         md.qfrc_applied[dof["hip"]] = (FM.KS_HIP * dq_s - _tau2s(dq_s)) + bias1
+        if knee_deep:
+            kd_, q20_ = knee_deep
+            q2r = -float(md.qpos[iq["knee_motor"]])
+            tau_ext = kd_ * max(0.0, q20_ - q2r)     # 로봇 좌표 신전(+) 방향 받침
+            md.qfrc_applied[dof["knee_motor"]] = -tau_ext   # MuJoCo dof 부호 (검증 예정)
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -470,5 +475,69 @@ if __name__ == "__main__":
         baseline_fs2()
     elif a == "modea":
         modea_fs()
+    elif a == "kneedeep":
+        fit_knee_deep()
     else:
         golden_g5()
+
+
+def fit_knee_deep():
+    """세션별 (q2_0, k_d) 적합 — 하강 창(깊은 부분)만 사용 (규칙 4). HO 0324 포함(자체 캘리브 관찰용)."""
+    import json
+    import fs_data as FD
+    down = safe.read_json(HERE / "_fs_static_audit.json")
+    up = safe.read_json(HERE / "_fs_updown.json")
+    def bias_of(s):
+        r1d = np.mean([r["a1"] - r["s1"] for tr in down[s].values() for r in tr["rows"] if r["ok"]])
+        r1u = np.mean([v["r1_up"] for v in up[s].values()]) if s in up and up[s] else r1d
+        return float((r1d + r1u) / 2)
+    ft = fs_twin()
+    FIT = {}
+    for s, base in FD.SESS_FIT.items():
+        if s in FD.CVT_SESS:
+            continue
+        trials = FD.trials_of(base)[:2]     # 세션당 2 trial로 적합 (속도)
+        b = bias_of(s) if s in down else 0.0
+        def deep_err(knee_deep):
+            errs = []
+            for p in trials:
+                d = FD.load2(p); seg = FD.segment(d); t = d["t"]
+                w0 = seg["t_desc"]
+                while w0 + 0.05 < seg["t_lo"]:
+                    wl = min(0.4, seg["t_lo"] - w0)
+                    m = (t >= w0) & (t <= w0 + wl)
+                    if m.sum() < 20:
+                        w0 += 0.3
+                        continue
+                    if np.degrees(np.mean(d["q2"][m])) > -125:
+                        w0 += 0.3
+                        continue
+                    i0 = int(np.argmax(m)); tg = t[m] - w0
+                    L = rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
+                                        float(d["q1"][i0]), float(d["q2"][i0]),
+                                        float(d["dq1"][i0]), float(d["dq2"][i0]),
+                                        float(tg[-1] - 0.004), bias1=b, knee_deep=knee_deep)
+                    if L is not None:
+                        mm = tg >= 0.02
+                        q2s = np.interp(tg, L["t"], L[k]) if (k := "q2") else None
+                        errs.append(np.degrees(np.sqrt(np.mean((d["q2"][m][mm] - q2s[mm]) ** 2))))
+                    w0 += 0.3
+            return float(np.mean(errs)) if errs else None
+        e0 = deep_err(None)
+        if e0 is None:
+            print(f"{s}: 깊은 창 없음 — 요소 불필요", flush=True)
+            FIT[s] = None
+            continue
+        best = (e0, None)
+        for q20 in (-2.20, -2.27, -2.36, -2.44):
+            for kd in (2.5, 5.0, 10.0, 20.0):
+                e = deep_err((kd, q20))
+                if e is not None and e < best[0]:
+                    best = (e, (kd, q20))
+        FIT[s] = dict(err0=round(e0, 2), err=round(best[0], 2),
+                      kd=best[1][0] if best[1] else 0.0,
+                      q20_deg=round(float(np.degrees(best[1][1])), 1) if best[1] else None)
+        print(f"{s}: {e0:.2f}° → {best[0]:.2f}° (k_d {FIT[s]['kd']}, 결합 {FIT[s]['q20_deg']}°)", flush=True)
+    import json as _j
+    safe.atomic_json_write(HERE / "_fs_knee_deep.json", FIT)
+    print("done")

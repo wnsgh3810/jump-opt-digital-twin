@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\fs_runner.py", line 479, in <module>
+    fit_knee_deep()
+    ^^^^^^^^^^^^^
+NameError: name 'fit_knee_deep' is not defined
