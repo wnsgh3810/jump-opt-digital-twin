@@ -3,9 +3,9 @@
 
 *2 형식 (Explore 검증 2026-07-29): hip2/knee2/GRF2.xlsx, 전 세션 rad 통일, 500Hz(dt=0.002),
 기존 hip.xlsx 창을 절대 타임축 공유로 오차 0 포함, 토크 언랩 완료.
-모션 구조: hold0(초기 유지) → ramp(느린 신전, 준정적=세션 캘리브 창) → prehold(프리홀드)
-→ squat(급속 딥스쿼트) → push(푸시) → 이륙 → flight → landing(마킹만).
-채점 창 = [squat 개시, 이륙]. 규칙: harness_output(합성)·raw_unwrap 경로 사용 금지 (파서가 차단).
+모션 구조: hold0(초기 유지) → desc(천천히 deep squat로 하강 — 준정적, 세션 캘리브 창) → prehold(바닥 준비자세 유지)
+→ push(급속 점프 국면: 최종 딥+신전) → 이륙 → flight → landing(마킹만).
+채점 창 = [앉기(하강) 개시, 이륙]. 규칙: harness_output(합성)·raw_unwrap 경로 사용 금지 (파서가 차단).
 CLI: verify(전 trial 임베딩+분할 표) · spot(3 trial 분할 그래프)
 """
 import os, sys
