@@ -1,0 +1,21 @@
+[정적 감사 (하강)] → _fs_static_audit.json
+26.04.21: r1 +0.93±0.43 | r2 -0.03±0.40 (n=147)
+26.03.24: r1 +0.64±0.36 | r2 -0.24±0.46 (n=75)
+done → C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_fs_static_audit.json
+[복귀 창 분리] → _fs_updown.json
+26.06.02: hip 마찰성 -0.35 | hip 중력/오프셋 +0.79 || knee 마찰성 -0.15 | 중력/오프셋 -0.22
+26.03.24: hip 마찰성 -0.08 | hip 중력/오프셋 +0.73 || knee 마찰성 -0.00 | 중력/오프셋 -0.24
+done
+[무릎 간섭 적합] → _fs_knee_deep.json
+26.06.02: 10.91° → 2.27° (k_d 10.0, 결합 -130.1°)
+26.04.21: 2.85° → 1.26° (k_d 2.5, 결합 -130.1°)
+done
+[CVT 감사 (0429)] → _fs_cvt_audit.json
+=== 0429 세션 종합 [Nm] ===
+하강: r1 +0.53±0.59 (n=250) | r2 +0.08±0.28
+done → _fs_cvt_audit.json
+[관측 w 상수화] → _fs_tauobs_w.json
+26.06.02: w*_desc=0.1 → 푸시 1.78 | blend0.5 1.84 | 오라클 w=0.2 1.78
+전체: 제로샷 2.29 | blend0.5 2.45 | 오라클 2.23
+done → _fs_tauobs_w.json
+전 단계 완료 — _sess_params()가 소비하는 5개 산출물 최신화됨

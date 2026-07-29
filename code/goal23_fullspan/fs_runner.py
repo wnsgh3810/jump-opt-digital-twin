@@ -96,7 +96,7 @@ def _tau2s(d, k_lo=96.0, k_hi=323.0, tau0=9.0):
     return np.sign(d) * t
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영)."""
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -130,6 +130,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         c2 = float(np.clip(c2, -TW.R19.CLIP, TW.R19.CLIP))
         s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        if taulim is not None:
+            s1 = float(np.clip(s1, -taulim, taulim))   # F26 진단: 세션 토크 상한 (실측 플래토 판독)
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
@@ -593,6 +595,12 @@ def baseline_fs3():
         if cvt or ho or not g:
             continue
         sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+        tl_ = None
+        if os.environ.get("FS_TAULIM") == "1":
+            _tj = HERE / "_fs_taulim.json"
+            if _tj.exists():
+                _te = safe.read_json(_tj).get(s)
+                tl_ = float(_te["lim"]) if (_te and _te.get("active")) else None
         try:
             d = FD.load2(p); seg = FD.segment(d)
             gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
@@ -601,7 +609,7 @@ def baseline_fs3():
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
                               gm, seg["t_lo"] - d["t"][i0], two_stage=True,
                               bias1=sp["bias1"], knee_deep=sp["knee_deep"],
-                              fade=os.environ.get("FS_FADE") == "1")
+                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_)
             if L is None:
                 continue
             gi = lambda k: np.interp(t, L["t"], L[k])
