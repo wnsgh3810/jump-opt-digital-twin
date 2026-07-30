@@ -1,0 +1,22 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+
+=== desc 창 τ1 (세션 평균) ===
+26.07.22: s1(커맨드) 0.83 | tsp(스프링) 1.86 | blend0.5 1.08 | phys(tsp+Jα) 1.86
+26.07.23: s1(커맨드) 0.88 | tsp(스프링) 0.51 | blend0.5 0.56 | phys(tsp+Jα) 0.51
+26.07.24: s1(커맨드) 0.77 | tsp(스프링) 0.69 | blend0.5 0.72 | phys(tsp+Jα) 0.69
+26.07.25: s1(커맨드) 1.54 | tsp(스프링) 4.51 | blend0.5 2.86 | phys(tsp+Jα) 4.51
+26.07.27: s1(커맨드) 0.86 | tsp(스프링) 2.58 | blend0.5 1.64 | phys(tsp+Jα) 2.58
+26.04.24: s1(커맨드) 1.26 | tsp(스프링) 0.52 | blend0.5 0.86 | phys(tsp+Jα) 0.52
+26.06.02: s1(커맨드) 0.88 | tsp(스프링) 0.47 | blend0.5 0.56 | phys(tsp+Jα) 0.47
+전체: s1(커맨드) 1.00 | tsp(스프링) 1.59 | blend0.5 1.18 | phys(tsp+Jα) 1.59
+
+=== push 창 τ1 (세션 평균) ===
+26.07.22: s1(커맨드) 2.39 | tsp(스프링) 2.36 | blend0.5 2.23 | phys(tsp+Jα) 2.50
+26.07.23: s1(커맨드) 3.84 | tsp(스프링) 3.09 | blend0.5 3.39 | phys(tsp+Jα) 3.03
+26.07.24: s1(커맨드) 2.29 | tsp(스프링) 2.50 | blend0.5 2.28 | phys(tsp+Jα) 2.18
+26.07.25: s1(커맨드) 2.18 | tsp(스프링) 3.60 | blend0.5 2.73 | phys(tsp+Jα) 3.23
+26.07.27: s1(커맨드) 2.11 | tsp(스프링) 2.83 | blend0.5 2.35 | phys(tsp+Jα) 2.47
+26.04.24: s1(커맨드) 2.75 | tsp(스프링) 1.96 | blend0.5 2.29 | phys(tsp+Jα) 2.45
+26.06.02: s1(커맨드) 2.10 | tsp(스프링) 1.76 | blend0.5 1.80 | phys(tsp+Jα) 2.22
+전체: s1(커맨드) 2.52 | tsp(스프링) 2.59 | blend0.5 2.44 | phys(tsp+Jα) 2.58
