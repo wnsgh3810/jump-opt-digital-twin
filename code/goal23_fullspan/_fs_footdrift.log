@@ -1,0 +1,41 @@
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+100_1.5_250_3: n=19 정렬상관 0.97 | pred 스팬 0.7° | α=nan β=+nan | defl 범위 -2.8~+0.1°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+120_2_250_3: n=19 정렬상관 0.97 | pred 스팬 0.9° | α=nan β=+nan | defl 범위 -3.4~+0.2°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+150_2.2_250_3: n=19 정렬상관 0.95 | pred 스팬 0.9° | α=nan β=+nan | defl 범위 -3.9~+0.3°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+200_2.5_250_3: n=19 정렬상관 0.98 | pred 스팬 0.8° | α=nan β=+nan | defl 범위 -3.9~+0.1°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+250_3_250_3: n=19 정렬상관 0.98 | pred 스팬 0.8° | α=nan β=+nan | defl 범위 -4.4~+0.1°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+60_2_250_3: n=19 정렬상관 0.97 | pred 스팬 0.6° | α=nan β=+nan | defl 범위 -3.4~+0.2°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+80_2_250_3: n=19 정렬상관 0.96 | pred 스팬 0.5° | α=nan β=+nan | defl 범위 -3.4~+0.2°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+done → C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_fs_video_desc_260727.json
+120_2_120_2: 하강 표본 32 | 발볼트 x 이동 -7px (범위 -7~+6) | y 이동 -8px
+    무릎 -115° 이후: x 추가이동 -11px (표본 18)
+    무릎 -126° 이후: x 추가이동 -13px (표본 14)
+    무릎 -135° 이후: x 추가이동 -13px (표본 10)
+150_2.2_250_3: 하강 표본 32 | 발볼트 x 이동 +0px (범위 +0~+0) | y 이동 -1px
+    무릎 -115° 이후: x 추가이동 +0px (표본 18)
+    무릎 -126° 이후: x 추가이동 +0px (표본 14)
+    무릎 -135° 이후: x 추가이동 +0px (표본 10)
+60_1.5_60_1.5: 하강 표본 32 | 발볼트 x 이동 +1px (범위 -2~+6) | y 이동 +0px
+    무릎 -115° 이후: x 추가이동 -1px (표본 19)
+    무릎 -126° 이후: x 추가이동 -4px (표본 15)
+    무릎 -135° 이후: x 추가이동 -5px (표본 11)
