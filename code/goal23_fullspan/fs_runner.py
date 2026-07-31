@@ -100,8 +100,19 @@ def _tau2s(d, k_lo=96.0, k_hi=323.0, tau0=9.0):
     return np.sign(d) * t
 
 
+def _bias_ramp():
+    """마라톤C: FS_BIAS_RAMP="기울기@임계°" — 접지 깊이 결합 hip 정역학 항 (무슬립 합의 갭).
+    bias1(q2) = bias1 + k·max(0, th − q2°) [Nm]. 상수 bias(공중 앵커)와 별층 — 전 세션 고정."""
+    v = os.environ.get("FS_BIAS_RAMP")
+    if not v:
+        return None
+    k_, th_ = v.split("@")
+    return (float(k_), float(th_))
+
+
 def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영)."""
+    _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
     iq, dof = ft["iq"], ft["dof"]
@@ -151,9 +162,12 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if two_stage or bias1:
             dq_s = float(md.qpos[iq["hip"]])
             corr = (FM.KS_HIP * dq_s - _tau2s(dq_s)) if two_stage else 0.0
-            b_eff = bias1
+            b_base = bias1
+            if _ramp is not None:
+                b_base = bias1 + _ramp[0] * max(0.0, _ramp[1] - np.degrees(q2c))
+            b_eff = b_base
             if fade and abs(v1c) > 1.0:
-                b_eff = bias1 * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)
+                b_eff = b_base * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)
             if os.environ.get("FS_BIAS_SIDE") == "motor":
                 # F56/F57: 자세무관 오프셋의 물리 후보 = 모터측 → ctrl에 얹고 s1 로그에도 포함 (회계 일치)
                 md.qfrc_applied[dof["hip"]] = corr
@@ -456,6 +470,7 @@ def modea_fs():
 
 def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False, bz_floor=None, knee_rel=None):
     """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경)."""
+    _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
     iq, dof = ft["iq"], ft["dof"]
@@ -510,9 +525,12 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         dq_s = float(md.qpos[iq["hip"]])
-        b_eff = bias1
+        b_base = bias1
+        if _ramp is not None:
+            b_base = bias1 + _ramp[0] * max(0.0, _ramp[1] - np.degrees(-float(md.qpos[iq["knee_motor"]])))
+        b_eff = b_base
         if fade and abs(v1c) > 1.0:
-            b_eff = bias1 * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)   # 저속 전용 (마찰성 가설)
+            b_eff = b_base * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)   # 저속 전용 (마찰성 가설)
         md.qfrc_applied[dof["hip"]] = (FM.KS_HIP * dq_s - _tau2s(dq_s)) + b_eff
         if knee_deep:
             kd_, q20_ = knee_deep
