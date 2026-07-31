@@ -194,26 +194,29 @@ def main():
         if Lf is None or Lo is None:
             print(f"{p.name}: CL 실패 (fs {Lf is None} old {Lo is None})", flush=True)
             continue
-        mseg = t <= t_end + 0.05
-        tm = t[mseg]
         dt5 = float(np.median(np.diff(Lo["t"])))
+        pm = seg["push"][i0:][: len(t)]
+        t_push0 = float(t[pm][0]) if pm.sum() else 0.0
+        w0, w1 = t_push0 - 0.05, t_end + 0.05          # 점프(push) 구간만
+        mseg = (t >= w0) & (t <= w1)
+        tm = t[mseg]
+        mo = (Lo["t"] >= w0) & (Lo["t"] <= w1)
+        mf = (Lf["t"] >= w0) & (Lf["t"] <= w1)
+        s1o_l = lpf(Lo["s1"], dt5)
         fig, ax = plt.subplots(2, 3, figsize=(15, 7), sharex=True)
-        tri(ax[0, 0], tm, np.degrees(d["q1"][i0:][mseg]), Lo["t"], np.degrees(Lo["q1"]), Lf["t"], np.degrees(Lf["thm1"]), "q1 [°]")
-        tri(ax[0, 1], tm, np.degrees(d["q2"][i0:][mseg]), Lo["t"], np.degrees(Lo["q2"]), Lf["t"], np.degrees(Lf["q2"]), "q2 크랭크 [°]")
-        tri(ax[1, 0], tm, d["dq1"][i0:][mseg], Lo["t"], Lo["dq1"], Lf["t"], Lf["dq1"], "dq1 [rad/s]")
-        tri(ax[1, 1], tm, d["dq2"][i0:][mseg], Lo["t"], Lo["dq2"], Lf["t"], Lf["dq2"], "dq2 크랭크 [rad/s]")
-        tri(ax[0, 2], tm, d["a1"][i0:][mseg], Lo["t"], lpf(Lo["s1"], dt5), Lf["t"], Lf["s1f"], "τ1 (lpf 관측) [Nm]")
-        tri(ax[1, 2], tm, d["a2"][i0:][mseg], Lo["t"], Lo["s2"], Lf["t"], Lf["s2"], "τ2 [Nm]")
+        tri(ax[0, 0], tm, np.degrees(d["q1"][i0:][mseg]), Lo["t"][mo], np.degrees(Lo["q1"][mo]), Lf["t"][mf], np.degrees(Lf["thm1"][mf]), "q1 [°]")
+        tri(ax[0, 1], tm, np.degrees(d["q2"][i0:][mseg]), Lo["t"][mo], np.degrees(Lo["q2"][mo]), Lf["t"][mf], np.degrees(Lf["q2"][mf]), "q2 크랭크 [°]")
+        tri(ax[1, 0], tm, d["dq1"][i0:][mseg], Lo["t"][mo], Lo["dq1"][mo], Lf["t"][mf], Lf["dq1"][mf], "dq1 [rad/s]")
+        tri(ax[1, 1], tm, d["dq2"][i0:][mseg], Lo["t"][mo], Lo["dq2"][mo], Lf["t"][mf], Lf["dq2"][mf], "dq2 크랭크 [rad/s]")
+        tri(ax[0, 2], tm, d["a1"][i0:][mseg], Lo["t"][mo], s1o_l[mo], Lf["t"][mf], Lf["s1f"][mf], "τ1 (lpf 관측) [Nm]")
+        tri(ax[1, 2], tm, d["a2"][i0:][mseg], Lo["t"][mo], Lo["s2"][mo], Lf["t"][mf], Lf["s2"][mf], "τ2 [Nm]")
         ax[0, 0].legend(fontsize=8)
         for a in ax[1]:
             a.set_xlabel("t [s]")
-        pm = seg["push"][i0:][: len(t)]
-        t_push0 = float(t[pm][0]) if pm.sum() else None
-        if t_push0 is not None:
-            for a in ax.flat:
-                a.axvline(t_push0, lw=0.6, alpha=0.4)
-                a.axvline(t_end, lw=0.6, alpha=0.4)
-        fig.suptitle(f"0429 CVT CL (폴더 게인 PD, i_desc→t_lo · 세로선=push 시작/이륙) — {p.name}")
+        for a in ax.flat:
+            a.axvline(t_push0, lw=0.6, alpha=0.4)
+            a.axvline(t_end, lw=0.6, alpha=0.4)
+        fig.suptitle(f"0429 CVT CL 점프(push) 구간 (세로선=push 시작/이륙) — {p.name}")
         fig.tight_layout()
         fp = OUT / f"cvt0429_CL_{p.name}.png"
         fig.savefig(fp, dpi=110)
