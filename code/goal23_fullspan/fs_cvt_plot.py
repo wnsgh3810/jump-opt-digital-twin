@@ -197,7 +197,7 @@ def main():
         dt5 = float(np.median(np.diff(Lo["t"])))
         pm = seg["push"][i0:][: len(t)]
         t_push0 = float(t[pm][0]) if pm.sum() else 0.0
-        w0, w1 = t_push0 - 0.05, t_end + 0.05          # 점프(push) 구간만
+        w0, w1 = t_push0 - 0.05, t_end                  # 점프(push) 구간만 — 이륙에서 절단 (이후 sim은 커맨드 0 관례라 비교 무의미)
         mseg = (t >= w0) & (t <= w1)
         tm = t[mseg]
         mo = (Lo["t"] >= w0) & (Lo["t"] <= w1)
