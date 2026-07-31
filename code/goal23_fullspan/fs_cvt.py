@@ -77,10 +77,10 @@ def golden():
                 print(f"  {sub}: ERR {type(ex).__name__}", flush=True)
         print(f"{tag}: 0429 재생 dq2 RMSE 평균 {np.mean(rms):.3f} (n={len(rms)}, 골든 앵커 ~3.31)", flush=True)
 
-def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=True, bias1=0.0):
+def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=True, bias1=0.0, ret_traces=False):
     """a_full23 CVT 가지 문자 미러 (fs=False: 5q 검증 경로 → 정본 2.705 재현이 골든 /
     fs=True: 6q 직렬힌지 경로 — hip 분할 init + 2단 qfrc + 소산 게이트 + 세션 bias1).
-    반환 (dq2 RMSE, q1 RMSE, h_sim) | None."""
+    반환 (dq2 RMSE, q1 RMSE, h_sim) | None. ret_traces=True면 dict(tl,q1,q2,dq1,dq2) 추가 반환."""
     import fs_runner as FR
     P = TW.C._W["P"]; mj = TW.C._W["mj"]; S = P.J._P["S"]
     law = tw["law"]; spr = tw["spr"]; kr = tw["kr"]
@@ -137,6 +137,7 @@ def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=Tru
     N = int((P.J.T_SETTLE + t[-1] + P.J.T_AFTER) / dt)
     tl = np.arange(N) * dt - P.J.T_SETTLE
     dq2s = np.zeros(N); bzs = np.zeros(N); q1s = np.zeros(N)
+    q2s_c = np.zeros(N); dq1s = np.zeros(N)
     for k in range(N):
         tc = tl[k]
         if tc < 0:
@@ -188,9 +189,13 @@ def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=Tru
         dq2s[k] = -md.qvel[d_crank]
         q1s[k] = (-(md.qpos[i_hipm] + md.qpos[iq["hip"]]) - np.pi / 2) if fs else (-md.qpos[i_hipm] - np.pi / 2)
         bzs[k] = md.qpos[0]
+        q2s_c[k] = -md.qpos[i_crank]
+        dq1s[k] = -md.qvel[d_hipm]
     m = (tl >= 0) & (tl <= t[-1])
     rmse = float(np.sqrt(np.mean((np.interp(tl[m], t, d["dq2"]) - dq2s[m]) ** 2)))
     rq1 = float(np.degrees(np.sqrt(np.mean((np.interp(tl[m], t, d["q1"]) + o1 - q1s[m]) ** 2))))
+    if ret_traces:
+        return rmse, rq1, float(bzs[tl > 0].max()), dict(tl=tl[m], q1=q1s[m], q2=q2s_c[m], dq1=dq1s[m], dq2=dq2s[m])
     return rmse, rq1, float(bzs[tl > 0].max())
 
 
