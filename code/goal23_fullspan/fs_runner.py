@@ -345,7 +345,9 @@ def baseline_fs():
             continue
         try:
             d = FD.load2(p); seg = FD.segment(d)
-            gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
+            _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
+                  g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
@@ -396,7 +398,9 @@ def baseline_fs2():
             continue
         try:
             d = FD.load2(p); seg = FD.segment(d)
-            gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
+            _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
+                  g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
@@ -718,7 +722,9 @@ def baseline_fs3():
             tl_ = None
         try:
             d = FD.load2(p); seg = FD.segment(d)
-            gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
+            _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
+                  g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
             _lr = None
