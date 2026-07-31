@@ -123,6 +123,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     kp1, kd1, kp2, kd2 = gains
     md, _, _ = _settle(ft, float(qd1g[0]), float(qd2g[0]))
     dt = model.opt.timestep
+    # 마라톤C P12: 커맨드 지연 (전송+펌웨어+전류루프) — dq2 잔차의 가속도 기저 서명 (~7-9ms) 반영
+    _dly_n = int(round(float(os.environ.get("FS_CMD_DELAY", "0") or 0) / dt))
+    _dbuf = [] if _dly_n > 0 else None
+    # P13: kd 속도 신호 지연 (펌웨어 속도 추정 필터 — kd 비례 발현, 일괄 지연과 구별)
+    _vtc = float(os.environ.get("FS_KD_VLAG", "0") or 0)
+    _vaf = dt / (_vtc + dt) if _vtc > 0 else None
+    _v1f = _v2f = 0.0
     tc_f = float(os.environ.get("FS_TC", "0.010"))
     s1f = 0.0
     af = dt / max(tc_f, dt)
@@ -145,11 +152,16 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         v1c = -md.qvel[dof["hip_m"]]
         v2c = -md.qvel[dof["knee_motor"]]
         b_eff = 0.0
+        if _vaf is not None:
+            _v1f += _vaf * (v1c - _v1f)
+            _v2f += _vaf * (v2c - _v2f)
         if tc <= t_end:
             _f1 = dqd1 if vdes_ff else 0.0
             _f2 = dqd2 if vdes_ff else 0.0
-            c1 = kp1 * (qd1 - thm) + kd1 * (_f1 - v1c)
-            c2 = kp2 * (qd2 - q2c) + kd2 * (_f2 - v2c)
+            _vk1 = _v1f if _vaf is not None else v1c
+            _vk2 = _v2f if _vaf is not None else v2c
+            c1 = kp1 * (qd1 - thm) + kd1 * (_f1 - _vk1)
+            c2 = kp2 * (qd2 - q2c) + kd2 * (_f2 - _vk2)
         else:
             c1 = c2 = 0.0
         c1 = float(np.clip(c1, -TW.R19.CLIP, TW.R19.CLIP))
@@ -159,12 +171,22 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                 c1 = float(np.clip(c1, -lim_raw[0], lim_raw[0]))
             if lim_raw[1]:
                 c2 = float(np.clip(c2, -lim_raw[1], lim_raw[1]))
-        s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
-        s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        # 관측 = 계산 시점 커맨드 (실기 로그 타이밍), 플랜트 = 지연 커맨드 (모터 실행 타이밍)
+        s1o = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
+        s2o = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        if _dbuf is not None:
+            _dbuf.append((c1, c2))
+            c1, c2 = _dbuf[max(0, len(_dbuf) - 1 - _dly_n)]
+            s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
+            s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        else:
+            s1, s2 = s1o, s2o
         if lim2_nm is not None:
             s2 = float(np.clip(s2, -lim2_nm, lim2_nm))
+            s2o = float(np.clip(s2o, -lim2_nm, lim2_nm))
         if taulim is not None:
             s1 = float(np.clip(s1, -taulim, taulim))   # F26 진단: 세션 토크 상한 (실측 플래토 판독)
+            s1o = float(np.clip(s1o, -taulim, taulim))
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
@@ -226,12 +248,12 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["q2"][k] = -md.qpos[iq["knee_motor"]]
         Lg["dq1"][k] = -md.qvel[dof["hip_m"]]
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
-        Lg["s1"][k] = s1
-        Lg["s2"][k] = s2
+        Lg["s1"][k] = s1o
+        Lg["s2"][k] = s2o
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
-        s1f += af * (s1 - s1f)
+        s1f += af * (s1o - s1f)
         Lg["s1f"][k] = s1f
     return Lg
 
