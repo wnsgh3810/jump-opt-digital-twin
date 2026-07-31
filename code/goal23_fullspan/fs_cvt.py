@@ -236,11 +236,80 @@ def golden3():
         print(f"{tag}: dq2 {np.mean(rms):.3f} | q1 {np.mean(rq):.2f}° (n={len(rms)})", flush=True)
 
 
+def cl():
+    """마라톤C #266: 0429 CVT CL 채점 (baseline_fs3 미러 — fullspan *2 push/score 창).
+    모델 = 정본 CVT 캡처 + fs 6q 패치. settle은 qpos_from_crank 폐쇄 정합 (ft["cvt_init"] 훅),
+    전달비 소산 C_CVT는 ft["cvt_diss"] 훅. dq_des 인가(M1) — 사용자 확정 08-01."""
+    import fs_runner as FR
+    import fs_data as FD
+    import fs_metric as FMET
+    from cvt_core import qpos_from_crank
+    model_c, model_cf, ctx = build_cvt_pair()
+    if model_cf is None:
+        raise RuntimeError("fs 패치 CVT 모델 없음")
+    nm = ctx["nm"]
+    li = 0.02508
+    ft0 = FR.fs_twin()
+    ft = dict(ft0)
+    ft["model"] = model_cf
+    ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+    ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
+    ft["cvt_init"] = lambda q1, q2: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, li)[0]
+    qg, rg = RU.rtab(li)
+    ft["cvt_diss"] = (float(nm["C_CVT"]), qg, rg)
+    TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
+    SP = FR._sess_params()
+    OUT = {}
+    for s, p, g, cvt, ho in FD.registry():
+        if s != "26.04.29" or ho or not g:
+            continue
+        sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+        try:
+            d = FD.load2(p); seg = FD.segment(d)
+            _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),
+                  g[3] * (float(_kds) if _kds else 0.20))
+            i0 = max(0, seg["i_desc"] - 5)
+            t = d["t"][i0:] - d["t"][i0]
+            L = FR.rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+                                 gm, seg["t_lo"] - d["t"][i0], two_stage=True,
+                                 bias1=sp["bias1"], knee_deep=sp["knee_deep"],
+                                 fade=os.environ.get("FS_FADE") == "1", taulim=None)
+            if L is None:
+                print(f"{s}/{p.name}: rollout None", flush=True)
+                continue
+            gi = lambda k: np.interp(t, L["t"], L[k])
+            for wn in ("score", "push"):
+                m = seg[wn][i0:][: len(t)]
+                t1obs = gi("s1f") if os.environ.get("FS_TAUOBS") == "lpf" else gi("s1")
+                _tlm = os.environ.get("FS_TAULIM")
+                try:
+                    _ol = float(_tlm) if _tlm else None
+                except ValueError:
+                    _ol = None
+                if _ol is not None:
+                    t1obs = np.clip(t1obs, -_ol, _ol)
+                r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
+                                gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), t1obs, gi("s2"))
+                OUT.setdefault(wn, []).append(list(r))
+            print(f"{s}/{p.name}: OK", flush=True)
+        except Exception as ex:
+            print(f"{s}/{p.name}: ERR {type(ex).__name__} {ex}", flush=True)
+    for wn in ("score", "push"):
+        if wn in OUT:
+            a = np.mean(OUT[wn], axis=0)
+            print(f"[{wn}] 0429 CVT CL: q1 {a[0]:.2f} q2 {a[1]:.2f} dq1 {a[2]:.2f} dq2 {a[3]:.2f} τ1 {a[4]:.2f} τ2 {a[5]:.2f}", flush=True)
+    safe.atomic_json_write(HERE / "_fs_cvt_cl2.json", OUT)
+    print("done → _fs_cvt_cl2.json", flush=True)
+
+
 if __name__ == "__main__":
     import sys as _s
     if len(_s.argv) > 1 and _s.argv[1] == "golden2":
         golden2()
     elif len(_s.argv) > 1 and _s.argv[1] == "golden3":
         golden3()
+    elif len(_s.argv) > 1 and _s.argv[1] == "cl":
+        cl()
     else:
         golden()

@@ -55,12 +55,22 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
     iq, dof = ft["iq"], ft["dof"]
     A = P.A_PAPER
     md = mjm.MjData(model)
-    md.qpos[iq["base_z"]] = 1.0
-    md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2
-    md.qpos[iq["hip"]] = 0.0
-    md.qpos[iq["knee_motor"]] = -q2_0
-    md.qpos[iq["cpin"]] = q2_0
-    md.qpos[iq["knee"]] = -q2_0
+    _ci = ft.get("cvt_init")            # 마라톤C #266: CVT 폐쇄 정합 초기화 (qpos_from_crank)
+    if _ci is not None:
+        b5 = _ci(q1_0, q2_0)
+        md.qpos[iq["base_z"]] = b5[0]
+        md.qpos[iq["hip_m"]] = b5[1]
+        md.qpos[iq["hip"]] = 0.0
+        md.qpos[iq["knee_motor"]] = b5[2]
+        md.qpos[iq["cpin"]] = b5[3]
+        md.qpos[iq["knee"]] = b5[4]
+    else:
+        md.qpos[iq["base_z"]] = 1.0
+        md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2
+        md.qpos[iq["hip"]] = 0.0
+        md.qpos[iq["knee_motor"]] = -q2_0
+        md.qpos[iq["cpin"]] = q2_0
+        md.qpos[iq["knee"]] = -q2_0
     mjm.mj_forward(model, md)
     fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
     md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
@@ -191,6 +201,12 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        _cd = ft.get("cvt_diss")        # 마라톤C #266: CVT 전달비 소산 (a_cvt_mirror 문자 미러)
+        if _cd is not None:
+            _cc, _qg, _rg = _cd
+            _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
+            _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
+            tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         if two_stage or bias1:
@@ -368,7 +384,8 @@ def baseline_fs():
         try:
             d = FD.load2(p); seg = FD.segment(d)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
-            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else
+                          (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),  # 미적합 게인: 직렬탄성 법칙 보간 (마라톤C P14, R²0.963)
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
@@ -421,7 +438,8 @@ def baseline_fs2():
         try:
             d = FD.load2(p); seg = FD.segment(d)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
-            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else
+                          (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),  # 미적합 게인: 직렬탄성 법칙 보간 (마라톤C P14, R²0.963)
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
@@ -745,7 +763,8 @@ def baseline_fs3():
         try:
             d = FD.load2(p); seg = FD.segment(d)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
-            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else
+                          (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),  # 미적합 게인: 직렬탄성 법칙 보간 (마라톤C P14, R²0.963)
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
