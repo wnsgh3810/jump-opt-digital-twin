@@ -253,7 +253,7 @@ def cl():
     if model_cf is None:
         raise RuntimeError("fs 패치 CVT 모델 없음")
     nm = ctx["nm"]
-    li = 0.02508
+    li = 0.02499                   # Clutch.xlsx 실측 (전 trial σ0.00) — ModeA 전수 개선 확인 (P16)
     ft0 = FR.fs_twin()
     ft = dict(ft0)
     ft["model"] = model_cf
