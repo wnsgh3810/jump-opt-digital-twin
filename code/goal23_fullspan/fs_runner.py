@@ -140,6 +140,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _vtc = float(os.environ.get("FS_KD_VLAG", "0") or 0)
     _vaf = dt / (_vtc + dt) if _vtc > 0 else None
     _v1f = _v2f = 0.0
+    # P17: 커맨드 출력 1차 지연 LPF (지연군 판독 tc — 기록 raw=전달 전류이므로 관측·플랜트 동일값)
+    _ctc = float(os.environ.get("FS_CMD_LPF", "0") or 0)
+    _caf = dt / (_ctc + dt) if _ctc > 0 else None
+    _c1f = _c2f = 0.0
     tc_f = float(os.environ.get("FS_TC", "0.010"))
     s1f = 0.0
     af = dt / max(tc_f, dt)
@@ -176,6 +180,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             c1 = c2 = 0.0
         c1 = float(np.clip(c1, -TW.R19.CLIP, TW.R19.CLIP))
         c2 = float(np.clip(c2, -TW.R19.CLIP, TW.R19.CLIP))
+        if _caf is not None:
+            _c1f += _caf * (c1 - _c1f)
+            _c2f += _caf * (c2 - _c2f)
+            c1, c2 = _c1f, _c2f
         if lim_raw is not None:
             if lim_raw[0]:
                 c1 = float(np.clip(c1, -lim_raw[0], lim_raw[0]))
