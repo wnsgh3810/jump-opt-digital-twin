@@ -110,10 +110,11 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
-    lim_raw=(l1,l2): 세션 펌웨어 τ_lim [raw] — 커맨드 클립 (마라톤C: 실측 천장 판독, 15/20.5Nm 두 그룹).
-    lim2_nm: 무릎 축토크 클립 [Nm] — 펌웨어는 Nm 상수 제한 (포화 표본 ahat 판독; raw 클립보다 속도 정합)."""
+    lim_raw/lim2_nm: 마라톤C P5~6 잔재 (P7 철회 — 사용자 확인: 제한은 전류 포화 35.5 단일뿐). 미사용 유지.
+    vdes_ff=False: dq_des 미인가 세션 (0421 위치제어 등 — 데이터 사전 메타) — 실효 PD = kp·e − kd·dq
+    (MIT 모드 v_des=0). P8 형태 동정: 0421 M2 RMSE 3.61 vs M1 10.88 raw."""
     _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -145,8 +146,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         v2c = -md.qvel[dof["knee_motor"]]
         b_eff = 0.0
         if tc <= t_end:
-            c1 = kp1 * (qd1 - thm) + kd1 * (dqd1 - v1c)
-            c2 = kp2 * (qd2 - q2c) + kd2 * (dqd2 - v2c)
+            _f1 = dqd1 if vdes_ff else 0.0
+            _f2 = dqd2 if vdes_ff else 0.0
+            c1 = kp1 * (qd1 - thm) + kd1 * (_f1 - v1c)
+            c2 = kp2 * (qd2 - q2c) + kd2 * (_f2 - v2c)
         else:
             c1 = c2 = 0.0
         c1 = float(np.clip(c1, -TW.R19.CLIP, TW.R19.CLIP))
@@ -737,10 +740,12 @@ def baseline_fs3():
                     _ne = safe.read_json(_nj).get(s)
                     if _ne and _ne.get("lim2_nm") and _ne["lim2_nm"] < 19.0:
                         _l2n = float(_ne["lim2_nm"])
+            _vff = s not in os.environ.get("FS_VDES0", "").split(",")
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
                               gm, seg["t_lo"] - d["t"][i0], two_stage=True,
                               bias1=sp["bias1"], knee_deep=sp["knee_deep"],
-                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_, lim_raw=_lr, lim2_nm=_l2n)
+                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_, lim_raw=_lr, lim2_nm=_l2n,
+                              vdes_ff=_vff)
             if L is None:
                 continue
             gi = lambda k: np.interp(t, L["t"], L[k])
