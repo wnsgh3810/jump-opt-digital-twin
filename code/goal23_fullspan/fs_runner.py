@@ -154,7 +154,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             b_eff = bias1
             if fade and abs(v1c) > 1.0:
                 b_eff = bias1 * max(0.0, 1.0 - (abs(v1c) - 1.0) / 2.0)
-            md.qfrc_applied[dof["hip"]] = corr + b_eff
+            if os.environ.get("FS_BIAS_SIDE") == "motor":
+                # F56/F57: 자세무관 오프셋의 물리 후보 = 모터측 → ctrl에 얹고 s1 로그에도 포함 (회계 일치)
+                md.qfrc_applied[dof["hip"]] = corr
+                md.ctrl[0] = md.ctrl[0] - b_eff          # hip ctrl 부호 규약: -(s1+...)
+                s1 = s1 + b_eff
+            else:
+                md.qfrc_applied[dof["hip"]] = corr + b_eff
         _dc = os.environ.get("FS_DEEP_DMPCUT")
         _fcut = os.environ.get("FS_DEEP_FLCUT")
         if _dc is not None or _fcut is not None:
@@ -613,6 +619,16 @@ def fit_knee_deep():
     print("done")
 def _sess_params():
     import fs_data as FD
+    if os.environ.get("FS_FIXED") == "1":
+        # F52 고정 파라미터 노선 (bias 0.85 · k_d 5@-128 전 세션 — 26.04.29 포함)
+        class _P:
+            def get(self, s, d=None):
+                return dict(bias1=0.85, knee_deep=(5.0, float(np.radians(-128.0))))
+            def __contains__(self, s):
+                return True
+            def __getitem__(self, s):
+                return self.get(s)
+        return _P()
     down = safe.read_json(HERE / "_fs_static_audit.json")
     up = safe.read_json(HERE / "_fs_updown.json")
     kd = safe.read_json(HERE / "_fs_knee_deep.json")
@@ -650,6 +666,10 @@ def baseline_fs3():
         sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
         tl_ = None
         _tlm = os.environ.get("FS_TAULIM")
+        try:
+            _obs_fixed = float(_tlm) if _tlm not in (None, "1", "2", "3") else None
+        except ValueError:
+            _obs_fixed = None
         if _tlm == "1":
             _tj = HERE / "_fs_taulim.json"
             if _tj.exists():
@@ -663,6 +683,9 @@ def baseline_fs3():
         obs_lim = tl_ if _tlm == "3" else None
         if _tlm == "3":
             tl_ = None                        # 3 = 관측 전용 클립 (동역학 무손 — F30 트레이드오프 해소 시도)
+        if _obs_fixed is not None:
+            obs_lim = _obs_fixed              # 수치형 = 단일 축토크 관측 클립 (F54: raw 35.5 환산 ~20.5)
+            tl_ = None
         try:
             d = FD.load2(p); seg = FD.segment(d)
             gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
@@ -682,12 +705,12 @@ def baseline_fs3():
                     _wj = HERE / "_fs_tauobs_w.json"
                     _w = float(safe.read_json(_wj).get(s, 0.5)) if _wj.exists() else 0.5
                     t1obs = _w * gi("s1f") + (1 - _w) * gi("tsp1")
-                    if obs_lim is not None:
-                        t1obs = np.clip(t1obs, -obs_lim, obs_lim)
                 else:
                     t1obs = (gi("tsp1") if _to == "spr" else
                              gi("s1f") if _to == "lpf" else
                              0.5 * gi("s1f") + 0.5 * gi("tsp1") if _to == "blend" else gi("s1"))
+                if obs_lim is not None:
+                    t1obs = np.clip(t1obs, -obs_lim, obs_lim)
                 r = FMET._rmse6({k: d[k][i0:] for k in ("q1", "q2", "dq1", "dq2", "a1", "a2")}, m,
                                 gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), t1obs, gi("s2"))
                 OUT.setdefault(s, {}).setdefault(wn, []).append(list(r))
