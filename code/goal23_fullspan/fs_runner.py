@@ -384,8 +384,7 @@ def baseline_fs():
         try:
             d = FD.load2(p); seg = FD.segment(d)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
-            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else
-                          (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),  # 미적합 게인: 직렬탄성 법칙 보간 (마라톤C P14, R²0.963)
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
@@ -438,8 +437,7 @@ def baseline_fs2():
         try:
             d = FD.load2(p); seg = FD.segment(d)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
-            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else
-                          (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),  # 미적합 게인: 직렬탄성 법칙 보간 (마라톤C P14, R²0.963)
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
@@ -763,8 +761,7 @@ def baseline_fs3():
         try:
             d = FD.load2(p); seg = FD.segment(d)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
-            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else
-                          (TK[g[2]] if g[2] in TK else 400.0 / (g[2] + 400.0))),  # 미적합 게인: 직렬탄성 법칙 보간 (마라톤C P14, R²0.963)
+            gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
