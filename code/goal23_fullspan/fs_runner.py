@@ -110,8 +110,9 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None):
-    """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영)."""
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None):
+    """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
+    lim_raw=(l1,l2): 세션 펌웨어 τ_lim [raw] — 커맨드 클립 (마라톤C: 실측 천장 판독, 15/20.5Nm 두 그룹)."""
     _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -149,6 +150,11 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             c1 = c2 = 0.0
         c1 = float(np.clip(c1, -TW.R19.CLIP, TW.R19.CLIP))
         c2 = float(np.clip(c2, -TW.R19.CLIP, TW.R19.CLIP))
+        if lim_raw is not None:
+            if lim_raw[0]:
+                c1 = float(np.clip(c1, -lim_raw[0], lim_raw[0]))
+            if lim_raw[1]:
+                c2 = float(np.clip(c2, -lim_raw[1], lim_raw[1]))
         s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
         if taulim is not None:
@@ -709,10 +715,22 @@ def baseline_fs3():
             gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
+            _lr = None
+            if os.environ.get("FS_LIMRAW") == "1":
+                _lj = HERE / "_fs_lim.json"
+                if _lj.exists():
+                    _le = safe.read_json(_lj).get(s)
+                    if _le:
+                        # 판독 천장이 모터 최대(35.5) 미만일 때만 유효 설정으로 간주
+                        _l1 = _le.get("r1"); _l2 = _le.get("r2")
+                        _lr = (_l1 if (_l1 and _l1 < 34.0) else None,
+                               _l2 if (_l2 and _l2 < 34.0) else None)
+                        if _lr == (None, None):
+                            _lr = None
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
                               gm, seg["t_lo"] - d["t"][i0], two_stage=True,
                               bias1=sp["bias1"], knee_deep=sp["knee_deep"],
-                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_)
+                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_, lim_raw=_lr)
             if L is None:
                 continue
             gi = lambda k: np.interp(t, L["t"], L[k])
