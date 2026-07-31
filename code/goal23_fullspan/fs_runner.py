@@ -110,9 +110,10 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
-    lim_raw=(l1,l2): 세션 펌웨어 τ_lim [raw] — 커맨드 클립 (마라톤C: 실측 천장 판독, 15/20.5Nm 두 그룹)."""
+    lim_raw=(l1,l2): 세션 펌웨어 τ_lim [raw] — 커맨드 클립 (마라톤C: 실측 천장 판독, 15/20.5Nm 두 그룹).
+    lim2_nm: 무릎 축토크 클립 [Nm] — 펌웨어는 Nm 상수 제한 (포화 표본 ahat 판독; raw 클립보다 속도 정합)."""
     _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -157,6 +158,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                 c2 = float(np.clip(c2, -lim_raw[1], lim_raw[1]))
         s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        if lim2_nm is not None:
+            s2 = float(np.clip(s2, -lim2_nm, lim2_nm))
         if taulim is not None:
             s1 = float(np.clip(s1, -taulim, taulim))   # F26 진단: 세션 토크 상한 (실측 플래토 판독)
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
@@ -727,10 +730,17 @@ def baseline_fs3():
                                _l2 if (_l2 and _l2 < 34.0) else None)
                         if _lr == (None, None):
                             _lr = None
+            _l2n = None
+            if os.environ.get("FS_LIM2NM") == "1":
+                _nj = HERE / "_fs_lim_nm.json"
+                if _nj.exists():
+                    _ne = safe.read_json(_nj).get(s)
+                    if _ne and _ne.get("lim2_nm") and _ne["lim2_nm"] < 19.0:
+                        _l2n = float(_ne["lim2_nm"])
             L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
                               gm, seg["t_lo"] - d["t"][i0], two_stage=True,
                               bias1=sp["bias1"], knee_deep=sp["knee_deep"],
-                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_, lim_raw=_lr)
+                              fade=os.environ.get("FS_FADE") == "1", taulim=tl_, lim_raw=_lr, lim2_nm=_l2n)
             if L is None:
                 continue
             gi = lambda k: np.interp(t, L["t"], L[k])
