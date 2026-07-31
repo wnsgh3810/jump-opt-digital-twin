@@ -793,7 +793,14 @@ def baseline_fs3():
                     if _ne and _ne.get("lim2_nm") and _ne["lim2_nm"] < 19.0:
                         _l2n = float(_ne["lim2_nm"])
             _vff = s not in os.environ.get("FS_VDES0", "").split(",")
-            L = rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+            _qsn = int(os.environ.get("FS_QDSHIFT", "0") or 0)
+            def _sh(x, _n=_qsn):
+                # P18: qd 채널 로깅 스큐 보정 (qd가 q/raw보다 _n샘플 선행 기록 — δ4ms=2샘플 판독)
+                if _n <= 0:
+                    return x
+                y = np.empty_like(x); y[_n:] = x[:-_n]; y[:_n] = x[0]
+                return y
+            L = rollout_cl_fs(ft, t, _sh(d["qd1"][i0:]), _sh(d["qd2"][i0:]), _sh(d["dqd1"][i0:]), _sh(d["dqd2"][i0:]),
                               gm, seg["t_lo"] - d["t"][i0], two_stage=True,
                               bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                               fade=os.environ.get("FS_FADE") == "1", taulim=tl_, lim_raw=_lr, lim2_nm=_l2n,
