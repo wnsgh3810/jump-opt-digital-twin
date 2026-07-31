@@ -1,0 +1,149 @@
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+100_1.5_250_3: n=19 정렬상관 0.97 | pred 스팬 0.7° | α=nan β=+nan | defl 범위 -2.8~+0.1°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+120_2_250_3: n=19 정렬상관 0.97 | pred 스팬 0.9° | α=nan β=+nan | defl 범위 -3.4~+0.2°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+150_2.2_250_3: n=19 정렬상관 0.95 | pred 스팬 0.9° | α=nan β=+nan | defl 범위 -3.9~+0.3°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+200_2.5_250_3: n=19 정렬상관 0.98 | pred 스팬 0.8° | α=nan β=+nan | defl 범위 -3.9~+0.1°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+250_3_250_3: n=19 정렬상관 0.98 | pred 스팬 0.8° | α=nan β=+nan | defl 범위 -4.4~+0.1°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+60_2_250_3: n=19 정렬상관 0.97 | pred 스팬 0.6° | α=nan β=+nan | defl 범위 -3.4~+0.2°
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+80_2_250_3: n=19 정렬상관 0.96 | pred 스팬 0.5° | α=nan β=+nan | defl 범위 -3.4~+0.2°
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+done → C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_fs_video_desc_260727.json
+26.07.22/120_2_120_2: 하강 드리프트 -27px (범위 28, −126°이후 +0px, n=32)
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+26.07.22/150_2.2_250_3: 하강 드리프트 -27px (범위 28, −126°이후 +0px, n=32)
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+26.07.22/150_3.3_500_5: 하강 드리프트 -56px (범위 70, −126°이후 +0px, n=32)
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+26.07.22/60_0.75_60_2: 하강 드리프트 -55px (범위 70, −126°이후 +0px, n=32)
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+26.07.22/60_1.5_60_1.5: 하강 드리프트 -71px (범위 71, −126°이후 +0px, n=32)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.23/150_2.2_250_3: 하강 드리프트 -1px (범위 6, −126°이후 -6px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.23/150_2.2_500_5: 하강 드리프트 -6px (범위 11, −126°이후 -11px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.23/60_0.75_60_2: 하강 드리프트 +5px (범위 6, −126°이후 +0px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.24/150_2.2_250_3: 하강 드리프트 +0px (범위 6, −126°이후 -5px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.24/150_2.2_350_3.5: 하강 드리프트 -15px (범위 17, −126°이후 -13px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.24/150_2.2_500_5: 하강 드리프트 -5px (범위 8, −126°이후 -8px, n=16)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.25/100_1.5_250_3: 하강 드리프트 +7px (범위 7, −126°이후 +0px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.25/150_2.2_250_3: 하강 드리프트 +8px (범위 8, −126°이후 +0px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.25/200_2.5_250_3: 하강 드리프트 +8px (범위 8, −126°이후 +0px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/100_1.5_250_3: 하강 드리프트 +7px (범위 7, −126°이후 +1px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/120_2_250_3: 하강 드리프트 +7px (범위 8, −126°이후 +1px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/150_2.2_250_3: 하강 드리프트 +8px (범위 8, −126°이후 +1px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/200_2.5_250_3: 하강 드리프트 +8px (범위 8, −126°이후 +1px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/250_3_250_3: 하강 드리프트 +8px (범위 8, −126°이후 +1px, n=26)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/60_2_250_3: 하강 드리프트 +7px (범위 7, −126°이후 +1px, n=25)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.07.27/80_2_250_3: 하강 드리프트 +7px (범위 7, −126°이후 +1px, n=26)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/120_2.2_150_2.5: 하강 드리프트 -2px (범위 5, −126°이후 +0px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/120_2.2_200_2.8: 하강 드리프트 -1px (범위 6, −126°이후 -1px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/120_2_120_2: 하강 드리프트 -1px (범위 10, −126°이후 -1px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/150_2.2_250_3: 하강 드리프트 -16px (범위 21, −126°이후 -4px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/150_2.2_350_3.5: 하강 드리프트 +2px (범위 5, −126°이후 +0px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/150_2.2_500_4: 하강 드리프트 +0px (범위 3, −126°이후 +0px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.24/60_1.5_60_1.5: 하강 드리프트 -1px (범위 1, −126°이후 -1px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.06.02/120_2_120_2: 하강 드리프트 -7px (범위 13, −126°이후 -13px, n=32)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.06.02/150_2.2_250_3: 하강 드리프트 +0px (범위 0, −126°이후 +0px, n=32)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.06.02/150_2.2_500_5: 하강 드리프트 +4px (범위 8, −126°이후 -3px, n=32)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.06.02/60_0.75_60_2: 하강 드리프트 +5px (범위 7, −126°이후 +0px, n=32)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.06.02/60_1.5_60_1.5: 하강 드리프트 +1px (범위 8, −126°이후 -4px, n=32)
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.06.02/90_0.75_90_2: 하강 드리프트 +2px (범위 7, −126°이후 -4px, n=32)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+26.04.21/P60_D0.75_P60_D2: 하강 드리프트 +4px (범위 19, −126°이후 +6px, n=20)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.21/P70_D0.75_P70_D2: 하강 드리프트 +0px (범위 0, −126°이후 +0px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.21/P80_D0.75_P80_D2: 하강 드리프트 +0px (범위 0, −126°이후 +0px, n=48)
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+The frame size for reading (2160, 3840) is different from the source frame size (3840, 2160).
+26.04.21/P90_D0.75_P90_D2: 하강 드리프트 +0px (범위 0, −126°이후 +0px, n=48)
+
+측정 성공 38 / 전체 43 — done → _fs_descslip_all.json

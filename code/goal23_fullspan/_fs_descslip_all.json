@@ -1,0 +1,288 @@
+{
+ "26.07.22/120_2_120_2": {
+  "video": true,
+  "n": 32,
+  "drift_px": -27.0,
+  "range_px": 28.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.22/150_2.2_250_3": {
+  "video": true,
+  "n": 32,
+  "drift_px": -27.0,
+  "range_px": 28.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.22/150_3.3_500_5": {
+  "video": true,
+  "n": 32,
+  "drift_px": -56.0,
+  "range_px": 70.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.22/60_0.75_60_2": {
+  "video": true,
+  "n": 32,
+  "drift_px": -55.0,
+  "range_px": 70.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.22/60_1.5_60_1.5": {
+  "video": true,
+  "n": 32,
+  "drift_px": -71.0,
+  "range_px": 71.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.23/150_2.2_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": -1.0,
+  "range_px": 6.0,
+  "drift_deep_px": -6.0
+ },
+ "26.07.23/150_2.2_500_5": {
+  "video": true,
+  "n": 26,
+  "drift_px": -6.0,
+  "range_px": 11.0,
+  "drift_deep_px": -11.0
+ },
+ "26.07.23/60_0.75_60_2": {
+  "video": true,
+  "n": 26,
+  "drift_px": 5.0,
+  "range_px": 6.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.24/150_2.2_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 0.0,
+  "range_px": 6.0,
+  "drift_deep_px": -5.0
+ },
+ "26.07.24/150_2.2_350_3.5": {
+  "video": true,
+  "n": 26,
+  "drift_px": -15.0,
+  "range_px": 17.0,
+  "drift_deep_px": -13.0
+ },
+ "26.07.24/150_2.2_500_5": {
+  "video": true,
+  "n": 16,
+  "drift_px": -5.0,
+  "range_px": 8.0,
+  "drift_deep_px": -8.0
+ },
+ "26.07.25/100_1.5_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 7.0,
+  "range_px": 7.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.25/120_2_250_3": {
+  "video": true,
+  "fail": "span"
+ },
+ "26.07.25/150_2.2_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 8.0,
+  "range_px": 8.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.25/200_2.5_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 8.0,
+  "range_px": 8.0,
+  "drift_deep_px": 0.0
+ },
+ "26.07.27/100_1.5_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 7.0,
+  "range_px": 7.0,
+  "drift_deep_px": 1.0
+ },
+ "26.07.27/120_2_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 7.0,
+  "range_px": 8.0,
+  "drift_deep_px": 1.0
+ },
+ "26.07.27/150_2.2_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 8.0,
+  "range_px": 8.0,
+  "drift_deep_px": 1.0
+ },
+ "26.07.27/200_2.5_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 8.0,
+  "range_px": 8.0,
+  "drift_deep_px": 1.0
+ },
+ "26.07.27/250_3_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 8.0,
+  "range_px": 8.0,
+  "drift_deep_px": 1.0
+ },
+ "26.07.27/60_2_250_3": {
+  "video": true,
+  "n": 25,
+  "drift_px": 7.0,
+  "range_px": 7.0,
+  "drift_deep_px": 1.0
+ },
+ "26.07.27/80_2_250_3": {
+  "video": true,
+  "n": 26,
+  "drift_px": 7.0,
+  "range_px": 7.0,
+  "drift_deep_px": 1.0
+ },
+ "26.04.24/120_2.2_150_2.5": {
+  "video": true,
+  "n": 48,
+  "drift_px": -2.0,
+  "range_px": 5.0,
+  "drift_deep_px": 0.0
+ },
+ "26.04.24/120_2.2_200_2.8": {
+  "video": true,
+  "n": 48,
+  "drift_px": -1.0,
+  "range_px": 6.0,
+  "drift_deep_px": -1.0
+ },
+ "26.04.24/120_2_120_2": {
+  "video": true,
+  "n": 48,
+  "drift_px": -1.0,
+  "range_px": 10.0,
+  "drift_deep_px": -1.0
+ },
+ "26.04.24/150_2.2_250_3": {
+  "video": true,
+  "n": 48,
+  "drift_px": -16.0,
+  "range_px": 21.0,
+  "drift_deep_px": -4.0
+ },
+ "26.04.24/150_2.2_350_3.5": {
+  "video": true,
+  "n": 48,
+  "drift_px": 2.0,
+  "range_px": 5.0,
+  "drift_deep_px": 0.0
+ },
+ "26.04.24/150_2.2_500_4": {
+  "video": true,
+  "n": 48,
+  "drift_px": 0.0,
+  "range_px": 3.0,
+  "drift_deep_px": 0.0
+ },
+ "26.04.24/60_0.75_60_2": {
+  "video": true,
+  "fail": "coarse"
+ },
+ "26.04.24/60_1.5_60_1.5": {
+  "video": true,
+  "n": 48,
+  "drift_px": -1.0,
+  "range_px": 1.0,
+  "drift_deep_px": -1.0
+ },
+ "26.04.24/90_0.75_90_2": {
+  "video": true,
+  "fail": "coarse"
+ },
+ "26.06.02/120_2_120_2": {
+  "video": true,
+  "n": 32,
+  "drift_px": -7.0,
+  "range_px": 13.0,
+  "drift_deep_px": -13.0
+ },
+ "26.06.02/150_2.2_250_3": {
+  "video": true,
+  "n": 32,
+  "drift_px": 0.0,
+  "range_px": 0.0,
+  "drift_deep_px": 0.0
+ },
+ "26.06.02/150_2.2_500_5": {
+  "video": true,
+  "n": 32,
+  "drift_px": 4.0,
+  "range_px": 8.0,
+  "drift_deep_px": -3.0
+ },
+ "26.06.02/60_0.75_60_2": {
+  "video": true,
+  "n": 32,
+  "drift_px": 5.0,
+  "range_px": 7.0,
+  "drift_deep_px": 0.0
+ },
+ "26.06.02/60_1.5_60_1.5": {
+  "video": true,
+  "n": 32,
+  "drift_px": 1.0,
+  "range_px": 8.0,
+  "drift_deep_px": -4.0
+ },
+ "26.06.02/90_0.75_90_2": {
+  "video": true,
+  "n": 32,
+  "drift_px": 2.0,
+  "range_px": 7.0,
+  "drift_deep_px": -4.0
+ },
+ "26.04.21/P100_D0.75_P100_D2": {
+  "video": true,
+  "fail": "coarse"
+ },
+ "26.04.21/P200_D1.5_P200_D4": {
+  "video": true,
+  "fail": "coarse"
+ },
+ "26.04.21/P60_D0.75_P60_D2": {
+  "video": true,
+  "n": 20,
+  "drift_px": 4.0,
+  "range_px": 19.0,
+  "drift_deep_px": 6.0
+ },
+ "26.04.21/P70_D0.75_P70_D2": {
+  "video": true,
+  "n": 48,
+  "drift_px": 0.0,
+  "range_px": 0.0,
+  "drift_deep_px": 0.0
+ },
+ "26.04.21/P80_D0.75_P80_D2": {
+  "video": true,
+  "n": 48,
+  "drift_px": 0.0,
+  "range_px": 0.0,
+  "drift_deep_px": 0.0
+ },
+ "26.04.21/P90_D0.75_P90_D2": {
+  "video": true,
+  "n": 48,
+  "drift_px": 0.0,
+  "range_px": 0.0,
+  "drift_deep_px": 0.0
+ }
+}
