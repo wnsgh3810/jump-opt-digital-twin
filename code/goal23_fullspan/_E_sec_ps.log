@@ -1,0 +1,38 @@
+=== ps0.85 secondary ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+세션           |Δh| 중앙    h예 (sim/real)  슬립 sim(무슬립일 기준선 대비)
+26.04.21         nan                —                  6.5
+26.04.24        24.9        52.0/27.1                  5.9
+26.06.02         nan                —                  5.2
+26.07.22        16.4        56.7/33.9                  6.5
+26.07.23        13.8        44.9/31.1                  4.5
+26.07.24         6.9        36.3/29.4                  6.9
+26.07.25        10.7        37.6/26.6                  5.7
+26.07.27        12.3        44.9/31.4                  6.8
+done → _D_secondary.json
+=== ps0.85 dq2late ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+26.04.21: dq2말기 0.886 (n=6)
+26.04.24: dq2말기 1.299 (n=9)
+26.06.02: dq2말기 1.533 (n=6)
+26.07.22: dq2말기 2.832 (n=5)
+26.07.23: dq2말기 1.351 (n=3)
+26.07.24: dq2말기 0.683 (n=3)
+26.07.25: dq2말기 0.508 (n=4)
+26.07.27: dq2말기 0.728 (n=7)
+세션합: 9.820
+=== fs15 dq2late (기준) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+26.04.21: dq2말기 0.909 (n=6)
+26.04.24: dq2말기 1.300 (n=9)
+26.06.02: dq2말기 1.503 (n=6)
+26.07.22: dq2말기 2.814 (n=5)
+26.07.23: dq2말기 1.446 (n=3)
+26.07.24: dq2말기 0.736 (n=3)
+26.07.25: dq2말기 0.511 (n=4)
+26.07.27: dq2말기 0.735 (n=7)
+세션합: 9.954
+ALLDONE
