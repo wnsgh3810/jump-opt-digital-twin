@@ -74,9 +74,20 @@
 - **운영영역 제로섬 경보**: 어떤 파라미터 변화가 세션군 간 개선↔악화 재편(전체 평균 무변)을 보이면
   파라미터 축이 아니라 운영 영역(깊이·슬립·궤적 유형) 의존 신호 — fudge 재도입 금지 (F33/F38).
 
-## §11 그래프 창 규약 (사용자 제정 2026-08-01 — 훅 강제)
+## §11 그래프 규약 (사용자 제정 2026-08-01 — 훅 `plot_window_guard.py` 강제)
 - **모든 진단/비교 그래프는 원본 `hip/knee/GRF.xlsx` 스팬(= 점프 구간, ~0.2~0.3s)으로만 그린다.**
   *2/*3(앉기~착지 확장판)로 그리면 점프 판독이 흐려진다 (사고 전례: _compare 1차분 ModeA 4초 창).
 - 단일 출처: `goal23_fullspan/fs_data.py :: plot_window(fold, d)` → (t0,t1) in d["t"] 축.
 - 강제: `~/.claude/hooks/plot_window_guard.py` (PreToolUse Bash = savefig 실행 시 근거 검사 →
   미충족이면 ask · PostToolUse Edit|Write = 경고). 창 무의미 그림은 `# plot-window-exempt: <사유>`로 면제.
+
+### 성능 비교 그래프 5규칙 (P16~P18에서 확립 — 위반 시 훅이 ask/경고)
+1. **창** = 원본 hip/knee/GRF.xlsx 스팬 (점프, ~0.2~0.3s) — `fs_data.plot_window`
+2. **통짜** = 창 중간 리셋 금지 (창 분할 재생은 에러를 초기화해 모델 발전의 자가 못 됨)
+3. **실측 앵커** = 창 시작 1회 초기화, thm1(모터측)을 실측 q1에 (F15/P12) —
+   CL `rollout_cl_fs(init_meas=)` · ModeA `rollout_ol_fs_b` · OLD `cl_old_meas`(정본 문자 미러, 골든 0.00)
+4. **OLD α** = 게인 의존 보간 (`alpha_of`/`alphas_for`, α≤1). 상수 fallback(0.40/0.656) 금지,
+   세션 α(R19.ALPH)는 kp_ref 기하평균 기준으로 게인 의존 복원 후 사용
+5. **형식** = 6패널(q1·q2·dq1·dq2·τ1·τ2), 선 = 실측 / 배포계획(τ*, 있으면) / OLD 재생 / 현행 / 명령(qd),
+   색 리터럴 금지. 배포 계획은 exp5 규약(측정 qd2 ↔ 계획 qd2 미분 교차상관)으로 시각 정렬.
+구현 기준본: `goal23_fullspan/fs_compare_plot.py` (CVT는 `fs_compare_cvt.py`).
