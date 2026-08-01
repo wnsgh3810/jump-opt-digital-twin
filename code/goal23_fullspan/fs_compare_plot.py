@@ -99,8 +99,7 @@ def cl_pair(d, seg, g, sess):
     init = (float(d["q1"][i0]), float(d["q2"][i0]), float(d["dq1"][i0]), float(d["dq2"][i0]),
             float(d["raw1"][i0]), float(d["raw2"][i0]))
     qd = (d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m])
-    sess_al = FMET.ALPH_SESS.get(sess)
-    alphas = tuple(sess_al) if sess_al else (alpha_of(TH, g[0]), 0.20, alpha_of(TK, g[2]), 0.20)
+    alphas = alphas_for(sess, g)
     Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
     ft = FR.fs_twin()
     SP = FR._sess_params()
@@ -117,6 +116,38 @@ def cl_pair(d, seg, g, sess):
     meas = {k: d[k][m] for k, _ in CH}
     cmd = [d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m], None, None]   # exp5 형식: 명령 병기
     return tt[m], meas, old, fs, np.ones(m.sum(), bool), cmd
+
+
+
+_KPREF = {}
+
+
+def _kp_ref(sess):
+    """세션 적합 α의 '실효 기준 게인' = 그 세션 trial 게인의 기하평균 (hip, knee)."""
+    if sess not in _KPREF:
+        k1 = [g[0] for s_, p_, g, c_, h_ in FD.registry() if s_ == sess and g]
+        k2 = [g[2] for s_, p_, g, c_, h_ in FD.registry() if s_ == sess and g]
+        _KPREF[sess] = (float(np.exp(np.mean(np.log(k1)))) if k1 else None,
+                        float(np.exp(np.mean(np.log(k2)))) if k2 else None)
+    return _KPREF[sess]
+
+
+def alphas_for(sess, g):
+    """OLD α 결정 (P18, 사용자 지시 '다른 날도 제대로 보간').
+    ①세션 적합 α가 있는 날(0424/0602/0421): 세션 수준은 보존하되 **게인 의존을 복원** —
+      α(kp) = α_sess × alpha_of(표, kp) / alpha_of(표, kp_ref), kp_ref = 세션 게인 기하평균.
+      (구: 세션 α 하나를 kp 60~500 전 trial에 동일 적용 → 저게인 과소·고게인 과대)
+    ②없는 날(7월 등): 표 log-kp 보간 (P17).
+    kd 계수는 원 규약(0.20 또는 세션 적합) 유지."""
+    sess_al = FMET.ALPH_SESS.get(sess)
+    if not sess_al:
+        return (alpha_of(TH, g[0]), 0.20, alpha_of(TK, g[2]), 0.20)
+    r1, r2 = _kp_ref(sess)
+    f1 = alpha_of(TH, g[0]) / alpha_of(TH, r1) if r1 else 1.0
+    f2 = alpha_of(TK, g[2]) / alpha_of(TK, r2) if r2 else 1.0
+    # α ≤ 1 (전달 스케일의 물리 상한 — 복원 스케일링이 1을 넘으면 클립)
+    return (float(min(sess_al[0] * f1, 1.0)), float(sess_al[1]),
+            float(min(sess_al[2] * f2, 1.0)), float(sess_al[3]))
 
 
 def cl_old_meas(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains, alphas, t_end, init_meas):
@@ -201,8 +232,7 @@ def golden_mirror(d, seg, g, sess):
     sl = slice(i0, None)
     t = d["t"][sl] - d["t"][i0]
     t_end = seg["t_lo"] - d["t"][i0]
-    sess_al = FMET.ALPH_SESS.get(sess)
-    alphas = tuple(sess_al) if sess_al else (alpha_of(TH, g[0]), 0.20, alpha_of(TK, g[2]), 0.20)
+    alphas = alphas_for(sess, g)
     args = (t, d["qd1"][sl], d["qd2"][sl], d["dqd1"][sl], d["dqd2"][sl])
     A_ = TW.rollout_cl(FMET.tw0, *args, tuple(g), alphas=alphas, t_end=t_end, t_after=0.05)
     B_ = cl_old_meas(FMET.tw0, *args, tuple(g), alphas, t_end, None)

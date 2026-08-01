@@ -72,7 +72,8 @@ def cl5q(model, tw, cc, d, seg, g, win=None):
         dqd1g, dqd2g = d["dqd1"][i0:], d["dqd2"][i0:]
         t_end = seg["t_lo"] - d["t"][i0]
     kp1, kd1 = g[0], g[1]
-    kp2 = g[2] * TKD.get(g[2], 0.656); kd2 = g[3] * 0.20
+    import fs_compare_plot as _CP                      # P18: 표 밖 게인 log-kp 보간 (fallback 0.656 금지)
+    kp2 = g[2] * _CP.alpha_of(TKD, g[2]); kd2 = g[3] * 0.20
     md = mjm.MjData(model)
     _a1 = -(init[0] if win is not None else float(qd1g[0])) - np.pi / 2
     _a2 = -(init[1] if win is not None else float(qd2g[0]))
