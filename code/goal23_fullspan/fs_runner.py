@@ -135,6 +135,30 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
+def _vceil_init():
+    """마라톤F F-H7: 전압 포락선 토크 천장 — FS_VCEIL="w0,w1[,tau_max]" [rad/s, rad/s, Nm].
+
+    |ω|≤w0 천장 tau_max(기본 20.5=raw35.5 환산) 평평 · w0~w1 선형 강하 · ≥w1 에서 0.
+    REJECTED #61 재심 (22일 판독은 3~22rad/s 평평 = w0≥22 하한; push 말기 ω 25~30rad/s는 미판독 영역).
+    모터링 사분면(τ·ω>0)만 적용 (제동은 back-EMF가 돕는 방향). 관측은 커맨드 수준 유지."""
+    v = os.environ.get("FS_VCEIL")
+    if not v:
+        return None
+    p = [float(x) for x in v.split(",")]
+    return (p[0], p[1], p[2] if len(p) > 2 else 20.5)
+
+
+def _vceil_cap(s, w, vc):
+    w0, w1, tm = vc
+    if s * w <= 0.0:
+        return s
+    aw = abs(w)
+    if aw <= w0:
+        return s
+    cap = tm * max(0.0, (w1 - aw) / (w1 - w0))
+    return float(np.clip(s, -cap, cap))
+
+
 def _escrow_gate(bank, tau, vel, dt):
     """마라톤F F1: 저장-방출 에너지 회계 게이트 (층별 은행).
 
@@ -305,6 +329,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _eled = ({k_: np.zeros(N) for k_ in ("motor1", "motor2", "supp2", "hsupp1", "spr_tql", "kdeep2", "bias_h")}
              if os.environ.get("FS_ELEDGER") == "1" else None)   # 층별 순간 파워 [W] (오프라인 창 적분)
     _esc = _escrow_init()                  # 마라톤F F1: 층별 에너지 회계 (None = 비활성)
+    _vcl = _vceil_init()                   # 마라톤F F-H7: 전압 포락선 천장 (None = 비활성)
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -354,6 +379,9 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if taulim is not None:
             s1 = float(np.clip(s1, -taulim, taulim))   # F26 진단: 세션 토크 상한 (실측 플래토 판독)
             s1o = float(np.clip(s1o, -taulim, taulim))
+        if _vcl is not None:               # F-H7: 전압 포락선 천장 (플랜트 전달만 — 관측 s1o/s2o 무변)
+            s1 = _vceil_cap(s1, v1c, _vcl)
+            s2 = _vceil_cap(s2, v2c, _vcl)
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
@@ -801,6 +829,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     _psl = _PreSlide(model, fg) if os.environ.get("FS_PRESLIDE") else None
     _esc = _escrow_init()                  # 마라톤F F1: CL과 동일 플랜트 (에너지 회계)
+    _vcl = _vceil_init()                   # F-H7 동일 플랜트
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -811,6 +840,9 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         r2 = float(np.clip(r2, -TW.R19.CLIP, TW.R19.CLIP))
         s1 = float(P.J.ahat(A, np.array([r1]), np.array([v1c]))[0])
         s2 = float(P.J.ahat(A, np.array([r2]), np.array([v2c]))[0])
+        if _vcl is not None:               # F-H7: 실측 τ는 이미 실기 천장 반영 — 정확하면 무작동
+            s1 = _vceil_cap(s1, v1c, _vcl)
+            s2 = _vceil_cap(s2, v2c, _vcl)
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
