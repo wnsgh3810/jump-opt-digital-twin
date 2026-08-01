@@ -130,73 +130,63 @@ def plot_cl(sess, name, d, seg, g):
 
 
 def plot_ma(sess, name, d, seg):
-    """ModeA mshoot: 창별 조각 오버레이 (측정 raw 주입)."""
+    """ModeA = **점프 창 통짜 개루프 재생** (측정 raw 주입, 초기상태만 실측 — 중간 리셋 없음).
+
+    사용자 지적 (08-01): 창 분할 재생은 에러가 매 창 초기화돼 모델 발전의 자가 될 수 없다.
+    점프 창(~0.2~0.3s)은 통짜 재생이 가능하므로 R19 정본 재생 방식(단일 샷)을 따른다.
+    """
     ft = FR.fs_twin()
     SP = FR._sess_params()
     sp = SP.get(sess, dict(bias1=0.0, knee_deep=None))
     t = d["t"]
-    pw = FD.plot_window(d["_fold"], d)          # 그래프 창 = 원본 xlsx (점프 구간) — 훅 규약
-    t0, t1 = (pw if pw else (seg["t_desc"], seg["t_lo"]))
-    segs_o, segs_f = [], []
-    err_o, err_f = [], []
-    w0 = t0
-    while w0 + 0.05 < t1:
-        wl = min(MA_W, t1 - w0)
-        m = (t >= w0) & (t <= w0 + wl)
-        if m.sum() < 20:
-            w0 += MA_S
-            continue
-        i0 = int(np.argmax(m))
-        tg = t[m] - w0
-        st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0]), float(d["q2"][i0]),
-                               float(d["dq1"][i0]), float(d["dq2"][i0]),
-                               float(d["raw1"][i0]), float(d["raw2"][i0]))
-        Lo = TW.rollout_ol(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st,
-                           t_end=float(tg[-1] - 0.004), t_after=0.004)
-        Lf = FR.rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
-                                float(d["q1"][i0]), float(d["q2"][i0]),
-                                float(d["dq1"][i0]), float(d["dq2"][i0]),
-                                float(tg[-1] - 0.004), bias1=sp["bias1"],
-                                knee_deep=sp["knee_deep"], fade=True)
-        if Lo is not None:
-            gi = lambda k: np.interp(tg, Lo["t"], Lo[k])
-            v = [gi(k) for k in ("q1", "q2", "dq1", "dq2", "sh1", "sh2")]
-            segs_o.append((t[m], v))
-            mm = tg >= 0.02
-            err_o.append([np.sqrt(np.mean((d[k][m][mm] - s[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
-                          for (k, _), s in zip(CH, v)])
-        if Lf is not None:
-            gi = lambda k: np.interp(tg, Lf["t"], Lf[k])
-            v = [gi("thm1"), gi("q2"), gi("dq1"), gi("dq2"), gi("s1"), gi("s2")]
-            segs_f.append((t[m], v))
-            mm = tg >= 0.02
-            err_f.append([np.sqrt(np.mean((d[k][m][mm] - s[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
-                          for (k, _), s in zip(CH, v)])
-        w0 += MA_S
-    if not segs_o and not segs_f:
-        print(f"  MA {sess}/{name}: 창 없음", flush=True)
+    pw = FD.plot_window(d["_fold"], d)          # 그래프·재생 창 = 원본 xlsx (점프) — 훅 규약
+    if pw is None:
         return
-    eo = np.mean(err_o, axis=0) if err_o else np.full(6, np.nan)
-    ef = np.mean(err_f, axis=0) if err_f else np.full(6, np.nan)
-    fig, ax = panels(f"{sess} / {name} — ModeA (측정 토크 주입, 0.4s 창 재생) · 실측 vs 배포모델 vs 현행",
-                     f"창평균 RMSE  OLD: {' / '.join('%.2f' % x for x in eo)}   fs: {' / '.join('%.2f' % x for x in ef)}")
-    mall = (t >= t0) & (t <= t1)   # = 원본 xlsx 점프 창
+    m = (t >= pw[0]) & (t <= pw[1])
+    if m.sum() < 30:
+        print(f"  MA {sess}/{name}: 표본 부족", flush=True)
+        return
+    i0 = int(np.argmax(m))
+    tg = t[m] - t[i0]
+    t_end = float(tg[-1] - 0.004)
+    st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0]), float(d["q2"][i0]),
+                           float(d["dq1"][i0]), float(d["dq2"][i0]),
+                           float(d["raw1"][i0]), float(d["raw2"][i0]))
+    Lo = TW.rollout_ol(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end=t_end, t_after=0.004)
+    Lf = FR.rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
+                            float(d["q1"][i0]), float(d["q2"][i0]),
+                            float(d["dq1"][i0]), float(d["dq2"][i0]),
+                            t_end, bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
+    if Lo is None or Lf is None:
+        print(f"  MA {sess}/{name}: 재생 실패 (old {Lo is None} / fs {Lf is None})", flush=True)
+        return
+    go = lambda k: np.interp(tg, Lo["t"], Lo[k])
+    gf = lambda k: np.interp(tg, Lf["t"], Lf[k])
+    old = [go("q1"), go("q2"), go("dq1"), go("dq2"), go("sh1"), go("sh2")]
+    fs = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2"), gf("s1"), gf("s2")]
+    meas = {k: d[k][m] for k, _ in CH}
+    mm = tg >= 0.0
+    eo = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
+          for (k, _), v in zip(CH, old)]
+    ef = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
+          for (k, _), v in zip(CH, fs)]
+    fig, ax = panels(f"{sess} / {name} — ModeA 통짜 재생 (측정 토크 주입 · 점프 창 · 중간 리셋 없음)",
+                     f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {' / '.join('%.2f' % x for x in eo)}   "
+                     f"현행: {' / '.join('%.2f' % x for x in ef)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
-        y = d[k][mall]
-        a.plot(t[mall], np.degrees(y) if k in ("q1", "q2") else y, lw=1.2, label="실측", color="C0")
-        for i, (tt, v) in enumerate(segs_o):
-            yy = np.degrees(v[j]) if k in ("q1", "q2") else v[j]
-            a.plot(tt, yy, "--", lw=0.9, color="C1", alpha=0.85, label="배포모델 (OLD)" if i == 0 else None)
-        for i, (tt, v) in enumerate(segs_f):
-            yy = np.degrees(v[j]) if k in ("q1", "q2") else v[j]
-            a.plot(tt, yy, ":", lw=1.3, color="C2", alpha=0.9, label="현행 (fs)" if i == 0 else None)
+        y, yo, yf = meas[k], old[j], fs[j]
+        if k in ("q1", "q2"):
+            y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
+        a.plot(t[m], y, lw=1.2, label="실측")
+        a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD)")
+        a.plot(t[m], yf, ":", lw=1.5, label="현행 (fs)")
     ax[0].legend(fontsize=8, loc="best")
     fig.tight_layout()
     fp = OUT / "ModeA" / sess
     fp.mkdir(parents=True, exist_ok=True)
     fig.savefig(fp / f"{name}.png", dpi=105)
     plt.close(fig)
-    return list(eo), list(ef)
+    return eo, ef
 
 
 def summary_fig(folder, sess, rows, mode):
