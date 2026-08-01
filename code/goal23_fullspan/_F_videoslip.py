@@ -392,7 +392,12 @@ def process_trial(day, fold, T_ref_foot, ref_scale, ref_shape, quiet=False):
 def main():
     days = sys.argv[1:] if len(sys.argv) > 1 else DAYS
     OUT = {"_meta": dict(desc="fs_video_desc/fs_video_gauge 계보 재구축 — px->mm 실측 줄자 스케일 + "
-                              "서브픽셀(NCC+포물선보간) 발볼트 추적 + 배경ROI 카메라흔들림 차감")}
+                              "서브픽셀(NCC+포물선보간) 발볼트 추적. "
+                              "주지표 desc_drift_px/mm = x_raw(원신호) 선형적합. "
+                              "desc_drift_mm_bgcorr = 배경ROI(줄자 라벨) 차감판(2차/참고). "
+                              "uncertainty_mm = bg_shake_px*scale — 차감 안 한 채 남기는 카메라흔들림 "
+                              "불확도 밴드(day22처럼 bg_shake가 원신호와 동일 자릿수면 보정판을 신뢰하지 "
+                              "말고 이 밴드로 원신호를 감싸 해석할 것).")}
 
     # 27일 발볼트 기준 템플릿 확보 (fs_video_gauge.py 좌표 재사용) + 27일 자체 스케일
     # (다른 날짜 코스탐색 시 화각차 보정의 기준값으로 사용)
@@ -427,9 +432,10 @@ def main():
                 OUT[day][key] = dict(fail=err)
                 continue
             scales.append(res["scale_mm_per_px"])
+            unc = f"±{res['uncertainty_mm']:.2f}mm" if res["uncertainty_mm"] is not None else "±?"
             print(f"  {key}: scale {res['scale_mm_per_px']:.4f}mm/px n={res['n_frames']}(good {res['n_good']}) "
-                  f"drift {res['desc_drift_px']:+.2f}px={res['desc_drift_mm']:+.2f}mm "
-                  f"(끝점 {res['desc_drift_px_endpoint']:+.1f}px) 범위 {res['range_px']:.1f}px "
+                  f"drift {res['desc_drift_mm']:+.2f}mm{unc} (bg보정판 {res['desc_drift_mm_bgcorr']:+.2f}mm) "
+                  f"끝점 {res['desc_drift_mm_endpoint']:+.2f}mm 범위 {res['range_mm']:.2f}mm "
                   f"| bg흔들림 {res['bg_shake_px']}px | ncc {res['ncc_mean']:.2f} | {res['quality']}", flush=True)
             OUT[day][key] = res
         if scales:
