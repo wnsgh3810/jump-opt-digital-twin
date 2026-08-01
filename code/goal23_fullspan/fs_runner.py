@@ -167,6 +167,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     if _rail > 0:
         _fgR = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
         _cfR = np.zeros(6)
+    _w2 = float(os.environ.get("FS_W2", "0") or 0)
+    _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -220,6 +222,9 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        if _eta < 1.0:                   # P8 기어박스 η^sign 재심 (모터링 사분면만) — 관측은 커맨드 수준 유지
+            s1 = s1 * (_eta if s1 * v1c > 0 else 1.0)
+            s2 = s2 * (_eta if s2 * v2c > 0 else 1.0)
         _cd = ft.get("cvt_diss")        # 마라톤C #266: CVT 전달비 소산 (a_cvt_mirror 문자 미러)
         if _cd is not None:
             _cc, _qg, _rg = _cd
@@ -282,7 +287,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                     mjm.mj_contactForce(model, md, ci, _cfR)
                     _Fx += float((np.array(_c.frame).reshape(3, 3).T @ _cfR[:3])[0])
             _vbz = float(md.qvel[dof["base_z"]])
-            md.qfrc_applied[dof["base_z"]] = -_rail * abs(_Fx) * float(np.tanh(_vbz / 0.05))
+            _g = np.tanh(max(_vbz, 0.0) / 0.05) if os.environ.get("FS_RAIL_UP") == "1" else np.tanh(_vbz / 0.05)
+            md.qfrc_applied[dof["base_z"]] = -_rail * abs(_Fx) * float(_g)
+        if _w2 > 0:
+            _v2m = float(md.qvel[dof["knee_motor"]])
+            md.qfrc_applied[dof["knee_motor"]] = md.qfrc_applied[dof["knee_motor"]] - _w2 * _v2m * abs(_v2m)
+            _v1m = float(md.qvel[dof["hip_m"]])
+            md.qfrc_applied[dof["hip_m"]] = -_w2 * _v1m * abs(_v1m)   # 순할당 (hip_m 유일 기록자)
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -594,6 +605,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _rail = float(os.environ.get("FS_RAIL", "0") or 0)      # P6 레일 마찰 (CL과 동일 플랜트)
     if _rail > 0:
         _cfR = np.zeros(6)
+    _w2 = float(os.environ.get("FS_W2", "0") or 0)
+    _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -608,6 +621,9 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        if _eta < 1.0:
+            s1 = s1 * (_eta if s1 * v1c > 0 else 1.0)
+            s2 = s2 * (_eta if s2 * v2c > 0 else 1.0)
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         dq_s = float(md.qpos[iq["hip"]])
@@ -645,7 +661,13 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
                     mjm.mj_contactForce(model, md, ci, _cfR)
                     _Fx += float((np.array(_c.frame).reshape(3, 3).T @ _cfR[:3])[0])
             _vbz = float(md.qvel[dof["base_z"]])
-            md.qfrc_applied[dof["base_z"]] = -_rail * abs(_Fx) * float(np.tanh(_vbz / 0.05))
+            _g = np.tanh(max(_vbz, 0.0) / 0.05) if os.environ.get("FS_RAIL_UP") == "1" else np.tanh(_vbz / 0.05)
+            md.qfrc_applied[dof["base_z"]] = -_rail * abs(_Fx) * float(_g)
+        if _w2 > 0:
+            _v2m = float(md.qvel[dof["knee_motor"]])
+            md.qfrc_applied[dof["knee_motor"]] = md.qfrc_applied[dof["knee_motor"]] - _w2 * _v2m * abs(_v2m)
+            _v1m = float(md.qvel[dof["hip_m"]])
+            md.qfrc_applied[dof["hip_m"]] = -_w2 * _v1m * abs(_v1m)   # 순할당 (hip_m 유일 기록자)
         _dc = os.environ.get("FS_DEEP_DMPCUT")
         _fcut = os.environ.get("FS_DEEP_FLCUT")
         if _dc is not None or _fcut is not None:

@@ -53,8 +53,9 @@ def main():
             if L is None:
                 continue
             dt = float(np.median(np.diff(L["t"])))
-            ke = int(round(t_end / dt)) - 2
-            v_lo = (L["bz"][ke] - L["bz"][ke - 10]) / (10 * dt)
+            vbz = np.gradient(L["bz"], dt)
+            vbz = np.convolve(vbz, np.ones(5) / 5, mode="same")
+            v_lo = float(vbz.max())                       # 이륙 속도 강건 추정 (최대 상승 속도)
             h_sim = max(v_lo, 0.0) ** 2 / (2 * 9.81) * 100
             pm = seg["push"][i0:][: len(t)]
             t_p0 = float(t[pm][0]) if pm.sum() else t_end - 0.3
@@ -73,7 +74,7 @@ def main():
             OUT[key] = e
         except Exception as ex:
             print(f"{s}/{p.name}: ERR {type(ex).__name__}", flush=True)
-    safe.atomic_json_write(HERE / "_D_secondary.json", OUT)
+    safe.atomic_json_write(HERE / f"_D_secondary{os.environ.get('FS_SEC_TAG', '')}.json", OUT)
     # 세션 요약
     print(f"{'세션':<10} {'|Δh| 중앙':>9} {'h예 (sim/real)':>16} {'슬립 sim(무슬립일 기준선 대비)':>20}")
     sess = {}
