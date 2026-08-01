@@ -260,6 +260,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     _psl = _PreSlide(model, _fgx) if os.environ.get("FS_PRESLIDE") else None
+    _eled = ({k_: np.zeros(N) for k_ in ("motor1", "motor2", "supp2", "hsupp1", "spr_tql", "kdeep2", "bias_h")}
+             if os.environ.get("FS_ELEDGER") == "1" else None)   # 층별 순간 파워 [W] (오프라인 창 적분)
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -322,8 +324,16 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
             _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
             tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
-        md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+        _hsupp = RU.hip_supp_scalar(s1, s2, v1c)
+        md.ctrl[:] = [-(s1 + _hsupp), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
+        if _eled is not None:              # 마라톤E P9: 층별 순간 파워 원장 (진단 전용 — 동역학 무변경)
+            _vkn = float(md.qvel[dof["knee"]])
+            _eled["motor1"][k] = s1 * v1c             # 모터 명령 파워 (로봇 좌표)
+            _eled["motor2"][k] = s2 * v2c
+            _eled["supp2"][k] = supp * v2c            # 무릎 지지 적층 (ctrl 경유)
+            _eled["hsupp1"][k] = _hsupp * v1c         # 힙 지지 적층
+            _eled["spr_tql"][k] = tql * _vkn          # 스프링/CVT 소산 항 (knee link)
         if two_stage or bias1:
             dq_s = float(md.qpos[iq["hip"]])
             corr = (FM.KS_HIP * dq_s - _tau2s(dq_s)) if two_stage else 0.0
@@ -340,6 +350,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                 s1 = s1 + b_eff
             else:
                 md.qfrc_applied[dof["hip"]] = corr + b_eff
+            if _eled is not None:
+                _eled["bias_h"][k] = (corr + b_eff) * float(md.qvel[dof["hip"]])
         _dc = os.environ.get("FS_DEEP_DMPCUT")
         _fcut = os.environ.get("FS_DEEP_FLCUT")
         if _dc is not None or _fcut is not None:
@@ -370,6 +382,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                         Nf += abs(float(_cf[0]))
                 tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
+            if _eled is not None:
+                _eled["kdeep2"][k] = tau_ext * v2c      # qfrc −tau_ext × qvel(−v2c) = +tau_ext·v2c
         if _rail > 0:
             if _rxkb is not None:
                 _Fx = _rxkb[0] * float(md.qpos[dof["base_x"]]) + _rxkb[1] * float(md.qvel[dof["base_x"]])
@@ -424,6 +438,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["s1f"][k] = s1f
     if _psl is not None:
         _psl.restore()
+    if _eled is not None:
+        Lg["eledger"] = _eled
     return Lg
 
 
