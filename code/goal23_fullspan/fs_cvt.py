@@ -276,7 +276,13 @@ def cl():
                   g[3] * (float(_kds) if _kds else 0.20))
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
-            L = FR.rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
+            _qs = int(os.environ.get("FS_QDSHIFT", "0") or 0)
+            def _sh(x, _n=_qs):
+                if _n <= 0:
+                    return x
+                y = np.empty_like(x); y[_n:] = x[:-_n]; y[:_n] = x[0]
+                return y
+            L = FR.rollout_cl_fs(ft, t, _sh(d["qd1"][i0:]), _sh(d["qd2"][i0:]), _sh(d["dqd1"][i0:]), _sh(d["dqd2"][i0:]),
                                  gm, seg["t_lo"] - d["t"][i0], two_stage=True,
                                  bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                                  fade=os.environ.get("FS_FADE") == "1", taulim=None)

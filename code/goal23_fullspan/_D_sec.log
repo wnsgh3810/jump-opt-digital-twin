@@ -1,0 +1,12 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+세션           |Δh| 중앙    h예 (sim/real)  슬립 sim(무슬립일 기준선 대비)
+26.04.21         nan                —                  6.6
+26.04.24        15.4        43.7/27.1                  6.5
+26.06.02         nan                —                  6.5
+26.07.22         5.8        41.7/33.9                  6.3
+26.07.23         9.1        36.0/31.1                  6.3
+26.07.24         1.2        30.6/29.4                  6.6
+26.07.25         5.2        32.1/26.6                  5.9
+26.07.27         6.8        40.1/31.4                  6.7
+done → _D_secondary.json
