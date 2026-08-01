@@ -279,12 +279,24 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                               np.array([float(_dq1m)]))[0])
         _d0 = float(np.clip(np.sign(_s10) * (abs(_s10) / 96.0 if abs(_s10) <= 9
                                              else 9 / 96.0 + (abs(_s10) - 9) / 323.0), -0.3, 0.3))
-        md.qpos[iq["base_z"]] = 1.0
-        md.qpos[iq["hip_m"]] = -_q1m - np.pi / 2       # thm1(모터측) = 실측 앵커
-        md.qpos[iq["hip"]] = _d0
-        md.qpos[iq["knee_motor"]] = -_q2m
-        md.qpos[iq["cpin"]] = _q2m
-        md.qpos[iq["knee"]] = -_q2m
+        _ci0 = ft.get("cvt_init")
+        if _ci0 is not None:
+            # 마라톤F F3: CVT(l_i≠30)는 평행사변형 관례가 폐쇄 모순 → qpos_from_crank로 정합 초기화
+            # 반환 = 5q [bz, hip_m, crank, cpin, knee] — 6q(fs, hip 처짐 조인트 포함)에 이름 매핑
+            _qc5 = np.asarray(_ci0(_q1m, _q2m), float)
+            md.qpos[iq["base_z"]] = _qc5[0]
+            md.qpos[iq["hip_m"]] = _qc5[1]
+            md.qpos[iq["hip"]] = _d0                   # 처짐 분할 (앵커 규약 유지)
+            md.qpos[iq["knee_motor"]] = _qc5[2]
+            md.qpos[iq["cpin"]] = _qc5[3]
+            md.qpos[iq["knee"]] = _qc5[4]
+        else:
+            md.qpos[iq["base_z"]] = 1.0
+            md.qpos[iq["hip_m"]] = -_q1m - np.pi / 2   # thm1(모터측) = 실측 앵커
+            md.qpos[iq["hip"]] = _d0
+            md.qpos[iq["knee_motor"]] = -_q2m
+            md.qpos[iq["cpin"]] = _q2m
+            md.qpos[iq["knee"]] = -_q2m
         mjm.mj_forward(model, md)
         _fg0 = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
         md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[_fg0][2]) + P.J._P["S"].FOOT_RADIUS
@@ -292,9 +304,16 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         md.qvel[:] = 0
         md.qvel[dof["base_z"]] = -0.25 * (_c1 * _dq1m + _c12 * (_dq1m + _dq2m))
         md.qvel[dof["hip_m"]] = -_dq1m
-        md.qvel[dof["knee_motor"]] = -_dq2m
-        md.qvel[dof["cpin"]] = _dq2m
-        md.qvel[dof["knee"]] = -_dq2m
+        if _ci0 is not None:
+            # 폐쇄 정합 속도: d(qpos)/d(q2) 수치 미분 × dq2 (전달비 r(q)이 자동 반영) — 5q 인덱스 2/3/4
+            _eps = 1e-5
+            _dr5 = (np.asarray(_ci0(_q1m, _q2m + _eps), float) - _qc5) / _eps
+            for _j, _n in ((2, "knee_motor"), (3, "cpin"), (4, "knee")):
+                md.qvel[dof[_n]] = _dr5[_j] * _dq2m
+        else:
+            md.qvel[dof["knee_motor"]] = -_dq2m
+            md.qvel[dof["cpin"]] = _dq2m
+            md.qvel[dof["knee"]] = -_dq2m
         mjm.mj_forward(model, md)
     else:
         md, _, _ = _settle(ft, float(qd1g[0]), float(qd2g[0]))

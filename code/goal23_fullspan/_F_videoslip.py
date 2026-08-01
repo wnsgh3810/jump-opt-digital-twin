@@ -169,6 +169,27 @@ def _label_groups(f, x0, x1, thr=130, min_sz=60, max_sz=300, ygap=30):
     return [(float(np.mean([g[0] for g in grp])), float(np.mean([g[1] for g in grp]))) for grp in groups]
 
 
+def _clean_diffs(diffs):
+    """인접 라벨간 간격 중 절반 크기로 쪼개진 오검출(한 라벨의 상하 stacked 숫자가 별개
+    그룹으로 분리)을 인접 항끼리 합쳐 복구. day24/day27 각기 다른 trial의 f_cal 프레임에서
+    반복 확인된 실패모드 — tail(바닥쪽) 그룹에서 특히 잦음(전역 med<65 필터는 창 전체 중앙값이라
+    일부 tail만 쪼개진 경우 못 거름). 정상 간격의 기준은 '65px 이상인 항들의 중앙값'."""
+    diffs = list(diffs)
+    normal = [d for d in diffs if d > 65]
+    ref = float(np.median(normal)) if normal else (float(np.median(diffs)) if diffs else 0.0)
+    out = []
+    i = 0
+    while i < len(diffs):
+        d = diffs[i]
+        if d < 0.65 * ref and i + 1 < len(diffs):
+            out.append(d + diffs[i + 1])
+            i += 2
+        else:
+            out.append(d)
+            i += 1
+    return np.array(out)
+
+
 def calibrate_ruler(f):
     """줄자의 10cm 간격 라벨(10,20,...) y중심을 검색해 px/10cm 산출.
     x0 슬라이딩 창 탐색으로 라벨열을 자동 포착 (날짜별 프레이밍차 흡수).
@@ -186,12 +207,13 @@ def calibrate_ruler(f):
             if len(gs) < 6:
                 continue
             ys = np.array([g[0] for g in gs])
-            diffs = np.diff(ys)
+            diffs = _clean_diffs(np.diff(ys))
+            if len(diffs) < 4:
+                continue
             med = float(np.median(diffs))
             # 물리적 하한: 5개 날짜 실측 모두 10cm 라벨 간격 80~120px대 (카메라 거리차 반영).
             # <65px 는 한 라벨의 위아래 stacked 숫자가 별개 그룹으로 쪼개진 오검출(간격이
-            # 정확히 절반으로 관측됨, day24 f_bot 프레임에서 실측 확인) — 자체 cv는 낮게 나와
-            # cv만으론 못 거른다. 배경 텍스트(숫자) 간격이므로 이 하한은 세션 불문 안전하다.
+            # 정확히 절반으로 관측됨) — _clean_diffs로 병합했는데도 낮으면 이 창은 버림.
             if med < 65:
                 continue
             cv = float(np.std(diffs) / med)
@@ -203,7 +225,7 @@ def calibrate_ruler(f):
     _, x0, x1, gs = best
     ys = np.array([g[0] for g in gs])
     xs = np.array([g[1] for g in gs])
-    diffs = np.diff(ys)
+    diffs = _clean_diffs(np.diff(ys))
     med = float(np.median(diffs))
     cv = float(np.std(diffs) / med)
     n_local = min(3, len(diffs))
@@ -316,14 +338,16 @@ def process_trial(day, fold, T_ref_foot, ref_scale, ref_shape, quiet=False):
         qb = np.full_like(q, np.nan)
         bg_shake_px = float("nan")
 
+    # 주지표 = x_raw(발볼트 원신호) 기반. bg_shake_px가 원신호 진폭(수~10px대)과 같은 자릿수인
+    # 사례가 확인되어(day22) 배경보정을 무조건 차감하면 보정 자체의 트래킹 잡음이 신호에
+    # 그대로 얹혀 오히려 더 시끄러워질 위험 — bg_corr는 참고용 2차 지표로 남기고, bg_shake는
+    # "차감 안 한 채로 남는 카메라흔들림 불확도 밴드"로 별도 보고한다.
     good = q > 0.6
-    if bg_trk is not None:
-        good = good & (qb > 0.5)          # 배경 오정합 프레임도 제외 (카메라흔들림 보정 오염 방지)
     n_good = int(good.sum())
     if n_good < 10:
         return None, f"추적 품질 미달 (good {n_good}/{len(q)})"
 
-    tg, xg = t_arr[good], x_corr[good]
+    tg, xg = t_arr[good], x_raw[good]
     A = np.vstack([tg, np.ones_like(tg)]).T
     slope, intercept = np.linalg.lstsq(A, xg, rcond=None)[0]
     dur = tg[-1] - tg[0]
@@ -334,8 +358,16 @@ def process_trial(day, fold, T_ref_foot, ref_scale, ref_shape, quiet=False):
     quality = "good" if (n_good / len(q) > 0.85 and np.std(resid) < 1.5) else \
               ("marginal" if n_good / len(q) > 0.6 else "poor")
 
+    # bg_corr 2차지표 (동일 good 마스크 — foot ncc 기준. bg 자체 품질은 섞지 않음: 그 영향은
+    # 이미 bg_shake_px 불확도로 노출)
+    xgc = x_corr[good]
+    Ac = np.vstack([tg, np.ones_like(tg)]).T
+    slope_c, intercept_c = np.linalg.lstsq(Ac, xgc, rcond=None)[0]
+    drift_fit_px_corr = float(slope_c * dur)
+
     scale_local = cal_rep["mm_per_px_local"]
     scale_global = cal_rep["mm_per_px_global"]
+    unc_mm = bg_shake_px * scale_local if bg_shake_px == bg_shake_px else None
     res = dict(
         n_frames=int(len(q)), n_good=n_good, fps=fps, shift_ms=float(SH * 1e3),
         f_desc=f_desc, f_bot=f_bot,
@@ -345,6 +377,8 @@ def process_trial(day, fold, T_ref_foot, ref_scale, ref_shape, quiet=False):
         desc_drift_mm=round(drift_fit_px * scale_local, 3),
         desc_drift_mm_endpoint=round(drift_end_px * scale_local, 3),
         range_mm=round(rng_px * scale_local, 3),
+        desc_drift_mm_bgcorr=round(drift_fit_px_corr * scale_local, 3),
+        uncertainty_mm=round(unc_mm, 3) if unc_mm is not None else None,
         bg_shake_px=round(bg_shake_px, 2) if bg_shake_px == bg_shake_px else None,
         ncc_mean=round(float(q.mean()), 3), ncc_bg_mean=round(float(np.nanmean(qb)), 3) if bg_trk else None,
         fit_resid_std_px=round(float(np.std(resid)), 3),
