@@ -60,20 +60,23 @@ def main():
             continue
         try:
             d = FD.load2(p); seg = FD.segment(d)
-            i0 = max(0, seg["i_desc"] - 5)
-            t = d["t"][i0:] - d["t"][i0]
-            t_end = seg["t_lo"] - d["t"][i0]
-            Lf = FR.rollout_cl_fs(ft, t, CP.sh(d["qd1"][i0:]), CP.sh(d["qd2"][i0:]),
-                                  CP.sh(d["dqd1"][i0:]), CP.sh(d["dqd2"][i0:]),
+            pw = FD.plot_window(p, d)          # 원본 xlsx 창 = 점프 (훅 규약)
+            tt = d["t"]
+            mw = (tt >= pw[0]) & (tt <= pw[1])
+            i0 = int(np.argmax(mw))
+            t = tt[mw] - tt[i0]
+            t_end = float(t[-1])
+            init = (float(d["q1"][i0]), float(d["q2"][i0]), float(d["dq1"][i0]), float(d["dq2"][i0]),
+                    float(d["raw1"][i0]), float(d["raw2"][i0]))
+            Lf = FR.rollout_cl_fs(ft, t, CP.sh(d["qd1"][mw]), CP.sh(d["qd2"][mw]),
+                                  CP.sh(d["dqd1"][mw]), CP.sh(d["dqd2"][mw]),
                                   tuple(g), t_end, two_stage=True, bias1=sp["bias1"],
-                                  knee_deep=sp["knee_deep"], fade=True, taulim=None)
-            Lo = CVP.cl5q(model_c, tw, cc, d, seg, g)
+                                  knee_deep=sp["knee_deep"], fade=True, taulim=None, init_meas=init)
+            Lo = CVP.cl5q(model_c, tw, cc, d, seg, g, win=(mw, i0, init))
             if Lf is None or Lo is None:
                 print(f"CL {p.name}: 실패"); continue
-            m = seg["push"][i0:][: len(t)]
-            pw = FD.plot_window(p, d)          # 원본 hip/knee/GRF.xlsx 창 = 점프 구간 (훅 규약)
-            t_p0 = float(t[m][0]) if m.sum() else t_end - 0.3
-            w = ((t >= pw[0]) & (t <= pw[1])) if pw else ((t >= t_p0 - 0.05) & (t <= t_end))
+            m = np.ones(int(mw.sum()), bool)
+            w = m
             dts = float(np.median(np.diff(Lo["t"])))
             sims = {
                 "old": [np.interp(t, Lo["t"], Lo[k]) for k in ("q1", "q2", "dq1", "dq2")] +
@@ -81,17 +84,16 @@ def main():
                 "fs": [np.interp(t, Lf["t"], Lf[k]) for k in ("thm1", "q2", "dq1", "dq2")] +
                       [np.clip(np.interp(t, Lf["t"], Lf["s1f"]), -20.5, 20.5), np.interp(t, Lf["t"], Lf["s2"])],
             }
-            meas = {k: d[k][i0:][: len(t)] for k, _ in CP.CH}
-            fig, ax = CP.panels(f"26.04.29 (CVT l_i=25mm) / {p.name} — CL 점프 구간 · 실측 vs old α vs 현행 fs",
+            meas = {k: d[k][mw] for k, _ in CP.CH}
+            fig, ax = CP.panels(f"26.04.29 (CVT l_i=25mm) / {p.name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs old α vs 현행 fs",
                                 f"push RMSE  old: {CP.rmse_line(meas, m, sims['old'])}   fs: {CP.rmse_line(meas, m, sims['fs'])}")
             for j, (a, (k, _)) in enumerate(zip(ax, CP.CH)):
                 y, yo, yf = meas[k][w], sims["old"][j][w], sims["fs"][j][w]
                 if k in ("q1", "q2"):
                     y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
-                a.plot(t[w], y, lw=1.2, label="실측")
-                a.plot(t[w], yo, "--", lw=1.0, label="old α (5q)")
-                a.plot(t[w], yf, ":", lw=1.5, label="현행 fs (6q)")
-                a.axvline(t_p0, lw=0.6, alpha=0.4)
+                a.plot(tt[mw], y, lw=1.2, label="실측")
+                a.plot(tt[mw], yo, "--", lw=1.0, label="old α (5q)")
+                a.plot(tt[mw], yf, ":", lw=1.5, label="현행 fs (6q)")
             ax[0].legend(fontsize=8)
             fig.tight_layout()
             fp = OUT / "CVT_CL"; fp.mkdir(parents=True, exist_ok=True)

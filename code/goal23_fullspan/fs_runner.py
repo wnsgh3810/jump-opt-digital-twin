@@ -125,8 +125,10 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
+    init_meas=(q1,q2,dq1,dq2,raw1,raw2): settle 대신 **창 시작 실측 상태 1회 앵커** (ModeA와 동일 규칙,
+    마라톤D P16 사용자 지시). thm1을 실측 q1에 앵커·처짐은 측정 토크에서 (F15/P12 규약).
     lim_raw/lim2_nm: 마라톤C P5~6 잔재 (P7 철회 — 사용자 확인: 제한은 전류 포화 35.5 단일뿐). 미사용 유지.
     vdes_ff=False: dq_des 미인가 세션 (0421 위치제어 등 — 데이터 사전 메타) — 실효 PD = kp·e − kd·dq
     (MIT 모드 v_des=0). P8 형태 동정: 0421 M2 RMSE 3.61 vs M1 10.88 raw."""
@@ -136,7 +138,32 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     iq, dof = ft["iq"], ft["dof"]
     A = P.A_PAPER
     kp1, kd1, kp2, kd2 = gains
-    md, _, _ = _settle(ft, float(qd1g[0]), float(qd2g[0]))
+    if init_meas is not None:
+        _q1m, _q2m, _dq1m, _dq2m, _r1m, _r2m = init_meas
+        md = mjm.MjData(model)
+        _s10 = float(P.J.ahat(A, np.array([float(np.clip(_r1m, -TW.R19.CLIP, TW.R19.CLIP))]),
+                              np.array([float(_dq1m)]))[0])
+        _d0 = float(np.clip(np.sign(_s10) * (abs(_s10) / 96.0 if abs(_s10) <= 9
+                                             else 9 / 96.0 + (abs(_s10) - 9) / 323.0), -0.3, 0.3))
+        md.qpos[iq["base_z"]] = 1.0
+        md.qpos[iq["hip_m"]] = -_q1m - np.pi / 2       # thm1(모터측) = 실측 앵커
+        md.qpos[iq["hip"]] = _d0
+        md.qpos[iq["knee_motor"]] = -_q2m
+        md.qpos[iq["cpin"]] = _q2m
+        md.qpos[iq["knee"]] = -_q2m
+        mjm.mj_forward(model, md)
+        _fg0 = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
+        md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[_fg0][2]) + P.J._P["S"].FOOT_RADIUS
+        _c1, _c12 = np.cos(_q1m), np.cos(_q1m + _q2m)
+        md.qvel[:] = 0
+        md.qvel[dof["base_z"]] = -0.25 * (_c1 * _dq1m + _c12 * (_dq1m + _dq2m))
+        md.qvel[dof["hip_m"]] = -_dq1m
+        md.qvel[dof["knee_motor"]] = -_dq2m
+        md.qvel[dof["cpin"]] = _dq2m
+        md.qvel[dof["knee"]] = -_dq2m
+        mjm.mj_forward(model, md)
+    else:
+        md, _, _ = _settle(ft, float(qd1g[0]), float(qd2g[0]))
     dt = model.opt.timestep
     # 마라톤C P12: 커맨드 지연 (전송+펌웨어+전류루프) — dq2 잔차의 가속도 기저 서명 (~7-9ms) 반영
     _dly_n = int(round(float(os.environ.get("FS_CMD_DELAY", "0") or 0) / dt))

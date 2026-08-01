@@ -28,6 +28,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
+import safe
 import fs_data as FD
 import fs_metric as FMET
 import fs_runner as FR
@@ -69,32 +70,131 @@ def rmse_line(d, m, sims):
 
 
 def cl_pair(d, seg, g, sess):
-    """(t, 실측dict, OLD 6채널, fs15 6채널, push마스크) — 실패 시 None."""
-    i0 = max(0, seg["i_desc"] - 5)
-    sl = slice(i0, None)
-    t = d["t"][sl] - d["t"][i0]
-    t_end = seg["t_lo"] - d["t"][i0]
-    # --- OLD (배포 모델) ---
+    """CL을 **ModeA와 동일 규칙**으로: 점프 창 시작에서 실측 상태 1회 앵커 → 통짜 폐루프 (P16).
+    반환 (t, 실측, OLD, fs15, 창마스크) — 실패 시 None."""
+    pw = FD.plot_window(d["_fold"], d)
+    if pw is None:
+        return None
+    tt = d["t"]
+    m = (tt >= pw[0]) & (tt <= pw[1])
+    if m.sum() < 30:
+        return None
+    i0 = int(np.argmax(m))
+    t = tt[m] - tt[i0]
+    t_end = float(t[-1])
+    init = (float(d["q1"][i0]), float(d["q2"][i0]), float(d["dq1"][i0]), float(d["dq2"][i0]),
+            float(d["raw1"][i0]), float(d["raw2"][i0]))
+    qd = (d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m])
     sess_al = FMET.ALPH_SESS.get(sess)
     alphas = tuple(sess_al) if sess_al else (TH.get(g[0], 0.40), 0.20, TK.get(g[2], 0.656), 0.20)
-    Lo = TW.rollout_cl(FMET.tw0, t, d["qd1"][sl], d["qd2"][sl], d["dqd1"][sl], d["dqd2"][sl],
-                       tuple(g), alphas=alphas, t_end=t_end, t_after=0.05)
-    # --- fs15 ---
+    Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
     ft = FR.fs_twin()
     SP = FR._sess_params()
     sp = SP.get(sess, dict(bias1=0.0, knee_deep=None))
-    Lf = FR.rollout_cl_fs(ft, t, sh(d["qd1"][sl]), sh(d["qd2"][sl]), sh(d["dqd1"][sl]), sh(d["dqd2"][sl]),
+    Lf = FR.rollout_cl_fs(ft, t, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
                           tuple(g), t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
-                          fade=True, taulim=None, vdes_ff=(sess != "26.04.21"))
+                          fade=True, taulim=None, vdes_ff=(sess != "26.04.21"), init_meas=init)
     if Lo is None or Lf is None:
         return None
     gi = lambda L, k: np.interp(t, L["t"], L[k])
     old = [gi(Lo, "q1"), gi(Lo, "q2"), gi(Lo, "dq1"), gi(Lo, "dq2"), gi(Lo, "sh1"), gi(Lo, "sh2")]
-    t1f = np.clip(gi(Lf, "s1f"), -20.5, 20.5)
-    fs = [gi(Lf, "thm1"), gi(Lf, "q2"), gi(Lf, "dq1"), gi(Lf, "dq2"), t1f, gi(Lf, "s2")]
-    meas = {k: d[k][sl][: len(t)] for k, _ in CH}
-    m = seg["push"][sl][: len(t)]
-    return t, meas, old, fs, m, t_end
+    fs = [gi(Lf, "thm1"), gi(Lf, "q2"), gi(Lf, "dq1"), gi(Lf, "dq2"),
+          np.clip(gi(Lf, "s1f"), -20.5, 20.5), gi(Lf, "s2")]
+    meas = {k: d[k][m] for k, _ in CH}
+    return tt[m], meas, old, fs, np.ones(m.sum(), bool)
+
+
+def cl_old_meas(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains, alphas, t_end, init_meas):
+    """TW.rollout_cl 문자 미러 + **창 시작 실측 앵커** (settle 생략) — ModeA와 동일 규칙.
+    골든: init_meas=None으로 호출하면 정본과 동일 경로(settle)로 되돌아간다 (검증 함수 golden_mirror)."""
+    P = FMET.tw0["P"]; mj = P.J._P["mj"]; S = P.J._P["S"]
+    law_a, law_b, law_v0 = FMET.tw0["law"]
+    tm = FMET.tw0["tm"]; kr = FMET.tw0["kr"]; sprm = FMET.tw0["sprm"]
+    A = P.A_PAPER
+    model = FMET.tw0["model"]
+    RU = TW.RU
+    ap1, ad1, ap2, ad2 = alphas
+    kp1, kd1, kp2, kd2 = gains
+    kp1 *= ap1; kd1 *= ad1; kp2 *= ap2; kd2 *= ad2
+    md = mj.MjData(model)
+    dof_knee = safe.dofadr(model, "knee", mj)
+    iq_k = safe.qadr(model, "knee", mj)
+    settle = init_meas is None
+    if settle:
+        sq1, sq2 = -qd1g[0] - np.pi / 2, -qd2g[0]
+        md.qpos[:] = [1.0, sq1, sq2, -sq2, sq2]
+        mj.mj_forward(model, md)
+        fg = mj.mj_name2id(model, mj.mjtObj.mjOBJ_GEOM, "foot")
+        md.qpos[0] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+        md.qvel[:] = 0
+    else:
+        q1m, q2m, dq1m, dq2m = init_meas[:4]
+        sq1, sq2 = -q1m - np.pi / 2, -q2m
+        md.qpos[:] = [1.0, sq1, sq2, -sq2, sq2]
+        mj.mj_forward(model, md)
+        fg = mj.mj_name2id(model, mj.mjtObj.mjOBJ_GEOM, "foot")
+        md.qpos[0] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+        c1_, c12_ = np.cos(q1m), np.cos(q1m + q2m)
+        md.qvel[:] = [-0.25 * (c1_ * dq1m + c12_ * (dq1m + dq2m)), -dq1m, -dq2m, dq2m, -dq2m]
+    mj.mj_forward(model, md)
+    dt = model.opt.timestep
+    T_S = P.J.T_SETTLE if settle else 0.0
+    N = int((T_S + t_end + 0.05) / dt)
+    tl = np.arange(N) * dt - T_S
+    Lg = {k: np.zeros(N) for k in ("q1", "q2", "dq1", "dq2", "sh1", "sh2", "bz")}
+    c1f = c2f = 0.0
+    al = dt / max(tm, dt)
+    for k in range(N):
+        tc = tl[k]
+        q1c = -md.qpos[1] - np.pi / 2; q2c = -md.qpos[2]
+        v1c = -md.qvel[1]; v2c = -md.qvel[2]
+        if tc < 0:
+            c1 = S.SETTLE_KP * (qd1g[0] - q1c) - S.SETTLE_KD * v1c
+            c2 = S.SETTLE_KP * (qd2g[0] - q2c) - S.SETTLE_KD * v2c
+            c1f, c2f = c1, c2
+        else:
+            tm_ = min(tc, t_end)
+            c1 = kp1 * (np.interp(tm_, tg, qd1g) - q1c) + kd1 * (np.interp(tm_, tg, dqd1g) - v1c)
+            c2 = kp2 * (np.interp(tm_, tg, qd2g) - q2c) + kd2 * (np.interp(tm_, tg, dqd2g) - v2c)
+            c1f += al * (c1 - c1f); c2f += al * (c2 - c2f)
+            c1, c2 = c1f, c2f
+        c1 = float(np.clip(c1, -TW.R19.CLIP, TW.R19.CLIP)); c2 = float(np.clip(c2, -TW.R19.CLIP, TW.R19.CLIP))
+        s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
+        s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
+        if kr:
+            supp += float(RU.rise_term(v2c, kr, law_v0))
+        tql = RU.spr_tau(float(md.qpos[iq_k]), abs(s2), sprm) if sprm is not None else 0.0
+        md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+        md.qfrc_applied[dof_knee] = tql
+        try:
+            mj.mj_step(model, md)
+        except Exception:
+            return None
+        if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
+            return None
+        Lg["q1"][k] = -md.qpos[1] - np.pi / 2; Lg["q2"][k] = -md.qpos[2]
+        Lg["dq1"][k] = -md.qvel[1]; Lg["dq2"][k] = -md.qvel[2]
+        Lg["sh1"][k] = s1; Lg["sh2"][k] = s2; Lg["bz"][k] = md.qpos[0]
+    Lg["t"] = tl
+    return Lg
+
+
+def golden_mirror(d, seg, g, sess):
+    """미러 신뢰 검증: init_meas=None 미러 == 정본 TW.rollout_cl (침묵실패 방역)."""
+    i0 = max(0, seg["i_desc"] - 5)
+    sl = slice(i0, None)
+    t = d["t"][sl] - d["t"][i0]
+    t_end = seg["t_lo"] - d["t"][i0]
+    sess_al = FMET.ALPH_SESS.get(sess)
+    alphas = tuple(sess_al) if sess_al else (TH.get(g[0], 0.40), 0.20, TK.get(g[2], 0.656), 0.20)
+    args = (t, d["qd1"][sl], d["qd2"][sl], d["dqd1"][sl], d["dqd2"][sl])
+    A_ = TW.rollout_cl(FMET.tw0, *args, tuple(g), alphas=alphas, t_end=t_end, t_after=0.05)
+    B_ = cl_old_meas(FMET.tw0, *args, tuple(g), alphas, t_end, None)
+    if A_ is None or B_ is None:
+        return None
+    n = min(len(A_["q1"]), len(B_["q1"]))
+    return float(np.max(np.abs(A_["q1"][:n] - B_["q1"][:n]))), float(np.max(np.abs(A_["sh1"][:n] - B_["sh1"][:n])))
 
 
 def plot_cl(sess, name, d, seg, g):
@@ -102,31 +202,24 @@ def plot_cl(sess, name, d, seg, g):
     if r is None:
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
-    t, meas, old, fs, m, t_end = r
-    pw = FD.plot_window(d["_fold"], d)          # 원본 hip/knee/GRF.xlsx 창 = 점프 구간 (훅 규약)
-    t_p0 = float(t[m][0]) if m.sum() else max(t_end - 0.3, 0.0)
-    w = ((t >= pw[0]) & (t <= pw[1])) if pw else ((t >= t_p0 - 0.05) & (t <= t_end))
-    fig, ax = panels(f"{sess} / {name} — CL 점프(push) 구간 · 실측 vs 배포모델(OLD) vs 현행(fs15)",
-                     f"push RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   fs15: {rmse_line(meas, m, fs)}")
+    t, meas, old, fs, m = r
+    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜 폐루프) · 실측 vs 배포모델(OLD) vs 현행(fs15)",
+                     f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   fs15: {rmse_line(meas, m, fs)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
-        y = meas[k][w]
-        yo, yf = old[j][w], fs[j][w]
+        y, yo, yf = meas[k], old[j], fs[j]
         if k in ("q1", "q2"):
             y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
-        a.plot(t[w], y, lw=1.2, label="실측")
-        a.plot(t[w], yo, "--", lw=1.0, label="배포모델 (OLD)")
-        a.plot(t[w], yf, ":", lw=1.5, label="현행 (fs15)")
-        a.axvline(t_p0, lw=0.6, alpha=0.4)
+        a.plot(t, y, lw=1.2, label="실측")
+        a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
+        a.plot(t, yf, ":", lw=1.5, label="현행 (fs15)")
     ax[0].legend(fontsize=8, loc="best")
     fig.tight_layout()
     fp = OUT / "CL" / sess
     fp.mkdir(parents=True, exist_ok=True)
     fig.savefig(fp / f"{name}.png", dpi=105)
     plt.close(fig)
-    return [np.sqrt(np.mean((meas[k][m] - s[m]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
-            for (k, _), s in zip(CH, old)], \
-           [np.sqrt(np.mean((meas[k][m] - s[m]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
-            for (k, _), s in zip(CH, fs)]
+    conv = lambda k, v: np.sqrt(np.mean((meas[k][m] - v[m]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
+    return [conv(k, v) for (k, _), v in zip(CH, old)], [conv(k, v) for (k, _), v in zip(CH, fs)]
 
 
 def plot_ma(sess, name, d, seg):

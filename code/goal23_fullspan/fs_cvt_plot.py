@@ -52,29 +52,42 @@ def tri(ax, t0, y0, t1, y1, t2, y2, ylab):
     ax.grid(alpha=0.3)
 
 
-def cl5q(model, tw, cc, d, seg, g):
+def cl5q(model, tw, cc, d, seg, g, win=None):
     """old α CL 미러 (5q 직결 hip): settle→폴더 게인 PD(TK·kd0.2)→supp/spr/CVT소산."""
     P = tw["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = tw["law"]; kr = tw["kr"]; sprm = tw["sprm"]
     A = P.A_PAPER
     from cvt_core import qpos_from_crank
-    i0 = max(0, seg["i_desc"] - 5)
-    t = d["t"][i0:] - d["t"][i0]
-    qd1g, qd2g = d["qd1"][i0:], d["qd2"][i0:]
-    dqd1g, dqd2g = d["dqd1"][i0:], d["dqd2"][i0:]
-    t_end = seg["t_lo"] - d["t"][i0]
+    if win is not None:                       # P16: 점프 창 시작 실측 앵커 (ModeA 동일 규칙)
+        mw, i0, init = win
+        t = d["t"][mw] - d["t"][i0]
+        qd1g, qd2g = d["qd1"][mw], d["qd2"][mw]
+        dqd1g, dqd2g = d["dqd1"][mw], d["dqd2"][mw]
+        t_end = float(t[-1])
+    else:
+        mw = None
+        i0 = max(0, seg["i_desc"] - 5)
+        t = d["t"][i0:] - d["t"][i0]
+        qd1g, qd2g = d["qd1"][i0:], d["qd2"][i0:]
+        dqd1g, dqd2g = d["dqd1"][i0:], d["dqd2"][i0:]
+        t_end = seg["t_lo"] - d["t"][i0]
     kp1, kd1 = g[0], g[1]
     kp2 = g[2] * TKD.get(g[2], 0.656); kd2 = g[3] * 0.20
     md = mjm.MjData(model)
-    md.qpos[:] = qpos_from_crank(1.0, -float(qd1g[0]) - np.pi / 2, -float(qd2g[0]), LI)[0]
+    _a1 = -(init[0] if win is not None else float(qd1g[0])) - np.pi / 2
+    _a2 = -(init[1] if win is not None else float(qd2g[0]))
+    md.qpos[:] = qpos_from_crank(1.0, _a1, _a2, LI)[0]
     mjm.mj_forward(model, md)
     fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
     md.qpos[0] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
     md.qvel[:] = 0
+    if win is not None:                       # 실측 속도 주입 (5q 좌표: [bz, hip, crank, cpin, knee])
+        _c1, _c12 = np.cos(init[0]), np.cos(init[0] + init[1])
+        md.qvel[:] = [-0.25 * (_c1 * init[2] + _c12 * (init[2] + init[3])), -init[2], -init[3], init[3], -init[3]]
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
     qg, rg = RU.rtab(LI)
-    for k in range(int(round(P.J.T_SETTLE / dt))):        # settle
+    for k in range(0 if win is not None else int(round(P.J.T_SETTLE / dt))):        # settle (앵커판은 생략)
         q1c = -md.qpos[1] - np.pi / 2; q2c = -md.qpos[2]
         v1c = -md.qvel[1]; v2c = -md.qvel[2]
         c1 = S.SETTLE_KP * (float(qd1g[0]) - q1c) - S.SETTLE_KD * v1c
