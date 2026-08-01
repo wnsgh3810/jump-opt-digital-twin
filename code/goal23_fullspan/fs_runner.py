@@ -251,9 +251,15 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     s1f = 0.0
     af = dt / max(tc_f, dt)
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx", "cfx", "cfz", "bx")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx",
+            "cfx", "cfz", "bx", "slipv")
     Lg = {k: np.zeros(N) for k in keys}
     _fgx = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")   # 마라톤D P3: 발 x (슬립 지표)
+    # 마라톤E P12: 접촉 물질점의 접선속도 = **진짜 미끄럼**(구름이면 0) — 발이동을 구름/슬립으로 분해
+    _slog = os.environ.get("FS_SLIPLOG") == "1"
+    if _slog:
+        _fbody = int(model.geom_bodyid[_fgx])
+        _jacp = np.zeros((3, model.nv))
     _cf6 = np.zeros(6)                                            # P14: 발 접촉 법선/접선력 (슬립 방아쇠 진단)
     # F28b 하중 인식 간섭: N(t)=sim 발 접촉 수직력 / mg 스케일 (하강≈1 → 세션 적합 보존)
     load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
@@ -444,6 +450,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                     _fxt += float(np.hypot(_cf6[1], _cf6[2]))     # 접선 크기
         Lg["cfz"][k] = _fz
         Lg["cfx"][k] = _fxt
+        if _slog and _fz > 1.0:
+            for _ci in range(md.ncon):
+                _c = md.contact[_ci]
+                if _c.geom1 == _fgx or _c.geom2 == _fgx:
+                    mjm.mj_jac(model, md, _jacp, None, np.asarray(_c.pos, float), _fbody)
+                    Lg["slipv"][k] = float(_jacp[0] @ md.qvel)   # 접촉점 물질속도 x = 미끄럼 속도
+                    break
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
         s1f += af * (s1o - s1f)
         Lg["s1f"][k] = s1f
