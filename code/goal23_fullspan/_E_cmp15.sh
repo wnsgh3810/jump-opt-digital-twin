@@ -6,3 +6,5 @@ export FS_CMP_OUT=_compare FS_STACK_TAG=fs15
 python fs_compare_plot.py
 python fs_compare_cvt.py
 echo ALLDONE
+
+python _E_cmp_readme.py "$FS_CMP_OUT" "$FS_STACK_TAG"

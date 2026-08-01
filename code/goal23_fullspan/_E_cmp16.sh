@@ -8,3 +8,5 @@ python fs_compare_plot.py
 echo "=== [2/2] CVT (0429) CL + ModeA ==="
 python fs_compare_cvt.py
 echo ALLDONE
+
+python _E_cmp_readme.py "$FS_CMP_OUT" "$FS_STACK_TAG"
