@@ -77,16 +77,21 @@ def _ncc(patch, T):
 
 def ncc_search(f, T, cy, cx, ry, rx):
     """정수화소 격자 NCC 탐색. 반환: (best_score, dy*, dx*, score_grid, y0, x0)
-    score_grid: (2ry+1, 2rx+1) — 이후 포물선 보간에 재사용."""
-    h, w = T.shape[0] // 2, T.shape[1] // 2
+    score_grid: (2ry+1, 2rx+1) — 이후 포물선 보간에 재사용.
+    T의 세로/가로가 홀수여도(리사이즈 템플릿 대비) 정확히 동작하도록 비대칭 반폭 사용
+    (h0=th//2, h1=th-h0 — 대칭 ±h 가정 시 홀수 크기에서 patch.shape가 항상 어긋나
+    전 격자가 무효화되는 버그 확인됨, day22 리사이즈 코스탐색에서 재현)."""
+    th, tw = T.shape
+    h0, h1 = th // 2, th - th // 2
+    w0, w1 = tw // 2, tw - tw // 2
     ny, nx = 2 * ry + 1, 2 * rx + 1
     grid = np.full((ny, nx), -1.0, dtype=np.float64)
     for iy, dy in enumerate(range(-ry, ry + 1)):
-        yy0, yy1 = cy + dy - h, cy + dy + h
+        yy0, yy1 = cy + dy - h0, cy + dy + h1
         if yy0 < 0 or yy1 > f.shape[0]:
             continue
         for ix, dx in enumerate(range(-rx, rx + 1)):
-            xx0, xx1 = cx + dx - w, cx + dx + w
+            xx0, xx1 = cx + dx - w0, cx + dx + w1
             if xx0 < 0 or xx1 > f.shape[1]:
                 continue
             patch = f[yy0:yy1, xx0:xx1]
@@ -116,11 +121,14 @@ def parabolic_refine(grid, iy, ix):
     return dsy, dsx
 
 
-def track_point(frames, idx_list, T0, cy0, cx0, ry=20, rx=25, propagate=True):
+def track_point(frames, idx_list, T0, cy0, cx0, ry=20, rx=25, propagate=True, min_score_propagate=0.55):
     """프레임열 idx_list(임의 순서, 보통 시간순)를 따라 템플릿 T0(1개, 고정)를 추적.
     propagate=True: 이전 위치를 다음 탐색 중심으로 전파 (발볼트 — 실제 이동 추적 필요).
     propagate=False: 탐색 중심을 시드(cy0,cx0)에 고정 (배경기준점 — 정적 물체이므로 전파 시
     프레임별 미세오차가 누적되어 줄자의 인접 유사 눈금으로 "걸어가는" 드리프트 위험 확인됨).
+    저신뢰 프레임(score<min_score_propagate)에서는 전파를 건너뛴다 — 그렇지 않으면 한 번의
+    오정합이 다음 탐색 중심을 오염시켜 눈덩이처럼 드리프트가 누적된다(day22 실측으로 확인:
+    전파 무조건 허용 시 -27~-34px의 물리적으로 불가능한 "표류"가 발생).
     반환: dict(t_idx -> (y,x,score))."""
     out = {}
     cy, cx = cy0, cx0
@@ -130,8 +138,8 @@ def track_point(frames, idx_list, T0, cy0, cx0, ry=20, rx=25, propagate=True):
         y_abs = y0 + (iy + ry) + dsy
         x_abs = x0 + (ix + rx) + dsx
         out[i] = (float(y_abs), float(x_abs), sc)
-        if propagate:
-            cy, cx = y_abs, x_abs       # 다음 탐색 중심 갱신 (전파)
+        if propagate and sc >= min_score_propagate:
+            cy, cx = y_abs, x_abs       # 다음 탐색 중심 갱신 (전파, 신뢰도 충분할 때만)
     return out
 
 
@@ -180,7 +188,11 @@ def calibrate_ruler(f):
             ys = np.array([g[0] for g in gs])
             diffs = np.diff(ys)
             med = float(np.median(diffs))
-            if med < 20:
+            # 물리적 하한: 5개 날짜 실측 모두 10cm 라벨 간격 80~120px대 (카메라 거리차 반영).
+            # <65px 는 한 라벨의 위아래 stacked 숫자가 별개 그룹으로 쪼개진 오검출(간격이
+            # 정확히 절반으로 관측됨, day24 f_bot 프레임에서 실측 확인) — 자체 cv는 낮게 나와
+            # cv만으론 못 거른다. 배경 텍스트(숫자) 간격이므로 이 하한은 세션 불문 안전하다.
+            if med < 65:
                 continue
             cv = float(np.std(diffs) / med)
             key = (round(cv, 3), -len(gs))
@@ -205,15 +217,25 @@ def calibrate_ruler(f):
 
 # ───────────────────────── ② 발볼트 코스 위치 (27일 템플릿 → 자기 템플릿) ─────────────────────────
 
-def locate_foot_seed(f, T_ref, y0, x0, ry=110, rx=170):
-    sc, iy, ix, grid, gy0, gx0 = ncc_search(f, T_ref, y0, x0, ry, rx)
+def locate_foot_seed(f, T_ref, y0, x0, ry=110, rx=170, resize=1.0):
+    """T_ref로 광역 코스탐색. resize!=1.0이면 날짜 간 카메라 줌 차이를 보정하기 위해
+    템플릿을 이 배율로 리샘플한 뒤 매칭 (스케일 불일치 시 코스탐색 자체가 엉뚱한 곳에
+    안착하는 문제가 day22(1920x1080, 27일과 확연히 다른 화각)에서 확인됨)."""
+    if abs(resize - 1.0) > 0.03:
+        new_h = max(8, int(round(T_ref.shape[0] * resize)))
+        new_w = max(8, int(round(T_ref.shape[1] * resize)))
+        zy, zx = new_h / T_ref.shape[0], new_w / T_ref.shape[1]
+        T_use = ndimage.zoom(T_ref, (zy, zx), order=1)
+    else:
+        T_use = T_ref
+    sc, iy, ix, grid, gy0, gx0 = ncc_search(f, T_use, y0, x0, ry, rx)
     cy, cx = y0 + iy, x0 + ix
     return cy, cx, sc
 
 
 # ───────────────────────── main ─────────────────────────
 
-def process_trial(day, fold, T_ref_foot, quiet=False):
+def process_trial(day, fold, T_ref_foot, ref_scale, quiet=False):
     mp4s = list(fold.glob("*.mp4"))
     if not mp4s:
         return None, "영상 없음"
@@ -234,13 +256,20 @@ def process_trial(day, fold, T_ref_foot, quiet=False):
         return None, f"하강 프레임 부족 ({f_desc}~{f_bot})"
 
     # 스케일/배경기준점: trial 자신의 프레임에서 매번 재확립 (동일 날짜라도 phone 재배치로
-    # 프레이밍이 trial마다 미세하게 다를 수 있음 — day-level 재사용시 배경패치 오정합 확인됨)
-    cal_rep = calibrate_ruler(frames[f_bot])
+    # 프레이밍이 trial마다 미세하게 다를 수 있음 — day-level 재사용시 배경패치 오정합 확인됨).
+    # f_bot(크라우치 정지자세) 대신 이른 정지 프레임 사용 — f_bot 프레임은 trial마다 인덱스가
+    # 달라 이따금 프레임 압축/블러로 숫자 라벨의 상하 stacked 획이 갈라져 절반 간격으로
+    # 오검출되는 사례 확인(day24). 초반 프레임은 항상 로봇 대기자세로 안정적.
+    f_cal = min(30, len(frames) - 1)
+    cal_rep = calibrate_ruler(frames[f_cal])
     if cal_rep is None:
         return None, "줄자 판독 실패"
 
-    # 발볼트 코스 위치: 바닥(f_bot) 프레임에서 27일 템플릿으로 광역 탐색
-    cy, cx, e0 = locate_foot_seed(frames[f_bot], T_ref_foot, *FOOT_REF_2707)
+    # 발볼트 코스 위치: 바닥(f_bot) 프레임에서 27일 템플릿으로 광역 탐색.
+    # 날짜간 카메라 줌차 보정: 27일 대비 이 날짜의 mm/px 비율만큼 템플릿을 리샘플
+    # (day22가 1920x1080·확연히 다른 화각이라 무보정시 코스탐색이 엉뚱한 곳에 안착 — 실측 확인).
+    resize = ref_scale / cal_rep["mm_per_px_local"]
+    cy, cx, e0 = locate_foot_seed(frames[f_bot], T_ref_foot, *FOOT_REF_2707, resize=resize)
     if e0 < 0.35:
         return None, f"발볼트 코스탐색 파탄 (ncc={e0:.2f})"
     T_own = frames[f_bot][int(cy) - 20:int(cy) + 20, int(cx) - 20:int(cx) + 20].copy()
@@ -253,10 +282,10 @@ def process_trial(day, fold, T_ref_foot, quiet=False):
     # 배경(카메라 흔들림) 기준점: 이 trial 자신의 프레임에서 확립한 줄자 라벨 패치(bg_seed)
     bgy0, bgx0 = int(cal_rep["bg_seed"][0]), int(cal_rep["bg_seed"][1])
     bgh, bgw = 32, 24   # 세로로 더 큼 (숫자 두어개+공백 포함 → 눈금 반복패턴 대비 모호성 감소)
-    if not (bgh <= bgy0 < frames[f_bot].shape[0] - bgh and bgw <= bgx0 < frames[f_bot].shape[1] - bgw):
+    if not (bgh <= bgy0 < frames[f_cal].shape[0] - bgh and bgw <= bgx0 < frames[f_cal].shape[1] - bgw):
         bg_trk = None
     else:
-        T_bg = frames[f_bot][bgy0 - bgh:bgy0 + bgh, bgx0 - bgw:bgx0 + bgw].copy()
+        T_bg = frames[f_cal][bgy0 - bgh:bgy0 + bgh, bgx0 - bgw:bgx0 + bgw].copy()
         bg_trk = track_point(frames, idx_list, T_bg, bgy0, bgx0, ry=8, rx=8, propagate=False)
 
     idx_sorted = sorted(foot_trk)
@@ -324,13 +353,17 @@ def main():
     OUT = {"_meta": dict(desc="fs_video_desc/fs_video_gauge 계보 재구축 — px->mm 실측 줄자 스케일 + "
                               "서브픽셀(NCC+포물선보간) 발볼트 추적 + 배경ROI 카메라흔들림 차감")}
 
-    # 27일 발볼트 기준 템플릿 확보 (fs_video_gauge.py 좌표 재사용)
+    # 27일 발볼트 기준 템플릿 확보 (fs_video_gauge.py 좌표 재사용) + 27일 자체 스케일
+    # (다른 날짜 코스탐색 시 화각차 보정의 기준값으로 사용)
     ref_fold = ROOT / REF_DAY / "250_3_250_3"
     ref_mp4 = list(ref_fold.glob("*.mp4"))[0]
     ref_frames, ref_fps = load_frames(ref_mp4)
     jr = jump_frame_index(ref_frames)
     fy, fx = FOOT_REF_2707
     T_ref_foot = ref_frames[jr - 5][fy - 20:fy + 20, fx - 20:fx + 20].copy()
+    ref_cal = calibrate_ruler(ref_frames[min(30, len(ref_frames) - 1)])
+    ref_scale = ref_cal["mm_per_px_local"]
+    print(f"기준(27일) 스케일: {ref_scale:.4f}mm/px", flush=True)
 
     for day in days:
         base = ROOT / day
@@ -346,7 +379,7 @@ def main():
         scales = []
         for fold in trials:
             key = fold.name
-            res, err = process_trial(day, fold, T_ref_foot)
+            res, err = process_trial(day, fold, T_ref_foot, ref_scale)
             if err:
                 print(f"  {key}: FAIL — {err}", flush=True)
                 OUT[day][key] = dict(fail=err)
