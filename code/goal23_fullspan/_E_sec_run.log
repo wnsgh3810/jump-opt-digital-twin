@@ -1,0 +1,27 @@
+=== fs15 secondary ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+세션           |Δh| 중앙    h예 (sim/real)  슬립 sim(무슬립일 기준선 대비)
+26.04.21         nan                —                  6.6
+26.04.24        25.0        52.1/27.1                  6.5
+26.06.02         nan                —                  6.5
+26.07.22        16.2        56.5/33.9                  6.3
+26.07.23        16.1        47.2/31.1                  6.3
+26.07.24         8.7        38.1/29.4                  6.6
+26.07.25        10.6        37.5/26.6                  5.9
+26.07.27        12.2        44.7/31.4                  6.7
+done → _D_secondary.json
+=== E1 secondary (μ0.85+railx) ===
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+세션           |Δh| 중앙    h예 (sim/real)  슬립 sim(무슬립일 기준선 대비)
+26.04.21         nan                —                  5.5
+26.04.24        25.0        52.1/27.1                  5.4
+26.06.02         nan                —                  5.0
+26.07.22        16.0        56.3/33.9                  6.2
+26.07.23        13.8        44.9/31.1                  4.4
+26.07.24         6.7        36.1/29.4                  5.7
+26.07.25        10.6        37.5/26.6                  6.1
+26.07.27        12.2        44.7/31.4                  6.6
+done → _D_secondary.json
+ALLDONE

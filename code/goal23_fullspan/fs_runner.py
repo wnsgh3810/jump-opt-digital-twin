@@ -135,6 +135,56 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
+class _PreSlide:
+    """마라톤E P4: stick-slip 이력 마찰 (Karnopp형 presliding) — FS_PRESLIDE="mu_s[,mu_k[,v_stop[,mu_hold]]]".
+
+    점착(stick) 중엔 접촉쌍 마찰을 mu_hold(기본 2.0)로 올려 규제화 쿨롱의 파단 이하 크리프를 억제
+    (0602 깊은 앉기 유지 창의 MA q2 악화 원인 = 유지 구간 위상 활주). 파단은 |Ft|/N ≥ mu_s에서만
+    → slide 상태(마찰 mu_k, 기본 =mu_s=0.85 데이터 하한) → 발 접선속도 |v_t|<v_stop 재점착.
+    발+바닥 geom 동시 설정. 모델이 _CACHE 공유이므로 rollout 양 종단에서 restore() 의무."""
+
+    def __init__(self, model, fg):
+        p = [float(v) for v in os.environ["FS_PRESLIDE"].split(",")]
+        self.mu_s = p[0]
+        self.mu_k = p[1] if len(p) > 1 else p[0]
+        self.v_stop = p[2] if len(p) > 2 else 0.02
+        self.mu_hold = p[3] if len(p) > 3 else 2.0
+        self.model = model; self.fg = fg
+        self.gf = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "floor")
+        self.orig = (float(model.geom_friction[fg][0]), float(model.geom_friction[self.gf][0]))
+        self.slide = False; self.fx_prev = None
+        self._cf = np.zeros(6)
+        self._set(self.mu_hold)
+
+    def _set(self, mu):
+        self.model.geom_friction[self.fg][0] = mu
+        self.model.geom_friction[self.gf][0] = mu
+
+    def step(self, md, dt):
+        """mj_step 직후 호출: 상태 갱신 + 다음 스텝 마찰 설정. (법선합, 접선합) 반환 (cfz/cfx 로깅 겸용)."""
+        fz = ft_ = 0.0
+        for ci in range(md.ncon):
+            c = md.contact[ci]
+            if c.geom1 == self.fg or c.geom2 == self.fg:
+                mjm.mj_contactForce(self.model, md, ci, self._cf)
+                fz += abs(float(self._cf[0]))
+                ft_ += float(np.hypot(self._cf[1], self._cf[2]))
+        fx = float(md.geom_xpos[self.fg][0])
+        vt = 0.0 if self.fx_prev is None else (fx - self.fx_prev) / dt
+        self.fx_prev = fx
+        if not self.slide:
+            if fz > 1.0 and ft_ >= self.mu_s * fz:
+                self.slide = True
+        elif abs(vt) < self.v_stop or fz <= 1.0:
+            self.slide = False
+        self._set(self.mu_k if self.slide else self.mu_hold)
+        return fz, ft_
+
+    def restore(self):
+        self.model.geom_friction[self.fg][0] = self.orig[0]
+        self.model.geom_friction[self.gf][0] = self.orig[1]
+
+
 def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
     init_meas=(q1,q2,dq1,dq2,raw1,raw2): settle 대신 **창 시작 실측 상태 1회 앵커** (ModeA와 동일 규칙,
@@ -209,6 +259,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _rxkb = tuple(float(v) for v in _rxv.split(",")) if (_rxv and "base_x" in dof) else None
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
+    _psl = _PreSlide(model, _fgx) if os.environ.get("FS_PRESLIDE") else None
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -341,6 +392,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             md.qfrc_applied[dof["hip_m"]] = -_w2 * _v1m * abs(_v1m)   # 순할당 (hip_m 유일 기록자)
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
+            if _psl is not None:
+                _psl.restore()
             return None
         Lg["t"][k] = tc
         Lg["thm1"][k] = -md.qpos[iq["hip_m"]] - np.pi / 2
@@ -354,18 +407,23 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["bz"][k] = md.qpos[iq["base_z"]]
         Lg["fx"][k] = float(md.geom_xpos[_fgx][0])
         Lg["bx"][k] = float(md.qpos[dof["base_x"]]) if "base_x" in dof else 0.0
-        _fz = _fxt = 0.0
-        for _ci in range(md.ncon):
-            _c = md.contact[_ci]
-            if _c.geom1 == _fgx or _c.geom2 == _fgx:
-                mjm.mj_contactForce(model, md, _ci, _cf6)
-                _fz += abs(float(_cf6[0]))                        # 접촉 법선 (contact frame)
-                _fxt += float(np.hypot(_cf6[1], _cf6[2]))         # 접선 크기
+        if _psl is not None:
+            _fz, _fxt = _psl.step(md, dt)                         # 상태 갱신 + 접촉력 (이중 루프 회피)
+        else:
+            _fz = _fxt = 0.0
+            for _ci in range(md.ncon):
+                _c = md.contact[_ci]
+                if _c.geom1 == _fgx or _c.geom2 == _fgx:
+                    mjm.mj_contactForce(model, md, _ci, _cf6)
+                    _fz += abs(float(_cf6[0]))                    # 접촉 법선 (contact frame)
+                    _fxt += float(np.hypot(_cf6[1], _cf6[2]))     # 접선 크기
         Lg["cfz"][k] = _fz
         Lg["cfx"][k] = _fxt
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
         s1f += af * (s1o - s1f)
         Lg["s1f"][k] = s1f
+    if _psl is not None:
+        _psl.restore()
     return Lg
 
 
@@ -668,6 +726,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _rxkb = tuple(float(v) for v in _rxv.split(",")) if (_rxv and "base_x" in dof) else None
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
+    _psl = _PreSlide(model, fg) if os.environ.get("FS_PRESLIDE") else None
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -747,7 +806,11 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
             md.qfrc_applied[dof["hip_m"]] = _q
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
+            if _psl is not None:
+                _psl.restore()
             return None
+        if _psl is not None:
+            _psl.step(md, dt)
         Lg["t"][k] = tc
         Lg["thm1"][k] = -md.qpos[iq["hip_m"]] - np.pi / 2
         Lg["q1"][k] = -(md.qpos[iq["hip_m"]] + md.qpos[iq["hip"]]) - np.pi / 2
@@ -756,6 +819,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1
         Lg["s2"][k] = s2
+    if _psl is not None:
+        _psl.restore()
     return Lg
 
 def fit_knee_deep():
