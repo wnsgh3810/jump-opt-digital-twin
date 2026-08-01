@@ -153,9 +153,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     s1f = 0.0
     af = dt / max(tc_f, dt)
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx", "cfx", "cfz")
     Lg = {k: np.zeros(N) for k in keys}
     _fgx = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")   # 마라톤D P3: 발 x (슬립 지표)
+    _cf6 = np.zeros(6)                                            # P14: 발 접촉 법선/접선력 (슬립 방아쇠 진단)
     # F28b 하중 인식 간섭: N(t)=sim 발 접촉 수직력 / mg 스케일 (하강≈1 → 세션 적합 보존)
     load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
     if load_on:
@@ -308,6 +309,15 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
         Lg["fx"][k] = float(md.geom_xpos[_fgx][0])
+        _fz = _fxt = 0.0
+        for _ci in range(md.ncon):
+            _c = md.contact[_ci]
+            if _c.geom1 == _fgx or _c.geom2 == _fgx:
+                mjm.mj_contactForce(model, md, _ci, _cf6)
+                _fz += abs(float(_cf6[0]))                        # 접촉 법선 (contact frame)
+                _fxt += float(np.hypot(_cf6[1], _cf6[2]))         # 접선 크기
+        Lg["cfz"][k] = _fz
+        Lg["cfx"][k] = _fxt
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
         s1f += af * (s1o - s1f)
         Lg["s1f"][k] = s1f
