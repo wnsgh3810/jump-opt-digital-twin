@@ -135,6 +135,31 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
+def _escrow_gate(bank, tau, vel, dt):
+    """마라톤F F1: 저장-방출 에너지 회계 게이트 (층별 은행).
+
+    p = τ·v ≤ 0 (흡수) → 은행 적립 · p > 0 (방출) → 잔고 한도 내만 (초과분 τ 스케일 컷).
+    형태(적합 법칙)는 유지하고 순주입만 구조적으로 0으로. (은행, 게이트 후 τ) 반환."""
+    p = tau * vel
+    if p <= 0.0:
+        return bank - p * dt, tau              # 흡수: −p·dt 적립
+    e = p * dt
+    if e <= bank:
+        return bank - e, tau
+    if bank <= 0.0:
+        return 0.0, 0.0
+    return 0.0, tau * (bank / e)
+
+
+def _escrow_init():
+    """FS_ESCROW="supp2,hsupp1,spr" → 층별 은행 dict (초기잔고 FS_ESCROW_SEED [J], 기본 0)."""
+    v = os.environ.get("FS_ESCROW")
+    if not v:
+        return None
+    seed = float(os.environ.get("FS_ESCROW_SEED", "0") or 0)
+    return {k.strip(): seed for k in v.split(",") if k.strip()}
+
+
 _PSL_PRISTINE = {}     # id(model) → 원본 (foot, floor) 마찰 — _PreSlide 누수 자가 치유용
 
 
@@ -279,6 +304,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _psl = _PreSlide(model, _fgx) if os.environ.get("FS_PRESLIDE") else None
     _eled = ({k_: np.zeros(N) for k_ in ("motor1", "motor2", "supp2", "hsupp1", "spr_tql", "kdeep2", "bias_h")}
              if os.environ.get("FS_ELEDGER") == "1" else None)   # 층별 순간 파워 [W] (오프라인 창 적분)
+    _esc = _escrow_init()                  # 마라톤F F1: 층별 에너지 회계 (None = 비활성)
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -331,7 +357,12 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
+        if _esc is not None and "supp2" in _esc:
+            _esc["supp2"], supp = _escrow_gate(_esc["supp2"], supp, v2c, dt)
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        if _esc is not None and "spr" in _esc:
+            # CVT 소산항(아래 tql +=)은 열소산이라 은행 적립 대상이 아님 — 스프링분만 게이트
+            _esc["spr"], tql = _escrow_gate(_esc["spr"], tql, float(md.qvel[dof["knee"]]), dt)
         if _eta < 1.0:                   # P8 기어박스 η^sign 재심 (모터링 사분면만) — 관측은 커맨드 수준 유지
             s1 = s1 * (_eta if s1 * v1c > 0 else 1.0)
             s2 = s2 * (_eta if s2 * v2c > 0 else 1.0)
@@ -342,6 +373,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
             tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
         _hsupp = RU.hip_supp_scalar(s1, s2, v1c)
+        if _esc is not None and "hsupp1" in _esc:
+            _esc["hsupp1"], _hsupp = _escrow_gate(_esc["hsupp1"], _hsupp, v1c, dt)
         md.ctrl[:] = [-(s1 + _hsupp), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         if _eled is not None:              # 마라톤E P9: 층별 순간 파워 원장 (진단 전용 — 동역학 무변경)
@@ -767,6 +800,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     _psl = _PreSlide(model, fg) if os.environ.get("FS_PRESLIDE") else None
+    _esc = _escrow_init()                  # 마라톤F F1: CL과 동일 플랜트 (에너지 회계)
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -780,11 +814,18 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
+        if _esc is not None and "supp2" in _esc:
+            _esc["supp2"], supp = _escrow_gate(_esc["supp2"], supp, v2c, dt)
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        if _esc is not None and "spr" in _esc:
+            _esc["spr"], tql = _escrow_gate(_esc["spr"], tql, float(md.qvel[dof["knee"]]), dt)
         if _eta < 1.0:
             s1 = s1 * (_eta if s1 * v1c > 0 else 1.0)
             s2 = s2 * (_eta if s2 * v2c > 0 else 1.0)
-        md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+        _hsupp = RU.hip_supp_scalar(s1, s2, v1c)
+        if _esc is not None and "hsupp1" in _esc:
+            _esc["hsupp1"], _hsupp = _escrow_gate(_esc["hsupp1"], _hsupp, v1c, dt)
+        md.ctrl[:] = [-(s1 + _hsupp), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         dq_s = float(md.qpos[iq["hip"]])
         b_base = bias1
