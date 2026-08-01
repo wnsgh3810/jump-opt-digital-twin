@@ -37,6 +37,20 @@ import p25_a_twin as TW
 OUT = HERE / "_compare"
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
+
+
+def alpha_of(tab, kp):
+    """OLD α 조회 — 표 밖 게인은 **log-kp 선형 보간**(표 범위 밖은 단부값 고정).
+    사용자 지적 (P17): 구 fallback 0.40/0.656 고정은 표 밖 게인에서 OLD를 부당하게 약화시켰다
+    (예: 27일 kp1=100 → 0.40, 보간값 0.58). 비교 공정성 수정."""
+    ks = sorted(tab)
+    if kp in tab:
+        return tab[kp]
+    if kp <= ks[0]:
+        return tab[ks[0]]
+    if kp >= ks[-1]:
+        return tab[ks[-1]]
+    return float(np.interp(np.log(kp), np.log(ks), [tab[k] for k in ks]))
 QS = 2                      # qd 스큐 보정 [샘플] (4ms@500Hz)
 MA_W, MA_S = 0.10, 0.05     # 점프 창(~0.2~0.3s) 내 mshoot 창/stride
 CH = [("q1", "q1 [°]"), ("q2", "q2 [°]"), ("dq1", "dq1 [rad/s]"),
@@ -86,7 +100,7 @@ def cl_pair(d, seg, g, sess):
             float(d["raw1"][i0]), float(d["raw2"][i0]))
     qd = (d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m])
     sess_al = FMET.ALPH_SESS.get(sess)
-    alphas = tuple(sess_al) if sess_al else (TH.get(g[0], 0.40), 0.20, TK.get(g[2], 0.656), 0.20)
+    alphas = tuple(sess_al) if sess_al else (alpha_of(TH, g[0]), 0.20, alpha_of(TK, g[2]), 0.20)
     Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
     ft = FR.fs_twin()
     SP = FR._sess_params()
@@ -101,7 +115,8 @@ def cl_pair(d, seg, g, sess):
     fs = [gi(Lf, "thm1"), gi(Lf, "q2"), gi(Lf, "dq1"), gi(Lf, "dq2"),
           np.clip(gi(Lf, "s1f"), -20.5, 20.5), gi(Lf, "s2")]
     meas = {k: d[k][m] for k, _ in CH}
-    return tt[m], meas, old, fs, np.ones(m.sum(), bool)
+    cmd = [d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m], None, None]   # exp5 형식: 명령 병기
+    return tt[m], meas, old, fs, np.ones(m.sum(), bool), cmd
 
 
 def cl_old_meas(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains, alphas, t_end, init_meas):
@@ -187,7 +202,7 @@ def golden_mirror(d, seg, g, sess):
     t = d["t"][sl] - d["t"][i0]
     t_end = seg["t_lo"] - d["t"][i0]
     sess_al = FMET.ALPH_SESS.get(sess)
-    alphas = tuple(sess_al) if sess_al else (TH.get(g[0], 0.40), 0.20, TK.get(g[2], 0.656), 0.20)
+    alphas = tuple(sess_al) if sess_al else (alpha_of(TH, g[0]), 0.20, alpha_of(TK, g[2]), 0.20)
     args = (t, d["qd1"][sl], d["qd2"][sl], d["dqd1"][sl], d["dqd2"][sl])
     A_ = TW.rollout_cl(FMET.tw0, *args, tuple(g), alphas=alphas, t_end=t_end, t_after=0.05)
     B_ = cl_old_meas(FMET.tw0, *args, tuple(g), alphas, t_end, None)
@@ -202,7 +217,7 @@ def plot_cl(sess, name, d, seg, g):
     if r is None:
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
-    t, meas, old, fs, m = r
+    t, meas, old, fs, m, cmd = r
     fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜 폐루프) · 실측 vs 배포모델(OLD) vs 현행(fs15)",
                      f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   fs15: {rmse_line(meas, m, fs)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
@@ -212,6 +227,9 @@ def plot_cl(sess, name, d, seg, g):
         a.plot(t, y, lw=1.2, label="실측")
         a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
         a.plot(t, yf, ":", lw=1.5, label="현행 (fs15)")
+        if cmd[j] is not None:
+            yc = np.degrees(cmd[j]) if k in ("q1", "q2") else cmd[j]
+            a.plot(t, yc, "--", lw=0.8, alpha=0.55, label="명령 (qd)")
     ax[0].legend(fontsize=8, loc="best")
     fig.tight_layout()
     fp = OUT / "CL" / sess
