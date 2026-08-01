@@ -330,6 +330,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
              if os.environ.get("FS_ELEDGER") == "1" else None)   # 층별 순간 파워 [W] (오프라인 창 적분)
     _esc = _escrow_init()                  # 마라톤F F1: 층별 에너지 회계 (None = 비활성)
     _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b: 하강 흡수 증폭 (supp2)
+    _svg = float(os.environ.get("FS_SUPP_VG", "0") or 0)     # F-H8: supp 속도 게이트 [rad/s] (0=비활성)
     _vcl = _vceil_init()                   # 마라톤F F-H7: 전압 포락선 천장 (None = 비활성)
     for k in range(N):
         tc = k * dt
@@ -386,6 +387,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
+        if _svg > 0.0:
+            supp *= max(0.0, 1.0 - abs(v2c) / _svg)   # F-H8: 유지 전용 게이트 (고속 소멸 = 마찰성 — 주입 불가 형태)
         if _esc is not None and "supp2" in _esc:
             if _est > 1.0 and supp * v2c < 0.0:
                 supp *= _est               # F1b: 하강 흡수 증폭 (탄성 저장 경로) — 증폭분 그대로 은행 적립
@@ -833,6 +836,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _psl = _PreSlide(model, fg) if os.environ.get("FS_PRESLIDE") else None
     _esc = _escrow_init()                  # 마라톤F F1: CL과 동일 플랜트 (에너지 회계)
     _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b 동일
+    _svg = float(os.environ.get("FS_SUPP_VG", "0") or 0)     # F-H8 동일
     _vcl = _vceil_init()                   # F-H7 동일 플랜트
     for k in range(N):
         tc = k * dt
@@ -850,6 +854,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
+        if _svg > 0.0:
+            supp *= max(0.0, 1.0 - abs(v2c) / _svg)   # F-H8 동일 플랜트
         if _esc is not None and "supp2" in _esc:
             if _est > 1.0 and supp * v2c < 0.0:
                 supp *= _est               # F1b 동일 플랜트

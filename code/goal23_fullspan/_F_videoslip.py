@@ -116,9 +116,12 @@ def parabolic_refine(grid, iy, ix):
     return dsy, dsx
 
 
-def track_point(frames, idx_list, T0, cy0, cx0, ry=20, rx=25):
-    """프레임열 idx_list(임의 순서, 보통 시간순)를 따라 템플릿 T0(1개, 고정)를 프레임간
-    전파(이전 위치를 다음 탐색 중심으로) 방식으로 추적. 반환: dict(t_idx -> (y,x,score))."""
+def track_point(frames, idx_list, T0, cy0, cx0, ry=20, rx=25, propagate=True):
+    """프레임열 idx_list(임의 순서, 보통 시간순)를 따라 템플릿 T0(1개, 고정)를 추적.
+    propagate=True: 이전 위치를 다음 탐색 중심으로 전파 (발볼트 — 실제 이동 추적 필요).
+    propagate=False: 탐색 중심을 시드(cy0,cx0)에 고정 (배경기준점 — 정적 물체이므로 전파 시
+    프레임별 미세오차가 누적되어 줄자의 인접 유사 눈금으로 "걸어가는" 드리프트 위험 확인됨).
+    반환: dict(t_idx -> (y,x,score))."""
     out = {}
     cy, cx = cy0, cx0
     for i in idx_list:
@@ -127,7 +130,8 @@ def track_point(frames, idx_list, T0, cy0, cx0, ry=20, rx=25):
         y_abs = y0 + (iy + ry) + dsy
         x_abs = x0 + (ix + rx) + dsx
         out[i] = (float(y_abs), float(x_abs), sc)
-        cy, cx = y_abs, x_abs           # 다음 탐색 중심 갱신 (전파)
+        if propagate:
+            cy, cx = y_abs, x_abs       # 다음 탐색 중심 갱신 (전파)
     return out
 
 
@@ -246,14 +250,14 @@ def process_trial(day, fold, T_ref_foot, quiet=False):
     idx_list = list(range(f_bot, f_desc - 1, -1))     # 바닥→하강개시 (자기 템플릿 원점에서 역방향 전파)
     foot_trk = track_point(frames, idx_list, T_own, cy, cx, ry=18, rx=22)
 
-    # 배경(카메라 흔들림) 기준점: 줄자 라벨 패치 (day-level calibrate_ruler의 bg_seed 재사용 —
-    # 같은 날 전 trial 카메라 고정이므로 위치 재탐색 불필요, 템플릿만 이 trial 프레임에서 추출)
+    # 배경(카메라 흔들림) 기준점: 이 trial 자신의 프레임에서 확립한 줄자 라벨 패치(bg_seed)
     bgy0, bgx0 = int(cal_rep["bg_seed"][0]), int(cal_rep["bg_seed"][1])
-    if not (20 <= bgy0 < frames[f_bot].shape[0] - 20 and 20 <= bgx0 < frames[f_bot].shape[1] - 20):
+    bgh, bgw = 32, 24   # 세로로 더 큼 (숫자 두어개+공백 포함 → 눈금 반복패턴 대비 모호성 감소)
+    if not (bgh <= bgy0 < frames[f_bot].shape[0] - bgh and bgw <= bgx0 < frames[f_bot].shape[1] - bgw):
         bg_trk = None
     else:
-        T_bg = frames[f_bot][bgy0 - 20:bgy0 + 20, bgx0 - 20:bgx0 + 20].copy()
-        bg_trk = track_point(frames, idx_list, T_bg, bgy0, bgx0, ry=12, rx=15)
+        T_bg = frames[f_bot][bgy0 - bgh:bgy0 + bgh, bgx0 - bgw:bgx0 + bgw].copy()
+        bg_trk = track_point(frames, idx_list, T_bg, bgy0, bgx0, ry=8, rx=8, propagate=False)
 
     idx_sorted = sorted(foot_trk)
     t_arr = np.array([(i / fps + SH) for i in idx_sorted])
@@ -264,15 +268,21 @@ def process_trial(day, fold, T_ref_foot, quiet=False):
         xb = np.array([bg_trk[i][1] for i in idx_sorted])
         yb = np.array([bg_trk[i][0] for i in idx_sorted])
         qb = np.array([bg_trk[i][2] for i in idx_sorted])
-        x_corr = x_raw - (xb - xb[0])
-        y_corr = y_raw - (yb - yb[0])
-        bg_shake_px = float(np.max(xb) - np.min(xb))
+        # 배경 트랙 중앙값 필터 (창5) — 실제 카메라 흔들림은 저주파인데 반해 간헐적 오정합은
+        # 1~2프레임 급跳 스파이크로 나타남 (정지 텍스트 패치의 준-주기적 패턴 오매칭 위험).
+        xb_s = ndimage.median_filter(xb, size=min(5, len(xb)))
+        yb_s = ndimage.median_filter(yb, size=min(5, len(yb)))
+        x_corr = x_raw - (xb_s - xb_s[0])
+        y_corr = y_raw - (yb_s - yb_s[0])
+        bg_shake_px = float(np.max(xb_s) - np.min(xb_s))
     else:
         x_corr = x_raw.copy(); y_corr = y_raw.copy()
         qb = np.full_like(q, np.nan)
         bg_shake_px = float("nan")
 
     good = q > 0.6
+    if bg_trk is not None:
+        good = good & (qb > 0.5)          # 배경 오정합 프레임도 제외 (카메라흔들림 보정 오염 방지)
     n_good = int(good.sum())
     if n_good < 10:
         return None, f"추적 품질 미달 (good {n_good}/{len(q)})"
@@ -327,39 +337,31 @@ def main():
         if not base.exists():
             print(f"{day}: 폴더 없음", flush=True)
             continue
-        # 날짜 스케일 (대표 trial 첫 영상으로 확립, 해당 날짜 내 전 trial 공용 — 동일 카메라 고정)
         trials = FD.trials_of(base)
         if not trials:
             print(f"{day}: trial 없음", flush=True)
             continue
-        cal_rep = None
-        for t0 in trials:
-            m0 = list(t0.glob("*.mp4"))
-            if not m0:
-                continue
-            fr0, _ = load_frames(m0[0], max_frames=90)
-            cal_rep = calibrate_ruler(fr0[min(60, len(fr0) - 1)])
-            if cal_rep is not None:
-                break
-        if cal_rep is None:
-            print(f"{day}: 줄자 판독 실패 — 스킵", flush=True)
-            continue
-        print(f"\n=== {day} === 스케일: 전역 {cal_rep['mm_per_px_global']:.4f}mm/px "
-              f"| 국소(바닥측) {cal_rep['mm_per_px_local']:.4f}mm/px "
-              f"(n라벨 {cal_rep['n_groups']}, cv {cal_rep['cv']:.3f})", flush=True)
-        OUT[day] = {"_scale": cal_rep}
+        print(f"\n=== {day} === ({len(trials)} trials — 스케일은 trial마다 자신의 프레임에서 재확립)", flush=True)
+        OUT[day] = {}
+        scales = []
         for fold in trials:
             key = fold.name
-            res, err = process_trial(day, fold, T_ref_foot, cal_rep)
+            res, err = process_trial(day, fold, T_ref_foot)
             if err:
                 print(f"  {key}: FAIL — {err}", flush=True)
                 OUT[day][key] = dict(fail=err)
                 continue
-            print(f"  {key}: n={res['n_frames']}(good {res['n_good']}) drift {res['desc_drift_px']:+.2f}px "
-                  f"={res['desc_drift_mm']:+.2f}mm (끝점 {res['desc_drift_px_endpoint']:+.1f}px) "
-                  f"범위 {res['range_px']:.1f}px | bg흔들림 {res['bg_shake_px']}px | ncc {res['ncc_mean']:.2f} "
-                  f"| {res['quality']}", flush=True)
+            scales.append(res["scale_mm_per_px"])
+            print(f"  {key}: scale {res['scale_mm_per_px']:.4f}mm/px n={res['n_frames']}(good {res['n_good']}) "
+                  f"drift {res['desc_drift_px']:+.2f}px={res['desc_drift_mm']:+.2f}mm "
+                  f"(끝점 {res['desc_drift_px_endpoint']:+.1f}px) 범위 {res['range_px']:.1f}px "
+                  f"| bg흔들림 {res['bg_shake_px']}px | ncc {res['ncc_mean']:.2f} | {res['quality']}", flush=True)
             OUT[day][key] = res
+        if scales:
+            print(f"  -> {day} 스케일 trial간 일관성: {np.mean(scales):.4f} ± {np.std(scales):.4f} mm/px "
+                  f"(n={len(scales)})", flush=True)
+            OUT[day]["_scale_summary"] = dict(mean=float(np.mean(scales)), std=float(np.std(scales)),
+                                              n=len(scales), values=scales)
 
     outp = HERE / "_F_videoslip.json"
     safe.atomic_json_write(outp, OUT)
