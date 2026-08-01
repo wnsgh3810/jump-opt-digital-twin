@@ -135,6 +135,9 @@ def _bias_ramp():
     return (float(k_), float(th_))
 
 
+_PSL_PRISTINE = {}     # id(model) → 원본 (foot, floor) 마찰 — _PreSlide 누수 자가 치유용
+
+
 class _PreSlide:
     """마라톤E P4: stick-slip 이력 마찰 (Karnopp형 presliding) — FS_PRESLIDE="mu_s[,mu_k[,v_stop[,mu_hold]]]".
 
@@ -151,7 +154,15 @@ class _PreSlide:
         self.mu_hold = p[3] if len(p) > 3 else 2.0
         self.model = model; self.fg = fg
         self.gf = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "floor")
-        self.orig = (float(model.geom_friction[fg][0]), float(model.geom_friction[self.gf][0]))
+        # 침묵실패 방역: 롤아웃이 예외로 이탈하면 restore()가 건너뛰어져 캐시 모델에 stick 마찰이 남는다
+        # → 원본값을 모델별로 1회 기록해 두고, 이후 생성 시 그 값으로 되돌린 뒤 시작 (누수 자가 치유)
+        _key = id(model)
+        if _key in _PSL_PRISTINE:
+            self.orig = _PSL_PRISTINE[_key]
+            model.geom_friction[fg][0], model.geom_friction[self.gf][0] = self.orig
+        else:
+            self.orig = (float(model.geom_friction[fg][0]), float(model.geom_friction[self.gf][0]))
+            _PSL_PRISTINE[_key] = self.orig
         self.slide = False; self.fx_prev = None
         self._cf = np.zeros(6)
         self._set(self.mu_hold)
