@@ -61,6 +61,13 @@ def main():
             t_p0 = float(t[pm][0]) if pm.sum() else t_end - 0.3
             mdw = L["t"] < t_p0
             slip_sim = (L["fx"][mdw][-1] - L["fx"][mdw][0]) * 1000 if mdw.sum() > 10 else None
+            # 마라톤E: 접촉 유지 전창(하강+push) 발 이동 — 판별 지표 D_slip의 원소 (cfz>5N)
+            slip_ct = None
+            if "cfz" in L:
+                ct = L["cfz"] > 5.0
+                if ct.sum() > 10:
+                    last = int(np.where(ct)[0][-1])
+                    slip_ct = (L["fx"][last] - L["fx"][0]) * 1000
             key = f"{s}/{p.name}"
             e = dict(h_sim=round(h_sim, 1))
             jh = JH.get(key)
@@ -69,6 +76,8 @@ def main():
             sl = SL.get(key)
             if slip_sim is not None:
                 e["slip_sim_mm"] = round(slip_sim, 1)
+            if slip_ct is not None:
+                e["slip_ct_mm"] = round(slip_ct, 1)
             if sl and sl.get("video"):
                 e["slip_video_px"] = sl.get("drift_deep_px")
             OUT[key] = e

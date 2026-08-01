@@ -34,19 +34,29 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     dm = float(os.environ.get("FS_HIPM_DAMP", "0.312066"))
     fl = float(os.environ.get("FS_HIPM_FL", "0.238254"))
     _mu = os.environ.get("FS_MU")            # 마라톤D P3: 발-바닥 마찰 (슬립 축)
-    key = (ks, bs, arm, dm, fl, _mu)
+    _rx = os.environ.get("FS_RAILX")         # 마라톤E P2: 레일 횡 컴플라이언스 "k,b" [N/m, N·s/m]
+    key = (ks, bs, arm, dm, fl, _mu, _rx)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
             _CACHE["base"] = (base_xml, tw)
         base_xml, tw = _CACHE["base"]
         model, xml = FM.build_fs(ks=ks, bs=bs, arm=arm, base_xml=base_xml, dm=dm, fl=fl)
+        if _rx:
+            _k, _b = (float(v) for v in _rx.split(","))
+            _bz = '<joint name="base_z" type="slide" axis="0 0 1"/>'
+            xml = safe.xml_patch(
+                xml, _bz,
+                _bz + "\n      "
+                + f'<joint name="base_x" type="slide" axis="1 0 0" stiffness="{_k}" damping="{_b}" springref="0"/>',
+                count=1)
+            model = mjm.MjModel.from_xml_string(xml)
         if _mu:
             for _gn in ("foot", "floor"):
                 _gi = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, _gn)
                 model.geom_friction[_gi][0] = float(_mu)
-        iq = {n: safe.qadr(model, n, mjm) for n in
-              ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+        _names = ["base_z", "hip_m", "hip", "knee_motor", "cpin", "knee"] + (["base_x"] if _rx else [])
+        iq = {n: safe.qadr(model, n, mjm) for n in _names}
         dof = {n: safe.dofadr(model, n, mjm) for n in iq}
         _CACHE[key] = dict(model=model, xml=xml, tw=tw, iq=iq, dof=dof,
                            P=tw["P"], law=tw["law"], kr=tw["kr"], sprm=tw["sprm"])
@@ -180,7 +190,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     s1f = 0.0
     af = dt / max(tc_f, dt)
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx", "cfx", "cfz")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx", "cfx", "cfz", "bx")
     Lg = {k: np.zeros(N) for k in keys}
     _fgx = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")   # 마라톤D P3: 발 x (슬립 지표)
     _cf6 = np.zeros(6)                                            # P14: 발 접촉 법선/접선력 (슬립 방아쇠 진단)
@@ -195,6 +205,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     if _rail > 0:
         _fgR = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
         _cfR = np.zeros(6)
+    _rxv = os.environ.get("FS_RAILX")        # 마라톤E P2: 레일 횡 컴플라이언스 → 횡하중=스프링력
+    _rxkb = tuple(float(v) for v in _rxv.split(",")) if (_rxv and "base_x" in dof) else None
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     for k in range(N):
@@ -308,8 +320,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                 tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         if _rail > 0:
-            _Fx = 0.0
-            for ci in range(md.ncon):
+            if _rxkb is not None:
+                _Fx = _rxkb[0] * float(md.qpos[dof["base_x"]]) + _rxkb[1] * float(md.qvel[dof["base_x"]])
+                _skip_contact = True
+            else:
+                _skip_contact = False
+            _Fx = _Fx if _rxkb is not None else 0.0
+            for ci in range(0 if _rxkb is not None else md.ncon):
                 _c = md.contact[ci]
                 if _c.geom1 == _fgR or _c.geom2 == _fgR:
                     mjm.mj_contactForce(model, md, ci, _cfR)
@@ -336,6 +353,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
         Lg["fx"][k] = float(md.geom_xpos[_fgx][0])
+        Lg["bx"][k] = float(md.qpos[dof["base_x"]]) if "base_x" in dof else 0.0
         _fz = _fxt = 0.0
         for _ci in range(md.ncon):
             _c = md.contact[_ci]
@@ -646,6 +664,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _rail = float(os.environ.get("FS_RAIL", "0") or 0)      # P6 레일 마찰 (CL과 동일 플랜트)
     if _rail > 0:
         _cfR = np.zeros(6)
+    _rxv = os.environ.get("FS_RAILX")
+    _rxkb = tuple(float(v) for v in _rxv.split(",")) if (_rxv and "base_x" in dof) else None
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     for k in range(N):
@@ -695,8 +715,13 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
                 tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
         if _rail > 0:
-            _Fx = 0.0
-            for ci in range(md.ncon):
+            if _rxkb is not None:
+                _Fx = _rxkb[0] * float(md.qpos[dof["base_x"]]) + _rxkb[1] * float(md.qvel[dof["base_x"]])
+                _skip_contact = True
+            else:
+                _skip_contact = False
+            _Fx = _Fx if _rxkb is not None else 0.0
+            for ci in range(0 if _rxkb is not None else md.ncon):
                 _c = md.contact[ci]
                 if _c.geom1 == fg or _c.geom2 == fg:
                     mjm.mj_contactForce(model, md, ci, _cfR)
