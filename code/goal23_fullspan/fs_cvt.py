@@ -112,7 +112,7 @@ def a_cvt_mirror(model, d, tw, o1, o2, c_cvt, fs=False, two_stage=True, fade=Tru
         s1_0 = float(P.J.ahat(P.A_PAPER, np.array([d["traw1"][0]]), np.array([d["dq1"][0]]))[0])
         defl0 = float(np.clip(np.sign(s1_0) * (abs(s1_0) / 96.0 if abs(s1_0) <= 9 else 9 / 96.0 + (abs(s1_0) - 9) / 323.0), -0.3, 0.3))
         md.qpos[iq["base_z"]] = base5[0]
-        md.qpos[iq["hip_m"]] = base5[1] - defl0
+        md.qpos[iq["hip_m"]] = base5[1]      # P12: thm1(모터측)을 실측에 앵커 (구: -defl0 → 처짐만큼 이탈)
         md.qpos[iq["hip"]] = defl0
         md.qpos[iq["knee_motor"]] = base5[2]
         md.qpos[iq["cpin"]] = base5[3]

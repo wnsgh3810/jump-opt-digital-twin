@@ -74,7 +74,7 @@ def run_trial(ft, d, bias1):
         s1_0 = float(P.J.ahat(A, np.array([d["raw1"][i0]]), np.array([d["dq1"][i0]]))[0])
         defl0 = float(np.clip(np.sign(s1_0) * (abs(s1_0) / 96.0 if abs(s1_0) <= 9 else 9 / 96.0 + (abs(s1_0) - 9) / 323.0), -0.3, 0.3))
         md.qpos[iq["base_z"]] = 1.0
-        md.qpos[iq["hip_m"]] = -float(d["q1"][i0]) - np.pi / 2 - defl0
+        md.qpos[iq["hip_m"]] = -float(d["q1"][i0]) - np.pi / 2      # P12: 모터측 앵커
         md.qpos[iq["hip"]] = defl0
         md.qpos[iq["knee_motor"]] = -float(d["q2"][i0])
         md.qpos[iq["cpin"]] = float(d["q2"][i0])

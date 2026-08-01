@@ -573,7 +573,11 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     r1_0 = float(np.interp(0.0, tg, raw1g))
     s1_0 = float(P.J.ahat(A, np.array([np.clip(r1_0, -TW.R19.CLIP, TW.R19.CLIP)]), np.array([float(dq1_0)]))[0])
     defl0 = np.clip(np.sign(s1_0) * (abs(s1_0) / 96.0 if abs(s1_0) <= 9 else 9 / 96.0 + (abs(s1_0) - 9) / 323.0), -0.3, 0.3)
-    md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2 - defl0
+    # 마라톤D P12 (사용자 적발 08-01): 실측 q1 = **모터측 인코더** → sim 모터각(thm1)을 실측에 앵커해야 한다.
+    # 구현 오류였던 구식: hip_m에서 defl0을 빼 링크각을 실측에 맞춤 → thm1이 처짐만큼 어긋난 채 출발
+    # (0602 −1.02° 등, F15 계보 '실측=모터측' 규약 위반). FS_MA_INIT=link 로 구식 재현 가능.
+    _lnk = os.environ.get("FS_MA_INIT") == "link"
+    md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2 - (defl0 if _lnk else 0.0)
     md.qpos[iq["hip"]] = defl0
     md.qpos[iq["knee_motor"]] = -q2_0
     md.qpos[iq["cpin"]] = q2_0
