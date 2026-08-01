@@ -329,6 +329,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _eled = ({k_: np.zeros(N) for k_ in ("motor1", "motor2", "supp2", "hsupp1", "spr_tql", "kdeep2", "bias_h")}
              if os.environ.get("FS_ELEDGER") == "1" else None)   # 층별 순간 파워 [W] (오프라인 창 적분)
     _esc = _escrow_init()                  # 마라톤F F1: 층별 에너지 회계 (None = 비활성)
+    _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b: 하강 흡수 증폭 (supp2)
     _vcl = _vceil_init()                   # 마라톤F F-H7: 전압 포락선 천장 (None = 비활성)
     for k in range(N):
         tc = k * dt
@@ -386,6 +387,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
         if _esc is not None and "supp2" in _esc:
+            if _est > 1.0 and supp * v2c < 0.0:
+                supp *= _est               # F1b: 하강 흡수 증폭 (탄성 저장 경로) — 증폭분 그대로 은행 적립
             _esc["supp2"], supp = _escrow_gate(_esc["supp2"], supp, v2c, dt)
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
         if _esc is not None and "spr" in _esc:
@@ -829,6 +832,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     _psl = _PreSlide(model, fg) if os.environ.get("FS_PRESLIDE") else None
     _esc = _escrow_init()                  # 마라톤F F1: CL과 동일 플랜트 (에너지 회계)
+    _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b 동일
     _vcl = _vceil_init()                   # F-H7 동일 플랜트
     for k in range(N):
         tc = k * dt
@@ -847,6 +851,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         if kr:
             supp += float(RU.rise_term(v2c, kr, law_v0))
         if _esc is not None and "supp2" in _esc:
+            if _est > 1.0 and supp * v2c < 0.0:
+                supp *= _est               # F1b 동일 플랜트
             _esc["supp2"], supp = _escrow_gate(_esc["supp2"], supp, v2c, dt)
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
         if _esc is not None and "spr" in _esc:
