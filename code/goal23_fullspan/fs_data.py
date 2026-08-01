@@ -97,6 +97,21 @@ def load2(fold: Path):
     return d
 
 
+def plot_window(fold: Path, d=None, pad=0.0):
+    """**그래프 전용 창 = 원본 hip/knee/GRF.xlsx 스팬 (= 점프 구간, ~0.2~0.3s)** — 단일 출처.
+
+    사용자 규약 (2026-08-01, 훅 강제): 모든 비교/진단 그래프는 이 창으로만 그린다.
+    반환: (t0, t1) — load2의 상대 시간축 d["t"] 기준 [s]. 원본 부재 시 None.
+    """
+    f = fold / "hip.xlsx"
+    if not f.exists():
+        return None
+    t1 = pd.read_excel(f, usecols=["Time"])["Time"].to_numpy(float)
+    t0_abs = float(pd.read_excel(fold / "hip2.xlsx", usecols=["Time"])["Time"].iloc[0]) \
+        if d is None else float(d["t_abs"][0])
+    return float(t1[0] - t0_abs) - pad, float(t1[-1] - t0_abs) + pad
+
+
 def _smooth(x, w):
     return np.convolve(x, np.ones(w) / w, mode="same")
 

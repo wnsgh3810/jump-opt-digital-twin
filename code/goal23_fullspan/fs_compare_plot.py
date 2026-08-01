@@ -37,6 +37,7 @@ OUT = HERE / "_compare"
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 QS = 2                      # qd 스큐 보정 [샘플] (4ms@500Hz)
+MA_W, MA_S = 0.10, 0.05     # 점프 창(~0.2~0.3s) 내 mshoot 창/stride
 CH = [("q1", "q1 [°]"), ("q2", "q2 [°]"), ("dq1", "dq1 [rad/s]"),
       ("dq2", "dq2 [rad/s]"), ("a1", "τ1 [Nm]"), ("a2", "τ2 [Nm]")]
 
@@ -102,8 +103,9 @@ def plot_cl(sess, name, d, seg, g):
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
     t, meas, old, fs, m, t_end = r
+    pw = FD.plot_window(d["_fold"], d)          # 원본 hip/knee/GRF.xlsx 창 = 점프 구간 (훅 규약)
     t_p0 = float(t[m][0]) if m.sum() else max(t_end - 0.3, 0.0)
-    w = (t >= t_p0 - 0.05) & (t <= t_end)
+    w = ((t >= pw[0]) & (t <= pw[1])) if pw else ((t >= t_p0 - 0.05) & (t <= t_end))
     fig, ax = panels(f"{sess} / {name} — CL 점프(push) 구간 · 실측 vs 배포모델(OLD) vs 현행(fs15)",
                      f"push RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   fs15: {rmse_line(meas, m, fs)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
@@ -133,15 +135,16 @@ def plot_ma(sess, name, d, seg):
     SP = FR._sess_params()
     sp = SP.get(sess, dict(bias1=0.0, knee_deep=None))
     t = d["t"]
-    t0, t1 = seg["t_desc"], seg["t_lo"]
+    pw = FD.plot_window(d["_fold"], d)          # 그래프 창 = 원본 xlsx (점프 구간) — 훅 규약
+    t0, t1 = (pw if pw else (seg["t_desc"], seg["t_lo"]))
     segs_o, segs_f = [], []
     err_o, err_f = [], []
     w0 = t0
     while w0 + 0.05 < t1:
-        wl = min(FMET.MSHOOT_W, t1 - w0)
+        wl = min(MA_W, t1 - w0)
         m = (t >= w0) & (t <= w0 + wl)
         if m.sum() < 20:
-            w0 += FMET.MSHOOT_S
+            w0 += MA_S
             continue
         i0 = int(np.argmax(m))
         tg = t[m] - w0
@@ -169,7 +172,7 @@ def plot_ma(sess, name, d, seg):
             mm = tg >= 0.02
             err_f.append([np.sqrt(np.mean((d[k][m][mm] - s[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
                           for (k, _), s in zip(CH, v)])
-        w0 += FMET.MSHOOT_S
+        w0 += MA_S
     if not segs_o and not segs_f:
         print(f"  MA {sess}/{name}: 창 없음", flush=True)
         return
@@ -177,7 +180,7 @@ def plot_ma(sess, name, d, seg):
     ef = np.mean(err_f, axis=0) if err_f else np.full(6, np.nan)
     fig, ax = panels(f"{sess} / {name} — ModeA (측정 토크 주입, 0.4s 창 재생) · 실측 vs 배포모델 vs 현행",
                      f"창평균 RMSE  OLD: {' / '.join('%.2f' % x for x in eo)}   fs: {' / '.join('%.2f' % x for x in ef)}")
-    mall = (t >= t0) & (t <= t1)
+    mall = (t >= t0) & (t <= t1)   # = 원본 xlsx 점프 창
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
         y = d[k][mall]
         a.plot(t[mall], np.degrees(y) if k in ("q1", "q2") else y, lw=1.2, label="실측", color="C0")
@@ -225,7 +228,7 @@ def main():
             continue                       # CVT는 fs_cvt_plot (모델 경로 상이)
         try:
             d = FD.load2(p); seg = FD.segment(d)
-            d["_sess"] = s
+            d["_sess"] = s; d["_fold"] = p
         except Exception as ex:
             print(f"{s}/{p.name}: LOAD {type(ex).__name__}", flush=True)
             continue

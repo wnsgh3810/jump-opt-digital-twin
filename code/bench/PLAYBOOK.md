@@ -73,3 +73,10 @@
   모터 내부/사지 기하/기구 상태를 판별 (F43: 무릎 간섭 = l_i=30 상태 문지름).
 - **운영영역 제로섬 경보**: 어떤 파라미터 변화가 세션군 간 개선↔악화 재편(전체 평균 무변)을 보이면
   파라미터 축이 아니라 운영 영역(깊이·슬립·궤적 유형) 의존 신호 — fudge 재도입 금지 (F33/F38).
+
+## §11 그래프 창 규약 (사용자 제정 2026-08-01 — 훅 강제)
+- **모든 진단/비교 그래프는 원본 `hip/knee/GRF.xlsx` 스팬(= 점프 구간, ~0.2~0.3s)으로만 그린다.**
+  *2/*3(앉기~착지 확장판)로 그리면 점프 판독이 흐려진다 (사고 전례: _compare 1차분 ModeA 4초 창).
+- 단일 출처: `goal23_fullspan/fs_data.py :: plot_window(fold, d)` → (t0,t1) in d["t"] 축.
+- 강제: `~/.claude/hooks/plot_window_guard.py` (PreToolUse Bash = savefig 실행 시 근거 검사 →
+  미충족이면 ask · PostToolUse Edit|Write = 경고). 창 무의미 그림은 `# plot-window-exempt: <사유>`로 면제.

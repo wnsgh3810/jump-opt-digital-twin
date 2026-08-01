@@ -71,8 +71,9 @@ def main():
             if Lf is None or Lo is None:
                 print(f"CL {p.name}: 실패"); continue
             m = seg["push"][i0:][: len(t)]
+            pw = FD.plot_window(p, d)          # 원본 hip/knee/GRF.xlsx 창 = 점프 구간 (훅 규약)
             t_p0 = float(t[m][0]) if m.sum() else t_end - 0.3
-            w = (t >= t_p0 - 0.05) & (t <= t_end)
+            w = ((t >= pw[0]) & (t <= pw[1])) if pw else ((t >= t_p0 - 0.05) & (t <= t_end))
             dts = float(np.median(np.diff(Lo["t"])))
             sims = {
                 "old": [np.interp(t, Lo["t"], Lo[k]) for k in ("q1", "q2", "dq1", "dq2")] +
