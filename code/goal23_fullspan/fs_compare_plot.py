@@ -166,13 +166,18 @@ def plan_of(sess, tm, qd2_meas):
         _PLANC[sess] = np.load(HERE.parent / "goal22" / "p25_task0" / f)
     Z = _PLANC[sess]
     PT = Z["t"]
-    best, blag = -9.0, 0.0
-    ref = np.gradient(np.asarray(qd2_meas, float))
+    # 정렬 = **RMSE 최소 지연** (P20 정정: exp5의 미분 교차상관은 위상만 맞춰 RMSE를 12ms 어긋나게 함).
+    # 명령 정지(이륙 후 홀드) 구간은 제외하고 맞춘다.
+    qm = np.asarray(qd2_meas, float)
+    mv = np.ones_like(qm, bool)
+    if len(qm) > 6:
+        mv[1:] = np.abs(np.diff(qm)) > 1e-7
+    best, blag = 9e9, 0.0
     for lag_ms in range(-40, 41):
         lg = lag_ms / 1000.0
-        c = np.corrcoef(ref, np.gradient(np.interp(tm + lg, PT, Z["qd2"])))[0, 1]
-        if np.isfinite(c) and c > best:
-            best, blag = float(c), lg
+        r = float(np.sqrt(np.mean((qm[mv] - np.interp(tm[mv] + lg, PT, Z["qd2"])) ** 2)))
+        if r < best:
+            best, blag = r, lg
     g = lambda k: np.interp(tm + blag, PT, Z[k])
     return [g("q1"), g("q2"), g("dq1"), g("dq2"), g("tau1_nm"), g("tau2_nm")], blag
 
