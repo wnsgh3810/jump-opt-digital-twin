@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""fs_compare_plot — 전 데이터 3자 비교 그래프: 실측 vs 배포모델(OLD) vs 현행(fs15).
+"""fs_compare_plot — 전 데이터 3자 비교 그래프: 실측 vs 배포모델(OLD) vs 현행 스택.
 
 채널: q1·q2 [°], dq1·dq2 [rad/s], τ1·τ2 [Nm] — 6패널 1장/trial.
 모드:
   CL    = 폴더 게인 PD 폐루프. **점프(push) 구간만** (push 시작−0.05s ~ 이륙, 사용자 지시).
-          OLD = TW.rollout_cl(alphas=TH/TK 또는 세션 R19.ALPH) · fs15 = FR.rollout_cl_fs(스큐+실게인+TC2ms)
+          OLD = TW.rollout_cl(alphas=TH/TK 또는 세션 R19.ALPH) · 현행 = FR.rollout_cl_fs (라벨은 FS_STACK_TAG)
   ModeA = mshoot 0.4s 창/0.3s stride, 측정 raw 주입·측정상태 리셋 (창별 조각 오버레이).
           OLD = TW.rollout_ol(구 플랜트) · fs = FR.rollout_ol_fs_b(내장 스프링 플랜트)
 출력: _compare/CL/<세션>/<trial>.png · _compare/ModeA/<세션>/<trial>.png
@@ -35,6 +35,7 @@ import fs_runner as FR
 import p25_a_twin as TW
 
 OUT = HERE / os.environ.get("FS_CMP_OUT", "_compare")   # 스택별 산출 분리 (기본 = 기존 경로)
+TAG = os.environ.get("FS_STACK_TAG", "fs")              # 그림 라벨 = 실제 스택명 (하드코딩 금지)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 
@@ -85,7 +86,7 @@ def rmse_line(d, m, sims):
 
 def cl_pair(d, seg, g, sess):
     """CL을 **ModeA와 동일 규칙**으로: 점프 창 시작에서 실측 상태 1회 앵커 → 통짜 폐루프 (P16).
-    반환 (t, 실측, OLD, fs15, 창마스크) — 실패 시 None."""
+    반환 (t, 실측, OLD, 현행, 창마스크) — 실패 시 None."""
     pw = FD.plot_window(d["_fold"], d)
     if pw is None:
         return None
@@ -280,15 +281,15 @@ def plot_cl(sess, name, d, seg, g):
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
     t, meas, old, fs, m, cmd, pl = r
-    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs 배포계획(τ*) vs 배포모델 재생(OLD) vs 현행(fs15)" + (f" | 계획 정렬 {pl[1]*1000:+.0f}ms" if pl else ""),
-                     f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   fs15: {rmse_line(meas, m, fs)}")
+    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs 배포계획(τ*) vs 배포모델 재생(OLD) vs 현행({TAG})" + (f" | 계획 정렬 {pl[1]*1000:+.0f}ms" if pl else ""),
+                     f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   {TAG}: {rmse_line(meas, m, fs)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
         y, yo, yf = meas[k], old[j], fs[j]
         if k in ("q1", "q2"):
             y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
         a.plot(t, y, lw=1.2, label="실측")
         a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
-        a.plot(t, yf, ":", lw=1.5, label="현행 (fs15)")
+        a.plot(t, yf, ":", lw=1.5, label=f"현행 ({TAG})")
         if pl is not None and os.environ.get("FS_PLAN") == "1":
             # 기본 미표시 (사용자 결정 P22): OLD 재생이 계획을 RMSE≤0.2로 포함 + 계획은 27일만 존재.
             yp = np.degrees(pl[0][j]) if k in ("q1", "q2") else pl[0][j]
