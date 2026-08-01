@@ -88,6 +88,8 @@
    CL `rollout_cl_fs(init_meas=)` · ModeA `rollout_ol_fs_b` · OLD `cl_old_meas`(정본 문자 미러, 골든 0.00)
 4. **OLD α** = 게인 의존 보간 (`alpha_of`/`alphas_for`, α≤1). 상수 fallback(0.40/0.656) 금지,
    세션 α(R19.ALPH)는 kp_ref 기하평균 기준으로 게인 의존 복원 후 사용
-5. **형식** = 6패널(q1·q2·dq1·dq2·τ1·τ2), 선 = 실측 / 배포계획(τ*, 있으면) / OLD 재생 / 현행 / 명령(qd),
-   색 리터럴 금지. 배포 계획은 exp5 규약(측정 qd2 ↔ 계획 qd2 미분 교차상관)으로 시각 정렬.
+5. **형식** = 6패널(q1·q2·dq1·dq2·τ1·τ2), 선 = 실측 / OLD 재생 / 현행 / 명령(qd), 색 리터럴 금지
+6. **배포계획선은 기본 미표시** (P22 결정) — OLD 재생이 계획을 RMSE≤0.2로 재현(골든)하고 계획은 27일만
+   존재해 중복·비대칭. 진단 시 `FS_PLAN=1`로 켜며, 정렬은 **RMSE 최소 + 명령 홀드 구간 제외**
+   (미분 교차상관 금지 — 위상만 맞아 12ms 어긋난 전례 P19→P20)
 구현 기준본: `goal23_fullspan/fs_compare_plot.py` (CVT는 `fs_compare_cvt.py`).

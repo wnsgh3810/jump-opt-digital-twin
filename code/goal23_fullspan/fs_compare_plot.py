@@ -289,7 +289,8 @@ def plot_cl(sess, name, d, seg, g):
         a.plot(t, y, lw=1.2, label="실측")
         a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
         a.plot(t, yf, ":", lw=1.5, label="현행 (fs15)")
-        if pl is not None:
+        if pl is not None and os.environ.get("FS_PLAN") == "1":
+            # 기본 미표시 (사용자 결정 P22): OLD 재생이 계획을 RMSE≤0.2로 포함 + 계획은 27일만 존재.
             yp = np.degrees(pl[0][j]) if k in ("q1", "q2") else pl[0][j]
             a.plot(t, yp, "-.", lw=1.2, label="배포계획 (v9 τ*)")
         if cmd[j] is not None:
