@@ -235,7 +235,7 @@ def locate_foot_seed(f, T_ref, y0, x0, ry=110, rx=170, resize=1.0):
 
 # ───────────────────────── main ─────────────────────────
 
-def process_trial(day, fold, T_ref_foot, ref_scale, quiet=False):
+def process_trial(day, fold, T_ref_foot, ref_scale, ref_shape, quiet=False):
     mp4s = list(fold.glob("*.mp4"))
     if not mp4s:
         return None, "영상 없음"
@@ -266,11 +266,18 @@ def process_trial(day, fold, T_ref_foot, ref_scale, quiet=False):
         return None, "줄자 판독 실패"
 
     # 발볼트 코스 위치: 바닥(f_bot) 프레임에서 27일 템플릿으로 광역 탐색.
-    # 날짜간 카메라 줌차 보정: 27일 대비 이 날짜의 mm/px 비율만큼 템플릿을 리샘플
-    # (day22가 1920x1080·확연히 다른 화각이라 무보정시 코스탐색이 엉뚱한 곳에 안착 — 실측 확인).
+    # ① 화면비 보정: 27일 절대좌표를 이 날짜 프레임 크기에 비례 변환한 좌표를 탐색 시드로
+    #    사용 (day22는 1920x1080 — 27일과 해상도·구도가 달라 절대좌표 그대로 쓰면 탐색반경을
+    #    벗어나 엉뚱한 부품(모터 쪽)에 안착함을 실측으로 확인).
+    # ② 줌차 보정: 27일 대비 이 날짜의 mm/px 비율만큼 템플릿을 리샘플.
+    Href, Wref = ref_shape
+    Hd, Wd = frames[f_bot].shape
+    seed_y = int(round(FOOT_REF_2707[0] / Href * Hd))
+    seed_x = int(round(FOOT_REF_2707[1] / Wref * Wd))
     resize = ref_scale / cal_rep["mm_per_px_local"]
-    cy, cx, e0 = locate_foot_seed(frames[f_bot], T_ref_foot, *FOOT_REF_2707, resize=resize)
-    if e0 < 0.35:
+    cy, cx, e0 = locate_foot_seed(frames[f_bot], T_ref_foot, seed_y, seed_x,
+                                   ry=150, rx=200, resize=resize)
+    if e0 < 0.45:
         return None, f"발볼트 코스탐색 파탄 (ncc={e0:.2f})"
     T_own = frames[f_bot][int(cy) - 20:int(cy) + 20, int(cx) - 20:int(cx) + 20].copy()
     if T_own.shape != (40, 40):
@@ -363,7 +370,8 @@ def main():
     T_ref_foot = ref_frames[jr - 5][fy - 20:fy + 20, fx - 20:fx + 20].copy()
     ref_cal = calibrate_ruler(ref_frames[min(30, len(ref_frames) - 1)])
     ref_scale = ref_cal["mm_per_px_local"]
-    print(f"기준(27일) 스케일: {ref_scale:.4f}mm/px", flush=True)
+    ref_shape = ref_frames[0].shape
+    print(f"기준(27일) 스케일: {ref_scale:.4f}mm/px, 프레임 {ref_shape}", flush=True)
 
     for day in days:
         base = ROOT / day
@@ -379,7 +387,7 @@ def main():
         scales = []
         for fold in trials:
             key = fold.name
-            res, err = process_trial(day, fold, T_ref_foot, ref_scale)
+            res, err = process_trial(day, fold, T_ref_foot, ref_scale, ref_shape)
             if err:
                 print(f"  {key}: FAIL — {err}", flush=True)
                 OUT[day][key] = dict(fail=err)
