@@ -240,3 +240,10 @@ presliding 이력)은 새 마찰 모델이 필요해 미착수로 남았다. = �
 존재, OLD는 전 9세션 ③trial 정합 — 27일 7 trial은 게인이 각기 다른데 계획은 하나뿐 (그 trial 예측 아님).
 구현: 기본 미표시 + `FS_PLAN=1` 진단 토글. 훅 규칙 6·PLAYBOOK §11 동기화. 전 45장 재생성.
 최종 선 구성: **실측 / 배포모델 재생(OLD) / 현행(fs15) / 명령(qd)**.
+
+## P23: 성능 평가 그래프 훅 정비 (ModeA·CL 통합)
+`plot_window_guard.py` → **`perf_plot_guard.py`**로 개명·확장 (settings.json 2곳 갱신, 구 훅 .bak 보관).
+규칙 6개를 ModeA·CL 공통으로 명문화: ①점프 창 ②통짜(ModeA도 단일 샷) ③실측 앵커(thm1 모터측)
+④OLD α 게인 보간 ⑤6패널·선 구성·색 리터럴 금지 ⑥계획선 기본 미표시(진단 FS_PLAN=1, 정렬 RMSE 최소).
+정본 `fs_compare_plot.py`를 import하면 검사 면제 (신규 스크립트는 이 모듈 재사용이 원칙).
+검증: 현행 4개 스크립트(CL/MA/CVT/secondary) 전부 통과 · 위반 ModeA 예제는 6항목 적발.
