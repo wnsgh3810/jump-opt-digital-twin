@@ -33,13 +33,18 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     bs = float(os.environ.get("FS_BS", str(bs)))
     dm = float(os.environ.get("FS_HIPM_DAMP", "0.312066"))
     fl = float(os.environ.get("FS_HIPM_FL", "0.238254"))
-    key = (ks, bs, arm, dm, fl)
+    _mu = os.environ.get("FS_MU")            # 마라톤D P3: 발-바닥 마찰 (슬립 축)
+    key = (ks, bs, arm, dm, fl, _mu)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
             _CACHE["base"] = (base_xml, tw)
         base_xml, tw = _CACHE["base"]
         model, xml = FM.build_fs(ks=ks, bs=bs, arm=arm, base_xml=base_xml, dm=dm, fl=fl)
+        if _mu:
+            for _gn in ("foot", "floor"):
+                _gi = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, _gn)
+                model.geom_friction[_gi][0] = float(_mu)
         iq = {n: safe.qadr(model, n, mjm) for n in
               ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
         dof = {n: safe.dofadr(model, n, mjm) for n in iq}
@@ -148,8 +153,9 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     s1f = 0.0
     af = dt / max(tc_f, dt)
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx")
     Lg = {k: np.zeros(N) for k in keys}
+    _fgx = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")   # 마라톤D P3: 발 x (슬립 지표)
     # F28b 하중 인식 간섭: N(t)=sim 발 접촉 수직력 / mg 스케일 (하강≈1 → 세션 적합 보존)
     load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
     if load_on:
@@ -276,6 +282,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["s2"][k] = s2o
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
+        Lg["fx"][k] = float(md.geom_xpos[_fgx][0])
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
         s1f += af * (s1o - s1f)
         Lg["s1f"][k] = s1f
