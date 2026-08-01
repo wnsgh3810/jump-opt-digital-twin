@@ -142,7 +142,7 @@ FS_TAULIM=20.5 FS_VDES0=26.04.21 FS_QDSHIFT=2 FS_TKOVR=1.0 FS_KDSC=1.0 **FS_PRES
 - [x] REJECTED #65(벡터 레일 마찰 4번째 역전)·#66(레일 흔들림 영상 불성립) 추가
 - [x] 메모리 marathon-e-slip-260802.md + MEMORY.md 인덱스
 - [x] git 커밋 (5bee278→c67ae15 + 본 커밋) · _compare 126장 fs16 최종 env 재생성
-- [ ] CURRENT_STACK 승격: fs15 전례대로 **사용자 판단 대기** (fs16 = fs15 env + FS_PRESLIDE=0.86,0.85)
+- [x] CURRENT_STACK 승격 완료 (08-02, 사용자 지시): 런타임 스택 fs16 등재 — `bench stack --set` 신설 (플랜트 p24 불변 + env 레시피 층 분리). 골든 재현 REPRODUCED (judge p24, FIT 36.1%/HO 33.1% 저장값 일치)
 
 ## Phase 9 — 보너스 정찰: 지지층 에너지 원장 (08-02 02:40, 진단 전용)
 `FS_ELEDGER=1` 층별 순간 파워 로깅 추가 (rollout_cl_fs, 동역학 무변경). fs16, desc/push 적분 [J]:

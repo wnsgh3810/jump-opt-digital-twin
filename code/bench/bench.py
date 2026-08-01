@@ -127,6 +127,16 @@ def render_stack(reg):
         ]
     else:
         lines += ["**현행: 미지정** — 전 후보 bench 재평가 후 promote로 확정 예정."]
+    st = reg.get("stack")
+    if st:
+        # 런타임 스택층 = 플랜트 후보 위에 얹는 env 레시피 (goal23 fs 계열). 후보 JSON엔 담기지 않는다.
+        lines += ["",
+                  f"**현행 런타임 스택: {st['name']}** (베이스 {st.get('base', '?')}) — {st.get('note', '')}"
+                  f"  (승격 {st.get('promoted', '?')})",
+                  f"- 러너: `{st.get('runner', 'code/goal23_fullspan/fs_runner.py')}` · env 레시피:",
+                  "```", st["env"], "```"]
+        for ln in st.get("metrics", []):
+            lines.append(f"- {ln}")
     lines += ["", "<!-- END-STATUS -->", "", "## 후보 레지스트리", "",
               "| key | 상태 | FIT | HO | judge | 파일 | note |",
               "|---|---|---|---|---|---|---|"]
@@ -182,6 +192,28 @@ def do_promote(path, note, force=False):
     return 0
 
 
+def do_stack_set(name, base, env, note, metrics, runner):
+    """런타임 스택층 등재 (플랜트 후보 위의 env 레시피 — 후보 JSON 스키마 밖).
+
+    후보 승격(promote)과 분리: 플랜트는 불변(철칙 1)이고 스택은 러너 구성이다.
+    베이스 후보가 현행이 아니면 거부 (스택은 현행 플랜트 위에서만 정의된다)."""
+    reg = load_registry()
+    cur = reg.get("current")
+    if base != cur:
+        print(f"거부: 베이스 {base} ≠ 현행 플랜트 {cur} — 플랜트 승격 후 스택을 등재할 것")
+        return 1
+    today = datetime.date.today().isoformat()
+    prev = (reg.get("stack") or {}).get("name")
+    reg["stack"] = {"name": name, "base": base, "env": env, "note": note,
+                    "metrics": metrics, "runner": runner, "promoted": today}
+    reg.setdefault("changelog", []).insert(
+        0, f"- {today}: 런타임 스택 **{name}** 등재 (베이스 {base}) — {note} (이전: {prev or '없음'})")
+    safe.atomic_json_write(REG, reg)
+    render_stack(reg)
+    print(f"스택 등재 완료: {name} (베이스 {base})")
+    return 0
+
+
 def do_list():
     reg = load_registry()
     print(f"current: {reg.get('current')}")
@@ -205,7 +237,13 @@ def main():
     p = sub.add_parser("promote"); p.add_argument("path")
     p.add_argument("--note", default=""); p.add_argument("--force", action="store_true")
     sub.add_parser("list")
-    sub.add_parser("stack")
+    st = sub.add_parser("stack")
+    st.add_argument("--set", dest="name", default=None, help="런타임 스택층 등재 (예: fs16)")
+    st.add_argument("--base", default=None, help="베이스 플랜트 후보 key (현행이어야 함)")
+    st.add_argument("--env", default="", help="env 레시피 (여러 줄 가능)")
+    st.add_argument("--note", default="")
+    st.add_argument("--metric", action="append", default=[], help="지표 줄 (반복 가능)")
+    st.add_argument("--runner", default="code/goal23_fullspan/fs_runner.py")
     a = ap.parse_args()
     if a.cmd == "eval":
         do_eval(a.path, a.judge, a.tol)
@@ -216,6 +254,8 @@ def main():
     elif a.cmd == "list":
         do_list()
     elif a.cmd == "stack":
+        if a.name:
+            sys.exit(do_stack_set(a.name, a.base, a.env, a.note, a.metric, a.runner))
         render_stack(load_registry())
 
 
