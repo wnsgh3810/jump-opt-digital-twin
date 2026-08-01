@@ -34,7 +34,7 @@ import fs_metric as FMET
 import fs_runner as FR
 import p25_a_twin as TW
 
-OUT = HERE / "_compare"
+OUT = HERE / os.environ.get("FS_CMP_OUT", "_compare")   # 스택별 산출 분리 (기본 = 기존 경로)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 
@@ -408,7 +408,7 @@ def main():
             if r:
                 agg.setdefault(("ModeA", s), []).append(r)
         print(f"{s}/{p.name}: OK", flush=True)
-    lines = ["# 3자 비교 그래프 색인 (실측 / 배포모델 OLD / 현행 fs15)", "",
+    lines = [f"# 3자 비교 그래프 색인 (실측 / 배포모델 OLD α / 현행 {os.environ.get('FS_STACK_TAG', 'fs')})", "",
              "- `CL/<세션>/<trial>.png` — 폐루프, 점프(push) 구간",
              "- `ModeA/<세션>/<trial>.png` — 측정 토크 주입 재생 (0.4s 창)",
              "- 각 세션 폴더의 `_summary.png` = 채널별 평균 RMSE 막대", "",

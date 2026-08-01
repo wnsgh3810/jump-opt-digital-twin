@@ -32,7 +32,7 @@ import fs_compare_plot as CP
 import fs_runner as FR
 import mujoco as mjm
 
-OUT = HERE / "_compare"
+OUT = HERE / os.environ.get("FS_CMP_OUT", "_compare")   # 스택별 산출 분리 (기본 = 기존 경로)
 LI = 0.02499
 TKD = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 
