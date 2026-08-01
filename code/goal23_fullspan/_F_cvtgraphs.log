@@ -1,0 +1,25 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+CL 120_2.2_150_2.5: OK
+CL 120_2.2_200_2.8: OK
+CL 120_2_120_2: OK
+CL 150_2.2_250_3: OK
+CL 150_2.2_350_3.5: OK
+CL 150_2.2_500_4: OK
+CL 60_0.75_60_2: OK
+CL 60_1.5_60_1.5: OK
+CL 90_0.75_90_2: OK
+CL 90_1.5_90_2.5: OK
+MA 60_0.75_60_2: OK
+MA 60_1.5_60_1.5: OK
+MA 90_0.75_90_2: OK
+MA 90_1.5_90_2.5: OK
+MA 120_2_120_2: OK
+MA 120_2.2_150_2.5: OK
+MA 120_2.2_200_2.8: OK
+MA 150_2.2_250_3: OK
+MA 150_2.2_350_3.5: OK
+MA 150_2.2_500_4: OK
+done
+이미 보강됨 — skip
+ALLDONE
