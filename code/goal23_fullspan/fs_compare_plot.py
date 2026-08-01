@@ -115,7 +115,8 @@ def cl_pair(d, seg, g, sess):
           np.clip(gi(Lf, "s1f"), -20.5, 20.5), gi(Lf, "s2")]
     meas = {k: d[k][m] for k, _ in CH}
     cmd = [d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m], None, None]   # exp5 형식: 명령 병기
-    return tt[m], meas, old, fs, np.ones(m.sum(), bool), cmd
+    pl = plan_of(sess, t, d["qd2"][m])                                        # 배포 계획 (있는 세션만)
+    return tt[m], meas, old, fs, np.ones(m.sum(), bool), cmd, pl
 
 
 
@@ -148,6 +149,32 @@ def alphas_for(sess, g):
     # α ≤ 1 (전달 스케일의 물리 상한 — 복원 스케일링이 1을 넘으면 클립)
     return (float(min(sess_al[0] * f1, 1.0)), float(sess_al[1]),
             float(min(sess_al[2] * f2, 1.0)), float(sess_al[3]))
+
+
+
+_PLAN = {"26.07.27": "t0nc_cl_v9.npz"}          # 배포 계획 (exp5 규약: 27일 = v9). 다른 날은 계획 파일 미확정.
+_PLANC = {}
+
+
+def plan_of(sess, tm, qd2_meas):
+    """배포 계획 궤적 로드 + **exp5 정렬 규약**(측정 qd2 ↔ 계획 qd2 미분 교차상관)으로 시각 정렬.
+    반환 (계획 6채널 보간값, lag[s]) | None. 계획이 없는 세션은 None (OLD 재생만 표시)."""
+    f = _PLAN.get(sess)
+    if not f:
+        return None
+    if sess not in _PLANC:
+        _PLANC[sess] = np.load(HERE.parent / "goal22" / "p25_task0" / f)
+    Z = _PLANC[sess]
+    PT = Z["t"]
+    best, blag = -9.0, 0.0
+    ref = np.gradient(np.asarray(qd2_meas, float))
+    for lag_ms in range(-40, 41):
+        lg = lag_ms / 1000.0
+        c = np.corrcoef(ref, np.gradient(np.interp(tm + lg, PT, Z["qd2"])))[0, 1]
+        if np.isfinite(c) and c > best:
+            best, blag = float(c), lg
+    g = lambda k: np.interp(tm + blag, PT, Z[k])
+    return [g("q1"), g("q2"), g("dq1"), g("dq2"), g("tau1_nm"), g("tau2_nm")], blag
 
 
 def cl_old_meas(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains, alphas, t_end, init_meas):
@@ -247,8 +274,8 @@ def plot_cl(sess, name, d, seg, g):
     if r is None:
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
-    t, meas, old, fs, m, cmd = r
-    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜 폐루프) · 실측 vs 배포모델(OLD) vs 현행(fs15)",
+    t, meas, old, fs, m, cmd, pl = r
+    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs 배포계획(τ*) vs 배포모델 재생(OLD) vs 현행(fs15)" + (f" | 계획 정렬 {pl[1]*1000:+.0f}ms" if pl else ""),
                      f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   fs15: {rmse_line(meas, m, fs)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
         y, yo, yf = meas[k], old[j], fs[j]
@@ -257,9 +284,12 @@ def plot_cl(sess, name, d, seg, g):
         a.plot(t, y, lw=1.2, label="실측")
         a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
         a.plot(t, yf, ":", lw=1.5, label="현행 (fs15)")
+        if pl is not None:
+            yp = np.degrees(pl[0][j]) if k in ("q1", "q2") else pl[0][j]
+            a.plot(t, yp, "-.", lw=1.2, label="배포계획 (v9 τ*)")
         if cmd[j] is not None:
             yc = np.degrees(cmd[j]) if k in ("q1", "q2") else cmd[j]
-            a.plot(t, yc, "--", lw=0.8, alpha=0.55, label="명령 (qd)")
+            a.plot(t, yc, "--", lw=0.8, alpha=0.5, label="명령 (qd)")
     ax[0].legend(fontsize=8, loc="best")
     fig.tight_layout()
     fp = OUT / "CL" / sess
