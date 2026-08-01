@@ -162,6 +162,11 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         _fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
         _Nmg = float(model.body_mass.sum() * 9.81)
         _cf = np.zeros(6)
+    # 마라톤D P6 (사용자 가설): 레일 캐리지 마찰 — 발 수평 반력 비례 쿨롱 (base_z 저항)
+    _rail = float(os.environ.get("FS_RAIL", "0") or 0)
+    if _rail > 0:
+        _fgR = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
+        _cfR = np.zeros(6)
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -269,6 +274,15 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
                         Nf += abs(float(_cf[0]))
                 tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
+        if _rail > 0:
+            _Fx = 0.0
+            for ci in range(md.ncon):
+                _c = md.contact[ci]
+                if _c.geom1 == _fgR or _c.geom2 == _fgR:
+                    mjm.mj_contactForce(model, md, ci, _cfR)
+                    _Fx += float((np.array(_c.frame).reshape(3, 3).T @ _cfR[:3])[0])
+            _vbz = float(md.qvel[dof["base_z"]])
+            md.qfrc_applied[dof["base_z"]] = -_rail * abs(_Fx) * float(np.tanh(_vbz / 0.05))
         mjm.mj_step(model, md)
         if not np.isfinite(md.qpos).all():
             return None
@@ -577,6 +591,9 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     if load_on:
         _Nmg = float(model.body_mass.sum() * 9.81)
         _cf = np.zeros(6)
+    _rail = float(os.environ.get("FS_RAIL", "0") or 0)      # P6 레일 마찰 (CL과 동일 플랜트)
+    if _rail > 0:
+        _cfR = np.zeros(6)
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -620,6 +637,15 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
                         Nf += abs(float(_cf[0]))
                 tau_ext *= min(Nf / _Nmg, 3.0)
             md.qfrc_applied[dof["knee_motor"]] = -tau_ext
+        if _rail > 0:
+            _Fx = 0.0
+            for ci in range(md.ncon):
+                _c = md.contact[ci]
+                if _c.geom1 == fg or _c.geom2 == fg:
+                    mjm.mj_contactForce(model, md, ci, _cfR)
+                    _Fx += float((np.array(_c.frame).reshape(3, 3).T @ _cfR[:3])[0])
+            _vbz = float(md.qvel[dof["base_z"]])
+            md.qfrc_applied[dof["base_z"]] = -_rail * abs(_Fx) * float(np.tanh(_vbz / 0.05))
         _dc = os.environ.get("FS_DEEP_DMPCUT")
         _fcut = os.environ.get("FS_DEEP_FLCUT")
         if _dc is not None or _fcut is not None:
