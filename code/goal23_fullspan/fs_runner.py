@@ -36,7 +36,14 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     _mu = os.environ.get("FS_MU")            # 마라톤D P3: 발-바닥 마찰 (슬립 축)
     _rx = os.environ.get("FS_RAILX")         # 마라톤E P2: 레일 횡 컴플라이언스 "k,b" [N/m, N·s/m]
     _mt = os.environ.get("FS_MASS")          # 사용자 실측 08-02: 총질량 [kg] (케이블 제거 3.26, 허용 ~3.3)
-    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt)
+    # 마라톤G Phase1: 바디별 질량분포 축 (사용자 확정 08-02 — 메모리 mass-ledger-truth)
+    #   FS_MBODY="thigh=1.05,crank=0.44"  바디 질량 [kg] (thigh = 허벅지+knee모터 한 묶음)
+    #   FS_COMZ ="thigh=-0.004"           CoM z 오프셋 [m] (기존 ipos에 가산)
+    #   FS_IBODY="thigh=1.10"             관성 배율 (미지정 시 질량비로 자동 스케일)
+    _mb = os.environ.get("FS_MBODY")
+    _cz = os.environ.get("FS_COMZ")
+    _ib = os.environ.get("FS_IBODY")
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
@@ -56,11 +63,39 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
             for _gn in ("foot", "floor"):
                 _gi = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, _gn)
                 model.geom_friction[_gi][0] = float(_mu)
+        def _kv(sp):
+            return {k.strip(): float(v) for k, v in
+                    (it.split("=") for it in sp.split(",") if it.strip())}
+
+        def _bid(nm):
+            i = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_BODY, nm)
+            if i < 0:
+                raise ValueError(f"바디 이름 없음: {nm} (오타 시 침묵 실패 방지)")
+            return i
+        if _mb:
+            # 바디 질량 지정. 관성은 기본 **질량비로 스케일** (형상 불변 가정) — FS_IBODY가 있으면 그쪽 우선.
+            _ibs = _kv(_ib) if _ib else {}
+            for _n, _v in _kv(_mb).items():
+                _i = _bid(_n)
+                _r = float(_v) / float(model.body_mass[_i])
+                model.body_mass[_i] = float(_v)
+                if _n not in _ibs:
+                    model.body_inertia[_i] *= _r
+        if _ib:
+            for _n, _v in _kv(_ib).items():
+                model.body_inertia[_bid(_n)] *= float(_v)
+        if _cz:
+            # CoM z 이동 → 관성은 평행축 정리로 보정하지 않는다 (여기 I는 **CoM 기준** 관성이므로
+            # 형상이 그대로면 불변). 이동량은 물리적 합당 범위에서만 쓸 것.
+            for _n, _v in _kv(_cz).items():
+                model.body_ipos[_bid(_n)][2] += float(_v)
         if _mt:
             # 사용자 실측 (08-02): 케이블 제거 총질량 3.26kg (정합 허용대 3.26~3.3).
-            # 정본 3.201kg 대비 부족분을 base(전장·레일 캐리지 몫)에 가산 — 링크 질량·관성은 불변.
+            # 링크 질량 확정 후 **잔여를 base**(전장·레일 캐리지 몫)에 몰아준다 — base는 어차피 적합축.
             _bi = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_BODY, "base")
             model.body_mass[_bi] += float(_mt) - float(model.body_mass.sum())
+            if model.body_mass[_bi] <= 0:
+                raise ValueError(f"base 질량이 음수 — 링크 질량 합이 총질량 초과 ({_mt})")
         _names = ["base_z", "hip_m", "hip", "knee_motor", "cpin", "knee"] + (["base_x"] if _rx else [])
         iq = {n: safe.qadr(model, n, mjm) for n in _names}
         dof = {n: safe.dofadr(model, n, mjm) for n in iq}
