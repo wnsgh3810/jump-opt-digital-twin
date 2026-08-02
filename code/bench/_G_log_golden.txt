@@ -1,0 +1,10 @@
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+후보: P24 p24a — NSGA-II(v6) 26축 재적합 ckpt gen80 row 29 (엄격 수기게이트 선발) : p23a 구조 + 힙 부하-지지층 + 케이지 교정, held-out 사전검증 (2026-07-17)
+  jump_0324              τ-갭  33.1%  q2 0.190  (n=3.0)
+  jump_0424              τ-갭  34.0%  q2 0.048  (n=9.0)
+  jump_0429              τ-갭  41.5%  q2 0.107  (n=10.0)
+  jump_0602              τ-갭  35.6%  q2 0.034  (n=6.0)
+  jump_position_0421     τ-갭  31.0%  q2 0.044  (n=6.0)
+  FIT 36.1%  |  held-out(0324) 33.1%
+  저장 지표 36.1% 대비: REPRODUCED

@@ -43,12 +43,42 @@ def rmse6(d, m, thm1, q2s, dq1s, dq2s, t1s, t2s):
     return r
 
 
+LI_CVT = 0.02499        # 0429 l_i 실측 채택값 (마라톤C: 25.08 대신 24.99가 ModeA 전수 개선)
+
+
+def _cvt_ft(ft0):
+    """0429(CVT l_i≠30) 전용 트윈 — fs_compare_cvt 경로 정본 미러 (폐쇄 초기화 픽스 포함)."""
+    import fs_cvt as FC
+    import mujoco as mjm
+    from cvt_core import qpos_from_crank
+    model_c, model_cf, ctx = FC.build_cvt_pair()
+    ft = dict(ft0)
+    ft["model"] = model_cf
+    ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+    ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
+    ft["cvt_init"] = lambda q1, q2: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, LI_CVT)[0]
+    qg, rg = FC.RU.rtab(LI_CVT)
+    ft["cvt_diss"] = (float(ctx["nm"]["C_CVT"]), qg, rg)
+    return ft
+
+
 def run_board():
-    ft = FR.fs_twin(); SP = FR._sess_params()
+    ft0 = FR.fs_twin(); SP = FR._sess_params()
+    _cv = {}       # CVT 트윈 지연 생성 캐시 (실패 시 None → 해당 세션만 건너뜀)
     OUT = {"CL": {}, "MA": {}}
     for s, p, g, cvt, ho in FD.registry():
         if cvt:
-            continue
+            if "ft" not in _cv:
+                try:
+                    _cv["ft"] = _cvt_ft(ft0)
+                except Exception as ex:
+                    print(f"CVT 트윈 생성 실패 → {s} 전체 건너뜀: {type(ex).__name__} {ex}", flush=True)
+                    _cv["ft"] = None
+            if _cv["ft"] is None:
+                continue
+            ft = _cv["ft"]
+        else:
+            ft = ft0
         try:
             d = FD.load2(p); seg = FD.segment(d)
             pw = FD.plot_window(p, d)
@@ -71,8 +101,10 @@ def run_board():
                 gm = lambda k: np.interp(t, Lm["t"], Lm[k])
                 OUT["MA"].setdefault(s, []).append(
                     rmse6(d, m, gm("thm1"), gm("q2"), gm("dq1"), gm("dq2"), gm("s1"), gm("s2")))
-            # ---- CL (fit 세션만) ----
-            if not ho and g:
+            # ---- CL (PD 폐루프가 성립하는 전 세션 = 게이트 0421 포함, FF 0324 제외) ----
+            # 마라톤G 08-02: 0421이 게이트로 이동하며 ho=True가 됨 — 조건을 ho가 아니라
+            # **제어 모드**로 판정해야 0421 CL이 조용히 누락되지 않는다.
+            if s not in FD.FF_SESS and g:
                 init = tuple(float(d[k][i0]) for k in ("q1", "q2", "dq1", "dq2", "raw1", "raw2"))
                 Lc = FR.rollout_cl_fs(ft, t, sh(d["qd1"][m]), sh(d["qd2"][m]),
                                       sh(d["dqd1"][m]), sh(d["dqd2"][m]),
@@ -110,11 +142,15 @@ def main():
     safe.atomic_json_write(HERE / f"_F_uboard_{tag}.json", OUT)
     for md in ("CL", "MA"):
         print(f"\n=== U-보드 {md} (세션 평균) ===")
-        tot = np.zeros(6)
+        tot = np.zeros(6); ftot = np.zeros(6); nf = 0
         for s in sorted(OUT[md]):
             a = np.mean(OUT[md][s], axis=0); tot += a
-            print(f"{s}: " + " ".join(f"{c} {v:.2f}" for c, v in zip(CH, a)))
-        print("세션합: " + " ".join(f"{v:.2f}" for v in tot))
+            k = FD.kind_of(s)
+            if k == "fit":
+                ftot += a; nf += 1
+            print(f"{s} [{k:<7}]: " + " ".join(f"{c} {v:.2f}" for c, v in zip(CH, a)))
+        print("세션합(전체): " + " ".join(f"{v:.2f}" for v in tot))
+        print(f"fit 평균({nf}세션): " + " ".join(f"{v:.2f}" for v in (ftot / max(nf, 1))))
     if len(sys.argv) > 2:
         ref = safe.read_json(HERE / f"_F_uboard_{sys.argv[2]}.json")
         bad = guard(OUT, ref)

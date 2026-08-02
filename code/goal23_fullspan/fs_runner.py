@@ -855,12 +855,25 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     # 구현 오류였던 구식: hip_m에서 defl0을 빼 링크각을 실측에 맞춤 → thm1이 처짐만큼 어긋난 채 출발
     # (0602 −1.02° 등, F15 계보 '실측=모터측' 규약 위반). FS_MA_INIT=link 로 구식 재현 가능.
     _lnk = os.environ.get("FS_MA_INIT") == "link"
-    md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2 - (defl0 if _lnk else 0.0)
-    md.qpos[iq["hip"]] = defl0
-    md.qpos[iq["knee_motor"]] = -q2_0
-    md.qpos[iq["cpin"]] = q2_0
-    md.qpos[iq["knee"]] = -q2_0
-    md.qpos[iq["base_z"]] = 1.0
+    # 마라톤G 08-02: F3(F-H10) 폐쇄 초기화 픽스가 **CL에만** 들어가 있었다 — 개루프(ModeA)는
+    # CVT(l_i≠30)에서도 평행사변형 관례로 출발해 4-bar 루프 모순 → 솔버 스냅 → 발산
+    # (U-보드 MA 0429: q2 494°·dq2 136). rollout_cl_fs(init_meas) 경로와 동일하게 미러한다.
+    _ci0 = ft.get("cvt_init")
+    if _ci0 is not None:
+        _qc5 = np.asarray(_ci0(q1_0, q2_0), float)     # 5q [bz, hip_m, crank, cpin, knee]
+        md.qpos[iq["base_z"]] = _qc5[0]
+        md.qpos[iq["hip_m"]] = _qc5[1]
+        md.qpos[iq["hip"]] = defl0
+        md.qpos[iq["knee_motor"]] = _qc5[2]
+        md.qpos[iq["cpin"]] = _qc5[3]
+        md.qpos[iq["knee"]] = _qc5[4]
+    else:
+        md.qpos[iq["hip_m"]] = -q1_0 - np.pi / 2 - (defl0 if _lnk else 0.0)
+        md.qpos[iq["hip"]] = defl0
+        md.qpos[iq["knee_motor"]] = -q2_0
+        md.qpos[iq["cpin"]] = q2_0
+        md.qpos[iq["knee"]] = -q2_0
+        md.qpos[iq["base_z"]] = 1.0
     mjm.mj_forward(model, md)
     fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
     md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
@@ -872,9 +885,16 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     md.qvel[:] = 0
     md.qvel[dof["base_z"]] = dbz
     md.qvel[dof["hip_m"]] = -dq1_0
-    md.qvel[dof["knee_motor"]] = -dq2_0
-    md.qvel[dof["cpin"]] = dq2_0
-    md.qvel[dof["knee"]] = -dq2_0
+    if _ci0 is not None:
+        # 폐쇄 정합 속도: d(qpos)/d(q2) 수치미분 × dq2 (전달비 r(q) 자동 반영) — CL 경로와 동일
+        _eps = 1e-5
+        _dr5 = (np.asarray(_ci0(q1_0, q2_0 + _eps), float) - _qc5) / _eps
+        for _j, _n in ((2, "knee_motor"), (3, "cpin"), (4, "knee")):
+            md.qvel[dof[_n]] = _dr5[_j] * dq2_0
+    else:
+        md.qvel[dof["knee_motor"]] = -dq2_0
+        md.qvel[dof["cpin"]] = dq2_0
+        md.qvel[dof["knee"]] = -dq2_0
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
     N = int(round((t_end + t_after) / dt))

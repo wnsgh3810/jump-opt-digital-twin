@@ -27,10 +27,16 @@ SESS_FIT = {
     "26.04.24": ROOT / "26.04.24",
     "26.06.02": ROOT / "26.06.02" / "position",
     "26.04.29": ROOT / "26.04.29",              # CVT l_i=25.08 — Day2 러너 정비 후 채점 편입
-    "26.04.21": ROOT / "26.04.21" / "Position Control",
 }
+# 게이트 전용 (fit 금지, 외삽 검증용) — 마라톤 G 사용자 확정 08-02:
+#   0324 = FF 토크 세션(원래 held-out), 0421 = 위치제어(dq_des=0 유일 세션).
+#   둘 다 fit 세션과 **제어 모드가 다르다** → 커맨드층 과적합을 잡는 자.
+#   ※ 26.04.22(Torque Control)는 사용자 지시로 미사용 (08-02).
+SESS_GATE = {"26.04.21": ROOT / "26.04.21" / "Position Control"}
 SESS_HO = {"26.03.24": ROOT / "26.03.24" / "Jump" / "Jump_No_Tr"}   # held-out — fit 절대 금지
+SESS_ALL = {**SESS_FIT, **SESS_GATE, **SESS_HO}
 CVT_SESS = {"26.04.29"}
+FF_SESS = {"26.03.24"}      # FF 토크 세션 — PD 폐루프(CL) 재생이 성립하지 않음 (MA 전용)
 BANNED = ("harness_output", "raw_unwrap", "Simulation")
 
 
@@ -212,21 +218,31 @@ def verify_embed(fold: Path, tol=1e-9):
 
 
 def registry():
-    """(세션, trial 폴더, 게인, is_cvt, is_holdout) 전수 목록."""
+    """(세션, trial 폴더, 게인, is_cvt, is_holdout) 전수 목록.
+    ho=True = **fit 금지** (게이트 0421 + held-out 0324). 세부 구분은 kind_of() 참조."""
     out = []
     for s, base in SESS_FIT.items():
         for p in trials_of(base):
             out.append((s, p, gains_of(p.name), s in CVT_SESS, False))
-    for s, base in SESS_HO.items():
+    for s, base in {**SESS_GATE, **SESS_HO}.items():
         for p in trials_of(base):
-            out.append((s, p, gains_of(p.name), False, True))
+            out.append((s, p, gains_of(p.name), s in CVT_SESS, True))
     return out
+
+
+def kind_of(sess: str):
+    """'fit' | 'gate' | 'heldout' — 보드 표기·가중 분리용."""
+    return "heldout" if sess in SESS_HO else ("gate" if sess in SESS_GATE else "fit")
 
 
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "verify"
     reg = registry()
-    print(f"레지스트리 trial {len(reg)}개 (fit {sum(1 for r in reg if not r[4])} / HO {sum(1 for r in reg if r[4])})")
+    _k = [kind_of(r[0]) for r in reg]
+    print(f"레지스트리 trial {len(reg)}개 (fit {_k.count('fit')} / gate {_k.count('gate')} / heldout {_k.count('heldout')})")
+    for s in sorted(SESS_ALL):
+        n = sum(1 for r in reg if r[0] == s)
+        print(f"  {s:<10} {kind_of(s):<8} {n:3d} trial  {'CVT' if s in CVT_SESS else ''}")
     if mode == "verify":
         bad = 0
         for s, p, g, cvt, ho in reg:
@@ -250,7 +266,7 @@ def main():
         picks = [("26.07.27", "150_2.2_250_3"), ("26.06.02", "150_2.2_250_3"), ("26.03.24", "P100_D3")]
         fig, axes = plt.subplots(len(picks), 1, figsize=(14, 3.2 * len(picks)))
         for ax, (s, name) in zip(np.atleast_1d(axes), picks):
-            base = SESS_FIT.get(s) or SESS_HO.get(s)
+            base = SESS_ALL.get(s)
             d = load2(base / name)
             seg = segment(d)
             ax.plot(d["t"], np.degrees(d["qd2"]), lw=1.2, label="qd2 [°]")
