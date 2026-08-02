@@ -192,6 +192,24 @@ def do_promote(path, note, force=False):
     return 0
 
 
+def do_stack_clear(reason):
+    """런타임 스택층 해제 — 플랜트 후보(현행 p24 + α 커맨드층)만 남는다.
+    지표 정의 오류 등으로 스택 근거가 무효화됐을 때 기준선을 되돌리는 경로 (승격의 역연산)."""
+    reg = load_registry()
+    prev = (reg.get("stack") or {}).get("name")
+    if not prev:
+        print("해제할 런타임 스택 없음 (이미 플랜트 후보 단독)")
+        return 0
+    today = datetime.date.today().isoformat()
+    reg.pop("stack", None)
+    reg.setdefault("changelog", []).insert(
+        0, f"- {today}: 런타임 스택 **{prev} 해제** → 기준선 = 플랜트 후보 + α 커맨드층 — {reason}")
+    safe.atomic_json_write(REG, reg)
+    render_stack(reg)
+    print(f"스택 해제 완료: {prev} → (플랜트 단독)")
+    return 0
+
+
 def do_stack_set(name, base, env, note, metrics, runner):
     """런타임 스택층 등재 (플랜트 후보 위의 env 레시피 — 후보 JSON 스키마 밖).
 
@@ -244,6 +262,7 @@ def main():
     st.add_argument("--note", default="")
     st.add_argument("--metric", action="append", default=[], help="지표 줄 (반복 가능)")
     st.add_argument("--runner", default="code/goal23_fullspan/fs_runner.py")
+    st.add_argument("--clear", default=None, help="런타임 스택층 해제 (사유 문자열)")
     a = ap.parse_args()
     if a.cmd == "eval":
         do_eval(a.path, a.judge, a.tol)
@@ -254,6 +273,8 @@ def main():
     elif a.cmd == "list":
         do_list()
     elif a.cmd == "stack":
+        if a.clear:
+            sys.exit(do_stack_clear(a.clear))
         if a.name:
             sys.exit(do_stack_set(a.name, a.base, a.env, a.note, a.metric, a.runner))
         render_stack(load_registry())
