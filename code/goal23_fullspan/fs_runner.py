@@ -35,7 +35,8 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     fl = float(os.environ.get("FS_HIPM_FL", "0.238254"))
     _mu = os.environ.get("FS_MU")            # 마라톤D P3: 발-바닥 마찰 (슬립 축)
     _rx = os.environ.get("FS_RAILX")         # 마라톤E P2: 레일 횡 컴플라이언스 "k,b" [N/m, N·s/m]
-    key = (ks, bs, arm, dm, fl, _mu, _rx)
+    _mt = os.environ.get("FS_MASS")          # 사용자 실측 08-02: 총질량 [kg] (케이블 제거 3.26, 허용 ~3.3)
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
@@ -55,6 +56,11 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
             for _gn in ("foot", "floor"):
                 _gi = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, _gn)
                 model.geom_friction[_gi][0] = float(_mu)
+        if _mt:
+            # 사용자 실측 (08-02): 케이블 제거 총질량 3.26kg (정합 허용대 3.26~3.3).
+            # 정본 3.201kg 대비 부족분을 base(전장·레일 캐리지 몫)에 가산 — 링크 질량·관성은 불변.
+            _bi = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_BODY, "base")
+            model.body_mass[_bi] += float(_mt) - float(model.body_mass.sum())
         _names = ["base_z", "hip_m", "hip", "knee_motor", "cpin", "knee"] + (["base_x"] if _rx else [])
         iq = {n: safe.qadr(model, n, mjm) for n in _names}
         dof = {n: safe.dofadr(model, n, mjm) for n in iq}
