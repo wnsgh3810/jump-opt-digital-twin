@@ -623,7 +623,7 @@ def rollout_ol_fs(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "bz")
     Lg = {k: np.zeros(N) for k in keys}
     for k in range(N):
         tc = k * dt
@@ -654,6 +654,7 @@ def rollout_ol_fs(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1
         Lg["s2"][k] = s2
+        Lg["bz"][k] = md.qpos[iq["base_z"]]     # ModeA 점프높이 판정 (사용자 요청 08-02)
     return Lg
 
 
@@ -877,7 +878,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2")
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "bz")
     Lg = {k: np.zeros(N) for k in keys}
     load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
     if load_on:
@@ -1001,6 +1002,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1
         Lg["s2"][k] = s2
+        Lg["bz"][k] = md.qpos[iq["base_z"]]     # ModeA 점프높이 판정 (사용자 요청 08-02)
     if _psl is not None:
         _psl.restore()
     return Lg
