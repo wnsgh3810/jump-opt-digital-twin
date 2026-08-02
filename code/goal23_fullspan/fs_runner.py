@@ -108,7 +108,7 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
         s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
-            supp += float(RU.rise_term(v2c, kr, law_v0))
+            supp += _rise(v2c, kr, law_v0)
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
@@ -133,6 +133,24 @@ def _bias_ramp():
         return None
     k_, th_ = v.split("@")
     return (float(k_), float(th_))
+
+
+def _rise(v2c, kr, law_v0):
+    """마라톤F F4: 상승항 형태 교정 — `k·dq2·(1−gate_v)`는 고속에서 무한 선형 증가(=음의 감쇠,
+    에너지원). 물리적으로는 포화해야 한다. FS_RISE_CAP=<Nm>이면 tanh 포화형으로 교체:
+        k·C·tanh(dq2·(1−gate_v)/C)   — 저속 구간은 원식과 1차 일치, 고속에서 |·|≤k·C로 상한.
+    FS_RISE_SCALE=<배>는 크기만 스케일 (형태 대조군). 둘 다 미지정이면 원식 그대로."""
+    r = float(RU.rise_term(v2c, kr, law_v0))
+    _c = os.environ.get("FS_RISE_CAP")
+    if _c:
+        C = float(_c)
+        if C > 0 and kr:
+            x = r / kr                      # = dq2·(1−gate_v)
+            r = kr * C * float(np.tanh(x / C))
+    _sc = os.environ.get("FS_RISE_SCALE")
+    if _sc:
+        r *= float(_sc)
+    return r
 
 
 def _svg_gate(v, spec):
@@ -419,7 +437,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             s2 = _vceil_cap(s2, v2c, _vcl)
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
-            supp += float(RU.rise_term(v2c, kr, law_v0))
+            supp += _rise(v2c, kr, law_v0)
         if _svg is not None:
             supp *= _svg_gate(v2c, _svg)   # F-H8: 유지 전용 게이트 (고속 소멸 = 마찰성 — 주입 불가 형태)
         if _esc is not None and "supp2" in _esc:
@@ -615,7 +633,7 @@ def rollout_ol_fs(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after
         s2 = float(P.J.ahat(A, np.array([r2]), np.array([v2c]))[0])
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
-            supp += float(RU.rise_term(v2c, kr, law_v0))
+            supp += _rise(v2c, kr, law_v0)
         tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
@@ -886,7 +904,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
             s2 = _vceil_cap(s2, v2c, _vcl)
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
-            supp += float(RU.rise_term(v2c, kr, law_v0))
+            supp += _rise(v2c, kr, law_v0)
         if _svg is not None:
             supp *= _svg_gate(v2c, _svg)   # F-H8 동일 플랜트
         if _esc is not None and "supp2" in _esc:
