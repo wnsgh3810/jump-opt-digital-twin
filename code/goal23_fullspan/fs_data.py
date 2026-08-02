@@ -103,6 +103,67 @@ def load2(fold: Path):
     return d
 
 
+def load3(fold: Path):
+    """*3 로드 (공중 전원인가 → 바닥 안착 → 스쿼트 → 점프 → 착지 전 구간).
+
+    *3는 *2의 상위집합 — 겹치는 구간의 값은 비트 단위로 동일함이 검증됨(마라톤F).
+    쓰임: **접지 이전 공중 구간**(무부하 중력 레버) 식별 — Phase 1 M·G 동정 데이터.
+    반환은 load2와 같은 dict 규약 + `i_touch`(접지 추정 인덱스).
+    """
+    _check_path(fold)
+    if not (fold / "hip3.xlsx").exists():
+        return None
+    hip = pd.read_excel(fold / "hip3.xlsx")
+    knee = pd.read_excel(fold / "knee3.xlsx")
+    grf = pd.read_excel(fold / "GRF3.xlsx")
+    n = min(len(hip), len(knee), len(grf))
+    hip, knee, grf = hip.iloc[:n], knee.iloc[:n], grf.iloc[:n]
+    t_abs = hip["Time"].to_numpy(float)
+    v1 = hip["currentAngleVelocity"].to_numpy(float)
+    v2 = knee["currentAngleVelocity"].to_numpy(float)
+    raw1 = hip["currentTorque"].to_numpy(float)
+    raw2 = knee["currentTorque"].to_numpy(float)
+    d = dict(
+        t=t_abs - t_abs[0], t_abs=t_abs,
+        q1=hip["currentAngle"].to_numpy(float), q2=knee["currentAngle"].to_numpy(float),
+        qd1=hip["desiredAngle"].to_numpy(float), qd2=knee["desiredAngle"].to_numpy(float),
+        dq1=v1, dq2=v2,
+        dqd1=hip["desiredAngleVelocity"].to_numpy(float),
+        dqd2=knee["desiredAngleVelocity"].to_numpy(float),
+        raw1=raw1, raw2=raw2,
+        a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
+        grf=grf["Current_GRF"].to_numpy(float),
+        name=fold.name, fold=str(fold))
+    if np.nanmax(np.abs(d["q2"])) > 7:
+        raise ValueError(f"{fold}: *3 각도가 rad가 아님 (규약 위반?)")
+    return d
+
+
+def air_window(fold: Path, d3=None):
+    """*3의 **공중 구간** (전원인가~바닥 안착 직전) 을 상대 시간축으로 반환.
+
+    경계 출처 = `Real Data.txt`의 시간 구간 3종 (사용자 승인 항목):
+      w3[0] = *3 시작(공중 전원인가) · w2[0] = *2 시작(= 바닥 위 초기자세 유지 시작).
+    → 공중 구간 = [w3[0], w2[0]]. GRF로 재확인하지 않는 이유: GRF.xlsx는 참고용 전용 규약.
+    반환 (t0, t1) [s, load3 상대축] 또는 None.
+    """
+    f = fold / "Real Data.txt"
+    if not f.exists():
+        return None
+    import re as _re
+    tri = _re.findall(r"^\s*([\d.]+)\s*~\s*([\d.]+)\s*~\s*([\d.]+)\s*$",
+                      f.read_text(encoding="utf-8", errors="ignore"), _re.M)
+    if len(tri) < 3:
+        return None
+    t_w2, t_w3 = float(tri[1][0]), float(tri[2][0])
+    if d3 is None:
+        d3 = load3(fold)
+    if d3 is None:
+        return None
+    t0a = float(d3["t_abs"][0])
+    return max(0.0, t_w3 - t0a), t_w2 - t0a
+
+
 def plot_window(fold: Path, d=None, pad=0.0):
     """**그래프 전용 창 = 원본 hip/knee/GRF.xlsx 스팬 (= 점프 구간, ~0.2~0.3s)** — 단일 출처.
 
