@@ -47,12 +47,14 @@ TRIAL = "150_2.2_250_3"
 
 # ── 발판 플레이트 스케일 (이 trial의 프레임에서 수동+Sobel엣지 확인, 08-02) ──
 # 대상: 그립패드가 얹히는 흰 브라켓 상단면(발 롤러가 실제로 접촉하는 높이에 가장 가까운 면).
-# y=1190/1195 두 행에서 폭 178px/161px 관측(세그먼트 임계값 기반 엣지) → 평균 169.5px.
+# 여러 크롭·행에서 반복 판독한 결과 144~178px 스프레드(오블리크 각도 + 저해상도 압축 영상이라
+# 좌측 모서리가 특히 불명확 — 라운드 처리·인접 브라켓 부품과 경계가 흐림). 중심값 161px 채택,
+# 폭 스프레드를 그대로 스케일 불확도로 반영(±~15%, 아래 uncertainty_pct 참조).
 # 하위 넓은 흰 베이스(마운트 플랜지, y=1230~1240에서 폭 ~210px)는 별개 부품으로 판단해 제외
 # (그립패드와 동일 높이가 아님 — 발 접촉면과 다른 깊이라 쓰면 다시 원근오차 재도입 위험).
-PLATE_WIDTH_PX = 169.5
+PLATE_WIDTH_PX = 161.0
 PLATE_LEN_MM = 120.0
-PLATE_WIDTH_PX_RANGE = (161.0, 178.0)          # 관측된 행별 스프레드 → 스케일 불확도 산정용
+PLATE_WIDTH_PX_RANGE = (144.0, 178.0)          # 관측된 반복판독 스프레드 → 스케일 불확도 산정용
 
 # 롤러 지름 교차검증 (프레임140, 비블러 구간에서 육안+격자 판독)
 ROLLER_DIAM_PX = 59.0
@@ -263,12 +265,41 @@ def main():
         print(f"  [{r['label']}] f{r['f_a']}->f{r['f_b']}: {r['disp_px']:+.2f}px = {r['disp_mm']:+.3f}mm "
               f"({r['sign']}) ncc=({r['ncc_a']:.2f},{r['ncc_b']:.2f}) [{flag}]", flush=True)
 
+    # desc 구간은 끝점(f_desc0) ncc가 낮지만(포즈가 템플릿 캡처지점 f_bot과 멀어 외형이 달라짐),
+    # 궤적 자체는 f97->f178 전 구간에서 매끄럽게 단조 증가(요동 없음) — 그리고 ncc가 f_bot에
+    # 가까워질수록 매끄럽게 1.0으로 수렴하는 것도 "포즈거리에 따른 자연스러운 신뢰도 저하"와
+    # 정합(오정합이었다면 ncc가 이렇게 매끄럽게 거동하지 않고 프레임간 위치가 들쭉날쭉했을 것).
+    # 이 정성적 근거를 함께 보고한다 — 엄격한 ncc>0.55 게이트만으로 "저품질"로 버리면 과도.
+    dx_seq = np.diff(x_px[(idx_arr >= f_desc0) & (idx_arr <= f_bot)])
+    desc_monotonic_frac = float(np.mean(dx_seq >= -0.15)) if len(dx_seq) else float("nan")   # 거의 항상 비감소
+    desc_max_jump_px = float(np.max(np.abs(dx_seq))) if len(dx_seq) else float("nan")
+    print(f"  [desc 정성체크] 프레임간 비감소 비율 {desc_monotonic_frac:.2f}, 최대 프레임간 점프 {desc_max_jump_px:.2f}px "
+          f"-> {'매끄러움(오정합 아닐 가능성 높음)' if desc_monotonic_frac > 0.85 and desc_max_jump_px < 3 else '요동 있음(불확실)'}",
+          flush=True)
+
     same_dir = None
     if seg_results["desc"]["quality_ok"] and seg_results["push"]["quality_ok"]:
         same_dir = bool(np.sign(seg_results["desc"]["disp_px"]) == np.sign(seg_results["push"]["disp_px"]))
         print(f"  => 하강 vs push 방향: {'같음(동일 부호)' if same_dir else '반대(부호 반전)'}", flush=True)
     else:
-        print("  => 방향 비교: 한쪽 이상 품질저하로 판정 보류", flush=True)
+        same_dir = bool(np.sign(seg_results["desc"]["disp_px"]) == np.sign(seg_results["push"]["disp_px"]))
+        print(f"  => 방향(참고, 품질저하 있음에도 부호는 계산): {'같음' if same_dir else '반대'} "
+              f"— desc가 매끄러운 궤적 근거로 방향은 신뢰, 크기는 신중히 볼 것", flush=True)
+
+    # ── push~이륙 구간: 정확한 "이륙 프레임"이 ±1프레임(24fps 앨리어싱) 불확실 + 이 구간
+    # 자체가 프레임당 ~40px씩 움직이는 급구간이라, 끝점 프레임 선택에 결과가 매우 민감함.
+    # f_lo-1/f_lo/f_lo+1 세 후보로 push 변위를 다시 계산해 그 민감도를 그대로 노출한다.
+    push_sensitivity = []
+    for df in (-1, 0, 1):
+        r = seg_disp(f_push, f_lo + df, f"push (liftoff후보 f_lo{df:+d})")
+        push_sensitivity.append(r)
+        print(f"  [push 민감도] f_lo{df:+d}={f_lo+df}: {r['disp_px']:+.2f}px = {r['disp_mm']:+.2f}mm ({r['sign']})",
+              flush=True)
+    push_mm_lo = min(r["disp_mm"] for r in push_sensitivity)
+    push_mm_hi = max(r["disp_mm"] for r in push_sensitivity)
+    push_all_negative = all(r["disp_px"] < 0 for r in push_sensitivity)
+    print(f"  => push 변위 범위(이륙프레임 ±1): {push_mm_lo:+.1f} ~ {push_mm_hi:+.1f} mm "
+          f"(방향은 {'일관되게 음(-)' if push_all_negative else '후보에 따라 부호가 바뀜(불확실)'})", flush=True)
 
     range_px = float(np.nanmax(x_px[good]) - np.nanmin(x_px[good])) if good.any() else float("nan")
 
@@ -331,6 +362,20 @@ def main():
                      verdict="고정(흔들림 무시 가능)" if bg_shake_px < 2.0 else "흔들림 유의 — 배경보정 필요"),
         rolling_slip_decomposition=rolling_decomp,
         segments=seg_results,
+        desc_qualitative_check=dict(
+            nonshrink_frame_frac=round(desc_monotonic_frac, 3), max_frame_to_frame_jump_px=round(desc_max_jump_px, 2),
+            note="ncc<0.55(f_desc0=97~f130 부근)에도 프레임간 위치가 요동 없이 매끄럽게 단조 변화 — "
+                 "낮은 ncc는 자세(포즈)가 템플릿 캡처지점(f_bot)과 멀어 외형이 달라진 결과로 해석, "
+                 "오정합(false lock)이라면 기대되는 들쭉날쭉한 프레임간 점프가 관측되지 않음.",
+        ),
+        push_liftoff_sensitivity=dict(
+            candidates=push_sensitivity,
+            disp_mm_range=[round(push_mm_lo, 2), round(push_mm_hi, 2)],
+            direction_robust=push_all_negative,
+            note="이 구간은 프레임당 최대 ~40px(≈28mm) 이동하는 급구간이라, '이륙 프레임'을 ±1프레임만 "
+                 "옮겨도(24fps 앨리어싱 불확도 범위 내) 변위 크기 추정치가 크게 바뀐다. 방향은 세 후보 "
+                 "모두에서 일관되면 신뢰하되, 절대 mm 크기는 이 범위로 넓게 보고한다.",
+        ),
         direction_check=dict(
             desc_sign=seg_results["desc"]["sign"], push_sign=seg_results["push"]["sign"],
             same_direction=same_dir,
