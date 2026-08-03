@@ -31,7 +31,7 @@ import numpy as np
 import imageio.v3 as iio
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 SCR = Path(r"C:/Users/junho/AppData/Local/Temp/claude/"
            r"C--Users-junho-Desktop-Research-4-Bar-Link-CVT-Data-26-03-24-Jump/"
            r"fcd547c7-41bc-4112-9159-2d1f317a3cc9/scratchpad")

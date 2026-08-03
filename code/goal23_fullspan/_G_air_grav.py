@@ -33,7 +33,7 @@ import fs_runner as FR
 import p25_a_twin as TW
 from sea_twin2 import ahat_np
 
-S2S = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.03.24/sit2stand")
+S2S = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_24/sit2stand")
 DQ_MAX = float(os.environ.get("G_DQMAX", "0.15"))   # 준정적 판정 [rad/s]
 STEP = 40              # 표본 간격 (500Hz → 80ms)
 MAXN = 45              # trial당 표본 상한 — **자세(q1)로 층화 추출**해 스윕 전체를 고르게 덮는다

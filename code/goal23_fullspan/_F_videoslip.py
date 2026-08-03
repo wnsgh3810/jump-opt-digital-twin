@@ -30,7 +30,7 @@ sys.path.insert(0, str(HERE.parent / "bench"))
 import safe                      # noqa: E402
 import fs_data as FD              # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 DAYS = ["26.07.22", "26.07.23", "26.07.24", "26.07.25", "26.07.27"]
 
 # 27일 발볼트 기준 템플릿 좌표 (fs_video_gauge.py 검증 좌표 재사용 — 광역 코스탐색의 시드)

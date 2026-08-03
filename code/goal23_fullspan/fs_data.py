@@ -13,27 +13,44 @@ os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
 import numpy as np, pandas as pd
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+# 데이터 루트 — 2026-08-02 사용자가 트리를 **언더스코어 규약으로 개명**했다:
+#   "4-Bar Link CVT" → "4-Bar_Link_CVT",  "26.03.24" → "26_03_24"
+# 세션 **키는 옛 표기(26.03.24)를 유지**한다 — 보드 JSON·세션 상수·기준선이 전부 그 키를 쓰므로
+# 키를 바꾸면 마라톤 G 기준선과의 비교가 끊긴다. 키→폴더 변환은 `_D()`가 담당.
+_ROOTS = [Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data"),
+          Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")]
+ROOT = next((p for p in _ROOTS if p.exists()), _ROOTS[0])
+_UNDERSCORE = (ROOT.name == "Data" and "4-Bar_Link_CVT" in str(ROOT))
+
+
+def _D(*parts):
+    """세션 키(점 표기)를 현행 폴더 규약으로 변환해 경로 결합. 예: _D('26.03.24','Jump')."""
+    out = ROOT
+    for p in parts:
+        out = out / (p.replace(".", "_") if (_UNDERSCORE and p[:2] == "26") else p)
+    return out
+
+
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent / "goal22" / "p26_sea"))
 from sea_twin2 import ahat_np    # noqa: E402  (a_hat Paper 변환 — 정본 재사용)
 
 SESS_FIT = {
-    "26.07.22": ROOT / "26.07.22",
-    "26.07.23": ROOT / "26.07.23",
-    "26.07.24": ROOT / "26.07.24",
-    "26.07.25": ROOT / "26.07.25",
-    "26.07.27": ROOT / "26.07.27",
-    "26.04.24": ROOT / "26.04.24",
-    "26.06.02": ROOT / "26.06.02" / "position",
-    "26.04.29": ROOT / "26.04.29",              # CVT l_i=25.08 — Day2 러너 정비 후 채점 편입
+    "26.07.22": _D("26.07.22"),
+    "26.07.23": _D("26.07.23"),
+    "26.07.24": _D("26.07.24"),
+    "26.07.25": _D("26.07.25"),
+    "26.07.27": _D("26.07.27"),
+    "26.04.24": _D("26.04.24"),
+    "26.06.02": _D("26.06.02", "position"),
+    "26.04.29": _D("26.04.29"),              # CVT l_i=25.08 — Day2 러너 정비 후 채점 편입
 }
 # 게이트 전용 (fit 금지, 외삽 검증용) — 마라톤 G 사용자 확정 08-02:
 #   0324 = FF 토크 세션(원래 held-out), 0421 = 위치제어(dq_des=0 유일 세션).
 #   둘 다 fit 세션과 **제어 모드가 다르다** → 커맨드층 과적합을 잡는 자.
 #   ※ 26.04.22(Torque Control)는 사용자 지시로 미사용 (08-02).
-SESS_GATE = {"26.04.21": ROOT / "26.04.21" / "Position Control"}
-SESS_HO = {"26.03.24": ROOT / "26.03.24" / "Jump" / "Jump_No_Tr"}   # held-out — fit 절대 금지
+SESS_GATE = {"26.04.21": _D("26.04.21", "Position Control")}
+SESS_HO = {"26.03.24": _D("26.03.24", "Jump", "Jump_No_Tr")}   # held-out — fit 절대 금지
 SESS_ALL = {**SESS_FIT, **SESS_GATE, **SESS_HO}
 CVT_SESS = {"26.04.29"}
 FF_SESS = {"26.03.24"}      # FF 토크 세션 — PD 폐루프(CL) 재생이 성립하지 않음 (MA 전용)

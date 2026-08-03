@@ -43,7 +43,10 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     _mb = os.environ.get("FS_MBODY")
     _cz = os.environ.get("FS_COMZ")
     _ib = os.environ.get("FS_IBODY")
-    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib)
+    # 마라톤G G1-E3: 공중 동정 실측 마찰 반영용 (무릎측). 힙측은 기존 FS_HIPM_DAMP/FL.
+    _kd = os.environ.get("FS_KNEEM_DAMP")
+    _kf = os.environ.get("FS_KNEEM_FL")
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
@@ -84,6 +87,12 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
         if _ib:
             for _n, _v in _kv(_ib).items():
                 model.body_inertia[_bid(_n)] *= float(_v)
+        if _kd or _kf:
+            _kj = safe.dofadr(model, "knee_motor", mjm)
+            if _kd:
+                model.dof_damping[_kj] = float(_kd)
+            if _kf:
+                model.dof_frictionloss[_kj] = float(_kf)
         if _cz:
             # CoM z 이동 → 관성은 평행축 정리로 보정하지 않는다 (여기 I는 **CoM 기준** 관성이므로
             # 형상이 그대로면 불변). 이동량은 물리적 합당 범위에서만 쓸 것.

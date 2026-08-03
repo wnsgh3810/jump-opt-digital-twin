@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 
 
 def load3(fold: Path):

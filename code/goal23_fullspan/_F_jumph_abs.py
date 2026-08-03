@@ -18,7 +18,7 @@ sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 import fs_data as FD
 import fs_runner as FR
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 PAT = re.compile(r"실제 점프 높이\s*:\s*([\d.]+)")
 
 

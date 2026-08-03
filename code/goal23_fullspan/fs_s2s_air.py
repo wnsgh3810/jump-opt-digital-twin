@@ -21,7 +21,7 @@ import fs_model as FM
 import safe
 import mujoco as mjm
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.03.24/sit2stand")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_24/sit2stand")
 WLEN, STRIDE = 0.4, 0.3
 
 

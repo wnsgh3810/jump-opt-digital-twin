@@ -22,7 +22,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 import fs_data as FD                     # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 DAY = sys.argv[1] if len(sys.argv) > 1 else "26.07.27"
 PTS0 = {"knee": (1065, 610), "foot": (1183, 368), "bodyL": (665, 212), "bodyR": (660, 502)}
 
