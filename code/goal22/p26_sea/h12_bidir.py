@@ -19,13 +19,13 @@ sys.path.insert(0, str(P25)); sys.path.insert(0, str(HERE.parent / "p25_deploy")
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 SESS = {
-    "fit 0424": ROOT/"26.04.24",
-    "fit 0602": ROOT/"26.06.02"/"position",
-    "HO 0324": ROOT/"26.03.24"/"Jump"/"Jump_No_Tr",
-    "exp1": ROOT/"26.07.22", "exp2": ROOT/"26.07.23", "exp3": ROOT/"26.07.24",
-    "exp4": ROOT/"26.07.25", "exp5": ROOT/"26.07.27",
+    "fit 0424": ROOT/"26_04_24",
+    "fit 0602": ROOT/"26_06_02"/"position",
+    "HO 0324": ROOT/"26_03_24"/"Jump"/"Jump_No_Tr",
+    "exp1": ROOT/"26_07_22", "exp2": ROOT/"26_07_23", "exp3": ROOT/"26_07_24",
+    "exp4": ROOT/"26_07_25", "exp5": ROOT/"26_07_27",
 }
 def defl_lin(tau): return tau/166.0
 def defl_2s(tau):

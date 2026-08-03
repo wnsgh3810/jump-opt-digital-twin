@@ -25,8 +25,8 @@ OUT = Path(r"C:/Users/junho/AppData/Local/Temp/claude/C--Users-junho-Desktop-Res
 OUT.mkdir(exist_ok=True)
 g18 = sys.modules[S.load_jump_0602.__module__]
 D = {
-    "0324": (Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.03.24/Jump/Jump_No_Tr"), "P60_D1.5", True),
-    "0421": (Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.04.21/Position Control"), "P100_D0.75_P100_D2", True),
+    "0324": (Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_24/Jump/Jump_No_Tr"), "P60_D1.5", True),
+    "0421": (Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_21/Position Control"), "P100_D0.75_P100_D2", True),
     "0424": (Path(g18.DATA_0424), "90_0.75_90_2", False),
     "0602": (Path(g18.DATA_0602), "60_0.75_60_2", False),
 }

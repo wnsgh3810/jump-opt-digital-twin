@@ -401,7 +401,7 @@ def main():
 
     # 27일 발볼트 기준 템플릿 확보 (fs_video_gauge.py 좌표 재사용) + 27일 자체 스케일
     # (다른 날짜 코스탐색 시 화각차 보정의 기준값으로 사용)
-    ref_fold = ROOT / REF_DAY / "250_3_250_3"
+    ref_fold = FD._D(REF_DAY, "250_3_250_3")
     ref_mp4 = list(ref_fold.glob("*.mp4"))[0]
     ref_frames, ref_fps = load_frames(ref_mp4)
     jr = jump_frame_index(ref_frames)
@@ -413,7 +413,7 @@ def main():
     print(f"기준(27일) 스케일: {ref_scale:.4f}mm/px, 프레임 {ref_shape}", flush=True)
 
     for day in days:
-        base = ROOT / day
+        base = FD._D(day)
         if not base.exists():
             print(f"{day}: 폴더 없음", flush=True)
             continue

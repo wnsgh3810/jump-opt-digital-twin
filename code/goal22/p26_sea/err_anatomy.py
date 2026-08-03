@@ -24,8 +24,8 @@ import p25_a_twin as TW          # noqa: E402
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-SESS = {"exp1(07-22)": ROOT/"26.07.22", "exp4(07-25)": ROOT/"26.07.25", "exp5(07-27)": ROOT/"26.07.27"}
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+SESS = {"exp1(07-22)": ROOT/"26_07_22", "exp4(07-25)": ROOT/"26_07_25", "exp5(07-27)": ROOT/"26_07_27"}
 KT, GR, CF = 0.091, 9.0, 0.59
 A = np.array([1.15605006, 4.17389589e-4, 0.26855607, 0.04904241])
 def ahat(raw, v):

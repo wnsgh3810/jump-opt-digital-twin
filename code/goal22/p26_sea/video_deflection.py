@@ -17,7 +17,7 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).parent
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.07.27/250_3_250_3")
+DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27/250_3_250_3")
 KT, GR, CF = 0.091, 9.0, 0.59
 A = np.array([1.15605006, 4.17389589e-4, 0.26855607, 0.04904241])
 def ahat(raw, v):

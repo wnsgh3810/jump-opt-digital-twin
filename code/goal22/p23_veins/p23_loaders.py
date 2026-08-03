@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 REPO = Path("C:/Users/junho/Documents/jump-opt-digital-twin")
 JO = Path("C:/Users/junho/Desktop/jump_opt")
 
@@ -201,7 +201,7 @@ def parse_pid_0422(fp):
 
 def load_jump_0422(sub):
     """26.04.22/Torque Control/<sub> — FF(캡 15Nm)+PD 점프. 토크는 xlsx currentTorque 직행."""
-    root = DATA / "26.04.22/Torque Control" / sub
+    root = DATA / "26_04_22/Torque Control" / sub
     hip = _read_joint(root / "hip.xlsx")
     knee = _read_joint(root / "knee.xlsx")
     n = min(len(hip["Time"]), len(knee["Time"]))
@@ -256,7 +256,7 @@ def load_jump_0319tau(sub="no_tr_tau"):
     trial 구성: 하위 trial 폴더 없음 — root xlsx 하나 (0.32s 창, 38.13~38.45s) = 단일 trial.
     게인: PID.txt 없음. 세션 What.txt = 'No 변속+V_des=0+새 모터' (게인 미기재)
     → V2+ff 회귀로 실효 게인 추정 (gains_source에 명기)."""
-    root = DATA / "26.03.19/tau" / sub
+    root = DATA / "26_03_19/tau" / sub
     hip = _read_joint(root / "hip.xlsx")
     knee = _read_joint(root / "knee.xlsx")
     n = min(len(hip["Time"]), len(knee["Time"]))
@@ -287,7 +287,7 @@ def load_s2s_0324(sub):
     desiredTorque 0/NaN → tdes=0. GRF·Clutch·Real Data 없음.
     ★ held-out DAY(26.03.24)지만 sit2stand 폴더는 fit-legal (GOAL18/19에서 사용) —
       meta heldout_day=True로 태깅해 다운스트림에서 제외 판단 가능하게."""
-    root = DATA / "26.03.24/sit2stand" / sub
+    root = DATA / "26_03_24/sit2stand" / sub
     hip = _read_joint(root / "hip.xlsx")
     knee = _read_joint(root / "knee.xlsx")
     hip_u, knee_u, rmeta = _resample(hip, knee)
@@ -350,7 +350,7 @@ def load_s2s_air():
     xlsx 재유도 (레거시 npz 재사용 아님) + 균일 리샘플 + 레거시 검출 로직 사이클 분할.
     잘린 마지막 사이클(기록 끝 135s에 걸침)은 drop. 반환: (cycles: list[d-dict], meta).
     각 사이클 d-dict에는 t0_abs(원본 절대 시작초) 키 추가."""
-    root = DATA / "26.03.19/position/sit2stand_air"
+    root = DATA / "26_03_19/position/sit2stand_air"
     hip = _read_joint(root / "hip.xlsx")
     knee = _read_joint(root / "knee.xlsx")
     # 사이클 검출은 원본(비리샘플) 타임베이스에서 — 레거시와 정확히 동일 조건

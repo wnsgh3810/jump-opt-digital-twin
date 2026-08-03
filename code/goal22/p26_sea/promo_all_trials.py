@@ -23,20 +23,20 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 OUT = HERE / "promo_all_trials"
 OUT.mkdir(exist_ok=True)
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 SESS = [
-    ("26.07.22", ROOT/"26.07.22", True),
-    ("26.07.23", ROOT/"26.07.23", True),
-    ("26.07.24", ROOT/"26.07.24", True),
-    ("26.07.25", ROOT/"26.07.25", True),
-    ("26.07.27", ROOT/"26.07.27", True),
-    ("26.04.24", ROOT/"26.04.24", True),
-    ("26.06.02_position", ROOT/"26.06.02"/"position", True),
-    ("26.03.24_Jump_No_Tr", ROOT/"26.03.24"/"Jump"/"Jump_No_Tr", False),  # ModeA만
+    ("26.07.22", ROOT/"26_07_22", True),
+    ("26.07.23", ROOT/"26_07_23", True),
+    ("26.07.24", ROOT/"26_07_24", True),
+    ("26.07.25", ROOT/"26_07_25", True),
+    ("26.07.27", ROOT/"26_07_27", True),
+    ("26.04.24", ROOT/"26_04_24", True),
+    ("26.06.02_position", ROOT/"26_06_02"/"position", True),
+    ("26.03.24_Jump_No_Tr", ROOT/"26_03_24"/"Jump"/"Jump_No_Tr", False),  # ModeA만
 ]
 R19A = getattr(TW.R19, "ALPH", {})
 ALPH_FIT = {"26.04.24": R19A.get("jump_0424"), "26.06.02_position": R19A.get("jump_0602")}

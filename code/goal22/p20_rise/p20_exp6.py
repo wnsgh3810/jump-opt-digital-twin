@@ -21,7 +21,7 @@ import p19_judge as P
 from p20_exp4 import win_scan
 from cvt_run2 import takeoff_time
 
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.04.22/Torque Control")
+DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_22/Torque Control")
 
 
 def load_0422(sub):

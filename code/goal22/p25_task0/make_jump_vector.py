@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).parent
-IKDIR = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/FKnIK")
+IKDIR = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/FKnIK")
 sys.path.insert(0, str(IKDIR))
 from IK2 import inverse_kinematics, q2_to_qm, generate_bezier_curve, rot_matrix  # noqa
 

@@ -19,7 +19,7 @@ import p25_a_twin as TW          # noqa: E402 (env 플래그+경로 주입)
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.07.27")
+DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
 OUT = HERE / "graphs" / "exp5"
 KT, GR, CF = 0.091, 9.0, 0.59
 A = np.array([1.15605006, 4.17389589e-4, 0.26855607, 0.04904241])

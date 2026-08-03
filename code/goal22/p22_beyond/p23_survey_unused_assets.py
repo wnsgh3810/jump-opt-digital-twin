@@ -12,7 +12,7 @@ import pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 REPO = Path("C:/Users/junho/Documents/jump-opt-digital-twin")
 
 # ---- Paper a_hat conversion (canonical constants; fallback if import fails) ----
@@ -176,7 +176,7 @@ def csv_ratio(folder, res, label):
 print("\n" + "#" * 70)
 print("# ASSET A — 26.03.19 (s2s_air focus)")
 print("#" * 70)
-B19 = DATA / "26.03.19"
+B19 = DATA / "26_03_19"
 resA = {}
 resA["s2s_air"] = survey_trial(B19 / "position/sit2stand_air", "0319 position/sit2stand_air")
 resA["s2s_gnd"] = survey_trial(B19 / "position/sit2stand_gnd", "0319 position/sit2stand_gnd (context)")
@@ -189,7 +189,7 @@ resA["NO_TR_JUMP"] = survey_trial(B19 / "position/NO_TR_JUMP", "0319 position/NO
 print("\n" + "#" * 70)
 print("# ASSET B — 26.03.24/sit2stand")
 print("#" * 70)
-B24 = DATA / "26.03.24/sit2stand"
+B24 = DATA / "26_03_24/sit2stand"
 for sub in sorted(p.name for p in B24.iterdir() if p.is_dir()):
     survey_trial(B24 / sub, f"0324 sit2stand/{sub}")
 
@@ -197,7 +197,7 @@ for sub in sorted(p.name for p in B24.iterdir() if p.is_dir()):
 print("\n" + "#" * 70)
 print("# ASSET C — 26.04.22/Torque Control")
 print("#" * 70)
-B22 = DATA / "26.04.22/Torque Control"
+B22 = DATA / "26_04_22/Torque Control"
 for sub in sorted(p.name for p in B22.iterdir() if p.is_dir()):
     res = survey_trial(B22 / sub, f"0422 TC/{sub}")
     csv_ratio(B22 / sub, res, f"0422 {sub}")

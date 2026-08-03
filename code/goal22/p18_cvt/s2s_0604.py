@@ -31,7 +31,7 @@ W = json.load(open(HERE / "p18b_iter11.json"))["x"]
 STIFF, REF = W[0], W[1]
 PRELOAD_30 = 2.06          # l_i=30mm 전용 (P18b, 세션 평균)
 CAP_SHAFT = float(J.ahat(A, np.array([35.5]), np.array([0.0]))[0]) if False else None
-D04 = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.06.04")
+D04 = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
 DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_s2s_0604_results")
 (DST / "png").mkdir(parents=True, exist_ok=True)
 (DST / "counterfactual").mkdir(exist_ok=True)

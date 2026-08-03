@@ -31,7 +31,10 @@ import numpy as np
 import imageio.v3 as iio
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+import sys
+sys.path.insert(0, str(HERE))
+import fs_data as FD              # noqa: E402  (세션 키→폴더 변환 _D() 재사용)
+ROOT = FD.ROOT
 SCR = Path(r"C:/Users/junho/AppData/Local/Temp/claude/"
            r"C--Users-junho-Desktop-Research-4-Bar-Link-CVT-Data-26-03-24-Jump/"
            r"fcd547c7-41bc-4112-9159-2d1f317a3cc9/scratchpad")
@@ -108,7 +111,7 @@ def save_roi_png(rgb, path):
 OUT = {}
 for day in DAYS:
     saved_roi = False
-    for fold in sorted((ROOT / day).iterdir()):
+    for fold in sorted(FD._D(day).iterdir()):
         if not fold.is_dir():
             continue
         mp4s = sorted(fold.glob("*.mp4"))

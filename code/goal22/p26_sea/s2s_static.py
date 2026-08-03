@@ -15,7 +15,7 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.06.04")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
 TRIALS = [("no_cvt 0kg", ROOT/"no_cvt/no_load/raw_unwrap", 0.0),
           ("no_cvt 5kg", ROOT/"no_cvt/load_5/raw_unwrap", 5.0),
           ("no_cvt 7.5kg", ROOT/"no_cvt/load_7.5/raw_unwrap", 7.5),

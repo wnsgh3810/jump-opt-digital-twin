@@ -18,12 +18,12 @@ sys.path.insert(0, str(HERE.parent / "p25_deploy"))
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-SESS = {"exp1(07-22)": ("26.07.22", "t0nc_cl_pd15.npz"),
-        "exp2(07-23)": ("26.07.23", "t0nc_cl_v4.npz"),
-        "exp3(07-24)": ("26.07.24", "t0nc_cl_v7.npz"),
-        "exp4(07-25)": ("26.07.25", "t0nc_cl_v8.npz"),
-        "exp5(07-27)": ("26.07.27", "t0nc_cl_v9.npz")}
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+SESS = {"exp1(07-22)": ("26_07_22", "t0nc_cl_pd15.npz"),
+        "exp2(07-23)": ("26_07_23", "t0nc_cl_v4.npz"),
+        "exp3(07-24)": ("26_07_24", "t0nc_cl_v7.npz"),
+        "exp4(07-25)": ("26_07_25", "t0nc_cl_v8.npz"),
+        "exp5(07-27)": ("26_07_27", "t0nc_cl_v9.npz")}
 TH = {60: 0.70, 120: 0.50, 150: 0.40}          # OLD α 테이블 (hip)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}   # (knee)
 def old_alpha(g):

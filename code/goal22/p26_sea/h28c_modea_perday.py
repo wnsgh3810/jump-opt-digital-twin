@@ -18,8 +18,8 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-DAYS = ["26.07.22", "26.07.23", "26.07.24", "26.07.25", "26.07.27"]
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DAYS = ["26_07_22", "26_07_23", "26_07_24", "26_07_25", "26_07_27"]
 tw = TW.twin()
 POOL = {d: dict(e=[], tau=[]) for d in DAYS}
 for day in DAYS:
@@ -49,7 +49,7 @@ for day in DAYS:
         print(f"{day}/{fold.name}: n={int(m.sum())}", flush=True)
 
 print("\n=== 날짜별 Mode A k̂ (e1~Δτ1 회귀) vs CL 오라클 ===", flush=True)
-ORACLE = {"26.07.22": 36, "26.07.23": "혼재(슬립)", "26.07.24": "혼재(슬립)", "26.07.25": 46, "26.07.27": "86~96"}
+ORACLE = {"26_07_22": 36, "26_07_23": "혼재(슬립)", "26_07_24": "혼재(슬립)", "26_07_25": 46, "26_07_27": "86~96"}
 OUT = {}
 for day in DAYS:
     e = np.concatenate(POOL[day]["e"]); tau = np.concatenate(POOL[day]["tau"])

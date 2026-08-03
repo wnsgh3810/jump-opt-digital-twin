@@ -21,7 +21,7 @@ import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
 RU = TW.RU
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 SEA = dict(ks1=96.0, ks1_hi=323.0, tau0_1=9.0, bs1=1.5, jm1=0.01, ks2=650.0, bs2=1.5, jm2=0.01)
 B1_0 = RU.HIP["b1"]
 
@@ -36,9 +36,9 @@ def defl_2s(tau):
 
 tw = TW.twin()
 # ── CL 전이 세트 로드 ──
-SESS = {"exp1": ("26.07.22","t0nc_cl_pd15.npz"),"exp2": ("26.07.23","t0nc_cl_v4.npz"),
-        "exp3": ("26.07.24","t0nc_cl_v7.npz"),"exp4": ("26.07.25","t0nc_cl_v8.npz"),
-        "exp5": ("26.07.27","t0nc_cl_v9.npz")}
+SESS = {"exp1": ("26_07_22","t0nc_cl_pd15.npz"),"exp2": ("26_07_23","t0nc_cl_v4.npz"),
+        "exp3": ("26_07_24","t0nc_cl_v7.npz"),"exp4": ("26_07_25","t0nc_cl_v8.npz"),
+        "exp5": ("26_07_27","t0nc_cl_v9.npz")}
 CLTR = []
 for sess, (day, bait) in SESS.items():
     z = np.load(P25/bait); m = z["t"] >= 0
@@ -66,7 +66,7 @@ for sess, (day, bait) in SESS.items():
                          a2=ahat_np(knee["currentTorque"].to_numpy(float), knee["currentAngleVelocity"].to_numpy(float))))
 # ── 0424 Mode A 세트 로드 ──
 MA424 = []
-for fold in sorted([p for p in (ROOT/"26.04.24").iterdir() if p.is_dir() and (p/"hip.xlsx").exists()]):
+for fold in sorted([p for p in (ROOT/"26_04_24").iterdir() if p.is_dir() and (p/"hip.xlsx").exists()]):
     try:
         hip = pd.read_excel(fold/"hip.xlsx"); knee = pd.read_excel(fold/"knee.xlsx")
     except FileNotFoundError:

@@ -22,7 +22,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 tw0 = TW.twin()
 
 def defl_2s(tau):
@@ -52,7 +52,7 @@ print("saved promo_modea_bars.png", flush=True)
 
 # ── Fig B: 시계열 3종 ──
 CASES = [("fit 0602", "R19:jump_0602:150_2.2_250_3", "150_2.2_250_3"),
-         ("배포 exp5 (07-27)", ROOT/"26.07.27"/"150_2.2_250_3", "150_2.2_250_3"),
+         ("배포 exp5 (07-27)", ROOT/"26_07_27"/"150_2.2_250_3", "150_2.2_250_3"),
          ("held-out 0324 (과보정 최악례)", "R19:jump_0324:P40_D0.7", "P40_D0.7")]
 
 def find_xlsx(fold):

@@ -159,7 +159,7 @@ BG_SEED_YX = (1175, 605)
 
 
 def main():
-    fold = ROOT / DAY / TRIAL
+    fold = FD._D(DAY, TRIAL)
     mp4s = list(fold.glob("*.mp4"))
     if not mp4s:
         print("영상 없음"); return

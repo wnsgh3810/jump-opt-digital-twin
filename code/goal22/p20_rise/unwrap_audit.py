@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results/unwrap_audit")
 DST.mkdir(parents=True, exist_ok=True)
 SPAN = 36.0

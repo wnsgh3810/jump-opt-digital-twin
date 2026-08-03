@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 DST = Path("C:/Users/junho/Desktop/jump_opt/g22_p20_results")
 DST.mkdir(parents=True, exist_ok=True)
 
@@ -37,17 +37,17 @@ def ahat(A, tau_rep, v):
 
 
 SETS = {
-    "jump_position_0421": (DATA / "26.04.21/Position Control",
+    "jump_position_0421": (DATA / "26_04_21/Position Control",
                            ["P60_D0.75_P60_D2", "P70_D0.75_P70_D2", "P80_D0.75_P80_D2",
                             "P90_D0.75_P90_D2", "P100_D0.75_P100_D2", "P200_D1.5_P200_D4"]),
-    "jump_0424": (DATA / "26.04.24",
+    "jump_0424": (DATA / "26_04_24",
                   ["60_0.75_60_2", "60_1.5_60_1.5", "90_0.75_90_2", "120_2_120_2",
                    "120_2.2_150_2.5", "120_2.2_200_2.8", "150_2.2_250_3",
                    "150_2.2_350_3.5", "150_2.2_500_4"]),
-    "jump_0602": (DATA / "26.06.02/position",
+    "jump_0602": (DATA / "26_06_02/position",
                   ["60_0.75_60_2", "60_1.5_60_1.5", "90_0.75_90_2", "120_2_120_2",
                    "150_2.2_250_3", "150_2.2_500_5"]),
-    "jump_0429": (DATA / "26.04.29",
+    "jump_0429": (DATA / "26_04_29",
                   ["60_0.75_60_2", "60_1.5_60_1.5", "90_0.75_90_2", "90_1.5_90_2.5",
                    "120_2_120_2", "120_2.2_150_2.5", "120_2.2_200_2.8",
                    "150_2.2_250_3", "150_2.2_350_3.5", "150_2.2_500_4"]),

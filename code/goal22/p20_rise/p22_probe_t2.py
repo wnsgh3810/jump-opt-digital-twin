@@ -38,16 +38,16 @@ import p19_judge as P                     # noqa: E402
 from p20_exp4 import win_scan             # noqa: E402
 from p14_judge import KT, GR, CF          # noqa: E402
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 DST = Path("C:/Users/junho/Desktop/jump_opt/g22_p20_results")
 DST.mkdir(parents=True, exist_ok=True)
 W = 0.12
 STRIDE = 0.01
 
 SESS = {
-    "jump_position_0421": DATA / "26.04.21/Position Control",
-    "jump_0424": DATA / "26.04.24",
-    "jump_0602": DATA / "26.06.02/position",
+    "jump_position_0421": DATA / "26_04_21/Position Control",
+    "jump_0424": DATA / "26_04_24",
+    "jump_0602": DATA / "26_06_02/position",
 }
 # 시간 순서 (헤더 주석의 mtime 감사 근거)
 CHRON = {

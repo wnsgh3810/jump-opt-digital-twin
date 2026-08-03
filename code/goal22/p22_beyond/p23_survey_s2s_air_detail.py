@@ -7,7 +7,7 @@ import pandas as pd
 from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-D = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.03.19/position/sit2stand_air")
+D = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_19/position/sit2stand_air")
 
 hip = pd.read_excel(D / "hip.xlsx")
 knee = pd.read_excel(D / "knee.xlsx")

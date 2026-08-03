@@ -22,14 +22,14 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 def old_alpha(g):
     return (TH.get(g[0], 0.40), 0.20, TK.get(g[2], 0.656), 0.20)
 
 tw0 = TW.twin()
-DAYS = ["26.07.22", "26.07.23", "26.07.24", "26.07.25", "26.07.27"]
+DAYS = ["26_07_22", "26_07_23", "26_07_24", "26_07_25", "26_07_27"]
 TRIAL = "150_2.2_250_3"
 
 def load(day):

@@ -47,7 +47,7 @@ def fig_ledger():
 def fig_0421():
     import p19_judge as P
     sub = "P100_D0.75_P100_D2"
-    base = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.04.21/Position Control") / sub
+    base = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_21/Position Control") / sub
     kx = pd.read_excel(base / "knee.xlsx")
     c = pd.read_csv(base / "jump_opt_compare" / "predicted_compare.csv")
     traw = kx["currentTorque"].values

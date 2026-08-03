@@ -12,7 +12,7 @@ sys.path.insert(0, str(REPO / "code/goal22/p19_jump"))
 sys.path.insert(0, str(REPO / "code/bench"))
 import p19_judge as P
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.04.22/Torque Control")
+DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_22/Torque Control")
 JO = Path("C:/Users/junho/Desktop/jump_opt")
 
 CANDS = [

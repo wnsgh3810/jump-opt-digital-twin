@@ -20,7 +20,7 @@ import g21_p13e_honest as PH
 L1 = 0.25          # thigh = coupler length
 L2 = 0.25          # calf
 LO = 0.03          # rocker (calf 쪽) — 세션 불변
-DATA429 = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.04.29")
+DATA429 = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_29")
 SUBS429 = ["60_0.75_60_2", "60_1.5_60_1.5", "90_0.75_90_2", "90_1.5_90_2.5",
            "120_2_120_2", "120_2.2_150_2.5", "120_2.2_200_2.8",
            "150_2.2_250_3", "150_2.2_350_3.5", "150_2.2_500_4"]

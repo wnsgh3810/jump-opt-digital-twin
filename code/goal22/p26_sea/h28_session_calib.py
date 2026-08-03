@@ -18,14 +18,14 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 tw0 = TW.twin()
 BASE_REF = dict(q1=2.40, q2=2.25, dq1=1.05, dq2=1.09, t1=3.86, t2=3.09)
 GRID = (66.0, 76.0, 86.0, 96.0, 106.0, 116.0, 126.0)
 
 TR = []
-for day in ["26.07.22", "26.07.23", "26.07.24", "26.07.25", "26.07.27"]:
+for day in ["26_07_22", "26_07_23", "26_07_24", "26_07_25", "26_07_27"]:
     for fold in sorted([p for p in (ROOT / day).iterdir() if p.is_dir() and (p / "hip.xlsx").exists()]):
         gg = [float(x) for x in fold.name.split("_")]
         if len(gg) != 4: continue

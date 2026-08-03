@@ -62,7 +62,7 @@ def defl_pred_deg(tau):
 
 
 # ── 기준 템플릿 (27일 250 — SEA 검증 좌표) ──
-mp250 = next((ROOT / "26.07.27" / "250_3_250_3").glob("*.mp4"))
+mp250 = next(FD._D("26.07.27", "250_3_250_3").glob("*.mp4"))
 fr250, _ = load_frames(mp250)
 d250 = [float(np.abs(fr250[i + 1] - fr250[i]).mean()) for i in range(len(fr250) - 1)]
 j250 = int(min(np.argsort(d250)[-12:]))
@@ -70,7 +70,7 @@ T_REF = {k: fr250[j250 - 5][y - 20:y + 20, x - 20:x + 20].copy() for k, (y, x) i
 del fr250
 
 OUT = {}
-for fold in sorted([p for p in (ROOT / DAY).iterdir() if p.is_dir() and (p / "hip2.xlsx").exists()]):
+for fold in sorted([p for p in FD._D(DAY).iterdir() if p.is_dir() and (p / "hip2.xlsx").exists()]):
     mp4s = list(fold.glob("*.mp4"))
     if not mp4s:
         print(f"{fold.name}: 영상 없음", flush=True)

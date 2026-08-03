@@ -143,7 +143,7 @@ if __name__ == "__main__":
         d = max(float(np.abs(La[k]-Lb[k]).max()) for k in ("q1", "q2", "bz"))
         print(f"수렴 골든 (ks=1e5): 정본 α=1 대비 최대차 {d:.2e} rad → {'PASS' if d < 5e-3 else 'CHECK'}", flush=True)
     # ── H6 v2: exp5 7게인 (hip만 SEA, b_s·J_m 소격자) ──
-    DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.07.27")
+    DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
     GAINS = [("60_2_250_3",(60,2)),("80_2_250_3",(80,2)),("100_1.5_250_3",(100,1.5)),("120_2_250_3",(120,2)),
              ("150_2.2_250_3",(150,2.2)),("200_2.5_250_3",(200,2.5)),("250_3_250_3",(250,3))]
     MODELS = {"OLD α (현행)": None}

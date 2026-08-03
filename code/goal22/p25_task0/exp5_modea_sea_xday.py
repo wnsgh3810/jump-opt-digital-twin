@@ -21,16 +21,16 @@ import p25_a_twin as TW          # noqa: E402
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 SESS = {  # 표시명: 베이스 경로
-    "07-22 배포(exp1)": ROOT/"26.07.22",
-    "07-23 배포(exp2)": ROOT/"26.07.23",
-    "07-24 배포(exp3)": ROOT/"26.07.24",
-    "07-25 배포(exp4)": ROOT/"26.07.25",
-    "07-27 배포(exp5)": ROOT/"26.07.27",
-    "04-24 fit": ROOT/"26.04.24",
-    "06-02 fit": ROOT/"26.06.02"/"position",
-    "03-24 held-out": ROOT/"26.03.24"/"Jump"/"Jump_No_Tr",
+    "07-22 배포(exp1)": ROOT/"26_07_22",
+    "07-23 배포(exp2)": ROOT/"26_07_23",
+    "07-24 배포(exp3)": ROOT/"26_07_24",
+    "07-25 배포(exp4)": ROOT/"26_07_25",
+    "07-27 배포(exp5)": ROOT/"26_07_27",
+    "04-24 fit": ROOT/"26_04_24",
+    "06-02 fit": ROOT/"26_06_02"/"position",
+    "03-24 held-out": ROOT/"26_03_24"/"Jump"/"Jump_No_Tr",
 }
 KT, GR, CF = 0.091, 9.0, 0.59
 A = np.array([1.15605006, 4.17389589e-4, 0.26855607, 0.04904241])

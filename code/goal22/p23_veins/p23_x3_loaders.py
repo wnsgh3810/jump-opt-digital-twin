@@ -34,7 +34,7 @@ def load_jump_0319pd(sub="NO_TR_JUMP"):
     지식 근거: (i) Δ가 π/4로 정확히 양자화 (ii) desired와 current가 동일하게 이동 =
     명령/엔코더 영점 규약 차이 (iii) 무릎 채널·GRF·토크는 전 세션 정합.
     → q1, qd1에 +π/4 가산해 타 세션 규약으로 통일 (dq/토크/GRF 무영향)."""
-    root = L.DATA / "26.03.19/position" / sub
+    root = L.DATA / "26_03_19/position" / sub
     hip = L._read_joint(root / "hip.xlsx")
     knee = L._read_joint(root / "knee.xlsx")
     n = min(len(hip["Time"]), len(knee["Time"]))

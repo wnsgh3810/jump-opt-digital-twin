@@ -21,8 +21,8 @@ from sea_twin2 import ahat_np    # noqa: E402
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-DAYS = ["26.07.22", "26.07.23", "26.07.24", "26.07.25", "26.07.27"]
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DAYS = ["26_07_22", "26_07_23", "26_07_24", "26_07_25", "26_07_27"]
 tw = TW.twin()
 E1, T1, TRIAL = [], [], []
 for day in DAYS:

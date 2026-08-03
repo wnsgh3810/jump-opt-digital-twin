@@ -18,7 +18,7 @@ import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 import safe                      # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.06.04")
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
 TRIALS = [("0kg", ROOT/"no_cvt/no_load/raw_unwrap", 0.0, (47.8, 53.2)),
           ("5kg", ROOT/"no_cvt/load_5/raw_unwrap", 5.0, (47.0, 53.0)),
           ("7.5kg", ROOT/"no_cvt/load_7.5/raw_unwrap", 7.5, (52.9, 58.5))]

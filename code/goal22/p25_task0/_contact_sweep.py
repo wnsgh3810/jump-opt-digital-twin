@@ -24,7 +24,7 @@ P = tw["P"]; A = P.A_PAPER; ahat = P.J.ahat
 C.TG = np.arange(0.0, TW.T_END + tw['dt'], tw['dt'])
 model0 = tw["model"]
 FOOT = mujoco.mj_name2id(model0, mujoco.mjtObj.mjOBJ_GEOM, "foot")
-ROOT = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
+ROOT = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
 Lm = 0.25
 
 
@@ -46,12 +46,12 @@ def old_fam(G):
     return (th.get(G[0], 0.40), 0.20, tk.get(G[2], 0.656), 0.20)
 
 
-CLT = [("exp1", "26.07.22", "150_2.2_250_3", "t0nc_cl_pd15.npz", (150, 2.2, 250, 3), 0.13),
-       ("exp1", "26.07.22", "150_3.3_500_5", "t0nc_cl_pd15.npz", (150, 3.3, 500, 5), 0.13),
-       ("exp2", "26.07.23", "150_2.2_250_3", "t0nc_cl_v4.npz", (150, 2.2, 250, 3), 0.19),
-       ("exp3", "26.07.24", "150_2.2_250_3", "t0nc_cl_v7.npz", (150, 2.2, 250, 3), 0.13),
-       ("exp4", "26.07.25", "150_2.2_250_3", "t0nc_cl_v8.npz", (150, 2.2, 250, 3), 0.13),
-       ("exp4", "26.07.25", "200_2.5_250_3", "t0nc_cl_v8.npz", (200, 2.5, 250, 3), 0.13)]
+CLT = [("exp1", "26_07_22", "150_2.2_250_3", "t0nc_cl_pd15.npz", (150, 2.2, 250, 3), 0.13),
+       ("exp1", "26_07_22", "150_3.3_500_5", "t0nc_cl_pd15.npz", (150, 3.3, 500, 5), 0.13),
+       ("exp2", "26_07_23", "150_2.2_250_3", "t0nc_cl_v4.npz", (150, 2.2, 250, 3), 0.19),
+       ("exp3", "26_07_24", "150_2.2_250_3", "t0nc_cl_v7.npz", (150, 2.2, 250, 3), 0.13),
+       ("exp4", "26_07_25", "150_2.2_250_3", "t0nc_cl_v8.npz", (150, 2.2, 250, 3), 0.13),
+       ("exp4", "26_07_25", "200_2.5_250_3", "t0nc_cl_v8.npz", (200, 2.5, 250, 3), 0.13)]
 
 MEAS = {}
 for expn, date, gf, npz, G, wb in CLT:
@@ -59,7 +59,7 @@ for expn, date, gf, npz, G, wb in CLT:
     kn = pd.read_excel(ROOT / date / gf / "knee.xlsx")
     n = min(len(hp), len(kn)); hp = hp.iloc[:n].reset_index(drop=True); kn = kn.iloc[:n].reset_index(drop=True)
     t = hp['Time'].values - hp['Time'].values[0]
-    if date in ("26.07.22", "26.07.23"):
+    if date in ("26_07_22", "26_07_23"):
         o = onset(np.degrees(hp['desiredAngle'].values)); t = t - t[o]
     m = (t >= 0) & (t <= wb)
     q1 = hp['currentAngle'].values; q2 = kn['currentAngle'].values
@@ -72,7 +72,7 @@ for expn, date, gf, npz, G, wb in CLT:
     try:
         gr = pd.read_excel(ROOT / date / gf / "GRF.xlsx")
         tg = gr['Time'].values - gr['Time'].values[0]
-        if date in ("26.07.22", "26.07.23"):
+        if date in ("26_07_22", "26_07_23"):
             oo = onset(np.degrees(hp['desiredAngle'].values))
             tg = tg - (hp['Time'].values[oo] - hp['Time'].values[0])
         grm = np.interp(t, tg, gr['Current_GRF'].values)
@@ -92,10 +92,10 @@ ksv, krefv, _ = RU.spr_resolve(model0, GD["SPR"])
 dof_knee = safe.dofadr(model0, "knee", mujoco)
 iq_k = safe.qadr(model0, "knee", mujoco)
 SD = P.SD
-MAT = [("0602", "26.06.02/position", "60_0.75_60_2", 0.14),
-       ("0602", "26.06.02/position", "150_2.2_250_3", 0.14),
-       ("0424", "26.04.24", "150_2.2_250_3", 0.14),
-       ("exp4", "26.07.25", "150_2.2_250_3", None)]
+MAT = [("0602", "26_06_02/position", "60_0.75_60_2", 0.14),
+       ("0602", "26_06_02/position", "150_2.2_250_3", 0.14),
+       ("0424", "26_04_24", "150_2.2_250_3", 0.14),
+       ("exp4", "26_07_25", "150_2.2_250_3", None)]
 MA = {}
 for lab, date, gf, wb in MAT:
     hp = pd.read_excel(ROOT / date / gf / "hip.xlsx")

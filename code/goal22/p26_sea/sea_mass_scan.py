@@ -19,8 +19,8 @@ sys.path.insert(0, str(P25)); sys.path.insert(0, str(HERE.parent / "p25_deploy")
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-SESS = {"exp4": ("26.07.25", "t0nc_cl_v8.npz"), "exp5": ("26.07.27", "t0nc_cl_v9.npz")}
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+SESS = {"exp4": ("26_07_25", "t0nc_cl_v8.npz"), "exp5": ("26_07_27", "t0nc_cl_v9.npz")}
 SEA = dict(ks1=96.0, ks1_hi=323.0, tau0_1=9.0, bs1=1.5, jm1=0.01, ks2=650.0, bs2=1.5, jm2=0.01)
 
 def slo(t, g, thr=1.0, win=0.05):

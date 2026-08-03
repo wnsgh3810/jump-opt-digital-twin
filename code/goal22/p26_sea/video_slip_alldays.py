@@ -13,8 +13,8 @@ import numpy as np, pandas as pd
 import imageio.v3 as iio
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-DAY = sys.argv[1] if len(sys.argv) > 1 else "26.07.23"
+ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DAY = sys.argv[1] if len(sys.argv) > 1 else "26_07_23"
 SCALE = (0.7, 1.2); R_FOOT = (20.0, 25.0)
 
 def gray(a): return a.mean(axis=2)
@@ -29,7 +29,7 @@ def match(f, T, cy, cx, ry, rx):
     return best
 
 # 기준 템플릿 (exp5 250 — 검증 완료 좌표)
-mp250 = next((ROOT/"26.07.27"/"250_3_250_3").glob("*.mp4"))
+mp250 = next((ROOT/"26_07_27"/"250_3_250_3").glob("*.mp4"))
 fr250 = [gray(f) for f in iio.imiter(str(mp250), plugin="FFMPEG")]
 d250 = [float(np.abs(fr250[i+1]-fr250[i]).mean()) for i in range(len(fr250)-1)]
 j250 = int(min(np.argsort(d250)[-12:]))

@@ -123,10 +123,10 @@ def rollout_cl_sea3(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains,
 
 if __name__ == "__main__":
     tw = TW.twin()
-    ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data")
-    SESS = {"exp1": ("26.07.22", "t0nc_cl_pd15.npz"), "exp2": ("26.07.23", "t0nc_cl_v4.npz"),
-            "exp3": ("26.07.24", "t0nc_cl_v7.npz"), "exp4": ("26.07.25", "t0nc_cl_v8.npz"),
-            "exp5": ("26.07.27", "t0nc_cl_v9.npz")}
+    ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+    SESS = {"exp1": ("26_07_22", "t0nc_cl_pd15.npz"), "exp2": ("26_07_23", "t0nc_cl_v4.npz"),
+            "exp3": ("26_07_24", "t0nc_cl_v7.npz"), "exp4": ("26_07_25", "t0nc_cl_v8.npz"),
+            "exp5": ("26_07_27", "t0nc_cl_v9.npz")}
     def slo(t, g, thr=1.0, win=0.05):
         dt = float(t[1]-t[0]); w = int(round(win/dt)); on = g > thr
         for i in range(len(g)-w):

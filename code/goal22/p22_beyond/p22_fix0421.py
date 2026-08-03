@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT0421 = Path("C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.04.21/Position Control")
+ROOT0421 = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_21/Position Control")
 DS = "jump_position_0421"
 
 

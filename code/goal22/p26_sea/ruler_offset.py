@@ -29,7 +29,7 @@ import numpy as np
 
 D = np.pi / 180.0
 HERE = os.path.dirname(os.path.abspath(__file__))
-VID = r"C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/26.06.04/no_cvt/no_load/KakaoTalk_20260604_170859513.mp4"
+VID = r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04/no_cvt/no_load/KakaoTalk_20260604_170859513.mp4"
 
 # ---------------------------------------------------------------------------
 # 1) 정적 구간 대표 프레임 평균 (프레임차분 quiet run에서 선정, 각 10장)
