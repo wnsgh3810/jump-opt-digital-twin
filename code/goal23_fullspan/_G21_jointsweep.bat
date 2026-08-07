@@ -1,51 +1,220 @@
 @echo off
-REM ============================================================================
-REM  마라톤G G21 — 공적합(joint) 그리드 스윕
-REM  사용자 지적(08-08): "p24 에서 적용됐던 모델들도 전부 a_hat 에 과적합됐던 애들이니까
-REM                       다 검토 다시 해봐야하는거 아냐? MCG 도 그렇고"
-REM  → G19/G20 이 실증: 일인자별로는 도달 불가 (나머지 축이 저항). 동시 최적화가 필요.
-REM
-REM  고정 (G20 확정): 인공 지지층 OFF · 부하연동 무릎 스프링 OFF · 정본곡선 포화캡
-REM  자유:  무릎캡 × 힙캡 × 허벅지 CoM(중력) — 27 조합
-REM  현재 최고: 무릎 2.9 / 힙 2.4 / comz 0 → J_G 0.9739 (게이트 PASS)
-REM  예상 소요: 약 80~90분 (조합당 ~3분)
-REM ============================================================================
-setlocal
+REM ==========================================================================
+REM  Marathon G / G21 joint sweep  (ASCII only - cmd cp949 safe)
+REM  FIXED : canon_cap torque map, supp OFF, knee-spring OFF, bias1 OFF, knee_deep OFF
+REM  FREE  : knee cap x hip cap x thigh CoM   (27 combos, ~3 min each = 80-90 min)
+REM  Current best: knee 3.3 / hip 2.8 / comz 0  ->  J_G 0.7725 (gate PASS)
+REM ==========================================================================
 cd /d "%~dp0"
 set PYTHONIOENCODING=utf-8
 set P25_CLIP_RAW=35.5
 set FS_TMAP=canon_cap
 set FS_NOSUPP=1
 set FS_NOSPR=1
-
-echo ============================================================
-echo  G21 joint sweep 시작 — 27 조합
-echo  결과는 _G13_board_Q_*.json 및 화면에 기록됩니다
-echo ============================================================
-
-for %%K in (2.7 2.9 3.1) do (
-  for %%H in (2.2 2.4 2.6) do (
-    for %%C in (0.0 0.015 0.027) do (
-      echo.
-      echo ### Q_k%%K_h%%H_c%%C
-      set FS_TDCAP=%%K,%%H
-      if "%%C"=="0.0" ( set "FS_COMZ=" ) else ( set "FS_COMZ=thigh=%%C" )
-      call :run %%K %%H %%C
-    )
-  )
-)
+set FS_NOBIAS=1
+set FS_NODEEP=1
+set LOG=_G21_sweep.log
+echo G21 joint sweep start > %LOG%
+echo ==========================================
+echo  G21 joint sweep : 27 combos, 80-90 min
+echo  detail log -^> %LOG%
+echo ==========================================
 echo.
-echo ============================================================
-echo  완료. 아래 명령으로 요약표를 뽑으세요:
-echo    python _G21_summary.py
-echo ============================================================
-pause
-exit /b
+python -c "import sys;print('python OK',sys.version.split()[0])" || (echo PYTHON NOT FOUND & pause & exit /b)
 
-:run
-setlocal enabledelayedexpansion
-set FS_TDCAP=%1,%2
-if "%3"=="0.0" ( set "FS_COMZ=" ) else ( set "FS_COMZ=thigh=%3" )
-python _G13_board.py Q_k%1_h%2_c%3 2>&1 | findstr /C:"J_G" /C:"게이트"
-endlocal
-exit /b
+echo [1/27] knee 3.1 / hip 2.6 / comz 0.0
+echo [1/27] knee 3.1 / hip 2.6 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.1,2.6
+set FS_COMZ=
+python _G13_board.py Q_k3p1_h2p6_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h2p6_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [2/27] knee 3.1 / hip 2.6 / comz 0.015
+echo [2/27] knee 3.1 / hip 2.6 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.1,2.6
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p1_h2p6_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h2p6_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [3/27] knee 3.1 / hip 2.6 / comz 0.027
+echo [3/27] knee 3.1 / hip 2.6 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.1,2.6
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p1_h2p6_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h2p6_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [4/27] knee 3.1 / hip 2.8 / comz 0.0
+echo [4/27] knee 3.1 / hip 2.8 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.1,2.8
+set FS_COMZ=
+python _G13_board.py Q_k3p1_h2p8_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h2p8_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [5/27] knee 3.1 / hip 2.8 / comz 0.015
+echo [5/27] knee 3.1 / hip 2.8 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.1,2.8
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p1_h2p8_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h2p8_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [6/27] knee 3.1 / hip 2.8 / comz 0.027
+echo [6/27] knee 3.1 / hip 2.8 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.1,2.8
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p1_h2p8_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h2p8_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [7/27] knee 3.1 / hip 3.0 / comz 0.0
+echo [7/27] knee 3.1 / hip 3.0 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.1,3.0
+set FS_COMZ=
+python _G13_board.py Q_k3p1_h3p0_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h3p0_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [8/27] knee 3.1 / hip 3.0 / comz 0.015
+echo [8/27] knee 3.1 / hip 3.0 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.1,3.0
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p1_h3p0_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h3p0_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [9/27] knee 3.1 / hip 3.0 / comz 0.027
+echo [9/27] knee 3.1 / hip 3.0 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.1,3.0
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p1_h3p0_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p1_h3p0_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [10/27] knee 3.3 / hip 2.6 / comz 0.0
+echo [10/27] knee 3.3 / hip 2.6 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.3,2.6
+set FS_COMZ=
+python _G13_board.py Q_k3p3_h2p6_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h2p6_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [11/27] knee 3.3 / hip 2.6 / comz 0.015
+echo [11/27] knee 3.3 / hip 2.6 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.3,2.6
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p3_h2p6_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h2p6_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [12/27] knee 3.3 / hip 2.6 / comz 0.027
+echo [12/27] knee 3.3 / hip 2.6 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.3,2.6
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p3_h2p6_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h2p6_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [13/27] knee 3.3 / hip 2.8 / comz 0.0
+echo [13/27] knee 3.3 / hip 2.8 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.3,2.8
+set FS_COMZ=
+python _G13_board.py Q_k3p3_h2p8_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h2p8_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [14/27] knee 3.3 / hip 2.8 / comz 0.015
+echo [14/27] knee 3.3 / hip 2.8 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.3,2.8
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p3_h2p8_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h2p8_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [15/27] knee 3.3 / hip 2.8 / comz 0.027
+echo [15/27] knee 3.3 / hip 2.8 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.3,2.8
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p3_h2p8_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h2p8_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [16/27] knee 3.3 / hip 3.0 / comz 0.0
+echo [16/27] knee 3.3 / hip 3.0 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.3,3.0
+set FS_COMZ=
+python _G13_board.py Q_k3p3_h3p0_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h3p0_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [17/27] knee 3.3 / hip 3.0 / comz 0.015
+echo [17/27] knee 3.3 / hip 3.0 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.3,3.0
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p3_h3p0_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h3p0_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [18/27] knee 3.3 / hip 3.0 / comz 0.027
+echo [18/27] knee 3.3 / hip 3.0 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.3,3.0
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p3_h3p0_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p3_h3p0_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [19/27] knee 3.5 / hip 2.6 / comz 0.0
+echo [19/27] knee 3.5 / hip 2.6 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.5,2.6
+set FS_COMZ=
+python _G13_board.py Q_k3p5_h2p6_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h2p6_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [20/27] knee 3.5 / hip 2.6 / comz 0.015
+echo [20/27] knee 3.5 / hip 2.6 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.5,2.6
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p5_h2p6_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h2p6_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [21/27] knee 3.5 / hip 2.6 / comz 0.027
+echo [21/27] knee 3.5 / hip 2.6 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.5,2.6
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p5_h2p6_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h2p6_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [22/27] knee 3.5 / hip 2.8 / comz 0.0
+echo [22/27] knee 3.5 / hip 2.8 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.5,2.8
+set FS_COMZ=
+python _G13_board.py Q_k3p5_h2p8_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h2p8_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [23/27] knee 3.5 / hip 2.8 / comz 0.015
+echo [23/27] knee 3.5 / hip 2.8 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.5,2.8
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p5_h2p8_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h2p8_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [24/27] knee 3.5 / hip 2.8 / comz 0.027
+echo [24/27] knee 3.5 / hip 2.8 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.5,2.8
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p5_h2p8_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h2p8_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [25/27] knee 3.5 / hip 3.0 / comz 0.0
+echo [25/27] knee 3.5 / hip 3.0 / comz 0.0 >> %LOG%
+set FS_TDCAP=3.5,3.0
+set FS_COMZ=
+python _G13_board.py Q_k3p5_h3p0_c0p0 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h3p0_c0p0.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [26/27] knee 3.5 / hip 3.0 / comz 0.015
+echo [26/27] knee 3.5 / hip 3.0 / comz 0.015 >> %LOG%
+set FS_TDCAP=3.5,3.0
+set FS_COMZ=thigh=0.015
+python _G13_board.py Q_k3p5_h3p0_c0p015 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h3p0_c0p015.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo [27/27] knee 3.5 / hip 3.0 / comz 0.027
+echo [27/27] knee 3.5 / hip 3.0 / comz 0.027 >> %LOG%
+set FS_TDCAP=3.5,3.0
+set FS_COMZ=thigh=0.027
+python _G13_board.py Q_k3p5_h3p0_c0p027 >> %LOG% 2>&1
+python -c "import io,json;d=json.load(io.open('_G13_board_Q_k3p5_h3p0_c0p027.json',encoding='utf-8'));print('    J_G %.4f   gate %s'%(d['J'],'PASS' if not d['gate_fail'] else 'FAIL'))"
+
+echo.
+echo ==========================================
+echo  DONE. summary:
+echo ==========================================
+python _G21_summary.py
+echo.
+pause
