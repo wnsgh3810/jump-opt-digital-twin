@@ -118,6 +118,7 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
     """settle (cl_run23 settle 블록 미러 — PD는 hip_m 인코더에)."""
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
+    _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
     A = P.A_PAPER
     md = mjm.MjData(model)
@@ -160,7 +161,8 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += _rise(v2c, kr, law_v0)
-        tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        tql = 0.0 if _nospr else (RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm)
+                                  if sprm is not None else 0.0)
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         mjm.mj_step(model, md)
@@ -401,6 +403,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
+    _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
     A = P.A_PAPER
     kp1, kd1, kp2, kd2 = gains
@@ -561,7 +564,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             if _est > 1.0 and supp * v2c < 0.0:
                 supp *= _est               # F1b: 하강 흡수 증폭 (탄성 저장 경로) — 증폭분 그대로 은행 적립
             _esc["supp2"], supp = _escrow_gate(_esc["supp2"], supp, v2c, dt)
-        tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        tql = 0.0 if _nospr else (RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm)
+                                  if sprm is not None else 0.0)
         if _esc is not None and "spr" in _esc:
             # CVT 소산항(아래 tql +=)은 열소산이라 은행 적립 대상이 아님 — 스프링분만 게이트
             _esc["spr"], tql = _escrow_gate(_esc["spr"], tql, float(md.qvel[dof["knee"]]), dt)
@@ -706,6 +710,7 @@ def rollout_ol_fs(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after
     """ModeA — 측정 raw 주입 (mshoot 창용: 측정상태 초기화, 스프링 처짐은 정적 τ/k로 시드)."""
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
+    _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
     A = P.A_PAPER
     md = mjm.MjData(model)
@@ -751,7 +756,8 @@ def rollout_ol_fs(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after
         supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
         if kr:
             supp += _rise(v2c, kr, law_v0)
-        tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        tql = 0.0 if _nospr else (RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm)
+                                  if sprm is not None else 0.0)
         md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         mjm.mj_step(model, md)
@@ -956,6 +962,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
+    _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
     A = P.A_PAPER
     md = mjm.MjData(model)
@@ -1058,7 +1065,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
             if _est > 1.0 and supp * v2c < 0.0:
                 supp *= _est               # F1b 동일 플랜트
             _esc["supp2"], supp = _escrow_gate(_esc["supp2"], supp, v2c, dt)
-        tql = RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm) if sprm is not None else 0.0
+        tql = 0.0 if _nospr else (RU.spr_tau(float(md.qpos[iq["knee"]]), abs(s2), sprm)
+                                  if sprm is not None else 0.0)
         if _esc is not None and "spr" in _esc:
             _esc["spr"], tql = _escrow_gate(_esc["spr"], tql, float(md.qvel[dof["knee"]]), dt)
         if _eta < 1.0:
