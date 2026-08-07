@@ -348,6 +348,18 @@ def _tmap_init(P=None, A=None):
                 return k * r - g(1, 0.0) * np.tanh(float(v) / 0.05)
             if form == "visc":
                 return k * r - g(1, 0.0) * r * a - g(2, 0.0) * float(v)
+            if form == "fric":
+                # ★ G24-E: a_hat 의 **형태**(부하 의존 쿨롱)는 살리고 **이득**만 분동으로 교체.
+                #   a_hat = k·raw − c·raw|raw| − (fc0 + fc1·|raw|)·sign(v)
+                #   a_hat 원값: k 0.682 · fc0 0.269 · fc1 0.0353 (=A3·CF/(GR·KT))
+                #   → 순수 모델군이 전멸한 이유 = 이 **속도-부호 × 부하비례 항**을 버렸기 때문
+                return (k * r - g(1, 0.0) * r * a
+                        - (g(2, 0.269) + g(3, 0.0353) * a) * np.tanh(float(v) / 0.05))
+            if form == "fricv":
+                # fric + 점성 (사용자 지시: viscous 고려)
+                return (k * r - g(1, 0.0) * r * a
+                        - (g(2, 0.269) + g(3, 0.0353) * a) * np.tanh(float(v) / 0.05)
+                        - g(4, 0.0) * float(v))
             if form == "env":
                 cap = max(g(1, 48.5) - g(2, 0.73) * abs(float(v)), 0.0)
                 return s * min(k * a, cap)
