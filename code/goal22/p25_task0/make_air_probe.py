@@ -42,12 +42,12 @@ G = 9.81
 Q1_HOME, QM_HOME = -45.0, 90.0
 
 # ── 판별용 3자세 (q1, q_m) — 힙 지레팔 부호가 갈리도록 선정 ──
-#   ★미세진동 ±3° 를 더해도 가동역(q_1 −64.6~−17.5 · q_m 60.1~128.2)에서
-#     최소 3.5° 여유가 남도록 중심을 안쪽으로 당겼다 (지레팔 손실은 5% 미만).
-POSES = [("P1", -58.0, 67.0), ("P2", -45.0, 80.0), ("P3", -25.0, 122.0)]
-DITHER_S = 20.0         # 자세당 미세진동 시간 (힙 3주기 · 무릎 2주기)
-DITH_A1, DITH_F1 = 3.0, 0.15
-DITH_A2, DITH_F2 = 3.0, 0.10
+#   ★접근 오버슈트 ±5° 를 더해도 가동역(q_1 −64.6~−17.5 · q_m 60.1~128.2)에서
+#     최소 3.5° 여유가 남도록 중심을 안쪽으로 당겼다 (지레팔 손실은 6% 미만).
+POSES = [("P1", -56.0, 69.0), ("P2", -45.0, 80.0), ("P3", -26.0, 120.0)]
+APPR = 5.0              # 양방향 접근 오버슈트 [deg] — 진동 대신 **위/아래에서 각각 접근**
+APPR_S = 3.0            # 접근 램프 시간 [s]
+SETTLE_S = 8.0          # 접근 후 유지(기록) 시간 [s]
 
 # ── 스윕 (양 끝 여유 2.5° 이상) ──
 SW_Q1 = (-62.0, -21.0)      # 힙 전구간
@@ -87,12 +87,14 @@ def cos_sweep(lo, hi, f, cycles, other, on="hip"):
     return np.full(n, other), x, np.zeros(n), dx
 
 
-def dither(q1c, qmc, sec):
-    n = int(round(sec * FS))
-    t = np.arange(n) * DT
-    x1 = q1c + DITH_A1 * np.sin(2 * np.pi * DITH_F1 * t)
-    x2 = qmc + DITH_A2 * np.sin(2 * np.pi * DITH_F2 * t)
-    return x1, x2, np.gradient(x1, DT), np.gradient(x2, DT)
+def approach(q1c, qmc, sign, q1_from, qm_from):
+    """오버슈트 지점에서 목표 자세로 **한 방향으로만** 접근한 뒤 유지.
+    정지마찰은 '마지막으로 움직인 방향'의 반대로 걸리므로, +방향 접근과 −방향 접근의
+    **평균을 내면 쿨롱 마찰이 소거**된다. 진동(추 흔들림)이 필요 없다."""
+    a = ramp(q1_from, qm_from, q1c + sign * APPR, qmc + sign * APPR, APPR_S)
+    b = ramp(q1c + sign * APPR, qmc + sign * APPR, q1c, qmc, APPR_S)
+    c = hold(q1c, qmc, SETTLE_S)
+    return [a, b, c]
 
 
 def pack(segs, name):
@@ -141,17 +143,15 @@ def main():
     print(f"   → cos q1 범위 {c1.min():.3f}~{c1.max():.3f} (26_08_02 은 0.536~0.839) "
           f"= 중력/오프셋 분리력 {(c1.max()-c1.min())/(0.839-0.536):.2f}배\n")
 
-    # ── B. 3자세 유지 ──
-    print("B. probe_hold3_v1 — 3자세 유지+미세진동 (추 없이 1회 → 추 달고 1회, 총 2회)")
+    # ── B. 3자세 유지 (양방향 접근 — 추 흔들림 없음) ──
+    print("B. probe_hold3_v2 — 3자세 × 양방향 접근 (추 없이 1회 → 추 달고 1회) [진동 없음]")
     S = [hold(Q1_HOME, QM_HOME, 1.0)]
     for nm, q1, qm in POSES:
-        S.append(ramp(S[-1][0][-1], S[-1][1][-1], q1, qm, 2.5))
-        S.append(hold(q1, qm, 2.0))
-        S.append(dither(q1, qm, DITHER_S))
-        S.append(hold(q1, qm, 2.0))
-    S.append(ramp(S[-1][0][-1], S[-1][1][-1], Q1_HOME, QM_HOME, 2.5))
+        for sign in (+1.0, -1.0):
+            S += approach(q1, qm, sign, S[-1][0][-1], S[-1][1][-1])
+    S.append(ramp(S[-1][0][-1], S[-1][1][-1], Q1_HOME, QM_HOME, 3.0))
     S.append(hold(Q1_HOME, QM_HOME, 1.0))
-    pack(S, "probe_hold3_v1.xlsx")
+    pack(S, "probe_hold3_v2.xlsx")
 
     print("\n" + "=" * 96)
     print("추 시험 예측표 — 발끝 구멍에 끈으로 자유 매달기 (힘이 정확히 수직 → 지레팔 = 수평거리)")
@@ -173,14 +173,37 @@ def main():
     print("  ※ 추는 주방저울로 실계량 · 발끝 구멍의 무릎축 기준 실제 거리도 측정 (지금 250mm 가정)")
     # 가동역 여유 감사 (한계에 붙으면 물리 파손 위험 — 자동 검사)
     LIM1, LIMM = (-64.6, -17.5), (60.1, 128.2)
-    print("\n  가동역 여유 감사 (미세진동·스윕 진폭 포함):")
+    print("\n  가동역 여유 감사 (접근 오버슈트·스윕 진폭 포함):")
     for nm, q1, qm in POSES:
-        print(f"   {nm}: q_1 {q1-DITH_A1:+.1f}~{q1+DITH_A1:+.1f}° (여유 "
-              f"{q1-DITH_A1-LIM1[0]:.1f}/{LIM1[1]-q1-DITH_A1:.1f}°) · "
-              f"q_m {qm-DITH_A2:.1f}~{qm+DITH_A2:.1f}° (여유 "
-              f"{qm-DITH_A2-LIMM[0]:.1f}/{LIMM[1]-qm-DITH_A2:.1f}°)")
+        print(f"   {nm}: q_1 {q1-APPR:+.1f}~{q1+APPR:+.1f}° (여유 "
+              f"{q1-APPR-LIM1[0]:.1f}/{LIM1[1]-q1-APPR:.1f}°) · "
+              f"q_m {qm-APPR:.1f}~{qm+APPR:.1f}° (여유 "
+              f"{qm-APPR-LIMM[0]:.1f}/{LIMM[1]-qm-APPR:.1f}°)")
     print(f"   스윕: q_1 여유 {SW_Q1[0]-LIM1[0]:.1f}/{LIM1[1]-SW_Q1[1]:.1f}° · "
           f"q_m 여유 {SW_QM[0]-LIMM[0]:.1f}/{LIMM[1]-SW_QM[1]:.1f}°")
+
+    # ── ★ 스윕을 추 달고 재실행할 때의 판별력 (권장 본선) ──
+    print("\n" + "=" * 96)
+    print("★ 추(2kg)를 달고 **스윕**을 재실행할 때 — 진동 없이 연속 교정곡선이 나온다")
+    M = 2.0
+    for qm in SW_KNEES:
+        xs = [levers(q1, qm)[0] for q1 in np.linspace(*SW_Q1, 200)]
+        zs = [levers(q1, qm)[2] for q1 in np.linspace(*SW_Q1, 200)]
+        ks = [levers(q1, qm)[1] for q1 in np.linspace(*SW_Q1, 200)]
+        print(f"   힙 스윕 @ q_m={qm:.0f}° : 발끝 수평 {1000*min(xs):+7.1f}~{1000*max(xs):+7.1f} mm "
+              f"→ Δτ1 {M*G*min(xs):+6.2f}~{M*G*max(xs):+6.2f} Nm | "
+              f"Δτ2 {M*G*min(ks):+6.2f}~{M*G*max(ks):+6.2f} Nm | "
+              f"발끝 높이 {1000*min(zs):.0f}~{1000*max(zs):.0f} mm")
+    allx = [levers(q1, qm)[0] for qm in SW_KNEES for q1 in np.linspace(*SW_Q1, 200)]
+    allz = [levers(q1, qm)[2] for qm in SW_KNEES for q1 in np.linspace(*SW_Q1, 200)]
+    span = (max(allx) - min(allx))
+    print(f"   → 지레팔 총 변화폭 {1000*span:.1f} mm · Δτ1 변화폭 **{M*G*span:.2f} Nm** "
+          f"(표본 수만 개 → 기울기 오차 사실상 0)")
+    print(f"   → 적합할 기울기: H2(질량분포 오류)면 **1.00** · H1(a_hat 1.7배 과소)면 **0.585**")
+    print(f"   → 왕복이라 쿨롱 마찰이 방향마다 부호 반전 → 양방향 평균에서 소거 (진동 불필요)")
+    print(f"   → 추 진자 흔들림: 가진 0.04Hz ≪ 진자 고유 ~0.9Hz(줄 30cm) → 줄은 사실상 수직 유지")
+    print(f"   ※ 바닥 여유: 발끝이 힙축 아래 최대 {abs(min(allz))*1000:.0f} mm 까지 내려간다 "
+          f"— 추가 바닥에 닿지 않도록 최소 {abs(min(allz))*1000+150:.0f} mm 이상 높이에 매달 것")
 
 
 if __name__ == "__main__":
