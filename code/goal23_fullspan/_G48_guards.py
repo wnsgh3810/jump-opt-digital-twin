@@ -30,6 +30,11 @@ import fs_runner as FR                                        # noqa: E402
 
 TAG = sys.argv[1] if len(sys.argv) > 1 else "new"
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}   # 무릎 α 표 (fs_runner 계보와 동일)
+# ★ G49: α 표는 **a_hat 아래에서 적합**된 값이다. 토크맵 이득이 0.682 → 1.24 (×1.82) 로 커지면
+#   같은 명령이 1.82배 토크를 내므로 **실효 폐루프 강성이 1.82배**가 된다.
+#   ⇒ 같은 폐루프 거동을 내려면 α 를 0.682/1.24 = **0.55배** 해야 한다는 예측이 선다.
+TKSC = float(os.environ.get("FS_TKSC", "1.0"))   # α 배율
+KDSC = float(os.environ.get("FS_KDSC2", "0.20"))  # kd 배율 (기존 관례 0.20)
 REF = HERE / "_G48_ref_p24.json"
 
 
@@ -59,8 +64,10 @@ def cl_rmse(ft, d, seg, pw, g, sp):
     need = ("qd1", "qd2", "dqd1", "dqd2")
     if any(d.get(k) is None for k in need):
         return None
+    if g is None or len(g) < 4:
+        return None          # ★ 0324 = FF(피드포워드 토크) 세션 — PD 게인이 없어 CL 무의미
     # 게인은 **α 반영 후** 넘긴다 (기존 baseline_fs 계보와 동일 규약): 무릎 kp × TK(kp), kd × 0.20
-    gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
+    gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656) * TKSC, g[3] * KDSC)
     L = FR.rollout_cl_fs(ft, t, d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m],
                          gm, float(t[-1] - 0.05), two_stage=True,
                          bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True,
