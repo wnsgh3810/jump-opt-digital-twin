@@ -338,11 +338,21 @@ def _tmap_init(P=None, A=None):
         elif md_ == "canon_fric":
             # ★ G34: 정본곡선 − (부하비례 쿨롱 + 점성). a_hat 의 **마찰 형태만** 물려받되
             #   이득은 분동(정본)으로. FS_TFRIC="fc0,fc1,b"
-            _tf = [float(x) for x in (os.environ.get("FS_TFRIC", "0.4,0.05,0.0")).split(",")]
+            # FS_TFRIC="fc0,fc1,b,v0" — v0 = **속도 문턱**(Stribeck/전이 스케일). 여기가 핵심:
+            #   v0 가 작으면(0.05) 사실상 부호함수 → 느린 구간에서도 전액 차감.
+            #   v0 가 크면(~2) **느릴 땐 정본 그대로, 빠를 때만 깎임** = canon_cap 의 실효 거동과
+            #   같은 모양을 **a_hat 없이** 만든다 (G34 가 지목한 구조).
+            #   채널별 지정 가능: "fc0,fc1,b,v0" (공용) 또는 8개 (무릎 4 + 힙 4)
+            _tf = [float(x) for x in (os.environ.get("FS_TFRIC", "0.3,0.30,0.0,2.0")).split(",")]
+            while len(_tf) < 4:
+                _tf.append(0.05 if len(_tf) == 3 else 0.0)
+            _tk = _tf[:4]
+            _th = _tf[4:8] if len(_tf) >= 8 else _tf[:4]
 
             def base(raw, v, ch=1):
-                return (_canon(raw) - (_tf[0] + _tf[1] * abs(float(raw))) * np.tanh(float(v) / 0.05)
-                        - (_tf[2] if len(_tf) > 2 else 0.0) * float(v))
+                c0, c1, bb, v0 = (_tk if ch else _th)
+                return (_canon(raw) - (c0 + c1 * abs(float(raw))) * np.tanh(float(v) / v0)
+                        - bb * float(v))
         else:
             # canon_cap: **분동 검증분만 채택**. τ = a_hat + clip(canon − a_hat, ±Δmax).
             #   canon−a_hat 은 raw 5 에서 3.4Nm → raw 35.5 에서 10.4Nm 로 계속 커지는데
