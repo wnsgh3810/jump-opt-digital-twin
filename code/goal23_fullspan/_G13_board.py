@@ -64,6 +64,12 @@ def main():
             m2 = (tt >= tt[i0]) & (tt <= t_end)
             t = tt[m2] - tt[i0]
             sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+            # 마라톤G G22: a_hat 하에서 적합된 **세션 상수**도 보상 구조 후보 (사용자 지적 08-08)
+            #   bias1 0.28~2.34 Nm (힙 상수토크) · knee_deep (깊은굽힘 무릎 보정)
+            if os.environ.get("FS_NOBIAS") == "1":
+                sp = dict(sp, bias1=0.0)
+            if os.environ.get("FS_NODEEP") == "1":
+                sp = dict(sp, knee_deep=None)
             L = FR.rollout_ol_fs_b(ft, t, d["raw1"][m2], d["raw2"][m2],
                                    float(d["q1"][i0]), float(d["q2"][i0]),
                                    float(d["dq1"][i0]), float(d["dq2"][i0]),
