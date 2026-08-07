@@ -257,6 +257,53 @@ def _escrow_gate(bank, tau, vel, dt):
     return 0.0, tau * (bank / e)
 
 
+def _tmap_init(P=None, A=None):
+    """마라톤G A: raw → 축토크 변환기 교체 (None = 기존 a_hat 유지).
+
+    `FS_TMAP=canon`  → **G5 정본곡선**(분동으로 크기 고정 + 로드셀로 raw 36 까지 실측 연결)
+      raw = d1·τ + d2·τ|τ| + d3·τ³ 의 역함수 (단조 — 판별식<0 확인). `_G5_curve_final.json`.
+    `FS_TRANS=c[,gmin]` → **상태(속도) 의존 전달률** g(ω) = clip(1 − c·|ω|, gmin, 1) 를 곱한다.
+      근거(G10): 정적 분동/로드셀 교정은 ω≈0 조건 → g(0)=1 이어야 하고,
+      푸시(ω 13~20 rad/s)의 에너지 감사가 요구하는 실효 배율은 0.66~0.75.
+      c=0 이면 전달률 비활성(정본곡선 그대로).
+    `FS_TSCALE=k`  → 지금 맵을 **k배** (형태 유지·크기만). supp 대체 실험용:
+      G11-D 가 인공 지지층 몫 = 주입 에너지의 18.8% 로 계량했으므로 k≈1.19 가 에너지 등가.
+    ※ A_c* 스캔(08-08) 결론: canon 단독 교체는 전 구성 게이트 탈락 — **필요한 보정은
+      속도 의존이 아니라 토크 의존**(a_hat/canon 비가 0.32→0.66 으로 raw 와 함께 변함)이었다.
+    """
+    md_ = os.environ.get("FS_TMAP")                 # None | "canon" | "ahat"
+    k = float(os.environ.get("FS_TSCALE", "1") or 1)
+    sp = (os.environ.get("FS_TRANS") or "0").split(",")
+    c = float(sp[0] or 0); gmin = float(sp[1]) if len(sp) > 1 else 0.35
+    if md_ is None and k == 1.0 and c == 0.0:
+        return None                                 # 완전 레거시 경로 (비트 동일)
+    if md_ == "canon":
+        import json as _j
+        cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
+        d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
+
+        def base(raw, v):
+            t = raw / d1
+            for _ in range(40):
+                f = d1 * t + d2 * t * abs(t) + d3 * t ** 3 - raw
+                df = d1 + 2 * d2 * abs(t) + 3 * d3 * t * t
+                t = t - f / (df if abs(df) > 1e-9 else 1e-9)
+            return t
+    else:                                           # a_hat 원형 (형태 유지, 크기만 k배)
+        def base(raw, v):
+            return float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
+
+    def tmap(raw, v):
+        g = 1.0 if c <= 0 else min(1.0, max(gmin, 1.0 - c * abs(v)))
+        return base(float(raw), float(v)) * k * g
+    return tmap
+
+
+def _nosupp_init():
+    """FS_NOSUPP=1 → 인공 지지층(supp·rise·hip_supp) 전면 비활성 (마라톤G A 절제)."""
+    return os.environ.get("FS_NOSUPP") == "1"
+
+
 def _escrow_init():
     """FS_ESCROW="supp2,hsupp1,spr" → 층별 은행 dict (초기잔고 FS_ESCROW_SEED [J], 기본 0)."""
     v = os.environ.get("FS_ESCROW")
@@ -433,6 +480,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b: 하강 흡수 증폭 (supp2)
     _svg = os.environ.get("FS_SUPP_VG") or None              # F-H8: supp 속도 게이트 spec (None=비활성)
     _vcl = _vceil_init()                   # 마라톤F F-H7: 전압 포락선 천장 (None = 비활성)
+    _tmap = _tmap_init(P, A); _nosupp = _nosupp_init()   # 마라톤G A: 정본곡선 전달률 · 지지층 절제
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
@@ -467,13 +515,15 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             if lim_raw[1]:
                 c2 = float(np.clip(c2, -lim_raw[1], lim_raw[1]))
         # 관측 = 계산 시점 커맨드 (실기 로그 타이밍), 플랜트 = 지연 커맨드 (모터 실행 타이밍)
-        s1o = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
-        s2o = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+        _cv = (lambda r, v: _tmap(r, v)) if _tmap is not None else \
+              (lambda r, v: float(P.J.ahat(A, np.array([r]), np.array([v]))[0]))
+        s1o = _cv(c1, v1c)
+        s2o = _cv(c2, v2c)
         if _dbuf is not None:
             _dbuf.append((c1, c2))
             c1, c2 = _dbuf[max(0, len(_dbuf) - 1 - _dly_n)]
-            s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
-            s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+            s1 = _cv(c1, v1c)
+            s2 = _cv(c2, v2c)
         else:
             s1, s2 = s1o, s2o
         if lim2_nm is not None:
@@ -485,8 +535,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if _vcl is not None:               # F-H7: 전압 포락선 천장 (플랜트 전달만 — 관측 s1o/s2o 무변)
             s1 = _vceil_cap(s1, v1c, _vcl)
             s2 = _vceil_cap(s2, v2c, _vcl)
-        supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
-        if kr:
+        supp = 0.0 if _nosupp else RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
+        if kr and not _nosupp:
             supp += _rise(v2c, kr, law_v0)
         if _svg is not None:
             supp *= _svg_gate(v2c, _svg)   # F-H8: 유지 전용 게이트 (고속 소멸 = 마찰성 — 주입 불가 형태)
@@ -507,7 +557,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
             _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
             tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
-        _hsupp = RU.hip_supp_scalar(s1, s2, v1c)
+        _hsupp = 0.0 if _nosupp else RU.hip_supp_scalar(s1, s2, v1c)
         if _esc is not None and "hsupp1" in _esc:
             _esc["hsupp1"], _hsupp = _escrow_gate(_esc["hsupp1"], _hsupp, v1c, dt)
         md.ctrl[:] = [-(s1 + _hsupp), -(s2 + supp)]
@@ -964,6 +1014,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b 동일
     _svg = os.environ.get("FS_SUPP_VG") or None              # F-H8 동일
     _vcl = _vceil_init()                   # F-H7 동일 플랜트
+    _tmap = _tmap_init(P, A); _nosupp = _nosupp_init()   # 마라톤G A 동일 플랜트
     for k in range(N):
         tc = k * dt
         v1c = -md.qvel[dof["hip_m"]]
@@ -972,13 +1023,17 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         r2 = float(np.interp(tc, tg, raw2g)) if tc <= t_end else 0.0
         r1 = float(np.clip(r1, -TW.R19.CLIP, TW.R19.CLIP))
         r2 = float(np.clip(r2, -TW.R19.CLIP, TW.R19.CLIP))
-        s1 = float(P.J.ahat(A, np.array([r1]), np.array([v1c]))[0])
-        s2 = float(P.J.ahat(A, np.array([r2]), np.array([v2c]))[0])
+        if _tmap is None:
+            s1 = float(P.J.ahat(A, np.array([r1]), np.array([v1c]))[0])
+            s2 = float(P.J.ahat(A, np.array([r2]), np.array([v2c]))[0])
+        else:                              # 마라톤G A: G5 정본곡선 + 상태의존 전달률
+            s1 = _tmap(r1, v1c)
+            s2 = _tmap(r2, v2c)
         if _vcl is not None:               # F-H7: 실측 τ는 이미 실기 천장 반영 — 정확하면 무작동
             s1 = _vceil_cap(s1, v1c, _vcl)
             s2 = _vceil_cap(s2, v2c, _vcl)
-        supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
-        if kr:
+        supp = 0.0 if _nosupp else RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
+        if kr and not _nosupp:
             supp += _rise(v2c, kr, law_v0)
         if _svg is not None:
             supp *= _svg_gate(v2c, _svg)   # F-H8 동일 플랜트
@@ -992,7 +1047,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         if _eta < 1.0:
             s1 = s1 * (_eta if s1 * v1c > 0 else 1.0)
             s2 = s2 * (_eta if s2 * v2c > 0 else 1.0)
-        _hsupp = RU.hip_supp_scalar(s1, s2, v1c)
+        _hsupp = 0.0 if _nosupp else RU.hip_supp_scalar(s1, s2, v1c)
         if _esc is not None and "hsupp1" in _esc:
             _esc["hsupp1"], _hsupp = _escrow_gate(_esc["hsupp1"], _hsupp, v1c, dt)
         md.ctrl[:] = [-(s1 + _hsupp), -(s2 + supp)]
