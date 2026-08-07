@@ -170,8 +170,27 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
 
 
 
-def _tau2s(d, k_lo=96.0, k_hi=323.0, tau0=9.0):
+_S2S = None
+
+
+def _s2s():
+    """마라톤G G33: FS_HSPR="k_lo,k_hi,tau0" 또는 FS_HSPR_S="s"(전체 s배 = 토크척도 가설의 예측).
+    토크가 s배 커지면 **같은 처짐**을 내려면 강성·전이토크가 정확히 s배여야 한다 (검증 가능)."""
+    global _S2S
+    if _S2S is None:
+        v = os.environ.get("FS_HSPR")
+        if v:
+            _S2S = tuple(float(x) for x in v.split(","))
+        else:
+            s_ = float(os.environ.get("FS_HSPR_S", "1.0"))
+            _S2S = (96.0 * s_, 323.0 * s_, 9.0 * s_)
+    return _S2S
+
+
+def _tau2s(d, k_lo=None, k_hi=None, tau0=None):
     """2단 스프링 토크 (처짐 d[rad] → Nm). d0=tau0/k_lo에서 연속."""
+    if k_lo is None:
+        k_lo, k_hi, tau0 = _s2s()
     d0 = tau0 / k_lo
     a = abs(d)
     t = k_lo * a if a <= d0 else tau0 + k_hi * (a - d0)
@@ -280,9 +299,9 @@ def _tmap_init(P=None, A=None):
     c = float(sp[0] or 0); gmin = float(sp[1]) if len(sp) > 1 else 0.35
     if md_ is None and k == 1.0 and c == 0.0:
         return None                                 # 완전 레거시 경로 (비트 동일)
-    if md_ in ("canon", "canon_cap", "model"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "model"):
         pass
-    if md_ in ("canon", "canon_cap"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric"):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
         d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
@@ -300,6 +319,30 @@ def _tmap_init(P=None, A=None):
         if md_ == "canon":
             def base(raw, v, ch=1):
                 return _canon(raw)
+        elif md_ == "canon_env":
+            # ★ G34: **a_hat 완전 배제**. 정본곡선(분동 A급) + **전압 포락선**.
+            #   물리: 드라이버는 전류를 명령하지만 **전압이 유한**하다. 모터가 빠르게 돌면
+            #   역기전력 e = Ke·ω 가 공급전압을 잠식해 실제 전류가 명령보다 작아진다.
+            #     τ_max(ω) = T0 − Kw·|ω|          (선형 포락선 = DC 모터 속도-토크 직선)
+            #   ⇒ τ = sign(raw)·min(|정본(raw)|, τ_max)
+            #   canon_cap 의 실효 천장이 raw 에만 의존하는 것과 달리 **속도에 의존** — 판별 가능.
+            #   FS_TENV="T0,Kw[,T0h,Kwh]"  (무릎, 힙; 생략 시 무릎값 공용) · ω = 관절속도[rad/s]
+            _te = [float(x) for x in (os.environ.get("FS_TENV", "20,0.6")).split(",")]
+            _T0k, _Kwk = _te[0], _te[1]
+            _T0h, _Kwh = (_te[2], _te[3]) if len(_te) >= 4 else (_te[0], _te[1])
+
+            def base(raw, v, ch=1):
+                t = _canon(raw); T0, Kw = (_T0k, _Kwk) if ch else (_T0h, _Kwh)
+                cap = max(T0 - Kw * abs(float(v)), 0.5)
+                return (1.0 if t >= 0 else -1.0) * min(abs(t), cap)
+        elif md_ == "canon_fric":
+            # ★ G34: 정본곡선 − (부하비례 쿨롱 + 점성). a_hat 의 **마찰 형태만** 물려받되
+            #   이득은 분동(정본)으로. FS_TFRIC="fc0,fc1,b"
+            _tf = [float(x) for x in (os.environ.get("FS_TFRIC", "0.4,0.05,0.0")).split(",")]
+
+            def base(raw, v, ch=1):
+                return (_canon(raw) - (_tf[0] + _tf[1] * abs(float(raw))) * np.tanh(float(v) / 0.05)
+                        - (_tf[2] if len(_tf) > 2 else 0.0) * float(v))
         else:
             # canon_cap: **분동 검증분만 채택**. τ = a_hat + clip(canon − a_hat, ±Δmax).
             #   canon−a_hat 은 raw 5 에서 3.4Nm → raw 35.5 에서 10.4Nm 로 계속 커지는데
