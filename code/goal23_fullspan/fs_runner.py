@@ -274,12 +274,14 @@ def _tmap_init(P=None, A=None):
     ※ A_c* 스캔(08-08) 결론: canon 단독 교체는 전 구성 게이트 탈락 — **필요한 보정은
       속도 의존이 아니라 토크 의존**(a_hat/canon 비가 0.32→0.66 으로 raw 와 함께 변함)이었다.
     """
-    md_ = os.environ.get("FS_TMAP")                 # None | "canon" | "ahat"
+    md_ = os.environ.get("FS_TMAP")                 # None | "canon" | "canon_cap" | "ahat" | "model"
     k = float(os.environ.get("FS_TSCALE", "1") or 1)
     sp = (os.environ.get("FS_TRANS") or "0").split(",")
     c = float(sp[0] or 0); gmin = float(sp[1]) if len(sp) > 1 else 0.35
     if md_ is None and k == 1.0 and c == 0.0:
         return None                                 # 완전 레거시 경로 (비트 동일)
+    if md_ in ("canon", "canon_cap", "model"):
+        pass
     if md_ in ("canon", "canon_cap"):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
@@ -308,6 +310,48 @@ def _tmap_init(P=None, A=None):
                 dd = _canon(raw) - a
                 dc = dcap_k if ch else dcap_h
                 return a + (dd if dc <= 0 else max(-dc, min(dc, dd)))
+    elif md_ == "model":
+        # ─────────────── 마라톤G G24: **a_hat 폐기** 모터 모델군 (사용자 지시 08-08) ───────────────
+        # a_hat 은 논문식 하나일 뿐이고, ①분동으로 틀린 게 증명됐고 ②마찰항이 섞여 있어
+        # 트윈 관절마찰과 **이중 차감**되며 ③속도항이 캡 지점에서 불연속 전환을 만든다.
+        # 여기서는 raw→축토크 를 **순수 변환**으로 두고, 마찰은 트윈 플랜트에 맡긴다.
+        #   FS_TMODEL="form:p1,p2,..."   (ch=0 힙, ch=1 무릎 — 공통 파라미터)
+        #     lin:k            τ = k·raw                              (1) 기준선
+        #     sat:k,c          τ = k·raw − c·raw|raw|                 (2) 자기포화/기어 부하손
+        #     cub:k,c,d        τ = k·raw − c·raw|raw| − d·raw³        (3) 포화 3차
+        #     pw:k,rc,k2       raw≤rc 는 k·raw, 위는 기울기 k2        (2+) **측정구간/외삽구간 분리**
+        #     vis:k,b          τ = k·raw − b·ω                        (2) 점성 (사용자 지시)
+        #     cou:k,fc         τ = k·raw − fc·tanh(ω/0.05)            (2) 쿨롱
+        #     visc:k,c,b       포화 + 점성                             (3)
+        #     env:k,a,b        τ = sign·min(|k·raw|, a − b|ω|)        (3) 전압 포락선 (REJECTED #61 재심)
+        #   ※ k 의 기준값 = **1.24 Nm/raw** (분동 실측, raw≤11.5 선형성 ±1.7% 확인 — G3/G4)
+        spec = (os.environ.get("FS_TMODEL") or "lin:1.24").split(":")
+        form = spec[0]
+        pr = [float(x) for x in spec[1].split(",")] if len(spec) > 1 and spec[1] else []
+        g = lambda i, d: pr[i] if len(pr) > i else d
+
+        def base(raw, v, ch=1):
+            r = float(raw); a = abs(r); s = 1.0 if r >= 0 else -1.0
+            k = g(0, 1.24)
+            if form == "lin":
+                return k * r
+            if form == "sat":
+                return k * r - g(1, 0.0) * r * a
+            if form == "cub":
+                return k * r - g(1, 0.0) * r * a - g(2, 0.0) * r ** 3
+            if form == "pw":
+                rc, k2 = g(1, 11.5), g(2, 0.40)
+                return s * (k * a if a <= rc else k * rc + k2 * (a - rc))
+            if form == "vis":
+                return k * r - g(1, 0.0) * float(v)
+            if form == "cou":
+                return k * r - g(1, 0.0) * np.tanh(float(v) / 0.05)
+            if form == "visc":
+                return k * r - g(1, 0.0) * r * a - g(2, 0.0) * float(v)
+            if form == "env":
+                cap = max(g(1, 48.5) - g(2, 0.73) * abs(float(v)), 0.0)
+                return s * min(k * a, cap)
+            raise ValueError(f"FS_TMODEL form 미지원: {form}")
     else:                                           # a_hat 원형 (형태 유지, 크기만 k배)
         def base(raw, v, ch=1):
             return float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
