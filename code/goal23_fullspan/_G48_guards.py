@@ -57,7 +57,7 @@ def cl_rmse(ft, d, seg, pw, g, sp):
     tt = d["t"]; m = (tt >= pw[0]) & (tt <= pw[1]); i0 = int(np.argmax(m))
     t = tt[m] - tt[i0]
     need = ("qd1", "qd2", "dqd1", "dqd2")
-    if any(k not in d for k in need):
+    if any(d.get(k) is None for k in need):
         return None
     # 게인은 **α 반영 후** 넘긴다 (기존 baseline_fs 계보와 동일 규약): 무릎 kp × TK(kp), kd × 0.20
     gm = (g[0], g[1], g[2] * TK.get(g[2], 0.656), g[3] * 0.20)
@@ -73,18 +73,25 @@ def cl_rmse(ft, d, seg, pw, g, sp):
     for k, deg in (("q1", True), ("q2", True)):
         sim = np.interp(t, L["t"], L[k]); e = sim - d[k][m]
         out[k] = float(np.sqrt(np.mean(np.degrees(e) ** 2)))
-    # τ: 측정 raw → 정본/현행 맵으로 Nm 변환한 것과 sim 관절 토크 비교
-    for k, mk in (("tau1", "raw1"), ("tau2", "raw2")):
-        if k not in L:
+    # ★ τ 채점: CL 로그의 `s1`/`s2` 는 **PD 가 만들어낸 명령**(raw 단위)이다.
+    #   실측 `raw1`/`raw2` 와 같은 단위·같은 의미이므로 직접 비교 가능.
+    #   이게 바로 τ-fidelity 그 자체 — "이 궤적을 이 게인으로 쫓으면 로봇이 실제로 낸 만큼의
+    #   토크를 트윈도 요구하는가". Nm 환산치도 함께 낸다 (해석용, 현행 토크맵 적용).
+    tm = FR._tmap_init(ft["P"], ft["P"].A_PAPER)
+    for k, mk, ch, vk in (("tau1", "raw1", 1, "dq1"), ("tau2", "raw2", 2, "dq2")):
+        sk = "s1" if ch == 1 else "s2"
+        if sk not in L:
             continue
-        sim = np.interp(t, L["t"], L[k])
-        tm = FR._tmap_init()
-        ch = 1 if k == "tau1" else 2
-        v = d["dq1"][m] if ch == 1 else d["dq2"][m]
-        vs = np.where(np.abs(v) > 1e-6, v, 1.0)
-        meas = np.array([tm(float(x), float(w), ch) if tm else 0.0
-                         for x, w in zip(d[mk][m], vs)])
-        out[k] = float(np.sqrt(np.mean((sim - meas) ** 2)))
+        sim = np.interp(t, L["t"], L[sk])
+        meas = np.asarray(d[mk][m], float)
+        out[k + "_raw"] = float(np.sqrt(np.mean((sim - meas) ** 2)))
+        if tm is not None:
+            v = np.asarray(d[vk][m], float)
+            vs = np.where(np.abs(v) > 1e-6, v, 1.0)
+            f = lambda arr: np.array([tm(float(x), float(w), ch) for x, w in zip(arr, vs)])
+            out[k] = float(np.sqrt(np.mean((f(sim) - f(meas)) ** 2)))
+        else:
+            out[k] = out[k + "_raw"] * 0.682          # a_hat 선형 이득 (구 기준선 해석용)
     return out
 
 
@@ -101,7 +108,7 @@ def main():
             d = FD.load2(p); seg = FD.segment(d); pw = FD.plot_window(p, d)
             if pw is None:
                 continue
-            r = modea_rmse(ft, d, seg, pw, SP.get(s, dict(bias1=0.0, knee_deep=None)))
+            r = modea_rmse(ft, d, seg, pw, SP.get(s) or dict(bias1=0.0, knee_deep=None))
         except Exception as ex:
             print(f"{p.name[:25]:<26} ERR {type(ex).__name__}: {ex}")
             continue
@@ -125,7 +132,7 @@ def main():
             d = FD.load2(p); seg = FD.segment(d); pw = FD.plot_window(p, d)
             if pw is None:
                 continue
-            r = cl_rmse(ft, d, seg, pw, g, SP.get(s, dict(bias1=0.0, knee_deep=None)))
+            r = cl_rmse(ft, d, seg, pw, g, SP.get(s) or dict(bias1=0.0, knee_deep=None))
         except Exception as ex:
             print(f"{(s+'/'+p.name)[:31]:<32} ERR {type(ex).__name__}: {str(ex)[:40]}")
             continue
@@ -135,7 +142,7 @@ def main():
         print(f"{(s+'/'+p.name)[:31]:<32}{r.get('q1',np.nan):9.3f}{r.get('q2',np.nan):9.3f}"
               f"{r.get('tau1',np.nan):10.3f}{r.get('tau2',np.nan):10.3f}")
     aggc = {k: float(np.nanmean([v[k] for v in CL.values() if k in v]))
-            for k in ("q1", "q2", "tau1", "tau2")} if CL else {}
+            for k in ("q1", "q2", "tau1", "tau2", "tau1_raw", "tau2_raw")} if CL else {}
     if aggc:
         print(f"{'평균':<32}{aggc['q1']:9.3f}{aggc['q2']:9.3f}{aggc['tau1']:10.3f}{aggc['tau2']:10.3f}")
 
@@ -152,7 +159,7 @@ def main():
             if k in agg and k in ref.get("cvt_agg", {}):
                 a, b = ref["cvt_agg"][k], agg[k]
                 print(f"{'CVT '+k:<20}{a:10.3f}{b:10.3f}{100*(b/a-1):+9.1f}%")
-        for k in ("q1", "q2", "tau1", "tau2"):
+        for k in ("q1", "q2", "tau1", "tau2", "tau1_raw", "tau2_raw"):
             if k in aggc and k in ref.get("cl_agg", {}):
                 a, b = ref["cl_agg"][k], aggc[k]
                 print(f"{'CL '+k:<20}{a:10.3f}{b:10.3f}{100*(b/a-1):+9.1f}%")
