@@ -277,18 +277,32 @@ def _tmap_init(P=None, A=None):
     c = float(sp[0] or 0); gmin = float(sp[1]) if len(sp) > 1 else 0.35
     if md_ is None and k == 1.0 and c == 0.0:
         return None                                 # 완전 레거시 경로 (비트 동일)
-    if md_ == "canon":
+    if md_ in ("canon", "canon_cap"):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
         d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
+        dcap = float(os.environ.get("FS_TDCAP", "0") or 0)
 
-        def base(raw, v):
+        def _canon(raw):
             t = raw / d1
             for _ in range(40):
                 f = d1 * t + d2 * t * abs(t) + d3 * t ** 3 - raw
                 df = d1 + 2 * d2 * abs(t) + 3 * d3 * t * t
                 t = t - f / (df if abs(df) > 1e-9 else 1e-9)
             return t
+
+        if md_ == "canon":
+            def base(raw, v):
+                return _canon(raw)
+        else:
+            # canon_cap: **분동 검증분만 채택**. τ = a_hat + clip(canon − a_hat, ±Δmax).
+            #   canon−a_hat 은 raw 5 에서 3.4Nm → raw 35.5 에서 10.4Nm 로 계속 커지는데
+            #   raw>11.5 구간은 **절대값 불신 로드셀의 모양** 외삽분 (데이터 사전 등재).
+            #   반면 인공 지지층 supp 는 2~5Nm 로 **포화** → 실제 결손은 포화형이다 (G14-B).
+            def base(raw, v):
+                a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
+                dd = _canon(raw) - a
+                return a + (dd if dcap <= 0 else max(-dcap, min(dcap, dd)))
     else:                                           # a_hat 원형 (형태 유지, 크기만 k배)
         def base(raw, v):
             return float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
