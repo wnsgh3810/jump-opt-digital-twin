@@ -281,7 +281,8 @@ def _tmap_init(P=None, A=None):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
         d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
-        dcap = float(os.environ.get("FS_TDCAP", "0") or 0)
+        _dc = [float(x) for x in (os.environ.get("FS_TDCAP", "0") or "0").split(",")]
+        dcap_k = _dc[0]; dcap_h = _dc[1] if len(_dc) > 1 else _dc[0]   # 무릎, 힙 (부호가 반대인 supp 대응)
 
         def _canon(raw):
             t = raw / d1
@@ -292,24 +293,25 @@ def _tmap_init(P=None, A=None):
             return t
 
         if md_ == "canon":
-            def base(raw, v):
+            def base(raw, v, ch=1):
                 return _canon(raw)
         else:
             # canon_cap: **분동 검증분만 채택**. τ = a_hat + clip(canon − a_hat, ±Δmax).
             #   canon−a_hat 은 raw 5 에서 3.4Nm → raw 35.5 에서 10.4Nm 로 계속 커지는데
             #   raw>11.5 구간은 **절대값 불신 로드셀의 모양** 외삽분 (데이터 사전 등재).
             #   반면 인공 지지층 supp 는 2~5Nm 로 **포화** → 실제 결손은 포화형이다 (G14-B).
-            def base(raw, v):
+            def base(raw, v, ch=1):
                 a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
                 dd = _canon(raw) - a
-                return a + (dd if dcap <= 0 else max(-dcap, min(dcap, dd)))
+                dc = dcap_k if ch else dcap_h
+                return a + (dd if dc <= 0 else max(-dc, min(dc, dd)))
     else:                                           # a_hat 원형 (형태 유지, 크기만 k배)
-        def base(raw, v):
+        def base(raw, v, ch=1):
             return float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
 
-    def tmap(raw, v):
+    def tmap(raw, v, ch=1):
         g = 1.0 if c <= 0 else min(1.0, max(gmin, 1.0 - c * abs(v)))
-        return base(float(raw), float(v)) * k * g
+        return base(float(raw), float(v), ch) * k * g
     return tmap
 
 
@@ -536,8 +538,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         if _dbuf is not None:
             _dbuf.append((c1, c2))
             c1, c2 = _dbuf[max(0, len(_dbuf) - 1 - _dly_n)]
-            s1 = _cv(c1, v1c)
-            s2 = _cv(c2, v2c)
+            s1 = _cv(c1, v1c, 0)
+            s2 = _cv(c2, v2c, 1)
         else:
             s1, s2 = s1o, s2o
         if lim2_nm is not None:
@@ -1041,8 +1043,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
             s1 = float(P.J.ahat(A, np.array([r1]), np.array([v1c]))[0])
             s2 = float(P.J.ahat(A, np.array([r2]), np.array([v2c]))[0])
         else:                              # 마라톤G A: G5 정본곡선 + 상태의존 전달률
-            s1 = _tmap(r1, v1c)
-            s2 = _tmap(r2, v2c)
+            s1 = _tmap(r1, v1c, 0)
+            s2 = _tmap(r2, v2c, 1)
         if _vcl is not None:               # F-H7: 실측 τ는 이미 실기 천장 반영 — 정확하면 무작동
             s1 = _vceil_cap(s1, v1c, _vcl)
             s2 = _vceil_cap(s2, v2c, _vcl)
