@@ -942,8 +942,12 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "bz")
+    # 마라톤G G13: 발 접촉 진단용 로깅 (xf=발 geom x, thf=발 바디 각) — **동역학 무변경**.
+    # 슬립 = Δxf − r·Δthf (구름 성분 차감). 기하 요구량(_G12_slipgeo)과 같은 정의로 맞춘다.
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "bz", "xf", "thf")
     Lg = {k: np.zeros(N) for k in keys}
+    _gfoot = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
+    _bfoot = int(model.geom_bodyid[_gfoot]) if _gfoot >= 0 else 0
     load_on = os.environ.get("FS_KNEE_LOAD") == "1" and knee_deep
     if load_on:
         _Nmg = float(model.body_mass.sum() * 9.81)
@@ -1067,6 +1071,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         Lg["s1"][k] = s1
         Lg["s2"][k] = s2
         Lg["bz"][k] = md.qpos[iq["base_z"]]     # ModeA 점프높이 판정 (사용자 요청 08-02)
+        Lg["xf"][k] = md.geom_xpos[_gfoot][0]   # G13 발 접촉 진단 (동역학 무관)
+        Lg["thf"][k] = np.arctan2(md.xmat[_bfoot][2], md.xmat[_bfoot][0])
     if _psl is not None:
         _psl.restore()
     return Lg
