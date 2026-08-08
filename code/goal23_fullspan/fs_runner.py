@@ -279,6 +279,56 @@ def _escrow_gate(bank, tau, vel, dt):
     return 0.0, tau * (bank / e)
 
 
+def tmap_closed(raw, v, cap=3.8, *, A=None, curve=None):
+    """★ G59: `canon_cap` 의 **닫힌 해석식** (명령 raw[N·m] → 관절 인가 토크[N·m]).
+
+    왜 필요한가
+      기존 경로는 정본곡선을 **뉴턴 40회 반복**으로 역산한다 → 미분 불가·느림 →
+      궤적 최적화(NLP/iLQR)에 그대로 못 쓴다. 3차식이므로 **Cardano 로 해석적 역산**이 되고,
+      clip 도 절댓값으로 닫힌 형태가 된다. 결과는 `_tmap_init("canon_cap")` 과 **기계정밀도 일치**
+      (전 구간 최대 오차 ~1e-14 — `_G59_closed.py` 가 검증).
+
+    ── 유도 ──────────────────────────────────────────────────────────────────
+    ① a_hat 을 raw 직접식으로 정리 (Iq = CF/(GR·KT)·raw 를 대입하면 GR·KT 가 약분된다)
+         τ_a = k1·raw − k2·raw|raw| − (fc0 + fc1·|raw|)·sgn(v)
+         k1 = A0·CF = 0.682070          k2  = A1·CF²/(GR·KT²) = 0.0019495
+         fc0 = A2   = 0.268556          fc1 = A3·CF/(GR·KT)   = 0.035330
+    ② 정본곡선 `raw = d1·τ + d2·τ|τ| + d3·τ³` 는 **홀함수**라 u=|raw| 로 풀고 부호만 되돌리면 된다.
+       τ≥0 에서 `d3·τ³ + d2·τ² + d1·τ − u = 0` → Cardano:
+         p = (3·d3·d1 − d2²)/(3·d3²) = **838.63 > 0**  ⇒ 판별식 Δ>0 ⇒ **실근 1개** (삼각 분기 불필요)
+         q = (2·d2³ − 9·d1·d2·d3 − 27·d3²·u)/(27·d3³)
+         τ_c = sgn(raw)·[ ∛(−q/2+√Δ) + ∛(−q/2−√Δ) − d2/(3·d3) ]
+    ③ clip 의 닫힌형:  clip(x,±c) = (|x+c| − |x−c|)/2
+    ④ 합치면
+         **τ = τ_a + ( |τ_c−τ_a+c| − |τ_c−τ_a−c| ) / 2**
+    ─────────────────────────────────────────────────────────────────────────
+    raw: 모터 명령 [N·m] · v: 관절 속도 [rad/s] · cap: 무릎 3.8 / 힙 2.6
+    """
+    import json as _j
+    if A is None:
+        A = [1.15605006, 4.17389589e-4, 0.26855607, 0.04904241]
+    if curve is None:
+        _c = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
+        curve = (_c["d1"], _c["d2"], _c["d3"])
+    CF, GR, KT = 0.59, 9.0, 0.091
+    d1, d2, d3 = curve
+    r = np.asarray(raw, float); vv = np.asarray(v, float)
+    # ① a_hat (raw 직접식)
+    k1 = A[0] * CF
+    k2 = A[1] * CF ** 2 / (GR * KT ** 2)
+    ta = k1 * r - k2 * r * np.abs(r) - (A[2] + A[3] * CF / (GR * KT) * np.abs(r)) * np.sign(vv)
+    # ② 정본곡선 해석적 역산
+    u = np.abs(r)
+    p_ = (3 * d3 * d1 - d2 ** 2) / (3 * d3 ** 2)
+    q_ = (2 * d2 ** 3 - 9 * d1 * d2 * d3 - 27 * d3 ** 2 * u) / (27 * d3 ** 3)
+    D_ = (q_ / 2) ** 2 + (p_ / 3) ** 3                    # p_>0 이므로 항상 >0
+    sq = np.sqrt(D_)
+    tc = np.sign(r) * (np.cbrt(-q_ / 2 + sq) + np.cbrt(-q_ / 2 - sq) - d2 / (3 * d3))
+    # ③④ clip 닫힌형 + 합성
+    dd = tc - ta
+    return ta + (np.abs(dd + cap) - np.abs(dd - cap)) / 2
+
+
 def _tmap_init(P=None, A=None):
     """마라톤G A: raw → 축토크 변환기 교체 (None = 기존 a_hat 유지).
 
