@@ -1,0 +1,456 @@
+=== G74 slip 2-pass (session-fixed ruler) === 
+ 
+### 26.07.23 
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+  [세션 자] 26.07.23: n=3 지름 15.9~33.5 → 중앙 **32.2px** (산포 55%)  ⚠ 수동 시드 권장
+  26.07.23/150_2.2_250_3        24fps 720x1280 · 자 0.9306 mm/px (지름 32.2px ±4%) · 이륙 f200 · shift -4.11s   ⚠ 동기 ±1프레임 → 푸시슬립 ±11mm
+      구간               Δx       구름       슬립
+      하강전반           4.30     4.62    -0.32
+      하강후반          -2.29     4.77    -7.07
+      바닥유지          -0.59    -0.08    -0.50
+      푸시~이륙        -57.75   -14.67   -43.09
+      전체           -56.33    -5.36   -50.97
+  26.07.23/150_2.2_500_5        24fps 720x1280 · 자 0.9306 mm/px (지름 32.2px ±4%) · 이륙 f96 · shift +0.06s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm
+      구간               Δx       구름       슬립
+      하강전반           4.16     4.45    -0.29
+      하강후반          -6.48     5.04   -11.52
+      바닥유지          -0.09     0.03    -0.13
+      푸시~이륙        -26.06   -12.56   -13.50
+      전체           -28.47    -3.03   -25.44
+  26.07.23/60_0.75_60_2         24fps 720x1280 · 자 0.9306 mm/px (지름 32.2px ±0%) · 이륙 f216 · shift -2.94s   ⚠ 측정지름 15.9 vs 세션자 32.2 (-51%) — 추적 의심 / 접지끝 f170 vs 차분이륙 f216 차이 46프레임
+      구간               Δx       구름       슬립
+      하강전반           0.02     3.12    -3.10
+      하강후반          10.27     1.50     8.77
+      바닥유지           3.48    -0.16     3.64
+      푸시~이륙         36.55    -9.53    46.08
+      전체            50.31    -5.07    55.38
+
+성공 29/29 · 저장: _G72_slipall.json
+ 
+### 26.06.02 
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+  [세션 자] 26.06.02: n=6 지름 14.7~22.6 → 중앙 **19.5px** (산포 40%)  ⚠ 수동 시드 권장
+  26.06.02/120_2_120_2          24fps 720x1280 · 자 1.5407 mm/px (지름 19.5px ±9%) · 이륙 f163 · shift -0.14s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f127 vs 차분이륙 f163 차이 36프레임
+      구간               Δx       구름       슬립
+      하강전반          23.41     2.50    20.91
+      하강후반          39.22     1.65    37.57
+      바닥유지           4.98    -0.08     5.07
+      푸시~이륙        -60.87   -17.11   -43.76
+      전체             6.75   -13.04    19.79
+  26.06.02/150_2.2_250_3        24fps 720x1280 · 자 1.5407 mm/px (지름 19.5px ±0%) · 이륙 f163 · shift +2.81s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f57 vs 차분이륙 f163 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙         -0.76   -15.72    14.96
+      전체            -0.76   -15.72    14.96
+  26.06.02/150_2.2_500_5        24fps 720x1280 · 자 1.5407 mm/px (지름 19.5px ±0%) · 이륙 f167 · shift +2.67s   ⚠ 동기 ±1프레임 → 푸시슬립 ±10mm / 이륙 변위 12px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f61 vs 차분이륙 f167 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙         -0.81   -15.26    14.45
+      전체            -0.81   -15.26    14.45
+  26.06.02/60_0.75_60_2         24fps 720x1280 · 자 1.5407 mm/px (지름 19.5px ±0%) · 이륙 f158 · shift -1.55s   ⚠ 측정지름 14.7 vs 세션자 19.5 (-24%) — 추적 의심 / 이륙 변위 10px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반          16.05     5.27    10.78
+      하강후반           0.65     3.18    -2.54
+      바닥유지          -0.54     0.15    -0.69
+      푸시~이륙        -26.66   -12.79   -13.87
+      전체           -10.50    -4.18    -6.32
+  26.06.02/60_1.5_60_1.5        24fps 720x1280 · 자 1.5407 mm/px (지름 19.5px ±0%) · 이륙 f172 · shift +2.38s   ⚠ 측정지름 22.6 vs 세션자 19.5 (+16%) — 추적 의심 / 이륙 변위 8px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f66 vs 차분이륙 f172 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙         -0.65   -12.06    11.41
+      전체            -0.65   -12.06    11.41
+  26.06.02/90_0.75_90_2         24fps 720x1280 · 자 1.5407 mm/px (지름 19.5px ±0%) · 이륙 f170 · shift +2.53s   ⚠ 측정지름 14.7 vs 세션자 19.5 (-24%) — 추적 의심 / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f64 vs 차분이륙 f170 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙          0.17   -11.56    11.73
+      전체             0.17   -11.56    11.73
+
+성공 29/29 · 저장: _G72_slipall.json
+ 
+### 26.07.24 
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+  [세션 자] 26.07.24: n=3 지름 14.7~22.2 → 중앙 **14.7px** (산포 50%)  ⚠ 수동 시드 권장
+  26.07.24/150_2.2_250_3        24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f128 · shift +2.28s   ⚠ 동기 ±1프레임 → 푸시슬립 ±11mm / 이륙 변위 12px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f46 vs 차분이륙 f128 차이 82프레임
+      구간               Δx       구름       슬립
+      하강전반          -0.15     0.13    -0.29
+      하강후반          -1.06     0.10    -1.16
+      바닥유지           0.03    -0.18     0.21
+      푸시~이륙         -0.03   -13.81    13.78
+      전체            -1.20   -13.75    12.55
+  26.07.24/150_2.2_350_3.5      24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f174 · shift -1.50s   ⚠ 동기 ±1프레임 → 푸시슬립 ±10mm / 측정지름 22.2 vs 세션자 14.7 (+50%) — 추적 의심 / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f136 vs 차분이륙 f174 차이 38프레임
+      구간               Δx       구름       슬립
+      하강전반          -9.07     4.14   -13.21
+      하강후반          32.28     2.79    29.49
+      바닥유지         -40.93    -0.03   -40.90
+      푸시~이륙        -24.04   -14.08    -9.95
+      전체           -41.76    -7.18   -34.58
+  26.07.24/150_2.2_500_5        24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f68 · shift +4.01s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm / 이륙 변위 15px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f4 vs 차분이륙 f68 차이 64프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙          2.63   -11.07    13.70
+      전체             2.63   -11.07    13.70
+
+성공 29/29 · 저장: _G72_slipall.json
+ 
+### 26.07.25 
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+  [세션 자] 26.07.25: n=4 지름 26.2~26.4 → 중앙 **26.4px** (산포 1%)
+  26.07.25/100_1.5_250_3        24fps 720x1280 · 자 1.1380 mm/px (지름 26.4px ±1%) · 이륙 f96 · shift +0.03s   ⚠ 이륙 변위 7px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           3.42     1.46     1.95
+      하강후반           4.92     1.06     3.86
+      바닥유지           0.41    -0.02     0.43
+      푸시~이륙        -13.43    -8.44    -4.99
+      전체            -4.68    -5.94     1.25
+  26.07.25/120_2_250_3          24fps 720x1280 · 자 1.1380 mm/px (지름 26.4px ±1%) · 이륙 f99 · shift -0.08s   ⚠ 이륙 변위 7px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           4.06     1.26     2.80
+      하강후반           5.11     1.17     3.94
+      바닥유지           0.73    -0.03     0.76
+      푸시~이륙         -9.19    -8.37    -0.82
+      전체             0.70    -5.97     6.67
+  26.07.25/150_2.2_250_3        24fps 720x1280 · 자 1.1380 mm/px (지름 26.4px ±2%) · 이륙 f116 · shift -0.72s   ⚠ 이륙 변위 3px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           3.39     0.95     2.43
+      하강후반           6.30     1.24     5.06
+      바닥유지          -0.07    -0.02    -0.05
+      푸시~이륙         -8.71    -7.78    -0.93
+      전체             0.92    -5.60     6.52
+  26.07.25/200_2.5_250_3        24fps 720x1280 · 자 1.1380 mm/px (지름 26.4px ±2%) · 이륙 f125 · shift -1.20s   ⚠ 이륙 변위 9px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           3.67     0.98     2.70
+      하강후반           6.90     1.23     5.67
+      바닥유지           1.54    -0.12     1.66
+      푸시~이륙        -16.80    -7.08    -9.72
+      전체            -4.68    -4.99     0.31
+
+성공 29/29 · 저장: _G72_slipall.json
+ 
+### 26.07.27 
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+  [세션 자] 26.07.27: n=7 지름 14.7~19.1 → 중앙 **17.1px** (산포 26%)  ⚠ 수동 시드 권장
+  26.07.27/100_1.5_250_3        24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±5%) · 이륙 f124 · shift -1.06s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           8.42     2.72     5.70
+      하강후반          12.20     2.75     9.44
+      바닥유지          -1.75    -0.51    -1.24
+      푸시~이륙        -34.71   -10.76   -23.95
+      전체           -15.84    -5.79   -10.05
+  26.07.27/120_2_250_3          24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±2%) · 이륙 f108 · shift +1.40s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f66 vs 차분이륙 f108 차이 42프레임
+      구간               Δx       구름       슬립
+      하강전반           0.36     2.24    -1.88
+      하강후반          24.32     1.12    23.21
+      바닥유지         -10.49    -0.76    -9.74
+      푸시~이륙         -8.14   -10.84     2.70
+      전체             6.06    -8.24    14.29
+  26.07.27/150_2.2_250_3        24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±5%) · 이륙 f128 · shift -1.22s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반          14.36     2.72    11.64
+      하강후반           9.85     2.76     7.10
+      바닥유지           0.04    -0.71     0.76
+      푸시~이륙        -55.16   -10.75   -44.41
+      전체           -30.90    -5.98   -24.92
+  26.07.27/200_2.5_250_3        24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±0%) · 이륙 f104 · shift -0.47s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm / 측정지름 14.7 vs 세션자 17.1 (-14%) — 추적 의심 / 이륙 변위 3px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지 절단 미발생 (f111 = 추적 끝) — 이륙 이후까지 추적됐을 수 있음
+      구간               Δx       구름       슬립
+      하강전반          -0.12     2.65    -2.77
+      하강후반           0.07     2.76    -2.69
+      바닥유지          -0.26    -0.70     0.45
+      푸시~이륙          0.29   -10.46    10.75
+      전체            -0.02    -5.76     5.74
+  26.07.27/250_3_250_3          24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±6%) · 이륙 f128 · shift -1.14s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm / 이륙 변위 15px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반          59.13     2.63    56.50
+      하강후반          33.09     2.76    30.33
+      바닥유지           0.42    -0.72     1.14
+      푸시~이륙         -7.40   -11.05     3.65
+      전체            85.23    -6.38    91.61
+  26.07.27/60_2_250_3           24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±4%) · 이륙 f96 · shift +0.03s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / 측정지름 14.9 vs 세션자 17.1 (-13%) — 추적 의심 / 이륙 변위 10px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지 절단 미발생 (f99 = 추적 끝) — 이륙 이후까지 추적됐을 수 있음
+      구간               Δx       구름       슬립
+      하강전반          47.92     2.95    44.97
+      하강후반         -39.34     2.79   -42.13
+      바닥유지          -8.49    -0.76    -7.73
+      푸시~이륙         -9.26   -12.44     3.18
+      전체            -9.17    -7.46    -1.71
+  26.07.27/80_2_250_3           24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±0%) · 이륙 f104 · shift -0.48s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / 이륙 변위 3px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지 절단 미발생 (f111 = 추적 끝) — 이륙 이후까지 추적됐을 수 있음
+      구간               Δx       구름       슬립
+      하강전반          -0.24     2.75    -2.99
+      하강후반          -0.19     2.77    -2.96
+      바닥유지          -0.61    -0.73     0.12
+      푸시~이륙          0.89   -11.50    12.40
+      전체            -0.14    -6.71     6.56
+
+성공 29/29 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+  ✔ 26_07_23__150_2_2_250_3.png
+Traceback (most recent call last):
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_G72_proof.py", line 128, in <module>
+    main()
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_G72_proof.py", line 118, in main
+    img = sheet(rec, cand[0])
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_G72_proof.py", line 65, in sheet
+    cx, cy = rec["series"]["cx"][j], rec["series"]["cy"][j]
+             ~~~~~~~~~~~~~^^^^^^
+KeyError: 'cx'
+=== done === 

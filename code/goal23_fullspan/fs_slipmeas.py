@@ -116,6 +116,14 @@ def liftoff_frame(prof, *, lo=0.25, hi=0.50, min_run=3):
 SEED_CAL = {
     "26.07.23": (421.0, 1138.0, 16.2),      # ds=1 (720x1280)
     "26.04.24": (510.0, 1681.0, 33.5),      # ds=2 (1080x1920) — 금속판 지름 ~67px
+    # ★ 0602 는 발이 **프레임 바닥에 붙어** 있다 (중심 y=1262, 프레임 1280).
+    #   원의 아래쪽(r+2=19 → y 1281)이 화면 밖 → 방사 기울기의 바깥 표본이 클립된다.
+    #   섹터를 좌·상으로 돌려야 한다 (아래를 못 쓴다). SECTOR_CAL 참조.
+    # ⚠ 0602 는 등재해도 실패했다. 시드를 120_2_120_2 에서 읽었는데
+    #   **같은 세션 안에서도 로봇 설치 위치가 trial 마다 다르다** (카메라는 고정이어도
+    #   로봇을 다시 놓으면 발이 옮겨간다). 150_2.2_250_3 에서 흰 브래킷 볼트에 락온.
+    #   ⇒ SEED_CAL 은 세션 단위로 부족하다 — **trial 단위 시드**가 필요하다.
+    #   "26.06.02": (417.0, 1262.0, 17.0),   # 120_2_120_2 기준. 세션 공용 불가.
 }
 
 
@@ -123,6 +131,10 @@ SEED_CAL = {
 #   같은 촬영 규격이면 발 크기도 같다 — 미등재 세션의 자동 탐색을 이걸로 구속한다.
 #   구속이 없으면 광학테이블 볼트머리(r≈4)·트러스구멍(r≈24)이 점수로 이긴다.
 R_PRIOR = {720: 16.2, 1080: 29.4}
+
+
+# 발이 프레임 가장자리에 붙은 세션은 **원호 섹터**를 돌려야 한다 (잘린 쪽을 뺀다).
+SECTOR_CAL = {"26.06.02": (120.0, 240.0)}      # 좌측 위주 (아래가 화면 밖)
 
 
 def seed_of(sess, k=1.0):
@@ -253,6 +265,7 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     shift = t_lo - f_lo / fps                      # 데이터시각 = 영상시각 + shift (뒤에서 재확정)
 
     f0 = max(2, f_lo - int(round(4.5 * fps)))      # 하강 시작 부근 (~4.5초 전)
+    sec = SECTOR_CAL.get(sess, VS.SECTOR)      # 가장자리에 붙은 세션은 원호를 돌린다
     sd = seed_of(sess, k)
     if sd is not None:
         # 세션 시드 → 스쿼트 바닥 프레임에서 **반지름 구속**하며 국소 정밀화
@@ -268,7 +281,7 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
             return dict(sess=sess, trial=trial, ok=False, reason="시드 프레임 읽기 실패")
         rc = sd[2]
         sc0, cx0, cy0, r0 = VS.fit_roller(G, sd[0], sd[1], win=60.0 * k, win_y=45.0 * k, step=2.0,
-                                          rrange=(rc * 0.70, rc * 1.30, 0.1 * k),
+                                          rrange=(rc * 0.70, rc * 1.30, 0.1 * k), sector=sec,
                                           d=VS.EDGE_D * k, refine=0.1 * k)
         moved = float("nan")
     else:
@@ -282,7 +295,7 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     # 시드는 **스쿼트 바닥(f_lo-14)** 기준 → 거기서 앞뒤로 나눠 추적
     f_sit = max(4, f_lo - max(6, int(round(0.6 * fps))))
     _rc = r0 if r0 and np.isfinite(r0) else 16.0 * k
-    TK = dict(win_min=6.0 * k, win_max=60.0 * k, win_y=7.0 * k, ds=ds,
+    TK = dict(win_min=6.0 * k, win_max=60.0 * k, win_y=7.0 * k, ds=ds, sector=sec,
               rrange=(_rc * 0.70, _rc * 1.30, 0.1 * k), d=VS.EDGE_D * k, refine=0.1 * k)
     tb = VS.track_roller(mp4, f0, f_sit, (cx0, cy0), order="rev", **TK)   # ★ 역방향
     # ★ 이륙 추정치 **너머까지** 추적하고, 접지 종료는 아래 유효성 절단이 정한다.
