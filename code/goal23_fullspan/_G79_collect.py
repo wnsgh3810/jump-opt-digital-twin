@@ -57,6 +57,12 @@ def collect_images():
             d = DST / "03_proof" / _sess_of(p.name)
             d.mkdir(parents=True, exist_ok=True)
             shutil.copy2(p, d / p.name); n += 1
+    z = G / "G81_zoomproof"          # 세션 한 장짜리 추적 검증 (가장 먼저 볼 것)
+    if z.exists():
+        d = DST / "03_proof" / "_세션한장검증"
+        d.mkdir(parents=True, exist_ok=True)
+        for p in sorted(z.glob("*.png")):
+            shutil.copy2(p, d / p.name); n += 1
     return n
 
 
@@ -137,8 +143,10 @@ def write_index(rows, nimg, data):
     A("| `01_결과표.csv` | trial × 구간 슬립/구름/Δx + QC | 엑셀로 열면 된다 |\n")
     A("| `02_seed/` | 발 시드 판독 그림 (`_sheet_*` = 세션 대조시트) | "
       "초록 원이 금속판 가장자리에 물렸는지 본다 |\n")
-    A("| `03_proof/` | 4컷 검증 시트 (하강시작/바닥/푸시/마지막접지) | "
-      "네 컷 모두 초록 원이 롤러에 있으면 그 trial 은 믿는다 |\n")
+    A("| `03_proof/_세션한장검증/` | **여기부터 보면 된다** — 세션 전체를 한 장에 | "
+      "모든 칸에서 초록 원이 롤러에 물려 있으면 그 세션은 통과 |\n")
+    A("| `03_proof/<세션>/` | trial 별 4컷 풀프레임 (하강시작/바닥/푸시/마지막접지) | "
+      "한 장짜리에서 의심 가는 trial 만 여기서 크게 본다 |\n")
     A("| `04_data/` | 원본 JSON (측정값·시드) | 재분석용 |\n")
     A("| `05_trend/` | 게인·세션별 경향 그림 | |\n")
     A("\n## 읽을 때 주의\n")
