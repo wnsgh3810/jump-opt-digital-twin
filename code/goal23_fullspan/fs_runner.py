@@ -349,9 +349,9 @@ def _tmap_init(P=None, A=None):
     c = float(sp[0] or 0); gmin = float(sp[1]) if len(sp) > 1 else 0.35
     if md_ is None and k == 1.0 and c == 0.0:
         return None                                 # 완전 레거시 경로 (비트 동일)
-    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "model"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "model"):
         pass
-    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS"):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
         d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
@@ -369,6 +369,56 @@ def _tmap_init(P=None, A=None):
         if md_ == "canon":
             def base(raw, v, ch=1):
                 return _canon(raw)
+        elif md_ == "canon_capS":
+            # ★ G62 **안전한 초집합**: canon_cap 에 분동곡선 스케일 S 추가.
+            #     τ = a_hat + clip(S·정본(raw) − a_hat, ±c)
+            #   S=1 이면 **현행 canon_cap 과 완전 동일** (회귀 불가). S 는 분동 캘리브레이션의
+            #   전역 배율 — 분동 실험의 지레팔·질량 오차나 KT 오차를 흡수하는 자유도다.
+            #   ★ G62-A 구조 발견: canon_cap ≈ a_hat + sign(raw)·min(0.675·|raw|, 3.8) (오차 0.25Nm)
+            #     0.675 ≈ a_hat 의 선형이득 k1(0.682) ⇒ **"논문식 토크상수가 저부하에서 딱 절반"**.
+            #     S 를 흔드는 것은 그 '절반'이 정확히 얼마인지를 J_G 위에서 되묻는 일이다.
+            #   FS_TCAPS="S,c_knee,c_hip"
+            _cs = [float(x) for x in (os.environ.get("FS_TCAPS", "1.0,3.8,2.6")).split(",")]
+            _S2 = _cs[0]; _ck2 = _cs[1]; _ch2 = _cs[2] if len(_cs) > 2 else _cs[1]
+
+            def base(raw, v, ch=1):
+                a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
+                dd = _S2 * _canon(raw) - a
+                dc = _ck2 if ch else _ch2
+                return a + max(-dc, min(dc, dd))
+        elif md_ == "canon_capv":
+            # ★ G60-A **안전한 확장**: canon_cap 의 캡을 **속도 의존**으로.
+            #   동기: 정본곡선은 분동(정지, v=0)에서 왔고 속도항이 **아예 없다**. 지금은 속도 의존을
+            #   전부 a_hat 에서 빌려 쓴다. 캡 자체가 속도에 따라 열리/닫히면 그 결손을 직접 표현한다.
+            #     cap(v) = c0 + c1·|v|      (c1=0 이면 **현행 canon_cap 과 완전 동일** → 회귀 불가)
+            #   FS_TDCAPV="c0k,c1k[,c0h,c1h]"  (무릎, 힙)
+            _cv = [float(x) for x in (os.environ.get("FS_TDCAPV", "3.8,0,2.6,0")).split(",")]
+            _c0k, _c1k = _cv[0], _cv[1]
+            _c0h, _c1h = (_cv[2], _cv[3]) if len(_cv) >= 4 else (_cv[0], _cv[1])
+
+            def base(raw, v, ch=1):
+                a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
+                dd = _canon(raw) - a
+                c0, c1 = (_c0k, _c1k) if ch else (_c0h, _c1h)
+                dc = max(c0 + c1 * abs(float(v)), 0.0)
+                return a + max(-dc, min(dc, dd))
+        elif md_ == "canon_fv":
+            # ★ G60-B **물리 형태**: a_hat 을 **완전히 버리고** 정본 + 속도 의존 손실로만 구성.
+            #     τ = S·정본(raw) − [F0 + F1·max(0, |raw| − R0)]·tanh(v/V0) − B·v
+            #   근거: G40-C 에서 손실의 함수 형태가 **문턱형**(r0≈3.75, 초과분의 26.9%)으로 판정됐고,
+            #        G37-A 에서 부하비례 계수 fc1≈0.31 이 무릎·힙 양 채널에서 동일하게 나왔다.
+            #   ※ G37-C 의 실패(canon_fric)와의 차이: 그때는 **canon_cap 을 재현하도록** 적합했고
+            #     여기서는 **J_G 위에서 직접** 적합한다 (목적함수가 다르다).
+            #   FS_TFV="S,F0,F1,R0,V0,B"
+            _fv = [float(x) for x in (os.environ.get("FS_TFV", "1.0,0.0,0.33,3.75,0.5,0.0")).split(",")]
+            while len(_fv) < 6:
+                _fv.append(0.0)
+            _S, _F0, _F1, _R0, _V0, _B = _fv
+
+            def base(raw, v, ch=1):
+                r = float(raw); vv = float(v)
+                loss = (_F0 + _F1 * max(0.0, abs(r) - _R0)) * np.tanh(vv / max(_V0, 1e-6))
+                return _S * _canon(r) - loss - _B * vv
         elif md_ == "canon_env":
             # ★ G34: **a_hat 완전 배제**. 정본곡선(분동 A급) + **전압 포락선**.
             #   물리: 드라이버는 전류를 명령하지만 **전압이 유한**하다. 모터가 빠르게 돌면
