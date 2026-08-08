@@ -113,7 +113,8 @@ def fit_roller(frame, cx0, cy0, *, sector=SECTOR, rrange=R_RANGE, d=EDGE_D, win=
     return scan(b[1], b[2], step * 0.75, refine) if refine else b
 
 
-def track_roller(mp4, f0, f1, seed, *, win_min=6.0, win_max=60.0, win_y=7.0, **kw):
+def track_roller(mp4, f0, f1, seed, *, win_min=6.0, win_max=60.0, win_y=7.0, ds=1,
+                 order="fwd", **kw):
     """구간 전 프레임에서 원을 맞춘다 → {frame: dict(cx,cy,r,score,win)}.
 
     ★ **등속 예측 + 적응 탐색창 + 수직 구속** (마라톤G 08-08 사고 대응)
@@ -123,20 +124,34 @@ def track_roller(mp4, f0, f1, seed, *, win_min=6.0, win_max=60.0, win_y=7.0, **k
       단 **세로 창은 좁게**(win_y) 묶는다 — 접지 중 발은 수평으로만 움직이는데,
       가로 창만 넓히면 흰 플랫폼의 **볼트 구멍**(밝은 원 = 강한 방사 경계)이
       더 높은 점수로 이겨버린다 (실제 발생: f199 가 −80.7mm 로 튐).
+
+    ★ `order="rev"` — **시드에서 시간을 거슬러** 추적한다. 시드는 보통 스쿼트 바닥에서
+      잡는데, 거기서 하강 시작(f0)까지 그냥 앞으로 추적하면 **첫 프레임부터 시드가
+      엉뚱한 곳**이다. 24fps·짧은 하강에선 우연히 통했지만 59fps 4K(하강 267프레임)에선
+      f120 에서 추적이 끊겼다 (08-08). 역방향이면 시드가 항상 인접 프레임이다.
+
+    ds : 정수배 축소 (4K 처리용). 자도 같은 축소 프레임에서 재므로 mm 정밀도는 보존.
     """
     import imageio.v3 as iio
-    out = {}; c = np.array(seed, float); v = np.zeros(2)
+    F = {}
     for i, f in enumerate(iio.imiter(Path(mp4))):
         if f0 <= i <= f1:
-            pred = c + v
-            w = float(np.clip(2.5 * np.hypot(*v) + win_min, win_min, win_max))
-            s, cx, cy, r = fit_roller(f, pred[0], pred[1], win=w, win_y=win_y, **kw)
-            new = np.array([cx, cy])
-            v = new - c if out else np.zeros(2)
-            c = new
-            out[i] = dict(cx=cx, cy=cy, r=r, score=s, win=w)
+            g = np.asarray(f)[..., :3].mean(axis=2)
+            F[i] = (g[::ds, ::ds] if ds > 1 else g).astype(np.uint8)
         if i > f1:
             break
+    ks = sorted(F)
+    if order == "rev":
+        ks = ks[::-1]
+    out = {}; c = np.array(seed, float); v = np.zeros(2)
+    for i in ks:
+        pred = c + v
+        w = float(np.clip(2.5 * np.hypot(*v) + win_min, win_min, win_max))
+        sc, cx, cy, r = fit_roller(F[i], pred[0], pred[1], win=w, win_y=win_y, **kw)
+        new = np.array([cx, cy])
+        v = new - c if out else np.zeros(2)
+        c = new
+        out[i] = dict(cx=cx, cy=cy, r=r, score=sc, win=w)
     return out
 
 

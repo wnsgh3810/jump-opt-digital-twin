@@ -46,13 +46,30 @@ sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 import fs_vidscale as VS                                       # noqa: E402
 
 OUT_JSON = HERE / "_G72_slipall.json"
-FPS_DEFAULT = 24.0
+REF_W = 720.0            # 기준 가로 해상도 — 픽셀 단위 파라미터는 전부 이 비율로 스케일
+
+
+def video_meta(mp4):
+    """★ fps·해상도는 **영상마다 읽는다** (하드코딩 절대 금지).
+
+    실측 분포: 0723/0602/0725/0727 = 24fps 720x1280 · 0324/0722 = 30fps ·
+    **0424/0429/0421 = 59.3fps 2160x3840(4K)**.
+    24 로 고정했다가 전수 배치를 통째로 버린 전례가 있다 (08-08).
+    4K 는 발이 3배 커서 반지름 탐색 범위도 비례 확대해야 한다.
+    """
+    import imageio
+    rd = imageio.get_reader(str(Path(mp4)))
+    m = rd.get_meta_data(); n = int(rd.count_frames()); rd.close()
+    w, h = int(m["size"][0]), int(m["size"][1])   # imageio meta size = (W, H) 순서
+    ds = max(1, int(w // 1080))             # ★ 4K 만 절반 축소 (발이 너무 작아지면 안 됨)
+    return dict(fps=float(m["fps"]), n=n, h=h, w=w, ds=ds, k=(w / ds) / REF_W)
 
 
 # ── ② 동기 ────────────────────────────────────────────────────────────────────
-def motion_profile(mp4, step=4):
-    """프레임차분(움직임) 시계열. 이륙은 여기서 폭발적으로 튄다."""
+def motion_profile(mp4, step=4, k=1.0, ds=1):
+    """프레임차분(움직임) 시계열. 이륙은 여기서 폭발적으로 튄다. (step 은 해상도 비례)"""
     import imageio.v3 as iio
+    step = max(2, int(round(step * k * ds)))
     prof = []; prev = None
     for f in iio.imiter(Path(mp4)):
         g = np.asarray(f, float)[..., :3].mean(axis=2)[::step, ::step]
@@ -84,29 +101,54 @@ def liftoff_frame(prof, *, lo=0.25, hi=0.50, min_run=3):
     return f, int(run[0]), int(run[-1])
 
 
+# ── ③ 발 시드 (세션별 표 + 반지름 구속) ──────────────────────────────────────
+#
+# 왜 완전 자동을 포기했나 (08-08)
+#   전역 원 탐색은 **광학 테이블 볼트 머리·브래킷 나사·트러스 구멍**이 점수에서 이긴다.
+#   0424(원거리 4K)에서 상위 12후보에 발이 아예 없었다. 판별로 시도한 두 규칙도 실패:
+#     "이륙 때 움직인 원" → 트러스 구멍 (이륙엔 로봇 전체가 움직임)
+#     "가장 아래 원"     → 광학 테이블 구멍 (테이블이 발보다 아래)
+#   카메라 배치는 **세션 단위로 일정**하므로, 세션마다 한 번만 눈으로 읽어 등재한다.
+#   그 뒤 trial 별 미세 차이는 넉넉한 창(±60px) + **반지름 구속**(±30%)으로 흡수한다.
+#   반지름 구속이 결정적이다 — 볼트 머리(r≈4)·트러스 구멍(r≈24)을 형상만으로 배제한다.
+#
+# 값은 **처리 해상도**(ds 적용 후) 기준. `_G72_seedsheet.py` 로 그림 보고 채운다.
+SEED_CAL = {
+    "26.07.23": (421.0, 1138.0, 16.2),      # ds=1 (720x1280)
+    "26.04.24": (510.0, 1681.0, 33.5),      # ds=2 (1080x1920) — 금속판 지름 ~67px
+}
+
+
+def seed_of(sess, k=1.0):
+    """세션 시드 (cx, cy, r_expect). 미등재면 None → 자동 탐색으로 폴백."""
+    return SEED_CAL.get(sess)
+
+
 # ── ③ 발 탐색 ────────────────────────────────────────────────────────────────
-def _scan_circles(g, ys, xs, *, rrange=(11.0, 24.0, 0.5), topn=40):
+def _scan_circles(g, ys, xs, *, rrange=(6.0, 30.0, 0.5), topn=40, k=1.0):
     """거친 격자 전역 탐색 → 상위 후보 [(score,cx,cy,r)]."""
     ang = np.deg2rad(np.arange(*VS.SECTOR, 6.0)); ca = np.cos(ang); sa = -np.sin(ang)
-    rs = np.arange(*rrange); out = []
+    rs = np.arange(rrange[0] * k, rrange[1] * k, max(0.5, rrange[2] * k))
+    ed = VS.EDGE_D * k
+    out = []
     for cy in ys:
         for cx in xs:
-            ri = (rs[:, None] - VS.EDGE_D) * ca[None, :]; si = (rs[:, None] - VS.EDGE_D) * sa[None, :]
-            ro = (rs[:, None] + VS.EDGE_D) * ca[None, :]; so = (rs[:, None] + VS.EDGE_D) * sa[None, :]
+            ri = (rs[:, None] - ed) * ca[None, :]; si = (rs[:, None] - ed) * sa[None, :]
+            ro = (rs[:, None] + ed) * ca[None, :]; so = (rs[:, None] + ed) * sa[None, :]
             sc = (VS._samp(g, cx + ri, cy + si) - VS._samp(g, cx + ro, cy + so)).mean(axis=1)
             j = int(np.argmax(sc)); out.append((float(sc[j]), float(cx), float(cy), float(rs[j])))
     out.sort(key=lambda t: -t[0])
     # 근접 후보 병합
     keep = []
     for c in out:
-        if all(np.hypot(c[1] - k[1], c[2] - k[2]) > 14 for k in keep):
+        if all(np.hypot(c[1] - q[1], c[2] - q[2]) > 14 * k for q in keep):
             keep.append(c)
         if len(keep) >= topn:
             break
     return keep
 
 
-def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8):
+def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1):
     """**이륙 순간 크게 움직이는 원 = 발**.
 
     판별 원리 (이게 결정적이다):
@@ -121,24 +163,31 @@ def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8):
     want = set(range(f_sit, f_lo + 2)); F = {}
     for i, f in enumerate(iio.imiter(Path(mp4))):
         if i in want:
-            F[i] = np.asarray(f, float)[..., :3].mean(axis=2)
+            g = np.asarray(f, float)[..., :3].mean(axis=2)
+            F[i] = g[::ds, ::ds] if ds > 1 else g
         if i > max(want):
             break
     if f_sit not in F or f_lo not in F:
         return None
     H, W = F[f_sit].shape
-    ys = np.arange(int(H * band[0]), int(H * band[1]), 6.0)
-    xs = np.arange(int(W * 0.10), int(W * 0.94), 6.0)
-    cands = _scan_circles(F[f_sit], ys, xs, topn=topn)
-    best = None
+    ys = np.arange(int(H * band[0]), int(H * band[1]), 6.0 * k)
+    xs = np.arange(int(W * 0.10), int(W * 0.94), 6.0 * k)
+    cands = _scan_circles(F[f_sit], ys, xs, topn=topn, k=k)
+    # ★ **발 = 로봇에서 가장 아래**  (2차 판별)
+    #   "이륙 때 움직인 원" 만으로는 부족하다 — 이륙 순간엔 허벅지 트러스도 링크도 다 움직인다.
+    #   실제로 0424(카메라 먼 세션)에서 **트러스 구멍**을 발로 오인했다 (08-08).
+    #   발은 지면에 닿아 있으므로 로봇 부품 중 화면상 **가장 아래**다 — 이건 애매하지 않다.
+    ok_list = []
     for s0, cx, cy, r0 in cands:
         c = np.array([cx, cy], float); v = np.zeros(2); rr = [r0]; okk = True
         for i in range(f_sit + 1, f_lo + 1):
             if i not in F:
                 okk = False; break
             pred = c + v
-            w = float(np.clip(2.5 * np.hypot(*v) + 6.0, 6.0, 60.0))
-            sc, nx, ny, nr = VS.fit_roller(F[i], pred[0], pred[1], win=w, win_y=7.0)
+            w = float(np.clip(2.5 * np.hypot(*v) + 6.0 * k, 6.0 * k, 60.0 * k))
+            sc, nx, ny, nr = VS.fit_roller(F[i], pred[0], pred[1], win=w, win_y=7.0 * k,
+                                           rrange=(9.0 * k, 26.0 * k, 0.1 * k),
+                                           d=VS.EDGE_D * k, refine=0.1 * k)
             v = np.array([nx, ny]) - c; c = np.array([nx, ny]); rr.append(nr)
         if not okk:
             continue
@@ -146,9 +195,18 @@ def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8):
         if rr.std() / max(rr.mean(), 1e-9) > 0.20:          # 반지름 붕괴 → 발이 아님
             continue
         moved = float(abs(c[0] - cx))
-        if best is None or moved > best[4]:
-            best = (s0, float(cx), float(cy), float(np.median(rr)), moved)
-    return best
+        if moved < 3.0 * k:                                  # 이륙에 안 움직임 → 배경
+            continue
+        ok_list.append((s0, float(cx), float(cy), float(np.median(rr)), moved))
+    if not ok_list:
+        return None
+    ymax = max(c[2] for c in ok_list)
+    low = [c for c in ok_list if c[2] > ymax - 6.0 * r0max(ok_list)]   # 최하단 무리
+    return max(low, key=lambda c: c[4])                      # 그중 이륙 변위 최대 = 발
+
+
+def r0max(lst):
+    return max(c[3] for c in lst) if lst else 1.0
 
 
 # ── ⑤ 융합 ───────────────────────────────────────────────────────────────────
@@ -173,24 +231,54 @@ def measure(sess, trial, *, verbose=True):
         return dict(sess=sess, trial=trial, ok=False, reason="segment/t_lo 없음")
     t_lo = float(seg["t_lo"])
 
-    prof = motion_profile(mp4)
+    vm = video_meta(mp4); fps = vm["fps"]; k = vm["k"]; ds = vm["ds"]
+    prof = motion_profile(mp4, k=k, ds=ds)
     f_lo, r0f, r1f = liftoff_frame(prof)
     if f_lo is None or f_lo < 40:
         return dict(sess=sess, trial=trial, ok=False, reason=f"이륙 프레임 검출 실패 (f_lo={f_lo})",
                     mp4=mp4.name)
-    fps = FPS_DEFAULT
-    shift = t_lo - f_lo / fps                      # 데이터시각 = 영상시각 + shift
+    shift = t_lo - f_lo / fps                      # 데이터시각 = 영상시각 + shift (뒤에서 재확정)
 
-    f0 = max(2, f_lo - 110)                        # 하강 시작 부근
-    fd = find_foot(mp4, f_lo)
-    if fd is None:
-        return dict(sess=sess, trial=trial, ok=False, reason="발 자동 탐색 실패", mp4=mp4.name)
-    sc0, cx0, cy0, r0, moved = fd
+    f0 = max(2, f_lo - int(round(4.5 * fps)))      # 하강 시작 부근 (~4.5초 전)
+    sd = seed_of(sess, k)
+    if sd is not None:
+        # 세션 시드 → 스쿼트 바닥 프레임에서 **반지름 구속**하며 국소 정밀화
+        import imageio.v3 as iio
+        f_sit0 = max(4, f_lo - max(6, int(round(0.6 * fps))))
+        G = None
+        for i, fr in enumerate(iio.imiter(mp4)):
+            if i == f_sit0:
+                g = np.asarray(fr, float)[..., :3].mean(axis=2)
+                G = g[::ds, ::ds] if ds > 1 else g
+                break
+        if G is None:
+            return dict(sess=sess, trial=trial, ok=False, reason="시드 프레임 읽기 실패")
+        rc = sd[2]
+        sc0, cx0, cy0, r0 = VS.fit_roller(G, sd[0], sd[1], win=60.0 * k, win_y=45.0 * k, step=2.0,
+                                          rrange=(rc * 0.70, rc * 1.30, 0.1 * k),
+                                          d=VS.EDGE_D * k, refine=0.1 * k)
+        moved = float("nan")
+    else:
+        fd = find_foot(mp4, f_lo, back=max(6, int(round(0.6 * fps))), k=k, ds=ds)
+        if fd is None:
+            return dict(sess=sess, trial=trial, ok=False,
+                        reason="발 시드 없음 (SEED_CAL 미등재 + 자동 탐색 실패)", mp4=mp4.name)
+        sc0, cx0, cy0, r0, moved = fd
 
     # 시드는 **스쿼트 바닥(f_lo-14)** 기준 → 거기서 앞뒤로 나눠 추적
-    f_sit = max(4, f_lo - 14)
-    tb = VS.track_roller(mp4, f0, f_sit, (cx0, cy0))          # 뒤로(=시간 역순 아님, f0→f_sit)
-    tf = VS.track_roller(mp4, f_sit, max(f_sit, f_lo - 1), (tb[f_sit]["cx"], tb[f_sit]["cy"]))
+    f_sit = max(4, f_lo - max(6, int(round(0.6 * fps))))
+    _rc = r0 if r0 and np.isfinite(r0) else 16.0 * k
+    TK = dict(win_min=6.0 * k, win_max=60.0 * k, win_y=7.0 * k, ds=ds,
+              rrange=(_rc * 0.70, _rc * 1.30, 0.1 * k), d=VS.EDGE_D * k, refine=0.1 * k)
+    tb = VS.track_roller(mp4, f0, f_sit, (cx0, cy0), order="rev", **TK)   # ★ 역방향
+    # ★ 이륙 추정치 **너머까지** 추적하고, 접지 종료는 아래 유효성 절단이 정한다.
+    #   프레임차분 기반 이륙 검출은 fps 에 편향된다 — 24fps 는 푸시가 2~3프레임이라
+    #   "최대의 50% 첫 교차" 가 맞았지만, 59fps 는 푸시가 15프레임에 걸쳐 올라가
+    #   같은 규칙이 **푸시 중간**에서 발동한다 (0424: 검출 f294, 실제 이륙 ~f301).
+    #   물리(발이 지면을 떠남)가 정하게 두면 fps 와 무관해진다.
+    f_hi = int(min(len(prof) - 1, np.argmax(prof) + 0.15 * fps))
+    tf = VS.track_roller(mp4, f_sit, max(f_sit, f_hi),
+                         (tb[f_sit]["cx"], tb[f_sit]["cy"]), **TK)
     tr = {**tb, **tf}
     R = np.array([v["r"] for v in tr.values()]); S = np.array([v["score"] for v in tr.values()])
     ok = S > np.percentile(S, 25)
@@ -206,8 +294,8 @@ def measure(sess, trial, *, verbose=True):
     cxs = np.array([tr[k]["cx"] for k in ks])
     last = len(ks) - 1
     for j in range(3, len(ks)):
-        if (abs(cys[j] - y0) > 8.0 or scs[j] < 0.5 * s0
-                or abs(cxs[j] - cxs[j - 1]) > 60.0):        # 1프레임 60px 초과 = 물리적 불가
+        if (abs(cys[j] - y0) > 8.0 * k or scs[j] < 0.5 * s0
+                or abs(cxs[j] - cxs[j - 1]) > 60.0 * k * 24.0 / fps):   # 1프레임 물리 한계
             last = j - 1; break
     ks = ks[: last + 1]
     f_end = ks[-1]
@@ -261,22 +349,30 @@ def measure(sess, trial, *, verbose=True):
         qc.append(f"지름 산포 {rel*100:.0f}% (>10%)")
     if float(np.min(S)) < 40:
         qc.append(f"최저 추적점수 {np.min(S):.0f} (<40)")
-    if moved < 15:
-        qc.append(f"이륙 변위 {moved:.0f}px (<15 — 발 오탐 가능)")
+    if np.isfinite(moved) and moved < 15 * k * 24.0 / fps:
+        qc.append(f"이륙 변위 {moved:.0f}px (<{15*k*24.0/fps:.0f} — 발 오탐 가능)")
+    if sd is None:
+        qc.append("SEED_CAL 미등재 — 자동 탐색 시드 (신뢰도 낮음, 검증 시트 필수)")
     if abs(shift) > 20:
         qc.append(f"동기 shift {shift:+.1f}s (비정상)")
-    if f_end < f_lo - 2:
-        qc.append(f"접지 절단 f{f_end} (이륙 f{f_lo} 보다 {f_lo-f_end}프레임 이름 — 동기 의심)")
+    if f_end >= f_hi:
+        qc.append(f"접지 절단 미발생 (f{f_end} = 추적 끝) — 이륙 이후까지 추적됐을 수 있음")
+    if abs(f_end - f_lo) > 0.30 * fps:
+        qc.append(f"접지끝 f{f_end} vs 차분이륙 f{f_lo} 차이 {abs(f_end-f_lo)}프레임")
     if B["푸시~이륙"][1] - B["푸시~이륙"][0] < 2:
         qc.append("푸시 구간 프레임 <2 (분해능 부족)")
 
     res = dict(sess=sess, trial=trial, ok=True, mp4=mp4.name, fps=fps,
-               f_lo=f_lo, f_end=f_end, jump_run=[r0f, r1f], t_lo=t_lo, shift=shift, f0=f0,
+               vid_w=vm["w"], vid_h=vm["h"], vid_n=vm["n"], px_k=k, px_ds=ds,
+               f_lo=f_lo, f_end=f_end, f_hi=f_hi, jump_run=[r0f, r1f], t_lo=t_lo,
+               shift=shift, f0=f0,
                seed=[cx0, cy0], seed_r=r0, seed_moved=moved,
                dia_px=dia, scale=s_mm, rel_sd=rel,
                score_min=float(np.min(S)), score_med=float(np.median(S)),
                r_foot_mm=rfoot * 1000, seg=segs, sync_sens_mm=sens, qc=qc,
-               series=dict(f=fi.tolist(), x=x_mm.tolist(), roll=roll.tolist(), slip=slip.tolist()))
+               series=dict(f=fi.tolist(), x=x_mm.tolist(), roll=roll.tolist(), slip=slip.tolist(),
+                           cx=[tr[int(q)]["cx"] for q in fi], cy=[tr[int(q)]["cy"] for q in fi],
+                           r=[tr[int(q)]["r"] for q in fi], sc=[tr[int(q)]["score"] for q in fi]))
     if verbose:
         _pr(res)
     return res
@@ -286,7 +382,7 @@ def _pr(r):
     if not r["ok"]:
         print(f"  ✗ {r['sess']}/{r['trial']}: {r['reason']}")
         return
-    print(f"  {r['sess']}/{r['trial']:<20s} 자 {r['scale']:.4f} mm/px (지름 {r['dia_px']:.1f}px "
+    print(f"  {r['sess']}/{r['trial']:<20s} {r['fps']:.0f}fps {r['vid_w']}x{r['vid_h']} · 자 {r['scale']:.4f} mm/px (지름 {r['dia_px']:.1f}px "
           f"±{r['rel_sd']*100:.0f}%) · 이륙 f{r['f_lo']} · shift {r['shift']:+.2f}s"
           + ("   ⚠ " + " / ".join(r["qc"]) if r["qc"] else ""))
     g = r["seg"]
@@ -321,7 +417,8 @@ def main():
             r = dict(sess=s, trial=q, ok=False, reason=f"{type(ex).__name__}: {str(ex)[:70]}")
             print(f"  ✗ {s}/{q}: {r['reason']}")
         OUT[f"{s}/{q}"] = r
-        json.dump(OUT, io.open(OUT_JSON, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        import safe                                   # 헌법 6: 다중 프로세스 JSON = 원자적 쓰기
+        safe.atomic_json_write(OUT_JSON, OUT)
     good = [v for v in OUT.values() if v.get("ok")]
     print(f"\n성공 {len(good)}/{len(OUT)} · 저장: {OUT_JSON.name}")
 
