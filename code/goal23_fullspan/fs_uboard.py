@@ -90,7 +90,7 @@ def run_board():
                 continue
             i0 = int(np.argmax(m))
             t = tt[m] - tt[i0]
-            sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
+            sp = FR.sess_params(s)      # ★ G63: FS_NOBIAS/FS_NODEEP 존중 (단일 출처)
             # ---- MA (전 세션, held-out 포함) ----
             Lm = FR.rollout_ol_fs_b(ft, t, d["raw1"][m], d["raw2"][m],
                                     float(d["q1"][i0]), float(d["q2"][i0]),
@@ -106,9 +106,21 @@ def run_board():
             # **제어 모드**로 판정해야 0421 CL이 조용히 누락되지 않는다.
             if s not in FD.FF_SESS and g:
                 init = tuple(float(d[k][i0]) for k in ("q1", "q2", "dq1", "dq2", "raw1", "raw2"))
+                # ★ G64: 커맨드층 노브 (기본 1.0/1.0 = 기존 `tuple(g)` 와 **완전 동일**).
+                #   FS_TKOVR = 무릎 kp 배율(α) · FS_KDSC = 무릎 kd 배율.
+                #   토크맵을 바꾸면 폐루프 실효 강성이 바뀌므로 α 를 되물어야 한다 (철칙 10).
+                #   FS_TKMODE=table  → 무릎 α 를 **배포 TK 표(로그보간)** 에서 조회, kd×0.20.
+                #     (사용자 지시 08-08: "α=1 로 통일할 게 아니라 TK 표대로 통일해서 비교")
+                #   기본(미설정) 은 α=1·kd=1 = 기존 `tuple(g)` 와 완전 동일.
+                if os.environ.get("FS_TKMODE") == "table":
+                    _tko = FR.alpha_of(g[2]); _kds = 0.20
+                else:
+                    _tko = float(os.environ.get("FS_TKOVR", "1.0"))
+                    _kds = float(os.environ.get("FS_KDSC", "1.0"))
+                gcl = (g[0], g[1], g[2] * _tko, g[3] * _kds)
                 Lc = FR.rollout_cl_fs(ft, t, sh(d["qd1"][m]), sh(d["qd2"][m]),
                                       sh(d["dqd1"][m]), sh(d["dqd2"][m]),
-                                      tuple(g), float(t[-1]), two_stage=True, bias1=sp["bias1"],
+                                      gcl, float(t[-1]), two_stage=True, bias1=sp["bias1"],
                                       knee_deep=sp["knee_deep"], fade=True, taulim=None,
                                       vdes_ff=(s != "26.04.21"), init_meas=init)
                 if Lc is not None:

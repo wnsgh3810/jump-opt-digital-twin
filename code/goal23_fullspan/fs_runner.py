@@ -1433,6 +1433,44 @@ def fit_knee_deep():
     import json as _j
     safe.atomic_json_write(HERE / "_fs_knee_deep.json", FIT)
     print("done")
+TK_TABLE = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}   # 배포 무릎 α 표 (OLD 규약)
+
+
+def alpha_of(kp, tab=None):
+    """무릎 α 조회 — 표 밖 게인은 **log-kp 선형 보간** (표 범위 밖은 단부값 고정).
+
+    ★ 단일 출처 (G65). 기존에 `fs_compare_plot.alpha_of` 에만 있었고 `baseline_fs` 는
+      `TK.get(kp, 0.656)` 고정 폴백을 썼다 — P17 사용자 지적: 고정 폴백은 표 밖 게인
+      (150/200/350) 을 전부 0.656 으로 만들어 **비교를 왜곡**한다. 보간이 정본이다.
+    """
+    tab = tab or TK_TABLE
+    ks = sorted(tab)
+    if kp in tab:
+        return tab[kp]
+    if kp <= ks[0]:
+        return tab[ks[0]]
+    if kp >= ks[-1]:
+        return tab[ks[-1]]
+    return float(np.interp(np.log(kp), np.log(ks), [tab[k] for k in ks]))
+
+
+def sess_params(sess):
+    """세션 상수(bias1 · knee_deep) 조회 — **FS_NOBIAS / FS_NODEEP 존중** (G63 단일 출처).
+
+    ★ 침묵실패 이력: 이 두 스위치를 `_G13_board.py` / `_G51_allboard.py` 가 **각자 안에서만**
+      처리했다. 그래서 같은 스택 env 를 줘도 `fs_compare_plot`(G54 적발) 과 `fs_uboard`(G63 적발)
+      는 세션 상수를 **켠 채** 돌았다 — 0421 q2 가 심판 3.99 vs 그림 7.13 으로 갈렸다.
+      호출처마다 재구현하지 말고 **여기 하나만** 쓴다.
+    ※ `_G13_board` 는 지표가 동결돼 있어 인라인 구현을 그대로 둔다 (로직 동일 확인됨).
+    """
+    sp = _sess_params().get(sess) or dict(bias1=0.0, knee_deep=None)
+    if os.environ.get("FS_NOBIAS") == "1":
+        sp = dict(sp, bias1=0.0)
+    if os.environ.get("FS_NODEEP") == "1":
+        sp = dict(sp, knee_deep=None)
+    return sp
+
+
 def _sess_params():
     import fs_data as FD
     if os.environ.get("FS_FIXED") == "1":

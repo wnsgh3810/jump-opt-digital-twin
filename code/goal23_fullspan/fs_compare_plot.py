@@ -42,20 +42,8 @@ TH = {60: 0.70, 120: 0.50, 150: 0.40}
 
 
 def sess_params(sess):
-    """세션 상수(bias1 · knee_deep) 조회 — **FS_NOBIAS / FS_NODEEP 존중** (마라톤G G53 추가).
-
-    ★ 왜 필요한가 (침묵실패 사례): 이 두 스위치는 그동안 `_G13_board.py` / `_G51_allboard.py`
-      **안에서만** 처리됐고 `fs_runner.py` 에도 이 파일에도 없었다. 그래서 마라톤G 스택
-      (인공층 전멸 = 세션 상수 0)을 env 로 넘겨도 **이 스크립트는 세션 상수를 그대로 켠 채** 돌았고,
-      같은 구성인데 0421 q2 가 심판 3.99 vs 그림 7.13 으로 갈렸다 (사용자 지적으로 발각).
-      두 경로가 같은 자를 쓰도록 정본 한 곳에 모은다.
-    """
-    sp = FR._sess_params().get(sess) or dict(bias1=0.0, knee_deep=None)
-    if os.environ.get("FS_NOBIAS") == "1":
-        sp = dict(sp, bias1=0.0)
-    if os.environ.get("FS_NODEEP") == "1":
-        sp = dict(sp, knee_deep=None)
-    return sp
+    """G63: 단일 출처 `fs_runner.sess_params` 로 위임 (구현 중복 제거)."""
+    return FR.sess_params(sess)
 
 
 def alpha_of(tab, kp):
