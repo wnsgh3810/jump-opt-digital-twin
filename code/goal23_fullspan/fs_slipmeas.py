@@ -101,7 +101,23 @@ def liftoff_frame(prof, *, lo=0.25, hi=0.50, min_run=3):
     return f, int(run[0]), int(run[-1])
 
 
-# ── ③ 발 시드 (세션별 표 + 반지름 구속) ──────────────────────────────────────
+# ── ③ 발 시드 ────────────────────────────────────────────────────────────────
+#
+# ★★ 결론 (08-09): **자동 전역 탐색은 이 데이터에 대해 작동하지 않는다.** ★★
+#   다섯 가지 판별을 시도했고 전부 다르게 실패했다:
+#     (1) 최고 점수 원          → 광학테이블 볼트머리·브래킷 나사
+#     (2) 이륙 때 움직인 원      → 허벅지 트러스 구멍 (이륙엔 로봇 전체가 움직인다)
+#     (3) 가장 아래 원          → 광학테이블 볼트 구멍 (테이블이 발보다 아래)
+#     (4) (2) AND (3) 결합       → 여전히 실패 (발이 상위 후보에 못 듦)
+#     (5) 후보 45개로 확대 + (4) → 여전히 실패 (0602/150_2.2_250_3)
+#   근본 원인: 롤러는 지름 20~60px 의 **저대비** 원인데, 화면에는 작고 고대비인 원
+#   (볼트머리·나사·구멍)이 수십 개 있다. 방사 기울기 점수는 후자를 항상 선호한다.
+#
+#   ⇒ **수동 시드가 정답이다.** 등재한 두 세션(0723·0424)은 **둘 다 한 번에 성공**했다.
+#     그리고 **세션 단위로는 부족하다** — 같은 세션 안에서도 로봇 설치 위치가
+#     trial 마다 달라(카메라는 고정) 0602 의 세션 시드가 다른 trial 에서 볼트에 락온했다.
+#     ⇒ **trial 단위 시드**를 `_G75_seedzoom.py` 로 읽어 SEED_CAL 에 등재한다.
+#        키는 "<세션>/<trial>" 형식을 우선 조회하고, 없으면 세션 키로 폴백.
 #
 # 왜 완전 자동을 포기했나 (08-08)
 #   전역 원 탐색은 **광학 테이블 볼트 머리·브래킷 나사·트러스 구멍**이 점수에서 이긴다.
@@ -137,8 +153,10 @@ R_PRIOR = {720: 16.2, 1080: 29.4}
 SECTOR_CAL = {"26.06.02": (120.0, 240.0)}      # 좌측 위주 (아래가 화면 밖)
 
 
-def seed_of(sess, k=1.0):
-    """세션 시드 (cx, cy, r_expect). 미등재면 None → 반지름 구속 자동 탐색."""
+def seed_of(sess, trial=None, k=1.0):
+    """시드 (cx, cy, r_expect). **trial 키 우선**, 없으면 세션 키, 그것도 없으면 None."""
+    if trial and f"{sess}/{trial}" in SEED_CAL:
+        return SEED_CAL[f"{sess}/{trial}"]
     return SEED_CAL.get(sess)
 
 
@@ -172,7 +190,8 @@ def _scan_circles(g, ys, xs, *, rrange=(6.0, 30.0, 0.5), topn=40, k=1.0):
     return keep
 
 
-def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1, rprior=None):
+def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=45, k=1.0, ds=1, rprior=None):
+    """⚠ 폴백 전용 — 신뢰하지 말 것. 위 주석의 5회 실패 기록 참조."""
     """**이륙 순간 크게 움직이는 원 = 발**.
 
     판별 원리 (이게 결정적이다):
@@ -225,9 +244,14 @@ def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1, rpr
         ok_list.append((s0, float(cx), float(cy), float(np.median(rr)), moved))
     if not ok_list:
         return None
+    # ★ **움직인 것 중 가장 아래** = 발.  두 조건을 반드시 **함께** 써야 한다:
+    #   "움직인 원"만 → 허벅지 트러스 구멍(이륙엔 로봇 전체가 움직임)
+    #   "가장 아래"만 → 광학테이블 볼트 구멍(테이블이 발보다 아래)
+    #   그리고 후보 수(topn)가 적으면 발이 목록에 아예 못 든다 — 볼트머리·나사가
+    #   대비 점수로 이기기 때문. 45개까지 받아서 위 두 조건으로 거른다.
     ymax = max(c[2] for c in ok_list)
-    low = [c for c in ok_list if c[2] > ymax - 6.0 * r0max(ok_list)]   # 최하단 무리
-    return max(low, key=lambda c: c[4])                      # 그중 이륙 변위 최대 = 발
+    low = [c for c in ok_list if c[2] > ymax - 4.0 * max(c2[3] for c2 in ok_list)]
+    return max(low, key=lambda c: c[4])
 
 
 def r0max(lst):
@@ -266,7 +290,7 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
 
     f0 = max(2, f_lo - int(round(4.5 * fps)))      # 하강 시작 부근 (~4.5초 전)
     sec = SECTOR_CAL.get(sess, VS.SECTOR)      # 가장자리에 붙은 세션은 원호를 돌린다
-    sd = seed_of(sess, k)
+    sd = seed_of(sess, trial, k)
     if sd is not None:
         # 세션 시드 → 스쿼트 바닥 프레임에서 **반지름 구속**하며 국소 정밀화
         import imageio.v3 as iio
