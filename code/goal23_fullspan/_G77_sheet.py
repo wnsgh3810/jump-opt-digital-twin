@@ -65,8 +65,7 @@ def trials_of(sess):
 
 def fit_one(g, cx0, cy0, r0, win=12.0, rtol=0.18):
     """`_G77_footfit` — 각도 중앙값 + 내부 게이트. 링크 가장자리·부분 가림을 배제한다."""
-    sc, cx, cy, r, sec, inn, ok = FF.fit_foot(g, cx0, cy0, r0, win=win, rtol=rtol)
-    return (sc, cx, cy, r, sec, inn, ok)
+    return FF.fit_foot(g, cx0, cy0, r0, win=win, rtol=rtol)
 
 
 def cell(G, sx, sy, fit, label, hw, hh, zoom, grid=20):
@@ -120,18 +119,19 @@ def main():
         G, vm, f_sit, mp4 = Z.sit_frame(sess, t)
         g = G.mean(axis=2) if G.ndim == 3 else G.astype(float)
         fit = fit_one(g, sx, sy, sr, win=win, rtol=rtol)
-        sc, cx, cy, r, sec, inn, ok = fit
+        sc, cx, cy, r, sec, inn, ok, br = fit
         mmpx = 30.0 / (2 * r)
         rec[key] = dict(cx=round(cx, 2), cy=round(cy, 2), r=round(r, 2), score=round(sc, 1),
                         sector=list(sec), mm_per_px=round(mmpx, 4), f_sit=int(f_sit),
                         ds=int(vm["ds"]), fps=round(vm["fps"], 2), manual=key in man,
-                        inner=round(inn, 1), gate=bool(ok))
+                        inner=round(inn, 1), gate=bool(ok), bright=round(br, 1))
         m = "M" if key in man else " "
         print(f" {m}{t:22s} 시드({sx:6.0f},{sy:7.0f}) → ({cx:7.2f},{cy:8.2f}) r{r:5.2f} "
-              f"점수{sc:6.1f} 내부{inn:6.1f} {'통과' if ok else '★탈락'} 자{mmpx:.4f}")
+              f"점수{sc:6.1f} 내부{inn:6.1f} 밝기{br:6.1f} "
+              f"{'통과' if ok else '★탈락'} 자{mmpx:.4f}")
         z = max(2, int(round(760 / (2 * hw))))
         cells.append(cell(G, sx, sy, fit,
-                          f"{t}  r{r:.1f} 점{sc:.0f} 내{inn:.0f}"
+                          f"{t}  r{r:.1f} 점{sc:.0f} 내{inn:.0f} 밝{br:.0f}"
                           f"{'' if ok else ' ★탈락'}{'  [수동]' if m == 'M' else ''}",
                           hw, hh, z))
     if not cells:

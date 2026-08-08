@@ -78,6 +78,28 @@ def motion_profile(mp4, step=4, k=1.0, ds=1):
     return np.asarray(prof)
 
 
+PROFCACHE = HERE / "graphs" / "G72_seed" / "_profcache"
+
+
+def motion_profile_cached(mp4, k=1.0, ds=1):
+    """`motion_profile` 을 mp4 별로 캐시한다.
+
+    왜 — 2패스(세션 자 확정 → 재측정)면 trial 당 **영상 전체를 두 번** 훑는다.
+    4K 59fps 는 한 번이 수십 초라 전수에서 이것만으로 몇 시간이 간다.
+    프레임차분은 영상만의 함수(결정적)이므로 캐시해도 값이 달라지지 않는다.
+    """
+    PROFCACHE.mkdir(parents=True, exist_ok=True)
+    fp = PROFCACHE / f"{Path(mp4).stem}_k{k:.3f}_ds{ds}.npy"
+    if fp.exists():
+        try:
+            return np.load(fp)
+        except Exception:
+            pass
+    prof = motion_profile(mp4, k=k, ds=ds)
+    np.save(fp, prof)
+    return prof
+
+
 def liftoff_frame(prof, *, lo=0.25, hi=0.50, min_run=3):
     """이륙 프레임 검출.
 
@@ -141,6 +163,19 @@ SEED_CAL = {
     #   ⇒ SEED_CAL 은 세션 단위로 부족하다 — **trial 단위 시드**가 필요하다.
     #   "26.06.02": (417.0, 1262.0, 17.0),   # 120_2_120_2 기준. 세션 공용 불가.
 }
+
+# ★ trial 단위 시드의 **단일 출처** = `_G77_seeds.json` (판독 산출물, _G77_sheet.py 가 씀).
+#   여기 딕셔너리에 손으로 55줄을 옮겨 적지 않는다 — 옮겨 적는 순간 두 곳이 갈라진다.
+#   내부 게이트를 통과한 것만 싣는다 (gate=False 는 사람이 다시 봐야 하는 것이다).
+_SEEDJSON = HERE / "_G77_seeds.json"
+if _SEEDJSON.exists():
+    try:
+        _SEEDGATE = {}
+        for _k, _v in json.load(io.open(_SEEDJSON, encoding="utf-8")).items():
+            SEED_CAL[_k] = (float(_v["cx"]), float(_v["cy"]), float(_v["r"]))
+            _SEEDGATE[_k] = bool(_v.get("gate", True))
+    except Exception as _ex:                       # 판독 파일이 깨져도 측정은 돌게
+        print(f"[경고] _G77_seeds.json 읽기 실패 — 세션 시드만 사용: {_ex}")
 
 
 # 처리 해상도(가로 px)별 발 금속판 **반지름 사전**. 등재 세션에서 실측한 값.
@@ -281,7 +316,7 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     t_lo = float(seg["t_lo"])
 
     vm = video_meta(mp4); fps = vm["fps"]; k = vm["k"]; ds = vm["ds"]
-    prof = motion_profile(mp4, k=k, ds=ds)
+    prof = motion_profile_cached(mp4, k=k, ds=ds)
     f_lo, r0f, r1f = liftoff_frame(prof)
     if f_lo is None or f_lo < 40:
         return dict(sess=sess, trial=trial, ok=False, reason=f"이륙 프레임 검출 실패 (f_lo={f_lo})",
@@ -290,7 +325,7 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
 
     f0 = max(2, f_lo - int(round(4.5 * fps)))      # 하강 시작 부근 (~4.5초 전)
     sec = SECTOR_CAL.get(sess, VS.SECTOR)      # 가장자리에 붙은 세션은 원호를 돌린다
-    sd = seed_of(sess, trial, k)
+    sd = seed_of(sess, trial, k); _seed_warn = None
     if sd is not None:
         # 세션 시드 → 스쿼트 바닥 프레임에서 **반지름 구속**하며 국소 정밀화
         import imageio.v3 as iio
@@ -304,9 +339,18 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
         if G is None:
             return dict(sess=sess, trial=trial, ok=False, reason="시드 프레임 읽기 실패")
         rc = sd[2]
-        sc0, cx0, cy0, r0 = VS.fit_roller(G, sd[0], sd[1], win=60.0 * k, win_y=45.0 * k, step=2.0,
-                                          rrange=(rc * 0.70, rc * 1.30, 0.1 * k), sector=sec,
-                                          d=VS.EDGE_D * k, refine=0.1 * k)
+        # ★ 시드 정밀화는 **발 전용 맞춤**(_G77_footfit: 각도 중앙값 + 내부 게이트)으로.
+        #   구 코드는 win=60px 로 넓게 찾았는데, 그 창이면 **종아리 링크의 밝은 가장자리**가
+        #   점수로 이긴다 (0602 에서 6/6 전부 링크로 끌려갔다). 시드가 trial 단위로
+        #   정확해진 지금은 좁은 창(±10px)이 맞고, 내부 게이트가 링크를 배제한다.
+        import _G77_footfit as FF
+        sc0, cx0, cy0, r0, _sec, _inn, _ok, _br = FF.fit_foot(
+            G, sd[0], sd[1], rc, win=10.0 * k, rtol=0.18, step=1.0, refine=0.25)
+        # 게이트 탈락은 **경고**지 실패가 아니다. 0324 처럼 발이 "두꺼운 검은 고무 타이어 +
+        # 밝은 금속 중앙" 이면 '안이 깨끗하다' 가정이 애초에 성립하지 않는다 (중앙에 큰 허브 구멍).
+        # 시드는 이미 사람이 시트로 확인한 값이므로, 여기서 막지 말고 QC 로 넘긴다.
+        _seed_warn = (f"시드 게이트 탈락 (내부 {_inn:.1f} · 밝기차 {_br:.1f} "
+                      f"vs 테두리 {sc0:.1f}) — 검증 시트 확인 필수") if not _ok else None
         moved = float("nan")
     else:
         rp = r_prior(vm["w"] / ds)
@@ -321,15 +365,29 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     _rc = r0 if r0 and np.isfinite(r0) else 16.0 * k
     TK = dict(win_min=6.0 * k, win_max=60.0 * k, win_y=7.0 * k, ds=ds, sector=sec,
               rrange=(_rc * 0.70, _rc * 1.30, 0.1 * k), d=VS.EDGE_D * k, refine=0.1 * k)
-    tb = VS.track_roller(mp4, f0, f_sit, (cx0, cy0), order="rev", **TK)   # ★ 역방향
+    # 추적기 A/B: FS_FOOTTRK=1 이면 발 전용(_G77_footfit.track_foot), 아니면 정본 track_roller.
+    #   기본을 정본으로 둔 이유 = 0723/150_2.2_250_3 푸시 −43.1mm 회귀 기준을 지키기 위해.
+    #   전환은 그 기준을 재현한 뒤에만 (아래 _G78 A/B 참조).
+    _ft = bool(os.environ.get("FS_FOOTTRK"))
+    if _ft:
+        import _G77_footfit as FF
+        TKF = dict(win_min=6.0 * k, win_max=60.0 * k, win_y=7.0 * k, ds=ds, rtol=0.18,
+                   step=1.0, refine=0.25)
+        tb = FF.track_foot(mp4, f0, f_sit, (cx0, cy0), r0, order="rev", **TKF)
+    else:
+        tb = VS.track_roller(mp4, f0, f_sit, (cx0, cy0), order="rev", **TK)   # ★ 역방향
     # ★ 이륙 추정치 **너머까지** 추적하고, 접지 종료는 아래 유효성 절단이 정한다.
     #   프레임차분 기반 이륙 검출은 fps 에 편향된다 — 24fps 는 푸시가 2~3프레임이라
     #   "최대의 50% 첫 교차" 가 맞았지만, 59fps 는 푸시가 15프레임에 걸쳐 올라가
     #   같은 규칙이 **푸시 중간**에서 발동한다 (0424: 검출 f294, 실제 이륙 ~f301).
     #   물리(발이 지면을 떠남)가 정하게 두면 fps 와 무관해진다.
     f_hi = int(min(len(prof) - 1, np.argmax(prof) + 0.15 * fps))
-    tf = VS.track_roller(mp4, f_sit, max(f_sit, f_hi),
-                         (tb[f_sit]["cx"], tb[f_sit]["cy"]), **TK)
+    if _ft:
+        tf = FF.track_foot(mp4, f_sit, max(f_sit, f_hi),
+                           (tb[f_sit]["cx"], tb[f_sit]["cy"]), r0, **TKF)
+    else:
+        tf = VS.track_roller(mp4, f_sit, max(f_sit, f_hi),
+                             (tb[f_sit]["cx"], tb[f_sit]["cy"]), **TK)
     tr = {**tb, **tf}
     # 자(지름)·QC 는 **접지 절단 뒤 남은 프레임**으로만 계산한다 (아래에서 확정).
     #   전체 추적으로 계산했더니 이미 버린 이륙 후 프레임 때문에 "최저 점수 21" 이
@@ -414,6 +472,8 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
         qc.append(f"이륙 변위 {moved:.0f}px (<{15*k*24.0/fps:.0f} — 발 오탐 가능)")
     if sd is None:
         qc.append("SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)")
+    if sd is not None and _seed_warn:
+        qc.append(_seed_warn)
     if abs(shift) > 20:
         qc.append(f"동기 shift {shift:+.1f}s (비정상)")
     if f_end >= f_hi:
