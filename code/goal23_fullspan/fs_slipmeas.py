@@ -294,6 +294,52 @@ def r0max(lst):
 
 
 # ── ⑤ 융합 ───────────────────────────────────────────────────────────────────
+# CVT 세션의 입력 링크 길이 [m] (Clutch.xlsx 실측, 데이터 사전 확정)
+CVT_LI = {"26.04.29": 0.02508}
+
+
+class ReducedCVT:
+    """CVT(l_i≠30) 세션용 축약 상태 — 크랭크→무릎 사상을 **폐쇄 솔버**로 푼다.
+
+    `_G10_energy.Reduced` 를 감싸고 `_fw` 만 갈아 끼운다. 기본형은 knee = crank 인데
+    그건 평행사변형(l_i=30) 관례라 CVT 에서 성립하지 않는다.
+    """
+
+    def __init__(self, ft, l_i):
+        from _G10_energy import Reduced as _R
+        import mujoco as _mj
+        from cvt_core import closure as _cl
+        self._R = _R(ft); self.l_i = float(l_i); self._mj = _mj; self._cl = _cl
+        self.r = self._R.r
+        self._c = {}
+
+    def _fw(self, q1, q2, zb):
+        R = self._R; md = R.md
+        qc = -q2
+        qk, qpin, _ = self._cl(qc, self.l_i, qc)      # 초기추정 = 평행사변형 (가지 고정)
+        md.qpos[R.iq["base_z"]] = zb
+        md.qpos[R.iq["hip_m"]] = -q1 - np.pi / 2
+        md.qpos[R.iq["hip"]] = 0.0
+        md.qpos[R.iq["knee_motor"]] = qc
+        md.qpos[R.iq["cpin"]] = qpin
+        md.qpos[R.iq["knee"]] = qk
+        self._mj.mj_forward(R.m, md)
+        return md
+
+    def state(self, q1, q2):
+        k = (round(q1, 9), round(q2, 9))
+        if k in self._c:
+            return self._c[k]
+        R = self._R
+        md = self._fw(q1, q2, 0.0)
+        zb = -(float(md.geom_xpos[R.gf][2]) - R.r)
+        md = self._fw(q1, q2, zb)
+        out = (zb, float(md.geom_xpos[R.gf][0]),
+               float(np.arctan2(md.xmat[R.bf][2], md.xmat[R.bf][0])), None)
+        self._c[k] = out
+        return out
+
+
 def measure(sess, trial, *, verbose=True, force_dia=None):
     """한 trial 의 슬립·구름 분해. 실패 시 reason 을 담은 dict 반환."""
     import fs_data as FD, fs_runner as FR
@@ -428,7 +474,15 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     t_vid = fi / fps
     t_dat = t_vid + shift
 
-    Rd = Reduced(FR.fs_twin()); rfoot = VS.FOOT_R_M
+    # ★ CVT 세션(l_i≠30)은 **구름 항이 달라진다**.
+    #   기본 Reduced 는 knee = crank (평행사변형)를 가정하는데 그건 l_i=30 에서만 참이다
+    #   (검증: closure(qc, 0.030) = qc, 오차 0.00°). l_i=25.08 에서는 최대 18° 어긋나고
+    #   전달비가 0.83 → 0.09 까지 변한다. 미보정으로 재면 0429 의 구름이 −19 대신 −37 로 나와
+    #   "CVT 가 3배 미끄러진다"는 **인공 결론**이 나온다 (실제로 영상 Δx 는 거의 같다).
+    #   발이 종아리와 한 덩어리이므로 θ_foot 은 (q1, 무릎각)의 함수 —
+    #   크랭크→무릎 사상만 폐쇄 솔버로 바로잡으면 된다.
+    Rd = ReducedCVT(FR.fs_twin(), CVT_LI[sess]) if sess in CVT_LI else Reduced(FR.fs_twin())
+    rfoot = VS.FOOT_R_M
     q1f = lpf(d["q1"], 30.0); q2f = lpf(d["q2"], 30.0)
     th = np.array([Rd.state(q1f[i], q2f[i])[2] for i in range(0, len(t), 2)])
     th_v = np.interp(t_dat, t[::2], th)
