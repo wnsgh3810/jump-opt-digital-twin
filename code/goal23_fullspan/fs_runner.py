@@ -1127,7 +1127,12 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     N = int(round((t_end + t_after) / dt))
     # 마라톤G G13: 발 접촉 진단용 로깅 (xf=발 geom x, thf=발 바디 각) — **동역학 무변경**.
     # 슬립 = Δxf − r·Δthf (구름 성분 차감). 기하 요구량(_G12_slipgeo)과 같은 정의로 맞춘다.
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "bz", "xf", "thf")
+    # 마라톤G G55: tq1/tq2 = **모터 출력 총 토크** [Nm, 로봇 좌표]
+    #   = 토크맵 출력(s1/s2) + 커맨드층 보정(hip_supp · supp · rise) 전부 합산.
+    #   s1/s2 는 토크맵 출력'만'이라 인공층이 켜진 스택에서는 실제 인가량을 **과소 표시**한다.
+    #   액추에이터 gear = 1 (hip_motor→hip_m · knee_motor→knee_motor) 이므로 ctrl 크기가
+    #   곧 관절 일반화력 → 부호 추측 없이 그대로 합산해 기록한다. **동역학 무변경(로깅 전용).**
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "tq1", "tq2", "bz", "xf", "thf")
     Lg = {k: np.zeros(N) for k in keys}
     _gfoot = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
     _bfoot = int(model.geom_bodyid[_gfoot]) if _gfoot >= 0 else 0
@@ -1259,6 +1264,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1
         Lg["s2"][k] = s2
+        Lg["tq1"][k] = -float(md.ctrl[0])       # G55: 모터 출력 총 토크 = s1 + _hsupp
+        Lg["tq2"][k] = -float(md.ctrl[1])       #      = s2 + supp  (ctrl 은 모델 좌표라 부호 반전)
         Lg["bz"][k] = md.qpos[iq["base_z"]]     # ModeA 점프높이 판정 (사용자 요청 08-02)
         Lg["xf"][k] = md.geom_xpos[_gfoot][0]   # G13 발 접촉 진단 (동역학 무관)
         Lg["thf"][k] = np.arctan2(md.xmat[_bfoot][2], md.xmat[_bfoot][0])

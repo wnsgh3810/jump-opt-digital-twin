@@ -33,6 +33,7 @@ import fs_data as FD
 import fs_metric as FMET
 import fs_runner as FR
 import p25_a_twin as TW
+from _G10_energy import real_h            # 점프높이 실측 (Real Data.txt, 영상 A급)
 
 OUT = HERE / os.environ.get("FS_CMP_OUT", "_compare")   # 스택별 산출 분리 (기본 = 기존 경로)
 TAG = os.environ.get("FS_STACK_TAG", "fs")              # 그림 라벨 = 실제 스택명 (하드코딩 금지)
@@ -275,6 +276,92 @@ def cl_old_meas(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains, alphas, t_end, init_mea
     return Lg
 
 
+def ol_old_meas(tw, tg, raw1g, raw2g, st, t_end, t_after=0.004):
+    """★ G55: OLD ModeA 미러 — `TW.rollout_ol` 과 **동일 로직**에 `tq1/tq2`(모터 출력 총 토크) 추가.
+
+    왜 필요한가 (사용자 지적): 정본이 그리던 `sh1/sh2` 는 **a_hat 출력만**이다. 그러나 OLD 는
+    그 위에 `hip_supp_scalar` · `supp_scalar` · `rise_term` 을 얹어 액추에이터에 넣는다.
+    ⇒ 지금까지 OLD 의 τ 는 **실제 인가량보다 작게** 그려지고 있었다.
+    `tq1/tq2` = 액추에이터에 실제로 들어간 값 (gear=1 이라 ctrl 크기 = 관절 일반화력).
+    ※ 무릎 `spr_tau(tql)` 는 `knee` 관절(모터 관절과 다른 DOF)에 걸리는 **부하연동 스프링**이라
+      모터 출력이 아니다 — 별도 키 `spr` 로 남겨 필요 시 참고.
+    검증은 `golden_mirror_ma()` 가 `TW.rollout_ol` 과 비트 대조한다 (침묵실패 방역).
+    """
+    P = tw["P"]
+    mj = P.J._P["mj"]
+    RU = TW.RU                  # cl_old_meas 와 동일 관례 (모듈 전역 아님 — 지역 바인딩)
+    law_a, law_b, law_v0 = tw["law"]
+    tm = tw["tm"]; kr = tw["kr"]; sprm = tw["sprm"]
+    A = P.A_PAPER
+    model = tw["model"]
+    md = mj.MjData(model)
+    dof_knee = safe.dofadr(model, "knee", mj)
+    iq_k = safe.qadr(model, "knee", mj)
+    md.qpos[:] = st["qpos"]; md.qvel[:] = st["qvel"]
+    mj.mj_forward(model, md)
+    dt = model.opt.timestep
+    N = int((t_end + t_after) / dt)
+    tl = np.arange(N) * dt
+    Lg = {k: np.zeros(N) for k in ("q1", "q2", "dq1", "dq2", "sh1", "sh2", "tq1", "tq2", "spr", "bz")}
+    c1f, c2f = st["c1f"], st["c2f"]
+    al = dt / max(tm, dt)
+    for k in range(N):
+        tc = tl[k]
+        v1c = -md.qvel[1]; v2c = -md.qvel[2]
+        if tc <= t_end:
+            c1 = float(np.interp(tc, tg, raw1g))
+            c2 = float(np.interp(tc, tg, raw2g))
+            c1f += al * (c1 - c1f); c2f += al * (c2 - c2f)
+            c1 = float(np.clip(c1f, -TW.R19.CLIP, TW.R19.CLIP))
+            c2 = float(np.clip(c2f, -TW.R19.CLIP, TW.R19.CLIP))
+            s1 = float(P.J.ahat(A, np.array([c1]), np.array([v1c]))[0])
+            s2 = float(P.J.ahat(A, np.array([c2]), np.array([v2c]))[0])
+            supp = RU.supp_scalar(s2, v2c, law_a, law_b, law_v0)
+            if kr:
+                supp += float(RU.rise_term(v2c, kr, law_v0))
+            tql = RU.spr_tau(float(md.qpos[iq_k]), abs(s2), sprm) if sprm is not None else 0.0
+            md.ctrl[:] = [-(s1 + RU.hip_supp_scalar(s1, s2, v1c)), -(s2 + supp)]
+            md.qfrc_applied[dof_knee] = tql
+        else:                                                   # a_full23 비행 규약
+            s1 = s2 = 0.0; tql = 0.0
+            md.ctrl[:] = [-(0.0 + RU.HIP["a1"]), -(0.0 + law_a)]
+            md.qfrc_applied[dof_knee] = 0.0
+        Lg["tq1"][k] = -float(md.ctrl[0]); Lg["tq2"][k] = -float(md.ctrl[1])
+        Lg["spr"][k] = tql
+        try:
+            mj.mj_step(model, md)
+        except Exception:
+            return None
+        if abs(md.qpos[0]) > 5 or not np.isfinite(md.qpos).all():
+            return None
+        Lg["q1"][k] = -md.qpos[1] - np.pi / 2; Lg["q2"][k] = -md.qpos[2]
+        Lg["dq1"][k] = -md.qvel[1]; Lg["dq2"][k] = -md.qvel[2]
+        Lg["sh1"][k] = s1; Lg["sh2"][k] = s2; Lg["bz"][k] = md.qpos[0]
+    Lg["t"] = tl
+    return Lg
+
+
+def golden_mirror_ma(d, seg):
+    """미러 신뢰 검증: ol_old_meas == 정본 TW.rollout_ol (침묵실패 방역, cl 판과 동일 규약)."""
+    pw = FD.plot_window(d["_fold"], d)
+    if pw is None:
+        return None
+    tt = d["t"]; m = (tt >= pw[0]) & (tt <= pw[1])
+    if m.sum() < 30:
+        return None
+    i0 = int(np.argmax(m)); tg = tt[m] - tt[i0]; t_end = float(tg[-1] - 0.004)
+    st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0]), float(d["q2"][i0]),
+                           float(d["dq1"][i0]), float(d["dq2"][i0]),
+                           float(d["raw1"][i0]), float(d["raw2"][i0]))
+    A_ = TW.rollout_ol(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end=t_end, t_after=0.004)
+    B_ = ol_old_meas(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end, 0.004)
+    if A_ is None or B_ is None:
+        return None
+    n = min(len(A_["q1"]), len(B_["q1"]))
+    return (float(np.max(np.abs(A_["q1"][:n] - B_["q1"][:n]))),
+            float(np.max(np.abs(A_["sh2"][:n] - B_["sh2"][:n]))))
+
+
 def golden_mirror(d, seg, g, sess):
     """미러 신뢰 검증: init_meas=None 미러 == 정본 TW.rollout_cl (침묵실패 방역)."""
     i0 = max(0, seg["i_desc"] - 5)
@@ -328,9 +415,15 @@ def plot_ma(sess, name, d, seg):
 
     사용자 지적 (08-01): 창 분할 재생은 에러가 매 창 초기화돼 모델 발전의 자가 될 수 없다.
     점프 창(~0.2~0.3s)은 통짜 재생이 가능하므로 R19 정본 재생 방식(단일 샷)을 따른다.
+
+    ★ G55 (사용자 지시): τ 패널을 **양쪽 모두 "실제 조인트에 들어간 총 토크"** 로 바꾼다.
+      · OLD  = a_hat + hip_supp_scalar / a_hat + supp_scalar + rise_term  (`ol_old_meas.tq*`)
+      · 현행 = 토크맵(canon_cap 등) 출력 + 커맨드층 보정 전부           (`rollout_ol_fs_b.tq*`)
+      구 방식(`sh1/sh2` vs `s1/s2`)은 **a_hat 출력만**이라 OLD 를 과소 표시했다.
+      제목에 **점프높이**(영상 실측 vs 두 모델, 부호 있는 오차)를 병기한다.
     """
     ft = FR.fs_twin()
-    sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
+    sp = sess_params(sess)
     t = d["t"]
     pw = FD.plot_window(d["_fold"], d)          # 그래프·재생 창 = 원본 xlsx (점프) — 훅 규약
     if pw is None:
@@ -342,10 +435,14 @@ def plot_ma(sess, name, d, seg):
     i0 = int(np.argmax(m))
     tg = t[m] - t[i0]
     t_end = float(tg[-1] - 0.004)
+    # h 판독용 연장 (심판 _G13_board 와 동일한 자: 이지 후 +0.6s)
+    t_ext = min(t[m][-1] + 0.6, t[-1])
+    m2 = (t >= t[i0]) & (t <= t_ext)
+    tg2 = t[m2] - t[i0]
     st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0]), float(d["q2"][i0]),
                            float(d["dq1"][i0]), float(d["dq2"][i0]),
                            float(d["raw1"][i0]), float(d["raw2"][i0]))
-    Lo = TW.rollout_ol(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end=t_end, t_after=0.004)
+    Lo = ol_old_meas(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end, 0.004)
     Lf = FR.rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
                             float(d["q1"][i0]), float(d["q2"][i0]),
                             float(d["dq1"][i0]), float(d["dq2"][i0]),
@@ -353,27 +450,45 @@ def plot_ma(sess, name, d, seg):
     if Lo is None or Lf is None:
         print(f"  MA {sess}/{name}: 재생 실패 (old {Lo is None} / fs {Lf is None})", flush=True)
         return
+    # 점프높이 (연장 재생으로 최고점 직접 판독)
+    hv = real_h(d["_fold"])
+    te2 = float(tg2[-1] - 0.004)
+    Ho = ol_old_meas(FMET.tw0, tg2, d["raw1"][m2], d["raw2"][m2], st, te2, 0.004)
+    Hf = FR.rollout_ol_fs_b(ft, tg2, d["raw1"][m2], d["raw2"][m2],
+                            float(d["q1"][i0]), float(d["q2"][i0]),
+                            float(d["dq1"][i0]), float(d["dq2"][i0]),
+                            te2, bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
+    ho_ = float(np.asarray(Ho["bz"]).max()) if Ho else np.nan
+    hf_ = float(np.asarray(Hf["bz"]).max()) if Hf else np.nan
+    if hv:
+        HT = (f"점프높이  영상 {hv:.3f} m  ·  OLD {ho_:.3f} m ({100*(ho_/hv-1):+.1f}%)"
+              f"  →  {TAG} {hf_:.3f} m ({100*(hf_/hv-1):+.1f}%)")
+    else:
+        HT = f"점프높이  영상 실측 없음  ·  OLD {ho_:.3f} m → {TAG} {hf_:.3f} m"
     go = lambda k: np.interp(tg, Lo["t"], Lo[k])
     gf = lambda k: np.interp(tg, Lf["t"], Lf[k])
-    old = [go("q1"), go("q2"), go("dq1"), go("dq2"), go("sh1"), go("sh2")]
-    fs = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2"), gf("s1"), gf("s2")]
+    # ★ τ = 총 인가 토크 (tq1/tq2). 구 sh1/sh2·s1/s2 는 토크맵 출력만이라 쓰지 않는다.
+    old = [go("q1"), go("q2"), go("dq1"), go("dq2"), go("tq1"), go("tq2")]
+    fs = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2"), gf("tq1"), gf("tq2")]
     meas = {k: d[k][m] for k, _ in CH}
     mm = tg >= 0.0
     eo = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
           for (k, _), v in zip(CH, old)]
     ef = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
           for (k, _), v in zip(CH, fs)]
-    fig, ax = panels(f"{sess} / {name} — ModeA 통짜 재생 (측정 토크 주입 · 점프 창 · 중간 리셋 없음)",
+    fig, ax = panels(f"{sess} / {name} — ModeA 통짜 재생 (측정 raw 주입 · 점프 창 · 중간 리셋 없음)\n{HT}",
                      f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {' / '.join('%.2f' % x for x in eo)}   "
-                     f"현행: {' / '.join('%.2f' % x for x in ef)}")
-    for j, (a, (k, _)) in enumerate(zip(ax, CH)):
-        y, yo, yf = meas[k], old[j], fs[j]
+                     f"{TAG}: {' / '.join('%.2f' % x for x in ef)}"
+                     f"      ※ τ 는 **총 인가 토크**(보정 전부 포함) · 실측 τ 는 a_hat 변환값이라 참고용")
+    for j_, (a, (k, _)) in enumerate(zip(ax, CH)):
+        y, yo, yf = meas[k], old[j_], fs[j_]
         if k in ("q1", "q2"):
             y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
-        a.plot(t[m], y, lw=1.2, label="실측")
-        a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD)")
-        a.plot(t[m], yf, ":", lw=1.5, label="현행 (fs)")
+        a.plot(t[m], y, lw=1.2, label="실측" + (" (a_hat 변환)" if k in ("a1", "a2") else ""))
+        a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가")
+        a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가")
     ax[0].legend(fontsize=8, loc="best")
+    ax[4].legend(fontsize=7, loc="best")
     fig.tight_layout()
     fp = OUT / "ModeA" / sess
     fp.mkdir(parents=True, exist_ok=True)
