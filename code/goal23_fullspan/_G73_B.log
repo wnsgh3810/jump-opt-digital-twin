@@ -1,0 +1,565 @@
+=== G73 (B) 24fps slip + foot radius board === 
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.23/150_2.2_250_3        24fps 720x1280 · 자 0.9306 mm/px (지름 32.2px ±4%) · 이륙 f200 · shift -4.11s   ⚠ 동기 ±1프레임 → 푸시슬립 ±11mm
+      구간               Δx       구름       슬립
+      하강전반           4.30     4.62    -0.32
+      하강후반          -2.29     4.77    -7.07
+      바닥유지          -0.59    -0.08    -0.50
+      푸시~이륙        -57.75   -14.67   -43.09
+      전체           -56.33    -5.36   -50.97
+
+성공 11/11 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.23/150_2.2_500_5        24fps 720x1280 · 자 0.8962 mm/px (지름 33.5px ±4%) · 이륙 f96 · shift +0.06s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm
+      구간               Δx       구름       슬립
+      하강전반           4.00     4.45    -0.45
+      하강후반          -6.24     5.04   -11.28
+      바닥유지          -0.09     0.03    -0.12
+      푸시~이륙        -25.09   -12.56   -12.53
+      전체           -27.42    -3.03   -24.39
+
+성공 11/11 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.23/60_0.75_60_2         24fps 720x1280 · 자 1.8896 mm/px (지름 15.9px ±0%) · 이륙 f216 · shift -2.94s   ⚠ 접지끝 f170 vs 차분이륙 f216 차이 46프레임
+      구간               Δx       구름       슬립
+      하강전반           0.03     3.12    -3.09
+      하강후반          20.85     1.50    19.35
+      바닥유지           7.06    -0.16     7.22
+      푸시~이륙         74.21    -9.53    83.74
+      전체           102.15    -5.07   107.22
+
+성공 11/11 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.24/150_2.2_250_3        24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f128 · shift +2.28s   ⚠ 동기 ±1프레임 → 푸시슬립 ±11mm / 이륙 변위 12px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f46 vs 차분이륙 f128 차이 82프레임
+      구간               Δx       구름       슬립
+      하강전반          -0.15     0.13    -0.29
+      하강후반          -1.06     0.10    -1.16
+      바닥유지           0.03    -0.18     0.21
+      푸시~이륙         -0.03   -13.81    13.78
+      전체            -1.20   -13.75    12.55
+
+성공 11/11 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.24/150_2.2_350_3.5      24fps 720x1280 · 자 1.3537 mm/px (지름 22.2px ±0%) · 이륙 f174 · shift -1.50s   ⚠ 동기 ±1프레임 → 푸시슬립 ±10mm / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f136 vs 차분이륙 f174 차이 38프레임
+      구간               Δx       구름       슬립
+      하강전반          -6.03     4.14   -10.18
+      하강후반          21.47     2.79    18.68
+      바닥유지         -27.23    -0.03   -27.19
+      푸시~이륙        -15.99   -14.08    -1.91
+      전체           -27.78    -7.18   -20.60
+
+성공 11/11 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.24/150_2.2_500_5        24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f68 · shift +4.01s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm / 이륙 변위 15px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f4 vs 차분이륙 f68 차이 64프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙          2.63   -11.07    13.70
+      전체             2.63   -11.07    13.70
+
+성공 12/12 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.25/100_1.5_250_3        24fps 720x1280 · 자 1.1397 mm/px (지름 26.3px ±1%) · 이륙 f96 · shift +0.03s   ⚠ 이륙 변위 7px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           3.42     1.46     1.96
+      하강후반           4.93     1.06     3.87
+      바닥유지           0.41    -0.02     0.43
+      푸시~이륙        -13.45    -8.44    -5.01
+      전체            -4.69    -5.94     1.25
+
+성공 13/13 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.25/120_2_250_3          24fps 720x1280 · 자 1.1363 mm/px (지름 26.4px ±1%) · 이륙 f99 · shift -0.08s   ⚠ 이륙 변위 7px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           4.05     1.26     2.79
+      하강후반           5.10     1.17     3.93
+      바닥유지           0.73    -0.03     0.76
+      푸시~이륙         -9.18    -8.37    -0.81
+      전체             0.70    -5.97     6.67
+
+성공 14/14 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.25/150_2.2_250_3        24fps 720x1280 · 자 1.1363 mm/px (지름 26.4px ±2%) · 이륙 f116 · shift -0.72s   ⚠ 이륙 변위 3px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           3.38     0.95     2.43
+      하강후반           6.29     1.24     5.05
+      바닥유지          -0.07    -0.02    -0.05
+      푸시~이륙         -8.70    -7.78    -0.92
+      전체             0.91    -5.60     6.52
+
+성공 15/15 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.25/200_2.5_250_3        24fps 720x1280 · 자 1.1450 mm/px (지름 26.2px ±2%) · 이륙 f125 · shift -1.20s   ⚠ 이륙 변위 9px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           3.70     0.98     2.72
+      하강후반           6.94     1.23     5.71
+      바닥유지           1.55    -0.12     1.67
+      푸시~이륙        -16.90    -7.08    -9.82
+      전체            -4.71    -4.99     0.28
+
+성공 16/16 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/100_1.5_250_3        24fps 720x1280 · 자 1.5672 mm/px (지름 19.1px ±4%) · 이륙 f124 · shift -1.06s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반           7.54     2.72     4.82
+      하강후반          10.92     2.75     8.17
+      바닥유지          -1.56    -0.51    -1.06
+      푸시~이륙        -31.08   -10.76   -20.32
+      전체           -14.18    -5.79    -8.39
+
+성공 17/17 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/120_2_250_3          24fps 720x1280 · 자 1.7299 mm/px (지름 17.3px ±2%) · 이륙 f108 · shift +1.40s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f66 vs 차분이륙 f108 차이 42프레임
+      구간               Δx       구름       슬립
+      하강전반           0.36     2.24    -1.88
+      하강후반          24.04     1.12    22.92
+      바닥유지         -10.37    -0.76    -9.61
+      푸시~이륙         -8.04   -10.84     2.80
+      전체             5.99    -8.24    14.22
+
+성공 18/18 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/150_2.2_250_3        24fps 720x1280 · 자 1.5939 mm/px (지름 18.8px ±4%) · 이륙 f128 · shift -1.22s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반          13.08     2.72    10.35
+      하강후반           8.97     2.76     6.22
+      바닥유지           0.04    -0.71     0.75
+      푸시~이륙        -50.23   -10.75   -39.49
+      전체           -28.14    -5.98   -22.16
+
+성공 19/19 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/200_2.5_250_3        24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f104 · shift -0.47s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm / 이륙 변위 3px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지 절단 미발생 (f111 = 추적 끝) — 이륙 이후까지 추적됐을 수 있음
+      구간               Δx       구름       슬립
+      하강전반          -0.14     2.65    -2.79
+      하강후반           0.08     2.76    -2.68
+      바닥유지          -0.30    -0.70     0.40
+      푸시~이륙          0.34   -10.46    10.80
+      전체            -0.02    -5.76     5.74
+
+성공 20/20 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/250_3_250_3          24fps 720x1280 · 자 1.7501 mm/px (지름 17.1px ±6%) · 이륙 f128 · shift -1.14s   ⚠ 동기 ±1프레임 → 푸시슬립 ±8mm / 이륙 변위 15px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반          59.13     2.63    56.50
+      하강후반          33.09     2.76    30.33
+      바닥유지           0.42    -0.72     1.14
+      푸시~이륙         -7.40   -11.05     3.65
+      전체            85.23    -6.38    91.61
+
+성공 21/21 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/60_2_250_3           24fps 720x1280 · 자 2.0159 mm/px (지름 14.9px ±5%) · 이륙 f96 · shift +0.03s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / 이륙 변위 10px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지 절단 미발생 (f99 = 추적 끝) — 이륙 이후까지 추적됐을 수 있음
+      구간               Δx       구름       슬립
+      하강전반          55.20     2.95    52.25
+      하강후반         -45.32     2.79   -48.10
+      바닥유지          -9.78    -0.76    -9.02
+      푸시~이륙        -10.67   -12.44     1.77
+      전체           -10.56    -7.46    -3.11
+
+성공 22/22 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.07.27/80_2_250_3           24fps 720x1280 · 자 1.8913 mm/px (지름 15.9px ±0%) · 이륙 f104 · shift -0.48s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / 이륙 변위 3px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지 절단 미발생 (f111 = 추적 끝) — 이륙 이후까지 추적됐을 수 있음
+      구간               Δx       구름       슬립
+      하강전반          -0.26     2.75    -3.01
+      하강후반          -0.21     2.77    -2.98
+      바닥유지          -0.65    -0.73     0.07
+      푸시~이륙          0.97   -11.50    12.47
+      전체            -0.16    -6.71     6.55
+
+성공 23/23 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.06.02/120_2_120_2          24fps 720x1280 · 자 1.7299 mm/px (지름 17.3px ±10%) · 이륙 f163 · shift -0.14s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / 지름 산포 10% (>10%) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f127 vs 차분이륙 f163 차이 36프레임
+      구간               Δx       구름       슬립
+      하강전반          26.29     2.50    23.79
+      하강후반          44.04     1.65    42.39
+      바닥유지           5.60    -0.08     5.68
+      푸시~이륙        -68.35   -17.11   -51.23
+      전체             7.58   -13.04    20.62
+
+성공 24/24 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.06.02/150_2.2_250_3        24fps 720x1280 · 자 1.3888 mm/px (지름 21.6px ±0%) · 이륙 f163 · shift +2.81s   ⚠ 동기 ±1프레임 → 푸시슬립 ±9mm / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f57 vs 차분이륙 f163 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙         -0.69   -15.72    15.03
+      전체            -0.69   -15.72    15.03
+
+성공 25/25 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.06.02/150_2.2_500_5        24fps 720x1280 · 자 1.3888 mm/px (지름 21.6px ±0%) · 이륙 f167 · shift +2.67s   ⚠ 동기 ±1프레임 → 푸시슬립 ±10mm / 이륙 변위 12px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f61 vs 차분이륙 f167 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙         -0.73   -15.26    14.53
+      전체            -0.73   -15.26    14.53
+
+성공 26/26 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.06.02/60_0.75_60_2         24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f158 · shift -1.55s   ⚠ 이륙 변위 10px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)
+      구간               Δx       구름       슬립
+      하강전반          21.20     5.27    15.93
+      하강후반           0.85     3.18    -2.33
+      바닥유지          -0.71     0.15    -0.86
+      푸시~이륙        -35.21   -12.79   -22.42
+      전체           -13.87    -4.18    -9.69
+
+성공 27/27 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.06.02/60_1.5_60_1.5        24fps 720x1280 · 자 1.3285 mm/px (지름 22.6px ±0%) · 이륙 f172 · shift +2.38s   ⚠ 이륙 변위 8px (<15 — 발 오탐 가능) / SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f66 vs 차분이륙 f172 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙         -0.56   -12.06    11.50
+      전체            -0.56   -12.06    11.50
+
+성공 28/28 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+========================================================================================================
+★ 슬립·구름 전수 판정 — 자=발 금속판 30mm · r=20mm · + = 화면 오른쪽 = 모델 +x
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+  26.06.02/90_0.75_90_2         24fps 720x1280 · 자 2.0350 mm/px (지름 14.7px ±0%) · 이륙 f170 · shift +2.53s   ⚠ SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수) / 접지끝 f64 vs 차분이륙 f170 차이 106프레임
+      구간               Δx       구름       슬립
+      하강전반           0.00     0.00     0.00
+      하강후반           0.00     0.00     0.00
+      바닥유지           0.00     0.00     0.00
+      푸시~이륙          0.22   -11.56    11.78
+      전체             0.22   -11.56    11.78
+
+성공 29/29 · 저장: _G72_slipall.json
+The frame size for reading (720, 1280) is different from the source frame size (1280, 720).
+The frame size for reading (1080, 1920) is different from the source frame size (1920, 1080).
+  ✔ 26_07_23__150_2_2_250_3.png
+Traceback (most recent call last):
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_G72_proof.py", line 128, in <module>
+    main()
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_G72_proof.py", line 118, in main
+    img = sheet(rec, cand[0])
+          ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\junho\Documents\jump-opt-digital-twin\code\goal23_fullspan\_G72_proof.py", line 65, in sheet
+    cx, cy = rec["series"]["cx"][j], rec["series"]["cy"][j]
+             ~~~~~~~~~~~~~^^^^^^
+KeyError: 'cx'
+ 
+### foot r = 0.021 (frozen best) 
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+보드 실행: tag=G73_footr_0021
+  26.07.22/120_2_120_2: q1 4.026 q2 1.317 h 0.846/0.82 slip -2.4/-19.0
+  26.07.22/150_2.2_250_3: q1 3.392 q2 1.260 h 0.896/0.85 slip -11.4/-18.8
+  26.07.22/150_3.3_500_5: q1 4.776 q2 1.741 h 0.883/0.85 slip -16.0/-21.5
+  26.07.22/60_0.75_60_2: q1 2.309 q2 1.454 h 0.743/0.74 slip -4.6/-47.2
+  26.07.22/60_1.5_60_1.5: q1 1.641 q2 2.123 h 0.729/0.76 slip -2.3/-23.1
+  26.07.23/150_2.2_250_3: q1 4.132 q2 1.630 h 0.828/0.81 slip 1.2/-16.8
+  26.07.23/150_2.2_500_5: q1 1.454 q2 1.196 h 0.788/0.8 slip -29.5/-30.0
+  26.07.23/60_0.75_60_2: q1 2.744 q2 3.720 h 0.902/0.83 slip -20.0/-73.8
+  26.07.24/150_2.2_250_3: q1 2.370 q2 2.824 h 0.850/0.76 slip 9.2/17.2
+  26.07.24/150_2.2_350_3.5: q1 2.792 q2 3.503 h 0.886/0.79 slip -6.1/28.5
+  26.07.24/150_2.2_500_5: q1 2.545 q2 2.292 h 0.773/0.72 slip -14.6/-0.5
+  26.07.25/100_1.5_250_3: q1 3.195 q2 3.391 h 0.729/0.76 slip -3.9/-34.8
+  26.07.25/120_2_250_3: q1 3.438 q2 3.527 h 0.715/0.75 slip -5.2/-36.0
+  26.07.25/150_2.2_250_3: q1 2.790 q2 2.574 h 0.735/0.76 slip -5.6/-45.0
+  26.07.25/200_2.5_250_3: q1 2.760 q2 2.136 h 0.745/0.74 slip -6.8/-50.7
+  26.07.27/100_1.5_250_3: q1 1.927 q2 3.180 h 0.778/0.82 slip -5.2/-18.7
+  26.07.27/120_2_250_3: q1 1.372 q2 2.457 h 0.789/0.81 slip -5.9/-13.4
+  26.07.27/150_2.2_250_3: q1 1.188 q2 0.987 h 0.853/0.84 slip -6.7/-15.7
+  26.07.27/200_2.5_250_3: q1 1.751 q2 0.899 h 0.864/0.84 slip -7.1/-22.6
+  26.07.27/250_3_250_3: q1 1.683 q2 1.065 h 0.887/0.86 slip -8.7/-21.3
+  26.07.27/60_2_250_3: q1 1.564 q2 1.041 h 0.815/0.84 slip 0.0/14.9
+  26.07.27/80_2_250_3: q1 2.435 q2 2.511 h 0.776/0.83 slip -1.4/-6.7
+  26.04.24/120_2.2_150_2.5: q1 3.229 q2 4.031 h 0.769/0.81 slip -2.2/13.1
+  26.04.24/120_2.2_200_2.8: q1 2.998 q2 5.105 h 0.731/0.795 slip -1.8/14.9
+  26.04.24/120_2_120_2: q1 2.212 q2 2.174 h 0.821/0.84 slip -0.6/6.6
+  26.04.24/150_2.2_250_3: q1 2.086 q2 3.574 h 0.724/0.77 slip -2.1/18.2
+  26.04.24/150_2.2_350_3.5: q1 2.969 q2 5.436 h 0.695/0.77 slip -3.6/18.6
+  26.04.24/150_2.2_500_4: q1 3.691 q2 7.535 h 0.690/0.775 slip -8.0/18.9
+  26.04.24/60_0.75_60_2: q1 2.209 q2 5.781 h 0.950/0.9 slip -13.6/-39.7
+  26.04.24/60_1.5_60_1.5: q1 2.028 q2 2.887 h 0.917/0.91 slip -9.3/-5.4
+  26.04.24/90_0.75_90_2: q1 1.001 q2 4.563 h 0.927/0.894 slip 5.8/-18.6
+  26.06.02/120_2_120_2: q1 1.713 q2 2.105 h 0.967/0.94 slip -16.5/3.0
+  26.06.02/150_2.2_250_3: q1 1.021 q2 1.166 h 0.875/0.9 slip 9.3/34.3
+  26.06.02/150_2.2_500_5: q1 1.541 q2 2.845 h 0.768/None slip 2.3/38.2
+  26.06.02/60_0.75_60_2: q1 1.323 q2 2.271 h 0.946/0.94 slip -9.6/-39.2
+  26.06.02/60_1.5_60_1.5: q1 1.703 q2 1.627 h 0.951/0.96 slip -7.7/-7.7
+  26.06.02/90_0.75_90_2: q1 0.802 q2 1.334 h 0.988/0.98 slip -16.4/-35.2
+  26.04.21/P100_D0.75_P100_D2: q1 1.620 q2 4.222 h 0.871/0.85 slip -12.8/-28.3
+  26.04.21/P200_D1.5_P200_D4: q1 1.373 q2 1.824 h 0.747/0.79 slip -17.1/-25.6
+  26.04.21/P60_D0.75_P60_D2: q1 2.397 q2 5.510 h 0.888/0.86 slip -9.9/-39.3
+  26.04.21/P70_D0.75_P70_D2: q1 1.120 q2 1.190 h 0.818/0.85 slip -9.5/-37.5
+  26.04.21/P80_D0.75_P80_D2: q1 3.196 q2 7.970 h 0.924/0.89 slip -10.3/-33.9
+  26.04.21/P90_D0.75_P90_D2: q1 1.098 q2 3.202 h 0.856/0.86 slip -12.1/-33.7
+  26.03.24/P100_D3: q1 1.845 q2 3.372 h 0.691/0.74 slip 0.4/16.4
+  26.03.24/P40_D0.7: q1 5.396 q2 13.425 h 0.792/0.8 slip 23.3/-21.4
+  26.03.24/P60_D1.5: q1 0.783 q2 4.926 h 0.735/0.77 slip 7.4/-7.8
+
+============================================================================================================
+세션            n    q1[°]    q2[°]      dq1      dq2  |h/h_v−1|  slip_sim   slip_기하
+26.03.24      3    2.675    7.241    1.014    2.148      0.040      10.4      -4.2   ← held-out/gate
+26.04.21      6    1.801    3.986    0.545    1.227      0.032     -12.0     -33.1   ← held-out/gate
+26.04.24      9    2.491    4.565    0.877    2.018      0.058      -3.9       3.0
+26.06.02      6    1.350    1.891    0.795    0.999      0.016      -6.4      -1.1
+26.07.22      5    3.229    1.579    1.776    1.147      0.034      -7.3     -25.9
+26.07.23      3    2.776    2.182    1.423    1.167      0.041     -16.1     -40.2
+26.07.24      3    2.569    2.873    1.265    1.376      0.105      -3.8      15.1
+26.07.25      4    3.046    2.907    1.825    1.237      0.032      -5.4     -41.6
+26.07.27      7    1.703    1.734    1.437    1.083      0.035      -5.0     -11.9
+전체           46    2.404    3.218    1.217    1.378      0.042                24.6
+
+============================================================================================================
+  Ê_MA 0.7164 · Ê_h 0.7279 · Ê_slip 0.8107   →   **J_G = 0.7387**  (p24 = 1.0000)
+  게이트(0324·0421 MA q1·q2): PASS
+ 
+### foot r = 0.020 (measured 40mm/2) 
+warm-start from previous mshoot best
+warm-start from previous fourbar best
+보드 실행: tag=G73_footr_0020
+  26.07.22/120_2_120_2: q1 3.949 q2 1.298 h 0.845/0.82 slip -2.4/-19.5
+  26.07.22/150_2.2_250_3: q1 3.319 q2 1.196 h 0.895/0.85 slip -11.3/-19.3
+  26.07.22/150_3.3_500_5: q1 4.683 q2 1.577 h 0.883/0.85 slip -15.9/-22.0
+  26.07.22/60_0.75_60_2: q1 2.233 q2 1.482 h 0.742/0.74 slip -4.6/-47.5
+  26.07.22/60_1.5_60_1.5: q1 1.587 q2 1.964 h 0.728/0.76 slip -2.3/-23.5
+  26.07.23/150_2.2_250_3: q1 4.121 q2 1.672 h 0.826/0.81 slip 0.9/-17.5
+  26.07.23/150_2.2_500_5: q1 1.552 q2 1.119 h 0.784/0.8 slip -31.1/-30.6
+  26.07.23/60_0.75_60_2: q1 2.728 q2 3.674 h 0.898/0.83 slip -20.7/-74.2
+  26.07.24/150_2.2_250_3: q1 2.347 q2 2.847 h 0.849/0.76 slip 9.1/16.5
+  26.07.24/150_2.2_350_3.5: q1 2.774 q2 3.409 h 0.883/0.79 slip -6.7/27.9
+  26.07.24/150_2.2_500_5: q1 2.583 q2 2.265 h 0.771/0.72 slip -14.9/-1.0
+  26.07.25/100_1.5_250_3: q1 3.114 q2 3.208 h 0.728/0.76 slip -3.9/-35.2
+  26.07.25/120_2_250_3: q1 3.358 q2 3.352 h 0.714/0.75 slip -5.2/-36.4
+  26.07.25/150_2.2_250_3: q1 2.714 q2 2.392 h 0.734/0.76 slip -5.6/-45.4
+  26.07.25/200_2.5_250_3: q1 2.682 q2 1.944 h 0.743/0.74 slip -6.8/-51.1
+  26.07.27/100_1.5_250_3: q1 1.887 q2 3.066 h 0.777/0.82 slip -5.2/-19.2
+  26.07.27/120_2_250_3: q1 1.356 q2 2.334 h 0.788/0.81 slip -5.9/-14.0
+  26.07.27/150_2.2_250_3: q1 1.168 q2 0.856 h 0.852/0.84 slip -6.7/-16.3
+  26.07.27/200_2.5_250_3: q1 1.693 q2 0.798 h 0.862/0.84 slip -7.1/-23.2
+  26.07.27/250_3_250_3: q1 1.642 q2 1.085 h 0.886/0.86 slip -8.7/-21.9
+  26.07.27/60_2_250_3: q1 1.516 q2 0.875 h 0.814/0.84 slip 0.0/14.2
+  26.07.27/80_2_250_3: q1 2.417 q2 2.418 h 0.774/0.83 slip -1.3/-7.3
+  26.04.24/120_2.2_150_2.5: q1 3.319 q2 4.110 h 0.767/0.81 slip -2.2/12.2
+  26.04.24/120_2.2_200_2.8: q1 3.062 q2 5.130 h 0.730/0.795 slip -1.8/14.0
+  26.04.24/120_2_120_2: q1 2.285 q2 2.235 h 0.819/0.84 slip -1.1/5.7
+  26.04.24/150_2.2_250_3: q1 2.136 q2 3.589 h 0.722/0.77 slip -2.1/17.3
+  26.04.24/150_2.2_350_3.5: q1 3.041 q2 5.495 h 0.693/0.77 slip -3.5/17.6
+  26.04.24/150_2.2_500_4: q1 3.732 q2 7.533 h 0.689/0.775 slip -7.9/17.9
+  26.04.24/60_0.75_60_2: q1 2.180 q2 5.755 h 0.948/0.9 slip -13.6/-40.5
+  26.04.24/60_1.5_60_1.5: q1 2.053 q2 2.917 h 0.915/0.91 slip -9.3/-6.2
+  26.04.24/90_0.75_90_2: q1 1.014 q2 4.638 h 0.926/0.894 slip 5.7/-19.5
+  26.06.02/120_2_120_2: q1 1.803 q2 2.152 h 0.965/0.94 slip -16.4/2.2
+  26.06.02/150_2.2_250_3: q1 1.067 q2 1.097 h 0.872/0.9 slip 9.9/33.3
+  26.06.02/150_2.2_500_5: q1 1.616 q2 2.864 h 0.767/None slip 2.1/37.2
+  26.06.02/60_0.75_60_2: q1 1.282 q2 2.096 h 0.942/0.94 slip -9.7/-39.8
+  26.06.02/60_1.5_60_1.5: q1 1.730 q2 1.470 h 0.947/0.96 slip -8.1/-8.5
+  26.06.02/90_0.75_90_2: q1 0.933 q2 1.222 h 0.984/0.98 slip -16.3/-35.9
+  26.04.21/P100_D0.75_P100_D2: q1 1.628 q2 4.288 h 0.870/0.85 slip -12.7/-29.1
+  26.04.21/P200_D1.5_P200_D4: q1 1.446 q2 1.870 h 0.745/0.79 slip -17.0/-26.4
+  26.04.21/P60_D0.75_P60_D2: q1 2.303 q2 5.379 h 0.885/0.86 slip -9.9/-40.0
+  26.04.21/P70_D0.75_P70_D2: q1 1.187 q2 1.183 h 0.815/0.85 slip -9.5/-38.2
+  26.04.21/P80_D0.75_P80_D2: q1 3.139 q2 7.957 h 0.923/0.89 slip -10.3/-34.7
+  26.04.21/P90_D0.75_P90_D2: q1 1.133 q2 3.282 h 0.855/0.86 slip -12.0/-34.5
+  26.03.24/P100_D3: q1 1.838 q2 3.380 h 0.689/0.74 slip 0.9/15.4
+  26.03.24/P40_D0.7: q1 5.417 q2 13.580 h 0.791/0.8 slip 22.8/-22.3
+  26.03.24/P60_D1.5: q1 0.818 q2 5.094 h 0.733/0.77 slip 8.2/-8.8
+
+============================================================================================================
+세션            n    q1[°]    q2[°]      dq1      dq2  |h/h_v−1|  slip_sim   slip_기하
+26.03.24      3    2.691    7.351    1.018    2.127      0.042      10.6      -5.2   ← held-out/gate
+26.04.21      6    1.806    3.993    0.548    1.226      0.032     -11.9     -33.8   ← held-out/gate
+26.04.24      9    2.536    4.600    0.886    2.026      0.059      -4.0       2.0
+26.06.02      6    1.405    1.817    0.796    0.987      0.015      -6.4      -1.9
+26.07.22      5    3.154    1.503    1.758    1.141      0.033      -7.3     -26.4
+26.07.23      3    2.800    2.155    1.424    1.149      0.041     -17.0     -40.8
+26.07.24      3    2.568    2.840    1.257    1.360      0.102      -4.1      14.5
+26.07.25      4    2.967    2.724    1.804    1.214      0.032      -5.4     -42.0
+26.07.27      7    1.669    1.633    1.439    1.081      0.035      -5.0     -12.5
+전체           46    2.399    3.180    1.214    1.368      0.042                24.8
+
+============================================================================================================
+  Ê_MA 0.7105 · Ê_h 0.7285 · Ê_slip 0.8090   →   **J_G = 0.7356**  (p24 = 1.0000)
+  게이트(0324·0421 MA q1·q2): PASS
+=== done === 

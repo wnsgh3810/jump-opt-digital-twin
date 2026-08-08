@@ -223,7 +223,7 @@ def r0max(lst):
 
 
 # ── ⑤ 융합 ───────────────────────────────────────────────────────────────────
-def measure(sess, trial, *, verbose=True):
+def measure(sess, trial, *, verbose=True, force_dia=None):
     """한 trial 의 슬립·구름 분해. 실패 시 reason 을 담은 dict 반환."""
     import fs_data as FD, fs_runner as FR
     from _G10_energy import Reduced
@@ -316,7 +316,11 @@ def measure(sess, trial, *, verbose=True):
 
     Rk = np.array([tr[int(q)]["r"] for q in fi]); Sk = np.array([tr[int(q)]["score"] for q in fi])
     okk = Sk > np.percentile(Sk, 25)
-    dia = float(2 * np.median(Rk[okk]))
+    dia_meas = float(2 * np.median(Rk[okk]))
+    # ★ **세션 자 강제** — 카메라가 세션 중 안 움직였으므로 자는 세션 내 상수다.
+    #   trial 마다 독립으로 재게 뒀더니 한 세션 안에서 자가 최대 111% 흔들렸다
+    #   (지름이 탐색 하한 14.7px 에 포화 → +83~107mm 같은 물리 불가 슬립). G74 참조.
+    dia = float(force_dia) if force_dia else dia_meas
     s_mm = VS.METAL_DIA_MM / dia
     rel = float((2 * np.percentile(Rk[okk], 75) - 2 * np.percentile(Rk[okk], 25)) / 2 / dia)
 
@@ -365,6 +369,8 @@ def measure(sess, trial, *, verbose=True):
         qc.append(f"동기 ±1프레임 → 푸시슬립 ±{sens:.0f}mm")
     if rel > 0.10:
         qc.append(f"지름 산포 {rel*100:.0f}% (>10%)")
+    if force_dia and abs(dia_meas - dia) / dia > 0.12:
+        qc.append(f"측정지름 {dia_meas:.1f} vs 세션자 {dia:.1f} ({(dia_meas/dia-1)*100:+.0f}%) — 추적 의심")
     if float(np.min(Sk)) < 40:
         qc.append(f"최저 추적점수 {np.min(Sk):.0f} (<40)")
     if np.isfinite(moved) and moved < 15 * k * 24.0 / fps:
@@ -385,7 +391,8 @@ def measure(sess, trial, *, verbose=True):
                f_lo=f_lo, f_end=f_end, f_hi=f_hi, jump_run=[r0f, r1f], t_lo=t_lo,
                shift=shift, f0=f0,
                seed=[cx0, cy0], seed_r=r0, seed_moved=moved,
-               dia_px=dia, scale=s_mm, rel_sd=rel,
+               dia_px=dia, dia_meas=dia_meas, scale=s_mm, rel_sd=rel,
+               dia_forced=bool(force_dia),
                score_min=float(np.min(Sk)), score_med=float(np.median(Sk)),
                r_foot_mm=rfoot * 1000, seg=segs, sync_sens_mm=sens, qc=qc,
                series=dict(f=fi.tolist(), x=x_mm.tolist(), roll=roll.tolist(), slip=slip.tolist(),
@@ -410,35 +417,74 @@ def _pr(r):
         print(f"      {k:<10}{v['dx']:9.2f}{v['roll']:9.2f}{v['slip']:9.2f}")
 
 
+def session_dia(sess, trials, *, verbose=True):
+    """세션 자 확정 — 여러 trial 에서 지름을 재 **중앙값**을 세션 자로 삼는다.
+
+    카메라는 세션 중 고정이므로 지름은 상수여야 한다. trial 별 측정이 흩어지면
+    그 세션은 추적이 불안한 것이고, 중앙값이 가장 많은 trial 이 동의한 값이다.
+    산포가 크면 (>12%) 수동 시드 등재 대상으로 표시한다.
+    """
+    ds = []
+    for q in trials:
+        try:
+            r = measure(sess, q, verbose=False)
+            if r.get("ok"):
+                ds.append((q, r["dia_meas"], r["score_med"], len(r["qc"])))
+        except Exception:
+            pass
+    if not ds:
+        return None, []
+    v = np.array([d[1] for d in ds])
+    med = float(np.median(v))
+    spread = float((v.max() - v.min()) / med)
+    if verbose:
+        print(f"  [세션 자] {sess}: n={len(ds)} 지름 {v.min():.1f}~{v.max():.1f} "
+              f"→ 중앙 **{med:.1f}px** (산포 {spread*100:.0f}%)"
+              + ("  ⚠ 수동 시드 권장" if spread > 0.12 else ""))
+    return med, ds
+
+
 def main():
     import fs_data as FD
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    reg = {}
     if "--all" in sys.argv:
-        reg = [(s, q.name) for s, q, g, c, h in FD.registry()]
+        for s, q, g, c, h in FD.registry():
+            reg.setdefault(s, []).append(q.name)
+    elif len(args) >= 2 and args[1] == "*":
+        for s, q, g, c, h in FD.registry():
+            if s == args[0]:
+                reg.setdefault(s, []).append(q.name)
     elif len(args) >= 2:
-        reg = [(args[0], args[1])]
+        reg = {args[0]: [args[1]]}
     else:
-        reg = [("26.07.23", "150_2.2_250_3")]
+        reg = {"26.07.23": ["150_2.2_250_3"]}
+
     print("=" * 104)
-    print(f"★ 슬립·구름 전수 판정 — 자=발 금속판 {VS.METAL_DIA_MM:.0f}mm · r={VS.FOOT_R_M*1000:.0f}mm "
+    print(f"★ 슬립·구름 판정 — 자=발 금속판 {VS.METAL_DIA_MM:.0f}mm · r={VS.FOOT_R_M*1000:.0f}mm "
           f"· + = 화면 오른쪽 = 모델 +x")
+    print("  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정")
     OUT = {}
     if OUT_JSON.exists():
         try:
             OUT = json.load(io.open(OUT_JSON, encoding="utf-8"))
         except Exception:
             OUT = {}
-    for s, q in reg:
-        try:
-            r = measure(s, q)
-        except Exception as ex:
-            r = dict(sess=s, trial=q, ok=False, reason=f"{type(ex).__name__}: {str(ex)[:70]}")
-            print(f"  ✗ {s}/{q}: {r['reason']}")
-        OUT[f"{s}/{q}"] = r
-        import safe                                   # 헌법 6: 다중 프로세스 JSON = 원자적 쓰기
-        safe.atomic_json_write(OUT_JSON, OUT)
+    import safe
+    for sess, trials in reg.items():
+        med, _ = session_dia(sess, trials) if len(trials) > 1 else (None, [])
+        for q in trials:
+            try:
+                r = measure(sess, q, force_dia=med)
+            except Exception as ex:
+                r = dict(sess=sess, trial=q, ok=False,
+                         reason=f"{type(ex).__name__}: {str(ex)[:70]}")
+                print(f"  ✗ {sess}/{q}: {r['reason']}")
+            OUT[f"{sess}/{q}"] = r
+            safe.atomic_json_write(OUT_JSON, OUT)
     good = [v for v in OUT.values() if v.get("ok")]
-    print(f"\n성공 {len(good)}/{len(OUT)} · 저장: {OUT_JSON.name}")
+    print("")
+    print(f"성공 {len(good)}/{len(OUT)} · 저장: {OUT_JSON.name}")
 
 
 if __name__ == "__main__":
