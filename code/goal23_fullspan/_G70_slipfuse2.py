@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
-"""_G70_slipfuse2 — **정본 자(발 42mm)로 재계산한 영상+엔코더 융합 슬립** (마라톤G, 08-08).
+"""_G70_slipfuse2 — **정본 자(발 롤러)로 재계산한 영상+엔코더 융합 슬립** (마라톤G, 08-08).
 
-_G68 대비 바뀐 두 가지 (둘 다 사용자 발견에서 출발)
-  ① **자 교체**: 발판 플레이트 120mm(0.7453 mm/px) → **발 롤러 42.0mm**(그 영상에서 직접 측정).
-     구 자는 발 지름을 24.1mm 로 본 셈 — 전 수치가 **1.739배** 과소평가였다.
+_G68 대비 바뀐 세 가지 (전부 사용자 발견/제보에서 출발)
+  ① **자 교체**: 발판 플레이트 120mm(0.7453 mm/px) → **발 롤러**(그 영상에서 직접 측정).
+     원 맞춤이 잡는 경계는 **안쪽 금속 원판 30.0mm** (고무 바깥은 검은 패드와 명암차 없음).
+     32.40 px = 30.0 mm → **0.9259 mm/px**. 구 자는 금속판을 24.1mm 로 본 셈 = **1.242배** 과소.
   ② **추적점 교체**: 링크 연결부(롤러 중심에서 10.3mm 오른쪽, 종아리 회전에 따라 궤도운동)
      → **원 맞춤으로 얻은 롤러 기하 중심** (`fs_vidscale.fit_roller`).
+  ③ **접지 반경 교체**: r = 21.0 → **20.0 mm** (바깥 지름 40mm/2, 사용자 실측 08-08).
+     MuJoCo `foot` geom 은 아직 0.021 — 수정 필요.
 
 원리 (왜 영상만으로도, 엔코더만으로도 안 되는가)
   | 측정 | 얻는 것 | 못 얻는 것 |
   |---|---|---|
   | 엔코더 q1,q2 | **Δθ_발** (4절 폐쇄로 결정, **베이스 위치와 무관**) | Δx_발 |
   | 영상(롤러 중심) | **Δx_발** (세계 좌표 실측) | Δθ_발 (롤러 표면 마커 없음) |
-        **슬립(t) = Δx_발(영상) − r·Δθ_발(엔코더)**,  r = 21.0 mm
+        **슬립(t) = Δx_발(영상) − r·Δθ_발(엔코더)**,  r = 20.0 mm
   비유: 바퀴가 굴러간 거리는 "바퀴가 몇 바퀴 돌았나"(엔코더)로 알고, 실제로 몇 cm 갔나는
   자로 재야(영상) 안다. 둘이 안 맞는 차이가 곧 **미끄러짐**이다.
 
@@ -48,11 +51,14 @@ def main():
     FIT = json.load(io.open(HERE / "_G70_diskfit.json", encoding="utf-8"))
     fi = np.array(sorted(int(k) for k in FIT), float)
     xpx = np.array([FIT[str(int(k))]["cx"] for k in fi], float)
-    # 원 맞춤 중심은 0.5px 격자 → 3프레임 이동중앙값으로 격자 잡음만 제거 (신호 대역 보존)
-    xs = np.array([np.median(xpx[max(0, i - 1):i + 2]) for i in range(len(xpx))])
+    # * 평활 금지. 3프레임 이동중앙값을 넣었더니 **푸시의 급변을 뭉개** f199 를
+    #   -56.5 -> -38.5mm 로 깎아먹었다 (마지막 프레임은 이웃이 한쪽뿐이라 더 심함).
+    #   서브픽셀 정밀화(0.1px)로 이미 격자 잡음은 없다 - 원자료 그대로 쓴다.
+    xs = xpx
     t_vid = fi / fps + shift
 
-    R = Reduced(FR.fs_twin()); r = R.r
+    R = Reduced(FR.fs_twin())
+    r = VS.FOOT_R_M            # ★ 0.020 m (바깥 40mm/2) — 모델 geom 0.021 은 오류
     p = [q for s, q, g, c, h in FD.registry() if s == SESS and q.name == TRIAL][0]
     d = FD.load2(p); t = d["t"]
     q1f = lpf(d["q1"], 30.0); q2f = lpf(d["q2"], 30.0)
@@ -84,14 +90,16 @@ def main():
               f"{dx:11.2f}{rr:11.2f}{dx-rr:11.2f}{old:10.2f}")
 
     # 사용자 지목 구간 — ★ 시각은 **영상 시계**(frame/fps) 기준 (데이터 시계 아님)
-    print(f"\n★ 사용자 지목 구간 (깊게 앉는 순간, 육안 −10~15mm) — 영상 시계 기준")
+    print(f"\n★ 사용자 지목 구간 (영상 시계 기준)")
     t_v0 = fi / fps
-    ia = int(np.argmin(np.abs(t_v0 - 6.67))); ib = int(np.argmin(np.abs(t_v0 - 7.42)))
-    dx = x_mm[ib] - x_mm[ia]; rr = roll[ib] - roll[ia]
-    print(f"   6.67~7.42 s (f{int(fi[ia])}~f{int(fi[ib])})  영상 Δx {dx:+7.2f} mm · "
-          f"구름 {rr:+7.2f} mm · **슬립 {dx-rr:+7.2f} mm**")
-    print(f"                (구 자였다면 Δx {(xs[ib]-xs[ia])*OLD_SCALE:+.2f} mm — "
-          f"이것이 '−4.65mm' 의 정체)")
+    for a, b, say in ((6.67, 7.42, "깊게 앉는 순간 (육안 −10~15mm)"),
+                      (6.67, 8.17, "사용자 재확인 (육안 8.xx mm)"),
+                      (8.00, 8.29, "푸시~이륙 (육안 −60mm = 플레이트 절반)"),
+                      (8.21, 8.29, "마지막 2프레임 (폭발 구간)")):
+        ia = int(np.argmin(np.abs(t_v0 - a))); ib = int(np.argmin(np.abs(t_v0 - b)))
+        dx = x_mm[ib] - x_mm[ia]; rr = roll[ib] - roll[ia]
+        print(f"   {a:.2f}~{b:.2f}s (f{int(fi[ia])}~f{int(fi[ib])})  영상 Δx {dx:+7.2f} · "
+              f"구름 {rr:+7.2f} · **슬립 {dx-rr:+7.2f}** mm   ← {say}")
 
     print(f"\n{'프레임':>7}{'t[s]':>8}{'영상Δx':>10}{'구름':>9}{'슬립':>9}   국면")
     for k in range(0, len(fi), 4):

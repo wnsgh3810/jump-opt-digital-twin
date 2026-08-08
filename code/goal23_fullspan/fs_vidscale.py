@@ -7,7 +7,7 @@
   우리가 재려는 대상은 **발 롤러의 수평 이동**이다. 그러면 자도 **발 롤러 자신**이 최선이다 —
     · 깊이가 정확히 같다 (같은 물체) → 원근 배율 오차 **0**
     · 원이라 카메라가 기울어도 지름은 불변
-    · 기준 길이가 실측 확정값: **바깥 지름 42.0 mm** (사용자 확인 08-08)
+    · 기준 길이가 실측 확정값: **바깥 40.0mm = 금속판 30.0mm + 고무 5.0mm×2** (08-08)
   비유: 사진 속 물건 크기를 잴 때 옆에 놓인 동전을 자로 쓰는 것과 같다. 단, 동전이 물건보다
   훨씬 앞/뒤에 있으면 틀린다 — 그래서 "물건 자신"을 자로 쓴다.
 
@@ -17,19 +17,21 @@
 
 폐기된 자 (전부 이 모듈 이전의 것)
   · 벽 눈금자 — 발보다 먼 평면 (마라톤F 이전)
-  · **발판 플레이트 120mm** — `_G_videoslip.json` 이 쓰던 자, 0.7453 mm/px. 이 자로는 발 지름이
-    **24.1 mm** (실측 42.0 대비 −43%). 판독 범위도 144~178px(±10%) 로 넓었다. **전 결과 무효.**
+  · **발판 플레이트 120mm** — `_G_videoslip.json` 이 쓰던 자, 0.7453 mm/px. 이 자로는 금속판이
+    **24.1 mm** (실측 30.0 대비 −20%). 판독 범위도 144~178px(±10%) 로 넓었다. **전 결과 무효.**
   · 은색 판 25mm 구멍 격자 — 자기상관 검증 실패(lag33 피크 없음, 상관 −0.176). **폐기.**
   · 가로 띠 밝기 임계 — 롤러가 **밝고 배경이 어둡다**. 링크·그림자에 오염돼 26~56px 로 요동. **폐기.**
 
 정본 측정법 `fit_roller()` — 방사 기울기 원 맞춤
-  롤러는 밝은 원판, 배경(그립패드)은 어둡다. 중심 후보와 반지름 r 을 훑으면서
+  ★ 잡히는 경계는 **금속판(밝음)/고무(어두움)** 이다 — 고무 바깥은 검은 그립패드와
+  명암차가 없어 안 잡힌다. 중심 후보와 반지름 r 을 훑으면서
   **안쪽(r−2px) 밝기 − 바깥쪽(r+2px) 밝기** 를 각도 평균해 최대가 되는 (cx,cy,r) 을 고른다.
   각도는 **95°~290°(좌·하)** 만 쓴다 — 오른쪽 위는 종아리 링크가 롤러를 가리기 때문.
   프레임마다 재고 **중앙값**을 취한다 (한 프레임의 모션블러에 흔들리지 않게).
 
-26.07.23/150_2.2_250_3 결과:  지름 **32.4 px** = 42.0 mm  →  **1.2963 mm/px**
-  (구 0.7453 대비 **1.739배** — 기존 영상 슬립 수치는 전부 1.739 를 곱해야 한다)
+26.07.23/150_2.2_250_3 결과:  금속판 **32.50 px** = 30.0 mm  →  **0.9231 mm/px**
+  (구 0.7453 대비 **1.242배** — 기존 영상 슬립 수치는 전부 1.242 를 곱해야 한다)
+  교차검증: 골격 겹침(종아리 250mm CAD) 0.92 · 벽 눈금자 1.03 — 모두 정합
 
 CLI:  python fs_vidscale.py                      # 등재 trial 자가검증
       python fs_vidscale.py <mp4> <f> <cx> <cy>  # 새 영상 교정
@@ -41,9 +43,17 @@ import numpy as np
 
 HERE = Path(__file__).parent
 
-# ── 실측 상수 ────────────────────────────────────────────────────────────────
-FOOT_DIA_MM = 42.0                  # 발 롤러 바깥 지름 — 사용자 확인 08-08
-FOOT_R_M = FOOT_DIA_MM / 2000.0     # 0.021 m — MuJoCo foot geom cylinder size[0] 와 일치 ✔
+# ── 실측 상수 (사용자 확인 08-08) ────────────────────────────────────────────
+#   발 롤러 = 안쪽 금속 원판 + 그 둘레의 고무 테두리
+FOOT_DIA_MM = 40.0                  # **바깥 지름** (고무 포함) = 접지 반경의 2배
+RUBBER_MM = 5.0                     # 고무 두께 (반경 방향)
+METAL_DIA_MM = 30.0                 # **안쪽 금속 원판 지름** = 40 − 2×5 ✔
+FOOT_R_M = FOOT_DIA_MM / 2000.0     # 0.020 m
+
+# ★ `fit_roller` 가 잡는 것은 **금속 원판**(밝음)과 고무(어두움)의 경계다.
+#   고무 바깥 가장자리는 배경(검은 그립패드)과 명암차가 없어 잡히지 않는다.
+#   그러므로 **스케일 = METAL_DIA_MM / 측정 지름 px**.  (초기에 이걸 바깥 지름으로
+#   착각해 42/32.4 = 1.296 을 썼다가 골격 겹침 검증에서 무릎이 한참 못 미쳐 발각됨.)
 
 SECTOR = (95.0, 290.0)              # 가려지지 않은 좌·하 원호 [deg]
 R_RANGE = (9.0, 26.0, 0.1)          # 반지름 탐색 [px]
@@ -52,9 +62,10 @@ EDGE_D = 2.0                        # 안/바깥 표본 간격 [px]
 # trial 별 **그 영상에서 잰** 지름. 새 trial 은 calibrate() 로 등재.
 FOOT_CAL = {
     ("26.07.23", "150_2.2_250_3"): dict(
-        mp4="KakaoTalk_20260723_165554947.mp4", frames=(96, 200), seed=(421.0, 1138.0),
-        dia_px=32.40, dia_px_iqr=(32.00, 33.60),
-        note="방사 기울기 원 맞춤 105프레임 중앙값 · foot_circlefit.png 로 육안 검증"),
+        mp4="KakaoTalk_20260723_165554947.mp4", frames=(96, 199), seed=(421.0, 1138.0),
+        dia_px=32.50, dia_px_iqr=(31.40, 33.60),
+        note="금속 원판(30mm) 지름. 방사 기울기 원 맞춤 105프레임 중앙값 · "
+             "골격 겹침(종아리 250mm CAD)과 벽 눈금자로 교차검증"),
 }
 
 
@@ -72,7 +83,7 @@ def _samp(g, x, y):
 
 
 def fit_roller(frame, cx0, cy0, *, sector=SECTOR, rrange=R_RANGE, d=EDGE_D, win=5.0, step=1.0,
-               refine=0.1):
+               refine=0.1, win_y=None):
     """한 프레임에서 롤러 원을 맞춘다 → (score, cx, cy, r) [px].
 
     2단 탐색: 거친 격자(step)로 대략 잡고, 그 주변을 `refine` 간격으로 **서브픽셀 정밀화**.
@@ -83,9 +94,10 @@ def fit_roller(frame, cx0, cy0, *, sector=SECTOR, rrange=R_RANGE, d=EDGE_D, win=
     ca = np.cos(ang); sa = -np.sin(ang)
     rs = np.arange(*rrange)
 
-    def scan(x0, y0, w, st):
+    def scan(x0, y0, w, st, wy=None):
         best = None
-        for cy in np.arange(y0 - w, y0 + w + 1e-9, st):
+        wy = w if wy is None else wy
+        for cy in np.arange(y0 - wy, y0 + wy + 1e-9, st):
             for cx in np.arange(x0 - w, x0 + w + 1e-9, st):
                 ri = (rs[:, None] - d) * ca[None, :]; si = (rs[:, None] - d) * sa[None, :]
                 ro = (rs[:, None] + d) * ca[None, :]; so = (rs[:, None] + d) * sa[None, :]
@@ -95,18 +107,32 @@ def fit_roller(frame, cx0, cy0, *, sector=SECTOR, rrange=R_RANGE, d=EDGE_D, win=
                     best = (float(sc[j]), float(cx), float(cy), float(rs[j]))
         return best
 
-    b = scan(cx0, cy0, win, step)
+    b = scan(cx0, cy0, win, step, win_y)
     return scan(b[1], b[2], step * 0.75, refine) if refine else b
 
 
-def track_roller(mp4, f0, f1, seed, **kw):
-    """구간 전 프레임에서 원을 맞춘다 → {frame: dict(cx,cy,r,score)}. 중심은 직전 프레임 추종."""
+def track_roller(mp4, f0, f1, seed, *, win_min=6.0, win_max=60.0, win_y=7.0, **kw):
+    """구간 전 프레임에서 원을 맞춘다 → {frame: dict(cx,cy,r,score,win)}.
+
+    ★ **등속 예측 + 적응 탐색창 + 수직 구속** (마라톤G 08-08 사고 대응)
+      고정 ±5px 창으로 두면 푸시 구간(프레임당 20~30px 이동)에서 발을 **놓치고**
+      배경에 락온한다 — 실제로 f199 를 −12.7mm 로 잘못 읽어 사용자의 −60mm 증언을
+      3회 반박했다. 다음 위치를 직전 속도로 예측하고, 창을 |속도|에 비례해 넓힌다.
+      단 **세로 창은 좁게**(win_y) 묶는다 — 접지 중 발은 수평으로만 움직이는데,
+      가로 창만 넓히면 흰 플랫폼의 **볼트 구멍**(밝은 원 = 강한 방사 경계)이
+      더 높은 점수로 이겨버린다 (실제 발생: f199 가 −80.7mm 로 튐).
+    """
     import imageio.v3 as iio
-    out = {}; c = tuple(map(float, seed))
+    out = {}; c = np.array(seed, float); v = np.zeros(2)
     for i, f in enumerate(iio.imiter(Path(mp4))):
         if f0 <= i <= f1:
-            s, cx, cy, r = fit_roller(f, c[0], c[1], **kw)
-            out[i] = dict(cx=cx, cy=cy, r=r, score=s); c = (cx, cy)
+            pred = c + v
+            w = float(np.clip(2.5 * np.hypot(*v) + win_min, win_min, win_max))
+            s, cx, cy, r = fit_roller(f, pred[0], pred[1], win=w, win_y=win_y, **kw)
+            new = np.array([cx, cy])
+            v = new - c if out else np.zeros(2)
+            c = new
+            out[i] = dict(cx=cx, cy=cy, r=r, score=s, win=w)
         if i > f1:
             break
     return out
@@ -122,7 +148,7 @@ def calibrate(mp4, f0, f1, seed, **kw):
                 dia_px=round(dia, 2),
                 dia_px_iqr=(round(2 * np.percentile(R[ok], 25), 2),
                             round(2 * np.percentile(R[ok], 75), 2)),
-                scale_mm_per_px=FOOT_DIA_MM / dia, n=int(ok.sum()), track=tr)
+                scale_mm_per_px=METAL_DIA_MM / dia, n=int(ok.sum()), track=tr)
 
 
 def scale_of(sess, trial, *, mp4=None, f0=None, f1=None, seed=None):
@@ -134,7 +160,7 @@ def scale_of(sess, trial, *, mp4=None, f0=None, f1=None, seed=None):
     if k in FOOT_CAL:
         c = FOOT_CAL[k]; d = c["dia_px"]
         lo, hi = c["dia_px_iqr"]
-        return dict(scale_mm_per_px=FOOT_DIA_MM / d, dia_px=d,
+        return dict(scale_mm_per_px=METAL_DIA_MM / d, dia_px=d,
                     rel_sd=float((hi - lo) / 2 / d), source="FOOT_CAL", note=c.get("note", ""))
     if mp4 is None:
         raise KeyError(
@@ -154,15 +180,17 @@ def main():
         print(json.dumps(c, ensure_ascii=False, indent=1))
         return
     print("=" * 96)
-    print(f"★ fs_vidscale 자가검증 — 발 롤러 {FOOT_DIA_MM:.0f}mm 자")
+    print(f"★ fs_vidscale 자가검증 — 발 롤러 자 (바깥 {FOOT_DIA_MM:.0f}mm = "
+          f"금속판 {METAL_DIA_MM:.0f}mm + 고무 {RUBBER_MM:.0f}mm x2)")
     for (s, t), c in FOOT_CAL.items():
         r = scale_of(s, t)
         print(f"\n  {s}/{t}")
         print(f"    지름 {r['dia_px']:.2f} px (IQR {c['dia_px_iqr'][0]}~{c['dia_px_iqr'][1]})"
               f"  →  **{r['scale_mm_per_px']:.4f} mm/px**  (±{r['rel_sd']*100:.1f}%)")
-        print(f"    구 플레이트 자 0.7453 은 지름을 {0.7453*c['dia_px']:.1f} mm 로 본 셈 "
+        print(f"    구 플레이트 자 0.7453 은 금속판을 {0.7453*c['dia_px']:.1f} mm 로 본 셈 "
               f"→ 기존 영상 수치에 **×{r['scale_mm_per_px']/0.7453:.3f}** 필요")
-    print(f"\n  모델 foot geom r = {FOOT_R_M*1000:.1f} mm ← 실측 지름 {FOOT_DIA_MM:.0f}mm 와 일치 ✔")
+    print(f"\n  ★ 접지 반경 r = {FOOT_R_M*1000:.1f} mm (바깥 {FOOT_DIA_MM:.0f}mm / 2). "
+          f"MuJoCo foot geom 은 0.021 → **0.020 수정 필요** (구름 r·dθ 4.8% 영향)")
     print("  ★ 새 영상은 반드시 그 영상에서 재-교정 (calibrate) — 다른 trial 값 재사용 금지")
 
 
