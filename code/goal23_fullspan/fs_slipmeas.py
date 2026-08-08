@@ -631,6 +631,7 @@ def main():
         except Exception:
             OUT = {}
     import safe
+    MINE = {}                       # 이 프로세스가 이번에 계산한 것만 (병합 방향 고정)
     for sess, trials in reg.items():
         med, _ = (session_dia(sess, trials) if (sess_force and len(trials) > 1)
                   else (None, []))
@@ -644,14 +645,19 @@ def main():
                          reason=f"{type(ex).__name__}: {str(ex)[:70]}")
                 print(f"  ✗ {sess}/{q}: {r['reason']}")
             OUT[f"{sess}/{q}"] = r
-            # ★ 쓰기 직전에 **다시 읽어 병합**한다. 프로세스를 나눠 돌리면(세션 병렬)
-            #   각자 시작 시점의 dict 를 통째로 써서 **남의 결과를 지운다** (08-09 실제 발생:
-            #   0424 작업과 7세션 작업이 서로를 덮어써 0602 가 낡은 값으로 되돌아갔다).
+            MINE[f"{sess}/{q}"] = r
+            # ★ 쓰기 직전에 다시 읽어 **내가 이번에 계산한 것만** 얹는다.
+            #   ① 시작 시점 dict 를 통째로 쓰면 남의 결과를 지운다
+            #      (0424 작업과 7세션 작업이 서로를 덮어써 0602 가 낡은 값으로 되돌아갔다)
+            #   ② 그렇다고 `cur.update(OUT)` 로 고치면 **방향이 반대**다 —
+            #      내 프로세스의 낡은 사본이 남의 최신 결과를 덮는다
+            #      (0324/P40_D0.7 이 고쳐 놓은 값에서 되돌아갔다. 08-09 2차 사고)
+            #   ⇒ 반드시 **MINE 만** 얹는다.
             try:
                 cur = json.load(io.open(OUT_JSON, encoding="utf-8")) if OUT_JSON.exists() else {}
             except Exception:
                 cur = {}
-            cur.update(OUT)
+            cur.update(MINE)
             OUT = cur
             safe.atomic_json_write(OUT_JSON, OUT)
     # 세션 중앙값 대비 QC (자를 강제하지 않는 대신 **사후 감사**로 잡는다)
