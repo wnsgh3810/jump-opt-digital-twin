@@ -484,9 +484,12 @@ def plot_ma(sess, name, d, seg):
         y, yo, yf = meas[k], old[j_], fs[j_]
         if k in ("q1", "q2"):
             y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
-        a.plot(t[m], y, lw=1.2, label="실측" + (" (a_hat 변환)" if k in ("a1", "a2") else ""))
-        a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가")
-        a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가")
+        # ★ G58: τ 패널은 **각 선의 고점을 범례에 숫자로** 박는다 (축 오독 방지 — 사용자 지적).
+        pk = (lambda v: f"  [고점 {np.max(v):.2f}]") if k in ("a1", "a2") else (lambda v: "")
+        a.plot(t[m], y, lw=1.2,
+               label="실측" + (" (a_hat 변환)" if k in ("a1", "a2") else "") + pk(y))
+        a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가" + pk(yo))
+        a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가" + pk(yf))
         if k in ("a1", "a2"):
             # ★ G57 (사용자 정정): `currentTorque` 는 **단위가 이미 N·m** 이다.
             #   AK80-9 매뉴얼: `float T_MIN=-18; T_MAX=18; t_int=float_to_uint(t_ff,T_MIN,T_MAX,12)`
@@ -497,9 +500,10 @@ def plot_ma(sess, name, d, seg):
             #   규약 ⑤(색 리터럴 금지): 기본 사이클의 4번째 색 (실측·OLD·현행과 비충돌).
             rk = "raw1" if k == "a1" else "raw2"
             a.plot(t[m], d[rk][m], lw=1.0, alpha=0.85,
-                   label="모터 명령 (엑셀 원본, N·m)")
+                   label=f"모터 명령 (엑셀 원본, 무변환) [고점 {np.max(d[rk][m]):.2f}]")
     ax[0].legend(fontsize=8, loc="best")
-    ax[4].legend(fontsize=7, loc="best")
+    for _i in (4, 5):                      # ★ G58: τ1·τ2 **양쪽 다** 범례(=고점 숫자) 표시
+        ax[_i].legend(fontsize=6.5, loc="best")
     fig.tight_layout()
     fp = OUT / "ModeA" / sess
     fp.mkdir(parents=True, exist_ok=True)
