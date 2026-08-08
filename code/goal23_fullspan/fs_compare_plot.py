@@ -40,6 +40,23 @@ TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 
 
+def sess_params(sess):
+    """세션 상수(bias1 · knee_deep) 조회 — **FS_NOBIAS / FS_NODEEP 존중** (마라톤G G53 추가).
+
+    ★ 왜 필요한가 (침묵실패 사례): 이 두 스위치는 그동안 `_G13_board.py` / `_G51_allboard.py`
+      **안에서만** 처리됐고 `fs_runner.py` 에도 이 파일에도 없었다. 그래서 마라톤G 스택
+      (인공층 전멸 = 세션 상수 0)을 env 로 넘겨도 **이 스크립트는 세션 상수를 그대로 켠 채** 돌았고,
+      같은 구성인데 0421 q2 가 심판 3.99 vs 그림 7.13 으로 갈렸다 (사용자 지적으로 발각).
+      두 경로가 같은 자를 쓰도록 정본 한 곳에 모은다.
+    """
+    sp = FR._sess_params().get(sess) or dict(bias1=0.0, knee_deep=None)
+    if os.environ.get("FS_NOBIAS") == "1":
+        sp = dict(sp, bias1=0.0)
+    if os.environ.get("FS_NODEEP") == "1":
+        sp = dict(sp, knee_deep=None)
+    return sp
+
+
 def alpha_of(tab, kp):
     """OLD α 조회 — 표 밖 게인은 **log-kp 선형 보간**(표 범위 밖은 단부값 고정).
     사용자 지적 (P17): 구 fallback 0.40/0.656 고정은 표 밖 게인에서 OLD를 부당하게 약화시켰다
@@ -103,8 +120,7 @@ def cl_pair(d, seg, g, sess):
     alphas = alphas_for(sess, g)
     Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
     ft = FR.fs_twin()
-    SP = FR._sess_params()
-    sp = SP.get(sess, dict(bias1=0.0, knee_deep=None))
+    sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
     Lf = FR.rollout_cl_fs(ft, t, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
                           tuple(g), t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                           fade=True, taulim=None, vdes_ff=(sess != "26.04.21"), init_meas=init)
@@ -314,8 +330,7 @@ def plot_ma(sess, name, d, seg):
     점프 창(~0.2~0.3s)은 통짜 재생이 가능하므로 R19 정본 재생 방식(단일 샷)을 따른다.
     """
     ft = FR.fs_twin()
-    SP = FR._sess_params()
-    sp = SP.get(sess, dict(bias1=0.0, knee_deep=None))
+    sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
     t = d["t"]
     pw = FD.plot_window(d["_fold"], d)          # 그래프·재생 창 = 원본 xlsx (점프) — 훅 규약
     if pw is None:
