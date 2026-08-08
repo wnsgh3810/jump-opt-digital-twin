@@ -560,7 +560,16 @@ def main():
     print("=" * 104)
     print(f"★ 슬립·구름 판정 — 자=발 금속판 {VS.METAL_DIA_MM:.0f}mm · r={VS.FOOT_R_M*1000:.0f}mm "
           f"· + = 화면 오른쪽 = 모델 +x")
-    print("  2패스: ① 세션 자 확정(중앙값) → ② 그 자를 강제해 전 trial 재측정")
+    # ★ 자 정책 (08-09 변경)
+    #   구: 세션 자 고정(2패스). 근거는 "카메라는 세션 중 고정" 이었다.
+    #   신: **trial 별 자**가 기본. 시드 판독에서 그 전제가 깨진 걸 확인했다 —
+    #       0324 는 P40_D0.7 발 지름이 23px, P100_D3 는 39px 다(같은 세션, 카메라 이동).
+    #       0727 은 60_2/80_2 만 촬영일이 다르다. 세션 자를 강제하면 이런 trial 이 통째로 틀린다.
+    #   세션 중앙값은 버리지 않고 **QC 기준**으로 쓴다 (12% 이상 벗어나면 경고).
+    #   구 방식으로 되돌리려면 FS_SESSDIA=1.
+    sess_force = bool(os.environ.get("FS_SESSDIA"))
+    print("  자 정책: " + ("세션 자 고정(2패스, FS_SESSDIA)" if sess_force
+                          else "**trial 별 자** + 세션 중앙값 대비 QC"))
     OUT = {}
     if OUT_JSON.exists():
         try:
@@ -569,19 +578,41 @@ def main():
             OUT = {}
     import safe
     for sess, trials in reg.items():
-        med, _ = session_dia(sess, trials) if len(trials) > 1 else (None, [])
+        med, _ = (session_dia(sess, trials) if (sess_force and len(trials) > 1)
+                  else (None, []))
         for q in trials:
             try:
                 r = measure(sess, q, force_dia=med)
+                if r.get("ok") and not sess_force:
+                    r["sess_dia_ref"] = None      # 세션 대비 QC 는 전수 끝난 뒤 일괄 (아래)
             except Exception as ex:
                 r = dict(sess=sess, trial=q, ok=False,
                          reason=f"{type(ex).__name__}: {str(ex)[:70]}")
                 print(f"  ✗ {sess}/{q}: {r['reason']}")
             OUT[f"{sess}/{q}"] = r
             safe.atomic_json_write(OUT_JSON, OUT)
+    # 세션 중앙값 대비 QC (자를 강제하지 않는 대신 **사후 감사**로 잡는다)
+    if not sess_force:
+        by = {}
+        for k, v in OUT.items():
+            if v.get("ok"):
+                by.setdefault(v["sess"], []).append(v)
+        for s, vs in by.items():
+            if len(vs) < 3:
+                continue
+            m = float(np.median([v["dia_px"] for v in vs]))
+            for v in vs:
+                d = v["dia_px"] / m - 1
+                tag = f"세션 중앙 지름 {m:.1f}px 대비 {d*100:+.0f}%"
+                v["sess_dia_ref"] = round(m, 2)
+                v["qc"] = [q for q in v.get("qc", []) if "세션 중앙 지름" not in q]
+                if abs(d) > 0.12:
+                    v["qc"].append(tag + " — 카메라 이동/추적 확인")
+        safe.atomic_json_write(OUT_JSON, OUT)
     good = [v for v in OUT.values() if v.get("ok")]
+    clean = [v for v in good if not v.get("qc")]
     print("")
-    print(f"성공 {len(good)}/{len(OUT)} · 저장: {OUT_JSON.name}")
+    print(f"성공 {len(good)}/{len(OUT)} · QC 무경고 {len(clean)} · 저장: {OUT_JSON.name}")
 
 
 if __name__ == "__main__":

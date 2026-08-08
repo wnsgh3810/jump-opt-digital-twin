@@ -30,12 +30,14 @@ SEGS = ("하강전반", "하강후반", "바닥유지", "푸시~이륙", "전체
 
 
 def _sess_of(name):
-    """파일명에서 세션 태그(26_07_23)를 뽑는다."""
-    for tok in name.replace(".png", "").split("__"):
-        t = tok.replace("_zoom1_", "").replace("_zoom2_", "").replace("_sheet_", "")
-        t = t.replace("_chk_", "")
-        if t.count("_") == 2 and t[:2].isdigit():
-            return t
+    """파일명에서 세션 태그를 뽑는다 (26_07_23 / 26.07.23 / 0602 등 표기 혼재 대응)."""
+    import re
+    m = re.search(r"(2\d)[._](\d{2})[._](\d{2})", name)
+    if m:
+        return "_".join(m.groups())
+    m = re.search(r"_(\d{2})(\d{2})[_.]", name)          # _0602_ 식 약식 표기
+    if m:
+        return f"26_{m.group(1)}_{m.group(2)}"
     return "기타"
 
 
@@ -76,13 +78,18 @@ def write_csv(res):
         if not r.get("ok"):
             rows.append(dict(세션=r["sess"], trial=r["trial"], 상태="실패",
                              사유=r.get("reason", ""))); continue
-        g = r["seg"]
+        g = r.get("seg")
+        if not g:                       # 구 스키마(필드 누락) — 재측정 대상으로 표시
+            rows.append(dict(세션=r.get("sess", "?"), trial=r.get("trial", "?"),
+                             상태="구스키마", 사유="seg 없음 — 재측정 필요")); continue
+        f = lambda k, d=float("nan"): r.get(k, d)
         row = dict(세션=r["sess"], trial=r["trial"], 상태="성공",
-                   fps=round(r["fps"], 2), 해상도=f"{r['vid_w']}x{r['vid_h']}",
-                   자_mm_px=round(r["scale"], 4), 지름px=round(r["dia_px"], 2),
-                   지름산포pct=round(r["rel_sd"] * 100, 1),
-                   동기민감도mm=round(r["sync_sens_mm"], 1),
-                   추적점수최저=round(r["score_min"], 0))
+                   fps=round(f("fps"), 2), 해상도=f"{r.get('vid_w','?')}x{r.get('vid_h','?')}",
+                   자_mm_px=round(f("scale"), 4), 지름px=round(f("dia_px"), 2),
+                   지름산포pct=round(f("rel_sd") * 100, 1),
+                   세션중앙지름px=r.get("sess_dia_ref"),
+                   동기민감도mm=round(f("sync_sens_mm"), 1),
+                   추적점수최저=round(f("score_min"), 0))
         for s in SEGS:
             row[f"Δx_{s}"] = round(g[s]["dx"], 2)
             row[f"구름_{s}"] = round(g[s]["roll"], 2)
