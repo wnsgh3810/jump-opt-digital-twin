@@ -66,6 +66,13 @@ def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None, endstop=False,
     # 액추에이터/인코더 = 모터 힌지
     xml = safe.xml_patch(xml, '<motor name="hip_motor" joint="hip" gear="1"/>',
                          '<motor name="hip_motor" joint="hip_m" gear="1"/>', count=1)
+    # ★ 발 접지 반경 — 실측 **바깥 지름 40.0mm → r = 0.020 m** (사용자 확인 08-08).
+    #   정본 XML 은 0.0210 (구 가정). canonical 은 불가침이므로 여기서 문자열만 덮는다.
+    #   기본값은 0.021 유지 = 골든 보존. FS_FOOTR 로 켠다 (구름 r·dtheta 가 4.8% 바뀜).
+    _fr = os.environ.get("FS_FOOTR")
+    if _fr:
+        xml = safe.xml_patch(xml, 'type="cylinder" size="0.0210 0.0065"',
+                             f'type="cylinder" size="{float(_fr):.4f} 0.0065"', count=1)
     if endstop:
         # 레일 하단 엔드스톱 (SEA P4: z_stop=0.169 soft) — s2s '의자'. 점프 자세는 구조적 미접촉
         xml = safe.xml_patch(xml, '<joint name="base_z" type="slide" axis="0 0 1"/>',

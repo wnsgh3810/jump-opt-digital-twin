@@ -119,9 +119,21 @@ SEED_CAL = {
 }
 
 
+# 처리 해상도(가로 px)별 발 금속판 **반지름 사전**. 등재 세션에서 실측한 값.
+#   같은 촬영 규격이면 발 크기도 같다 — 미등재 세션의 자동 탐색을 이걸로 구속한다.
+#   구속이 없으면 광학테이블 볼트머리(r≈4)·트러스구멍(r≈24)이 점수로 이긴다.
+R_PRIOR = {720: 16.2, 1080: 29.4}
+
+
 def seed_of(sess, k=1.0):
-    """세션 시드 (cx, cy, r_expect). 미등재면 None → 자동 탐색으로 폴백."""
+    """세션 시드 (cx, cy, r_expect). 미등재면 None → 반지름 구속 자동 탐색."""
     return SEED_CAL.get(sess)
+
+
+def r_prior(proc_w):
+    """처리 가로폭에 가장 가까운 규격의 반지름 사전."""
+    key = min(R_PRIOR, key=lambda w: abs(w - proc_w))
+    return R_PRIOR[key] * (proc_w / key)
 
 
 # ── ③ 발 탐색 ────────────────────────────────────────────────────────────────
@@ -148,7 +160,7 @@ def _scan_circles(g, ys, xs, *, rrange=(6.0, 30.0, 0.5), topn=40, k=1.0):
     return keep
 
 
-def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1):
+def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1, rprior=None):
     """**이륙 순간 크게 움직이는 원 = 발**.
 
     판별 원리 (이게 결정적이다):
@@ -172,7 +184,8 @@ def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1):
     H, W = F[f_sit].shape
     ys = np.arange(int(H * band[0]), int(H * band[1]), 6.0 * k)
     xs = np.arange(int(W * 0.10), int(W * 0.94), 6.0 * k)
-    cands = _scan_circles(F[f_sit], ys, xs, topn=topn, k=k)
+    rr_scan = ((rprior * 0.65, rprior * 1.35, 0.5) if rprior else (6.0 * k, 30.0 * k, 0.5 * k))
+    cands = _scan_circles(F[f_sit], ys, xs, topn=topn, k=1.0, rrange=rr_scan)
     # ★ **발 = 로봇에서 가장 아래**  (2차 판별)
     #   "이륙 때 움직인 원" 만으로는 부족하다 — 이륙 순간엔 허벅지 트러스도 링크도 다 움직인다.
     #   실제로 0424(카메라 먼 세션)에서 **트러스 구멍**을 발로 오인했다 (08-08).
@@ -186,7 +199,7 @@ def find_foot(mp4, f_lo, *, band=(0.60, 0.99), back=14, topn=8, k=1.0, ds=1):
             pred = c + v
             w = float(np.clip(2.5 * np.hypot(*v) + 6.0 * k, 6.0 * k, 60.0 * k))
             sc, nx, ny, nr = VS.fit_roller(F[i], pred[0], pred[1], win=w, win_y=7.0 * k,
-                                           rrange=(9.0 * k, 26.0 * k, 0.1 * k),
+                                           rrange=(rr_scan[0], rr_scan[1], 0.1 * k),
                                            d=VS.EDGE_D * k, refine=0.1 * k)
             v = np.array([nx, ny]) - c; c = np.array([nx, ny]); rr.append(nr)
         if not okk:
@@ -259,7 +272,8 @@ def measure(sess, trial, *, verbose=True):
                                           d=VS.EDGE_D * k, refine=0.1 * k)
         moved = float("nan")
     else:
-        fd = find_foot(mp4, f_lo, back=max(6, int(round(0.6 * fps))), k=k, ds=ds)
+        rp = r_prior(vm["w"] / ds)
+        fd = find_foot(mp4, f_lo, back=max(6, int(round(0.6 * fps))), k=k, ds=ds, rprior=rp)
         if fd is None:
             return dict(sess=sess, trial=trial, ok=False,
                         reason="발 시드 없음 (SEED_CAL 미등재 + 자동 탐색 실패)", mp4=mp4.name)
@@ -280,11 +294,9 @@ def measure(sess, trial, *, verbose=True):
     tf = VS.track_roller(mp4, f_sit, max(f_sit, f_hi),
                          (tb[f_sit]["cx"], tb[f_sit]["cy"]), **TK)
     tr = {**tb, **tf}
-    R = np.array([v["r"] for v in tr.values()]); S = np.array([v["score"] for v in tr.values()])
-    ok = S > np.percentile(S, 25)
-    dia = float(2 * np.median(R[ok]))
-    s_mm = VS.METAL_DIA_MM / dia
-    rel = float((2 * np.percentile(R[ok], 75) - 2 * np.percentile(R[ok], 25)) / 2 / dia)
+    # 자(지름)·QC 는 **접지 절단 뒤 남은 프레임**으로만 계산한다 (아래에서 확정).
+    #   전체 추적으로 계산했더니 이미 버린 이륙 후 프레임 때문에 "최저 점수 21" 이
+    #   허위로 뜨고 지름 산포도 부풀었다 (08-08).
 
     # ★ 접지 유효 구간 절단 — 이륙 다음 프레임부터 발이 화면에서 사라져 추적이 튄다.
     #   (실측: f200 에서 −148mm 로 폭주). 지면 높이에서 벗어나거나 점수가 무너지면 자른다.
@@ -301,6 +313,12 @@ def measure(sess, trial, *, verbose=True):
     f_end = ks[-1]
     fi = np.array(ks, float)
     xpx = np.array([tr[int(k)]["cx"] for k in fi])          # ★ 평활 금지
+
+    Rk = np.array([tr[int(q)]["r"] for q in fi]); Sk = np.array([tr[int(q)]["score"] for q in fi])
+    okk = Sk > np.percentile(Sk, 25)
+    dia = float(2 * np.median(Rk[okk]))
+    s_mm = VS.METAL_DIA_MM / dia
+    rel = float((2 * np.percentile(Rk[okk], 75) - 2 * np.percentile(Rk[okk], 25)) / 2 / dia)
 
     # ★★ 동기 재확정: **마지막 접지 프레임 ↔ 데이터 t_lo** ★★
     #   24fps 에서 푸시는 5프레임뿐인데 구름이 마지막 프레임에 15mm 급변한다 —
@@ -347,12 +365,12 @@ def measure(sess, trial, *, verbose=True):
         qc.append(f"동기 ±1프레임 → 푸시슬립 ±{sens:.0f}mm")
     if rel > 0.10:
         qc.append(f"지름 산포 {rel*100:.0f}% (>10%)")
-    if float(np.min(S)) < 40:
-        qc.append(f"최저 추적점수 {np.min(S):.0f} (<40)")
+    if float(np.min(Sk)) < 40:
+        qc.append(f"최저 추적점수 {np.min(Sk):.0f} (<40)")
     if np.isfinite(moved) and moved < 15 * k * 24.0 / fps:
         qc.append(f"이륙 변위 {moved:.0f}px (<{15*k*24.0/fps:.0f} — 발 오탐 가능)")
     if sd is None:
-        qc.append("SEED_CAL 미등재 — 자동 탐색 시드 (신뢰도 낮음, 검증 시트 필수)")
+        qc.append("SEED_CAL 미등재 — 반지름구속 자동 시드 (검증 시트 확인 필수)")
     if abs(shift) > 20:
         qc.append(f"동기 shift {shift:+.1f}s (비정상)")
     if f_end >= f_hi:
@@ -368,7 +386,7 @@ def measure(sess, trial, *, verbose=True):
                shift=shift, f0=f0,
                seed=[cx0, cy0], seed_r=r0, seed_moved=moved,
                dia_px=dia, scale=s_mm, rel_sd=rel,
-               score_min=float(np.min(S)), score_med=float(np.median(S)),
+               score_min=float(np.min(Sk)), score_med=float(np.median(Sk)),
                r_foot_mm=rfoot * 1000, seg=segs, sync_sens_mm=sens, qc=qc,
                series=dict(f=fi.tolist(), x=x_mm.tolist(), roll=roll.tolist(), slip=slip.tolist(),
                            cx=[tr[int(q)]["cx"] for q in fi], cy=[tr[int(q)]["cy"] for q in fi],
