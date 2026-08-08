@@ -73,7 +73,7 @@ def alpha_of(tab, kp):
 QS = 2                      # qd 스큐 보정 [샘플] (4ms@500Hz)
 MA_W, MA_S = 0.10, 0.05     # 점프 창(~0.2~0.3s) 내 mshoot 창/stride
 CH = [("q1", "q1 [°]"), ("q2", "q2 [°]"), ("dq1", "dq1 [rad/s]"),
-      ("dq2", "dq2 [rad/s]"), ("a1", "τ1 [Nm]"), ("a2", "τ2 [Nm]")]
+      ("dq2", "dq2 [rad/s]"), ("a1", "τ1 [N·m]"), ("a2", "τ2 [N·m]")]
 
 
 def sh(x, n=QS):
@@ -488,20 +488,16 @@ def plot_ma(sess, name, d, seg):
         a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가")
         a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가")
         if k in ("a1", "a2"):
-            # ★ G56 (사용자 요청): τ 패널에 **주입 raw 명령**을 오른쪽 축으로 병기.
-            #   raw 는 두 모델에 **완전히 동일**하게 들어가는 공통 입력이다.
-            #   같은 raw 가 환율표(a_hat vs canon_cap)를 거쳐 서로 다른 Nm 이 되는 것을
-            #   한 패널 안에서 바로 볼 수 있게 한다.
-            #   규약 ⑤(색 리터럴 금지): twin 축의 기본 사이클을 3칸 소비해 4번째 색을 쓴다
-            #   (실측 1번·OLD 2번·현행 3번과 겹치지 않게).
-            a2_ = a.twinx()
-            for _ in range(3):
-                a2_._get_lines.get_next_color()
+            # ★ G57 (사용자 정정): `currentTorque` 는 **단위가 이미 N·m** 이다.
+            #   AK80-9 매뉴얼: `float T_MIN=-18; T_MAX=18; t_int=float_to_uint(t_ff,T_MIN,T_MAX,12)`
+            #   즉 ±18 N·m 를 12bit 로 인코딩한 값 (사양표 N.M 행도 -18~18).
+            #   ⇒ 별도 축(twinx)이 아니라 **같은 Nm 축**에 그려야 직접 비교가 된다.
+            #   이 선이 곧 "모터가 내겠다고 명령받은 토크"이고, τ 곡선들은 각 모델이
+            #   그 명령을 자기 환율(a_hat / canon_cap)로 해석해 **실제 관절에 넣은 토크**다.
+            #   규약 ⑤(색 리터럴 금지): 기본 사이클의 4번째 색 (실측·OLD·현행과 비충돌).
             rk = "raw1" if k == "a1" else "raw2"
-            a2_.plot(t[m], d[rk][m], lw=0.9, alpha=0.75, label="주입 raw (공통 입력)")
-            a2_.set_ylabel("주입 raw [-]", fontsize=8)
-            a2_.tick_params(labelsize=7)
-            a2_.legend(fontsize=6, loc="lower right")
+            a.plot(t[m], d[rk][m], lw=1.0, alpha=0.85,
+                   label="모터 명령 (엑셀 원본, N·m)")
     ax[0].legend(fontsize=8, loc="best")
     ax[4].legend(fontsize=7, loc="best")
     fig.tight_layout()
