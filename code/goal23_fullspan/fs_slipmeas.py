@@ -663,11 +663,14 @@ def main():
         for s, vs in by.items():
             if len(vs) < 3:
                 continue
-            m = float(np.median([v["dia_px"] for v in vs]))
+            # ★ 해상도로 정규화하고 비교한다. 한 세션 안에서도 촬영 규격이 섞일 수 있다
+            #   (0421 은 P60 만 24fps 720p, 나머지는 59fps 4K) — 생 px 로 비교하면
+            #   정상 trial 에 "−34% 카메라 이동" 이라는 **허위 경고**가 붙는다.
+            m = float(np.median([v["dia_px"] / v["px_k"] for v in vs]))
             for v in vs:
-                d = v["dia_px"] / m - 1
-                tag = f"세션 중앙 지름 {m:.1f}px 대비 {d*100:+.0f}%"
-                v["sess_dia_ref"] = round(m, 2)
+                d = (v["dia_px"] / v["px_k"]) / m - 1
+                tag = f"세션 중앙 지름(해상도 정규화) {m:.1f} 대비 {d*100:+.0f}%"
+                v["sess_dia_ref"] = round(m, 2)   # 해상도 정규화 값 (dia_px / px_k)
                 v["qc"] = [q for q in v.get("qc", []) if "세션 중앙 지름" not in q]
                 if abs(d) > 0.12:
                     v["qc"].append(tag + " — 카메라 이동/추적 확인")
