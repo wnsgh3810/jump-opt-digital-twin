@@ -75,7 +75,9 @@ def _gray(f):
 
 
 def _samp(g, x, y):
-    """쌍선형 보간 (서브픽셀)."""
+    """쌍선형 보간 (서브픽셀). 경계 밖은 클립 (전역 탐색 시 IndexError 방지)."""
+    H, W = g.shape
+    x = np.clip(x, 0.0, W - 2.001); y = np.clip(y, 0.0, H - 2.001)
     x0 = np.floor(x).astype(int); y0 = np.floor(y).astype(int)
     fx = x - x0; fy = y - y0
     return (g[y0, x0] * (1 - fx) * (1 - fy) + g[y0, x0 + 1] * fx * (1 - fy)
