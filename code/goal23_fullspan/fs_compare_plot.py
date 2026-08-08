@@ -487,6 +487,21 @@ def plot_ma(sess, name, d, seg):
         a.plot(t[m], y, lw=1.2, label="실측" + (" (a_hat 변환)" if k in ("a1", "a2") else ""))
         a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가")
         a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가")
+        if k in ("a1", "a2"):
+            # ★ G56 (사용자 요청): τ 패널에 **주입 raw 명령**을 오른쪽 축으로 병기.
+            #   raw 는 두 모델에 **완전히 동일**하게 들어가는 공통 입력이다.
+            #   같은 raw 가 환율표(a_hat vs canon_cap)를 거쳐 서로 다른 Nm 이 되는 것을
+            #   한 패널 안에서 바로 볼 수 있게 한다.
+            #   규약 ⑤(색 리터럴 금지): twin 축의 기본 사이클을 3칸 소비해 4번째 색을 쓴다
+            #   (실측 1번·OLD 2번·현행 3번과 겹치지 않게).
+            a2_ = a.twinx()
+            for _ in range(3):
+                a2_._get_lines.get_next_color()
+            rk = "raw1" if k == "a1" else "raw2"
+            a2_.plot(t[m], d[rk][m], lw=0.9, alpha=0.75, label="주입 raw (공통 입력)")
+            a2_.set_ylabel("주입 raw [-]", fontsize=8)
+            a2_.tick_params(labelsize=7)
+            a2_.legend(fontsize=6, loc="lower right")
     ax[0].legend(fontsize=8, loc="best")
     ax[4].legend(fontsize=7, loc="best")
     fig.tight_layout()
