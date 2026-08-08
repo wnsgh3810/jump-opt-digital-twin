@@ -72,11 +72,18 @@ def main():
     fig, ax = plt.subplots(figsize=(13, 5.6))
     w = 0.8 / len(SEGS)
     for i, s in enumerate(SEGS):
-        xs, ys = [], []
+        # QC 경고는 **버리지 않고 x 표시**로 남긴다 (왜 걸렸는지가 정보다)
+        pos = {True: ([], []), False: ([], [])}
         for j, se in enumerate(ss):
-            v = [d[s] for d in rows if d["sess"] == se]
-            xs += [j + (i - len(SEGS) / 2 + 0.5) * w] * len(v); ys += v
-        ax.scatter(xs, ys, s=26, label=s, alpha=0.85)
+            for d in [d for d in rows if d["sess"] == se]:
+                pos[d["qc"]][0].append(j + (i - len(SEGS) / 2 + 0.5) * w)
+                pos[d["qc"]][1].append(d[s])
+        h = ax.scatter(pos[False][0], pos[False][1], s=28, label=s, alpha=0.9)
+        # 같은 구간은 같은 색으로 묶는다 — 색은 지정하지 않고 **방금 그린 것에서 받아온다**
+        # (프로젝트 규약: 색 리터럴 금지, get_color 패턴만 허용)
+        ax.scatter(pos[True][0], pos[True][1], s=30, marker="x", alpha=0.55,
+                   color=h.get_facecolor()[0])
+    ax.scatter([], [], marker="x", s=30, label="↑ x 표시 = QC 경고(참고용)")
     ax.axhline(0, lw=0.8)
     ax.set_xticks(range(len(ss))); ax.set_xticklabels(ss, rotation=20)
     ax.set_ylabel("슬립 [mm]  (+ = 화면 오른쪽)")

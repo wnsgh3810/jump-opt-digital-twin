@@ -590,6 +590,15 @@ def main():
                          reason=f"{type(ex).__name__}: {str(ex)[:70]}")
                 print(f"  ✗ {sess}/{q}: {r['reason']}")
             OUT[f"{sess}/{q}"] = r
+            # ★ 쓰기 직전에 **다시 읽어 병합**한다. 프로세스를 나눠 돌리면(세션 병렬)
+            #   각자 시작 시점의 dict 를 통째로 써서 **남의 결과를 지운다** (08-09 실제 발생:
+            #   0424 작업과 7세션 작업이 서로를 덮어써 0602 가 낡은 값으로 되돌아갔다).
+            try:
+                cur = json.load(io.open(OUT_JSON, encoding="utf-8")) if OUT_JSON.exists() else {}
+            except Exception:
+                cur = {}
+            cur.update(OUT)
+            OUT = cur
             safe.atomic_json_write(OUT_JSON, OUT)
     # 세션 중앙값 대비 QC (자를 강제하지 않는 대신 **사후 감사**로 잡는다)
     if not sess_force:
