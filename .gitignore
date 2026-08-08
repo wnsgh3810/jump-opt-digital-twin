@@ -37,3 +37,5 @@ tmp_*
 *.tmp
 MUJOCO_LOG.TXT
 **/MUJOCO_LOG.TXT
+
+code/goal23_fullspan/_G52_dump/
