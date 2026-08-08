@@ -677,7 +677,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     s1f = 0.0
     af = dt / max(tc_f, dt)
     N = int(round((t_end + t_after) / dt))
-    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "defl", "bz", "tsp1", "s1f", "fx",
+    # ★ G66: `c1`/`c2` = PD 가 만든 **명령**(N·m, 토크맵 통과 **전**) 로깅 추가.
+    #   τ 채점의 기준선 `d["a1"]` 은 a_hat 변환값이라 다른 맵을 쓰는 스택이 구조적으로 불리하다(G53).
+    #   명령끼리 비교하면 **맵 무관**이므로 편향분과 실제분을 분리할 수 있다. 동역학 무변경(로깅 전용).
+    keys = ("t", "thm1", "q1", "q2", "dq1", "dq2", "s1", "s2", "c1", "c2", "defl", "bz", "tsp1", "s1f", "fx",
             "cfx", "cfz", "bx", "slipv")
     Lg = {k: np.zeros(N) for k in keys}
     _fgx = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")   # 마라톤D P3: 발 x (슬립 지표)
@@ -882,6 +885,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1o
         Lg["s2"][k] = s2o
+        Lg["c1"][k] = c1                     # G66: 맵 통과 전 명령 (N·m) — 맵 무관 τ 비교용
+        Lg["c2"][k] = c2
         Lg["defl"][k] = md.qpos[iq["hip"]]
         Lg["bz"][k] = md.qpos[iq["base_z"]]
         Lg["fx"][k] = float(md.geom_xpos[_fgx][0])
