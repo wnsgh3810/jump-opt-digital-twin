@@ -27,7 +27,8 @@ import matplotlib.pyplot as plt
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
-OUT = HERE / "graphs" / "G79_slip_all" / "05_trend"
+OUT = Path(os.environ.get("G79_OUT",
+                          r"C:/Users/junho/Desktop/jump_opt/G_slip_all_260809")) / "05_trend"
 SEGS = ("하강전반", "하강후반", "바닥유지", "푸시~이륙")
 CVT_SESS = {"26.04.29"}
 

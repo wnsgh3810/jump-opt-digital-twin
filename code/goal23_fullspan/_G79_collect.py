@@ -25,7 +25,12 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 
 G = HERE / "graphs"
-DST = G / "G79_slip_all"
+# ★ 모음 폴더는 **repo 밖**에 둔다.
+#   ① 이 폴더는 repo 안 이미지의 사본이라 git 에 넣으면 같은 그림을 두 번 저장한다
+#      (실측 105MB · .git 이 이미 1.6GB). ② 사용자가 열어볼 곳은 탐색기지 repo 가 아니다.
+#   헌법상 분석 산출물 위치: repo 또는 `Desktop/jump_opt/`.
+DST = Path(os.environ.get("G79_OUT",
+                          r"C:/Users/junho/Desktop/jump_opt/G_slip_all_260809"))
 SEGS = ("하강전반", "하강후반", "바닥유지", "푸시~이륙", "전체")
 
 
