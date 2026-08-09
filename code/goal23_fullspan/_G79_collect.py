@@ -177,6 +177,14 @@ def main():
     if isinstance(res, dict):
         res = list(res.values())
     rows = write_csv(res)
+    # ★ trial 표도 여기서 **함께** 다시 쓴다 — 한 번 만들고 방치하면 낡는다
+    #   (실제 사고 08-09: CSV 는 갱신됐는데 표만 2시간 전 값으로 남아 사용자가 발견)
+    try:
+        import _G99_trialtable as TT
+        f, n = TT.build(DST)
+        print(f"  trial 표 갱신: {f.name} ({n} trial)")
+    except Exception as ex:
+        print(f"  [경고] trial 표 갱신 실패: {type(ex).__name__} {ex}")
     nimg = collect_images()
     data = collect_data()
     write_index(rows, nimg, data)
