@@ -30,8 +30,8 @@ import fs_data as FD
 import mujoco as mjm
 
 TW = FC.TW; RU = FC.RU
-OUT = HERE / "_plots"
-OUT.mkdir(exist_ok=True)
+OUT = HERE / os.environ.get("FS_CMP_OUT_CVT", "_plots")   # 승격 비교용 폴더 분리
+OUT.mkdir(parents=True, exist_ok=True)
 # ★ 08-09: l_i 하드코딩 폐지. trial 마다 `fs_data.cvt_li(trial폴더)` 로 읽는다.
 #   (구 0.02499 는 "실측" 주석과 달리 센서 범위 25.06~25.10 **밖**이었다 — 점수 튜닝값)
 LI = 0.02508    # 폴백 기본값 — 결과 경로는 trial 값으로 덮어쓸 것
@@ -46,15 +46,24 @@ def lpf(x, dt, tc=0.010):
     return y
 
 
+TAG = os.environ.get("FS_STACK_TAG", "fs")
+
+
 def tri(ax, t0, y0, t1, y1, t2, y2, ylab):
     ln, = ax.plot(t0, y0, lw=1.0, label="실측")
-    ax.plot(t1, y1, "--", lw=1.0, label="old α (5q)")
-    ax.plot(t2, y2, ":", lw=1.4, label="fs (6q)")
+    ax.plot(t1, y1, "--", lw=1.0, label="배포모델 (OLD=p24, 5q)")
+    ax.plot(t2, y2, ":", lw=1.4, label=f"현행 ({TAG}, 6q)")
     ax.set_ylabel(ylab)
     ax.grid(alpha=0.3)
 
 
-def cl5q(model, tw, cc, d, seg, g, win=None):
+def _rmse(y, ys, deg=False):
+    """실측 y 와 sim ys 의 RMSE. 각도 채널은 ° 로 (비CVT 보드와 같은 단위 규약)."""
+    e = float(np.sqrt(np.mean((np.asarray(y) - np.asarray(ys)) ** 2)))
+    return e * (180.0 / np.pi if deg else 1.0)
+
+
+def cl5q(model, tw, cc, d, seg, g, win=None, li=None):
     """old α CL 미러 (5q 직결 hip): settle→폴더 게인 PD(TK·kd0.2)→supp/spr/CVT소산."""
     P = tw["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = tw["law"]; kr = tw["kr"]; sprm = tw["sprm"]
@@ -76,10 +85,11 @@ def cl5q(model, tw, cc, d, seg, g, win=None):
     kp1, kd1 = g[0], g[1]
     import fs_compare_plot as _CP                      # P18: 표 밖 게인 log-kp 보간 (fallback 0.656 금지)
     kp2 = g[2] * _CP.alpha_of(TKD, g[2]); kd2 = g[3] * 0.20
+    _li = float(LI if li is None else li)              # ★ trial 별 실측 l_i (OLD 쪽도 동일 적용)
     md = mjm.MjData(model)
     _a1 = -(init[0] if win is not None else float(qd1g[0])) - np.pi / 2
     _a2 = -(init[1] if win is not None else float(qd2g[0]))
-    md.qpos[:] = qpos_from_crank(1.0, _a1, _a2, LI)[0]
+    md.qpos[:] = qpos_from_crank(1.0, _a1, _a2, _li)[0]
     mjm.mj_forward(model, md)
     fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
     md.qpos[0] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
@@ -89,7 +99,7 @@ def cl5q(model, tw, cc, d, seg, g, win=None):
         md.qvel[:] = [-0.25 * (_c1 * init[2] + _c12 * (init[2] + init[3])), -init[2], -init[3], init[3], -init[3]]
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
-    qg, rg = RU.rtab(LI)
+    qg, rg = RU.rtab(_li)
     for k in range(0 if win is not None else int(round(P.J.T_SETTLE / dt))):        # settle (앵커판은 생략)
         q1c = -md.qpos[1] - np.pi / 2; q2c = -md.qpos[2]
         v1c = -md.qvel[1]; v2c = -md.qvel[2]
@@ -144,17 +154,44 @@ def cl5q(model, tw, cc, d, seg, g, win=None):
     return L
 
 
+SESS = "26.04.29"
+
+
 def main():
     model_c, model_cf, ctx = FC.build_cvt_pair()
     tw = ctx["tw"]; nm = ctx["nm"]
     o1, o2, cc = float(nm["o1_429"]), float(nm["o2_429"]), float(nm["C_CVT"])
     P = tw["P"]
+    REG = {p.name: p for s, p, g, cvt, ho in FD.registry() if s == SESS}
+    GAIN = {p.name: g for s, p, g, cvt, ho in FD.registry() if s == SESS}
+    agg = {}
+
+    _mc = {}
+
+    def _models(li):
+        """이 trial 의 l_i 로 **5q(OLD)·6q(현행) 모델을 둘 다** 다시 짓는다 (캐시).
+
+        l_i 는 4절 입력링크 길이 = 모델 치수 자체다. 한쪽만 갱신하면 비교가 불공정해지고,
+        초기화만 바꾸면 루프 구속이 t=0 에 어긋나 솔버가 스냅한다 (fs_cvt._bind_li 와 같은 이유).
+        """
+        key = round(float(li), 7)
+        if key not in _mc:
+            _a, _b, _ = FC.build_cvt_pair(float(li))
+            if _b is None:
+                raise RuntimeError(f"fs 패치 CVT 모델 없음 (l_i={li})")
+            _mc[key] = (_a, _b)
+        return _mc[key]
 
     # ---- ModeA (R19 재생창) ----
     subs = [(sub, d) for ds, sub, d, *rest in TW.R19.TRIALS if ds == "jump_0429"]
     print(f"R19 0429 subs: {[s for s, _ in subs]}", flush=True)
-    _want = ("150_2.2_250_3", "60_0.75_60_2")
-    for sub, d in [x for x in subs if x[0] in _want]:
+    # ★ 승격 판단에는 **전 trial** 이 필요하다 (FS_CVT_ALL=1). 기본은 기존 2건 유지.
+    _want = None if os.environ.get("FS_CVT_ALL") == "1" else ("150_2.2_250_3", "60_0.75_60_2")
+    for sub, d in [x for x in subs if (_want is None or x[0] in _want)]:
+        if sub in REG:
+            d["l_i"] = FD.cvt_li(REG[sub])          # ★ 이 trial 의 Clutch 실측 (세션 상수 금지)
+        _li = float(d.get("l_i", LI))
+        model_c, model_cf = _models(_li)
         r5 = FC.a_cvt_mirror(model_c, d, tw, o1, o2, cc, fs=False, ret_traces=True)
         r6 = FC.a_cvt_mirror(model_cf, d, tw, o1, o2, cc, fs=True, bias1=0.85, ret_traces=True)
         if r5 is None or r6 is None:
@@ -162,6 +199,15 @@ def main():
             continue
         T5, T6 = r5[3], r6[3]
         t = d["t"]
+        # 채널 RMSE (τ 는 주입값이라 공통 — 비CVT ModeA 보드와 동일 규약)
+        _M = [np.degrees(d["q1"]) + np.degrees(o1), np.degrees(d["q2"]) + np.degrees(o2),
+              d["dq1"], d["dq2"]]
+        _S5 = [np.degrees(np.interp(t, T5["tl"], T5["q1"])), np.degrees(np.interp(t, T5["tl"], T5["q2"])),
+               np.interp(t, T5["tl"], T5["dq1"]), np.interp(t, T5["tl"], T5["dq2"])]
+        _S6 = [np.degrees(np.interp(t, T6["tl"], T6["q1"])), np.degrees(np.interp(t, T6["tl"], T6["q2"])),
+               np.interp(t, T6["tl"], T6["dq1"]), np.interp(t, T6["tl"], T6["dq2"])]
+        agg.setdefault("ModeA", []).append(
+            (sub, [_rmse(a, b) for a, b in zip(_M, _S5)], [_rmse(a, b) for a, b in zip(_M, _S6)]))
         a1m = P.J.ahat(P.A_PAPER, d["traw1"], d["dq1"])
         a2m = P.J.ahat(P.A_PAPER, d["traw2"], d["dq2"])
         fig, ax = plt.subplots(2, 3, figsize=(15, 7), sharex=True)
@@ -176,44 +222,67 @@ def main():
         ax[0, 0].legend(fontsize=8)
         for a in ax[1]:
             a.set_xlabel("t [s]")
-        fig.suptitle(f"0429 CVT ModeA (측정 raw 주입, R19 재생창) — {sub} | dq2 RMSE: old α {r5[0]:.2f} vs fs {r6[0]:.2f}")
+        fig.suptitle(f"{SESS} CVT (l_i={_li*1000:.2f}mm) ModeA — {sub}\n"
+                     f"창 RMSE (q1°/q2°/dq1/dq2)  OLD: "
+                     + " / ".join("%.2f" % x for x in agg["ModeA"][-1][1])
+                     + f"   {TAG}: " + " / ".join("%.2f" % x for x in agg["ModeA"][-1][2]))
         fig.tight_layout()
-        fp = OUT / f"cvt0429_modeA_{sub}.png"
-        fig.savefig(fp, dpi=110)
+        fp = OUT / "ModeA" / SESS
+        fp.mkdir(parents=True, exist_ok=True)
+        fig.savefig(fp / f"{sub}.png", dpi=110)
         plt.close(fig)
-        print(f"saved {fp.name}", flush=True)
+        print(f"  ModeA {sub}: OK (l_i {_li*1000:.2f}mm)", flush=True)
 
     # ---- CL (*2 fullspan) ----
     ft0 = FR.fs_twin()
     from cvt_core import qpos_from_crank
     ft = dict(ft0)
-    ft["model"] = model_cf
-    ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
-    ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
-    ft["cvt_init"] = lambda q1, q2: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, LI)[0]
-    qg, rg = RU.rtab(LI)
-    ft["cvt_diss"] = (cc, qg, rg)
+
+    def _bind_li(li):
+        """trial 별 실측 l_i 로 **모델·폐쇄 초기화·전달비를 전부** 갱신 (fs_cvt._bind_li 규약)."""
+        _mcf = _models(float(li))[1]
+        ft["model"] = _mcf
+        ft["iq"] = {n: safe.qadr(_mcf, n, mjm)
+                    for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+        ft["dof"] = {n: safe.dofadr(_mcf, n, mjm) for n in ft["iq"]}
+        ft["cvt_init"] = lambda q1, q2, _l=float(li): qpos_from_crank(
+            1.0, -q1 - np.pi / 2, -q2, _l)[0]
+        _qg, _rg = RU.rtab(float(li))
+        ft["cvt_diss"] = (cc, _qg, _rg)
+    import fs_compare_plot as _CP                # 규약 ④: 표 밖 게인 log-kp 보간 (상수 fallback 금지)
     SP = FR._sess_params()
-    sp = SP["26.04.29"]
+    sp = SP[SESS]
     for s, p, g, cvt, ho in FD.registry():
-        if s != "26.04.29" or p.name not in ("150_2.2_250_3", "60_0.75_60_2"):
+        if s != SESS:
+            continue
+        if os.environ.get("FS_CVT_ALL") != "1" and p.name not in ("150_2.2_250_3", "60_0.75_60_2"):
             continue
         d = FD.load2(p); seg = FD.segment(d)
-        gm = (g[0], g[1], g[2] * TKD.get(g[2], 0.656), g[3] * 0.20)
+        _li = float(d.get("l_i", LI))
+        _bind_li(_li)                       # ★ 이 trial 의 Clutch 실측
+        _mc5 = _models(_li)[0]
+        gm = (g[0], g[1], g[2] * _CP.alpha_of(TKD, g[2]), g[3] * 0.20)
         i0 = max(0, seg["i_desc"] - 5)
         t = d["t"][i0:] - d["t"][i0]
         t_end = seg["t_lo"] - d["t"][i0]
         Lf = FR.rollout_cl_fs(ft, t, d["qd1"][i0:], d["qd2"][i0:], d["dqd1"][i0:], d["dqd2"][i0:],
                               gm, t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                               fade=True, taulim=None)
-        Lo = cl5q(model_c, tw, cc, d, seg, g)
+        Lo = cl5q(_mc5, tw, cc, d, seg, g, li=_li)
         if Lf is None or Lo is None:
             print(f"{p.name}: CL 실패 (fs {Lf is None} old {Lo is None})", flush=True)
             continue
         dt5 = float(np.median(np.diff(Lo["t"])))
         pm = seg["push"][i0:][: len(t)]
         t_push0 = float(t[pm][0]) if pm.sum() else 0.0
-        w0, w1 = t_push0 - 0.05, t_end                  # 점프(push) 구간만 — 이륙에서 절단 (이후 sim은 커맨드 0 관례라 비교 무의미)
+        # ★ 규약 ①: 그래프·채점 창 = 원본 hip/knee.xlsx 스팬 (fs_data.plot_window) — 단일 출처.
+        #   구판은 push−0.05s 로 직접 잘랐다 (창 규약 위반 · 비CVT 보드와 비교 불가).
+        _pw = FD.plot_window(p, d)
+        if _pw is None:
+            w0, w1 = t_push0 - 0.05, t_end
+        else:
+            w0, w1 = _pw[0] - d["t"][i0], _pw[1] - d["t"][i0]   # d["t"] 상대축 → 롤아웃 t 축
+            w1 = min(w1, t_end)             # 이륙 이후 sim 은 커맨드 0 관례라 비교 무의미
         mseg = (t >= w0) & (t <= w1)
         tm = t[mseg]
         mo = (Lo["t"] >= w0) & (Lo["t"] <= w1)
@@ -232,13 +301,78 @@ def main():
         for a in ax.flat:
             a.axvline(t_push0, lw=0.6, alpha=0.4)
             a.axvline(t_end, lw=0.6, alpha=0.4)
-        fig.suptitle(f"0429 CVT CL 점프(push) 구간 (세로선=push 시작/이륙) — {p.name}")
+        # 채널 RMSE (창 안, 실측 시각에 sim 보간) — 비CVT CL 보드와 같은 6채널·같은 단위
+        _MC = [np.degrees(d["q1"][i0:][mseg]), np.degrees(d["q2"][i0:][mseg]),
+               d["dq1"][i0:][mseg], d["dq2"][i0:][mseg],
+               d["a1"][i0:][mseg], d["a2"][i0:][mseg]]
+        _oI = lambda k, deg=False: (np.degrees if deg else (lambda z: z))(np.interp(tm, Lo["t"], Lo[k]))
+        _fI = lambda k, deg=False: (np.degrees if deg else (lambda z: z))(np.interp(tm, Lf["t"], Lf[k]))
+        _O = [_oI("q1", True), _oI("q2", True), _oI("dq1"), _oI("dq2"),
+              np.interp(tm, Lo["t"], s1o_l), _oI("s2")]
+        _F = [_fI("thm1", True), _fI("q2", True), _fI("dq1"), _fI("dq2"), _fI("s1f"), _fI("s2")]
+        eo = [_rmse(a, b) for a, b in zip(_MC, _O)]
+        ef = [_rmse(a, b) for a, b in zip(_MC, _F)]
+        agg.setdefault("CL", []).append((p.name, eo, ef))
+        fig.suptitle(f"{SESS} CVT (l_i={_li*1000:.2f}mm) CL 점프 창 — {p.name}  "
+                     f"[게인 {g[0]:g}/{g[1]:g}/{g[2]:g}/{g[3]:g}]\n"
+                     f"창 RMSE (q1°/q2°/dq1/dq2/τ1/τ2)  OLD: " + " / ".join("%.2f" % x for x in eo)
+                     + f"   {TAG}: " + " / ".join("%.2f" % x for x in ef))
         fig.tight_layout()
-        fp = OUT / f"cvt0429_CL_{p.name}.png"
-        fig.savefig(fp, dpi=110)
+        fp = OUT / "CL" / SESS
+        fp.mkdir(parents=True, exist_ok=True)
+        fig.savefig(fp / f"{p.name}.png", dpi=110)
         plt.close(fig)
-        print(f"saved {fp.name}", flush=True)
-    print("done", flush=True)
+        print(f"  CL {p.name}: OK (l_i {_li*1000:.2f}mm)", flush=True)
+    write_summary(agg)
+    print(f"\ndone → {OUT}", flush=True)
+
+
+MA_CH = ["q1 [°]", "q2 [°]", "dq1", "dq2"]
+CL_CH = ["q1 [°]", "q2 [°]", "dq1", "dq2", "τ1", "τ2"]
+
+
+def write_summary(agg):
+    """세션 요약 막대 + README 표 — 비CVT 보드(fs_compare_plot)와 같은 읽는 법."""
+    lines = [f"# 0429 CVT 3자 비교 (실측 / 배포모델 OLD=p24 / 현행 {TAG})", "",
+             "- `ModeA/26.04.29/<trial>.png` — 측정 토크 주입 재생 (PD가 오차를 못 숨김 = 1급 심판)",
+             "- `CL/26.04.29/<trial>.png` — 폐루프, 점프 창 (원본 xlsx 스팬)",
+             "- l_i(변속 링크 길이)는 **trial 마다 그 trial 의 Clutch.xlsx 중앙값**을 쓴다.",
+             "  OLD·현행 **양쪽 모두** 같은 l_i 로 모델을 다시 지어 비교한다 (공정성).", ""]
+    for mode, rows in sorted(agg.items()):
+        if not rows:
+            continue
+        CHN = MA_CH if mode == "ModeA" else CL_CH
+        O = np.array([r[1] for r in rows], float)
+        F = np.array([r[2] for r in rows], float)
+        fig, a = plt.subplots(figsize=(7.5, 4))
+        x = np.arange(len(CHN))
+        a.bar(x - 0.19, O.mean(axis=0), 0.38, label="배포모델 (OLD=p24)")
+        a.bar(x + 0.19, F.mean(axis=0), 0.38, label=f"현행 ({TAG})")
+        a.set_xticks(x); a.set_xticklabels(CHN)
+        a.set_ylabel("RMSE (창 평균)")
+        a.set_title(f"{SESS} CVT — {mode} 채널별 (trial {len(rows)}개 평균)")
+        a.legend(); a.grid(alpha=0.3, axis="y")
+        fig.tight_layout()
+        fd = OUT / mode / SESS
+        fd.mkdir(parents=True, exist_ok=True)
+        fig.savefig(fd / "_summary.png", dpi=105)
+        plt.close(fig)
+        lines += [f"## {mode}", "",
+                  "| trial | " + " | ".join(CHN) + " |",
+                  "|---|" + "---|" * len(CHN)]
+        for nm_, eo, ef in rows:
+            lines.append(f"| {nm_} | " + " | ".join(f"{a_:.2f}→{b_:.2f}" for a_, b_ in zip(eo, ef)) + " |")
+        lines.append("| **평균** | " + " | ".join(
+            f"**{a_:.2f}→{b_:.2f}**" for a_, b_ in zip(O.mean(axis=0), F.mean(axis=0))) + " |")
+        won = int((F.mean(axis=1) < O.mean(axis=1)).sum())
+        lines += ["", f"채널 평균 기준 **현행 승 {won}/{len(rows)} trial**.", ""]
+    (OUT / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    safe.atomic_json_write(OUT / "_rmse.json", {          # 원수치 동봉 (표 재파싱 금지)
+        f"{mode}|{SESS}": dict(n=len(rows), ch=(MA_CH if mode == "ModeA" else CL_CH),
+                               old=np.mean([r[1] for r in rows], axis=0).tolist(),
+                               new=np.mean([r[2] for r in rows], axis=0).tolist(),
+                               trials={r[0]: dict(old=r[1], new=r[2]) for r in rows})
+        for mode, rows in agg.items() if rows})
 
 
 if __name__ == "__main__":

@@ -398,6 +398,9 @@ def plot_cl(sess, name, d, seg, g):
     return [conv(k, v) for (k, _), v in zip(CH, old)], [conv(k, v) for (k, _), v in zip(CH, fs)]
 
 
+H_LOG = {}          # (세션,trial) → (영상 h, OLD h, 현행 h) — 점프높이는 1급 게이트라 함께 남긴다
+
+
 def plot_ma(sess, name, d, seg):
     """ModeA = **점프 창 통짜 개루프 재생** (측정 raw 주입, 초기상태만 실측 — 중간 리셋 없음).
 
@@ -448,6 +451,7 @@ def plot_ma(sess, name, d, seg):
                             te2, bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
     ho_ = float(np.asarray(Ho["bz"]).max()) if Ho else np.nan
     hf_ = float(np.asarray(Hf["bz"]).max()) if Hf else np.nan
+    H_LOG[f"{sess}|{name}"] = (hv, ho_, hf_)
     if hv:
         HT = (f"점프높이  영상 {hv:.3f} m  ·  OLD {ho_:.3f} m ({100*(ho_/hv-1):+.1f}%)"
               f"  →  {TAG} {hf_:.3f} m ({100*(hf_/hv-1):+.1f}%)")
@@ -533,7 +537,10 @@ def main():
         except Exception as ex:
             print(f"{s}/{p.name}: LOAD {type(ex).__name__}", flush=True)
             continue
-        if want in ("BOTH", "CL") and not ho and g:
+        # ★ held-out 은 **fit 금지**이지 평가 금지가 아니다 (철칙 9).
+        #   승격 판단엔 게이트 세션의 CL 비악화도 봐야 하므로 FS_CMP_HO=1 로 포함시킨다.
+        _ho_ok = (not ho) or os.environ.get("FS_CMP_HO") == "1"
+        if want in ("BOTH", "CL") and _ho_ok and g:
             r = plot_cl(s, p.name, d, seg, g)
             if r:
                 agg.setdefault(("CL", s), []).append(r)
@@ -556,6 +563,14 @@ def main():
         lines.append(f"| {mode} | {s} | {len(rows)} | " +
                      " | ".join(f"{O[i]:.2f}→{F[i]:.2f}" for i in range(6)) + " |")
     (OUT / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # ★ 표를 다시 파싱하지 않도록 원수치를 함께 남긴다 (표만 낡는 사고 08-09 재발 방지)
+    import safe
+    safe.atomic_json_write(OUT / "_rmse.json", {
+        f"{mode}|{s}": dict(n=len(rows), ch=[c[0] for c in CH],
+                            old=np.nanmean([r[0] for r in rows], axis=0).tolist(),
+                            new=np.nanmean([r[1] for r in rows], axis=0).tolist())
+        for (mode, s), rows in agg.items()})
+    safe.atomic_json_write(OUT / "_jumph.json", H_LOG)
     print(f"\ndone → {OUT} ({len(agg)} 세션·모드 조합)", flush=True)
 
 
