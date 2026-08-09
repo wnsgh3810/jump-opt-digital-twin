@@ -446,9 +446,21 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     y0 = float(np.median(cys[: max(3, len(ks) // 2)])); s0 = float(np.median(scs))
     cxs = np.array([tr[k]["cx"] for k in ks])
     last = len(ks) - 1
+    cut_why = None
     for j in range(3, len(ks)):
-        if (abs(cys[j] - y0) > 8.0 * k or scs[j] < 0.5 * s0
-                or abs(cxs[j] - cxs[j - 1]) > 60.0 * k * 24.0 / fps):   # 1프레임 물리 한계
+        # ★★ 08-09 수정 — 구 규칙 `abs(cy - y0) > 8px` 는 **대칭**이라
+        #   화면에서 **아래로** 흔들려도 잘랐다. 그런데 이륙은 **위로** 뜨는 것이다.
+        #   아래로의 드리프트는 추적 흔들림(푸시 모션블러)이지 이륙 신호가 아니다.
+        #   실측 사고: 0723/60_0.75_60_2 에서 f218 의 |Δcy|=8.4 로 잘려
+        #   **푸시 슬립이 −56mm 대신 +1.2mm** 로 나왔다 (사용자 육안 −60mm 와 충돌).
+        #   추적기는 그때 발을 제대로 찾고 있었다 (cx 364 — 넓은창 재검증 368 과 일치).
+        lift = (y0 - cys[j]) > 10.0 * k          # 접지 높이보다 위 = 진짜 이륙
+        drift = (cys[j] - y0) > 25.0 * k         # 아래로 크게 = 추적 실패 (넉넉히)
+        dead = scs[j] < 0.5 * s0                 # 점수 붕괴 = 롤러를 놓침
+        jump = abs(cxs[j] - cxs[j - 1]) > 60.0 * k * 24.0 / fps   # 1프레임 물리 한계
+        if lift or drift or dead or jump:
+            cut_why = ("이륙(위로)" if lift else "아래드리프트" if drift
+                       else "점수붕괴" if dead else "물리한계Δcx")
             last = j - 1; break
     ks = ks[: last + 1]
     f_end = ks[-1]
@@ -501,9 +513,18 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     i_m = (i_d + i_b) // 2
     B = {"하강전반": (i_d, i_m), "하강후반": (i_m, i_b),
          "바닥유지": (i_b, i_p), "푸시~이륙": (i_p, n - 1), "전체": (i_d, n - 1)}
-    segs = {k: dict(dx=float(x_mm[b] - x_mm[a]), roll=float(roll[b] - roll[a]),
-                    slip=float(slip[b] - slip[a]), t=(float(t_vid[a]), float(t_vid[b])))
-            for k, (a, b) in B.items()}
+    # ★ 양 끝점 차이만 보면 **구간 안에서 갔다가 돌아온 것**이 안 보인다 (사용자 지적 08-09).
+    #   구간 내 슬립의 최소/최대 편차(시작 기준)를 함께 싣는다 —
+    #   |극값| 이 |끝점차| 보다 훨씬 크면 그 구간은 왕복이 있었다는 뜻이다.
+    def _seg(a, b):
+        sl = slip[a:b + 1] - slip[a]
+        xx = x_mm[a:b + 1] - x_mm[a]
+        return dict(dx=float(x_mm[b] - x_mm[a]), roll=float(roll[b] - roll[a]),
+                    slip=float(slip[b] - slip[a]),
+                    slip_min=float(sl.min()), slip_max=float(sl.max()),
+                    dx_min=float(xx.min()), dx_max=float(xx.max()),
+                    t=(float(t_vid[a]), float(t_vid[b])))
+    segs = {k: _seg(a, b) for k, (a, b) in B.items()}
 
     # 동기 민감도: shift 를 ±1프레임 흔들었을 때 푸시 슬립이 얼마나 변하나
     def push_slip(sh):
@@ -538,10 +559,15 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
         qc.append(f"접지끝 f{f_end} vs 차분이륙 f{f_lo} 차이 {abs(f_end-f_lo)}프레임")
     if B["푸시~이륙"][1] - B["푸시~이륙"][0] < 2:
         qc.append("푸시 구간 프레임 <2 (분해능 부족)")
+    _p = segs["푸시~이륙"]
+    _ex = max(abs(_p["slip_min"]), abs(_p["slip_max"]))
+    if _ex > abs(_p["slip"]) + 5.0:
+        qc.append(f"푸시 구간 내 왕복 — 끝점차 {_p['slip']:+.1f} vs 구간내 극값 "
+                  f"{_p['slip_min']:+.1f}~{_p['slip_max']:+.1f}mm")
 
     res = dict(sess=sess, trial=trial, ok=True, mp4=mp4.name, fps=fps,
                vid_w=vm["w"], vid_h=vm["h"], vid_n=vm["n"], px_k=k, px_ds=ds,
-               f_lo=f_lo, f_end=f_end, f_hi=f_hi, jump_run=[r0f, r1f], t_lo=t_lo,
+               f_lo=f_lo, f_end=f_end, f_hi=f_hi, cut_why=cut_why, jump_run=[r0f, r1f], t_lo=t_lo,
                shift=shift, f0=f0,
                seed=[cx0, cy0], seed_r=r0, seed_moved=moved,
                dia_px=dia, dia_meas=dia_meas, scale=s_mm, rel_sd=rel,
