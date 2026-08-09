@@ -411,6 +411,9 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     _rc = r0 if r0 and np.isfinite(r0) else 16.0 * k
     TK = dict(win_min=6.0 * k, win_max=60.0 * k, win_y=7.0 * k, ds=ds, sector=sec,
               rrange=(_rc * 0.70, _rc * 1.30, 0.1 * k), d=VS.EDGE_D * k, refine=0.1 * k)
+    # ※ 전방 창을 크게(25px) 잡아 봤으나 **더 나빠졌다** — 정지 구간에서 배경에 락온해
+    #   절단이 아예 안 걸렸다 (0724/150: f_end 가 추적 끝 f135 까지 감). 창은 보수적으로 두고,
+    #   대신 아래 **꼬리 연장**으로 갑작스러운 푸시를 회수한다.
     # 추적기 A/B: FS_FOOTTRK=1 이면 발 전용(_G77_footfit.track_foot), 아니면 정본 track_roller.
     #   기본을 정본으로 둔 이유 = 0723/150_2.2_250_3 푸시 −43.1mm 회귀 기준을 지키기 위해.
     #   전환은 그 기준을 재현한 뒤에만 (아래 _G78 A/B 참조).
@@ -454,7 +457,10 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
         #   실측 사고: 0723/60_0.75_60_2 에서 f218 의 |Δcy|=8.4 로 잘려
         #   **푸시 슬립이 −56mm 대신 +1.2mm** 로 나왔다 (사용자 육안 −60mm 와 충돌).
         #   추적기는 그때 발을 제대로 찾고 있었다 (cx 364 — 넓은창 재검증 368 과 일치).
-        lift = (y0 - cys[j]) > 10.0 * k          # 접지 높이보다 위 = 진짜 이륙
+        # 이륙 임계 10 → 6px (08-09). 접지 중 중심 흔들림은 실측 ±3px 이라 10px 는 3배로 헐겁다.
+        #   0.35 완화 뒤 접지높이보다 **5mm 위**인 공중 프레임이 들어온 사례가 나왔다
+        #   (0602/60_0.75_60_2 f161: −8.2px = −5.0mm 위인데 포함되어 슬립이 −30mm 부풀었다).
+        lift = (y0 - cys[j]) > 6.0 * k           # 접지 높이보다 위 = 진짜 이륙
         drift = (cys[j] - y0) > 25.0 * k         # 아래로 크게 = 추적 실패 (넉넉히)
         # ★ 0.5 → 0.35 (08-09). s0 는 **하강 포함 전체 중앙값**인데 푸시 구간은 모션블러로
         #   점수가 자연히 30~40% 떨어진다. 0.5 로 두면 **아직 접지 중인데** 잘린다
@@ -467,6 +473,36 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
                        else "점수붕괴" if dead else "물리한계Δcx")
             last = j - 1; break
     ks = ks[: last + 1]
+    # ★★ 꼬리 연장 (08-09) — 24fps 에서 푸시 시작은 **계단 변화**라 어떤 예측창으로도 못 잡는다.
+    #   실측 0724/150_2.2_250_3: f127 속도 −3.5px → 적응창 ±15px 인데 f128 에 발이 −33px 튄다.
+    #   창 밖이라 추적기가 발에 **닿을 수조차 없다**. 창 바닥을 25px 로 키우니 이번엔 정지 구간에서
+    #   배경에 락온했다. ⇒ 창은 보수적으로 두고, **절단 뒤에만** 넓은 창으로 회수한다.
+    #   회수 조건은 두 가지를 **모두** 만족할 때만 (감사 도구 _GA1 과 동일 기준):
+    #     ① 점수 ≥ 0.5 × 최근 기준     ② |cy − 접지높이| ≤ 6px·k  (= 아직 안 떴다)
+    _rfix = float(np.median(np.array([tr[q]["r"] for q in ks])))
+    _y0 = float(np.median(np.array([tr[q]["cy"] for q in ks[: max(3, len(ks) // 2)]])))
+    _s0 = float(np.median(np.array([tr[q]["score"] for q in ks[: max(5, len(ks) - 15)]])))
+    _px, _py = tr[ks[-1]]["cx"], tr[ks[-1]]["cy"]
+    _tail = []
+    if ks[-1] < f_hi:
+        import imageio.v3 as iio
+        for _i, _fr in enumerate(iio.imiter(Path(mp4))):
+            if _i <= ks[-1]:
+                continue
+            if _i > min(f_hi, ks[-1] + 6):
+                break
+            _g = np.asarray(_fr, float)[..., :3].mean(axis=2)
+            _g = _g[::ds, ::ds] if ds > 1 else _g
+            _sc, _X, _Y, _R = VS.fit_roller(_g, _px, _py, win=60.0 * k, win_y=20.0 * k, step=1.0,
+                                            rrange=(_rfix, _rfix + 0.01, 0.1), sector=sec,
+                                            d=VS.EDGE_D * k, refine=0.25)
+            if _sc < 0.5 * _s0 or abs(_Y - _y0) > 6.0 * k:
+                break
+            tr[_i] = dict(cx=_X, cy=_Y, r=_rfix, score=_sc, win=60.0 * k)
+            _tail.append(_i); _px, _py = _X, _Y
+    if _tail:
+        ks = ks + _tail
+        cut_why = (cut_why or "") + f" +꼬리연장{len(_tail)}"
     f_end = ks[-1]
     fi = np.array(ks, float)
     xpx = np.array([tr[int(k)]["cx"] for k in fi])          # ★ 평활 금지
