@@ -33,7 +33,7 @@ import fs_runner as FR
 import mujoco as mjm
 
 OUT = HERE / os.environ.get("FS_CMP_OUT", "_compare")   # 스택별 산출 분리 (기본 = 기존 경로)
-LI = 0.02499
+# LI 하드코딩 폐지 (08-09) — trial 별 Clutch 실측을 쓴다 (fs_data.cvt_li)
 TKD = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 
 
@@ -48,9 +48,24 @@ def main():
     ft["model"] = model_cf
     ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
     ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
-    ft["cvt_init"] = lambda q1, q2: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, LI)[0]
-    qg, rg = FC.RU.rtab(LI)
-    ft["cvt_diss"] = (cc, qg, rg)
+    _mc = {}
+
+    def _bind_li(li):
+        """이 trial 의 l_i 로 **모델·초기화·전달비를 전부** 갱신 (l_i 는 링크 치수다)."""
+        li = float(li); k = round(li, 7)
+        if k not in _mc:
+            _a, _b, _ = FC.build_cvt_pair(li)
+            if _b is None:
+                raise RuntimeError(f"fs 패치 CVT 모델 없음 (l_i={li})")
+            _mc[k] = _b
+        ft["model"] = _mc[k]
+        ft["iq"] = {n: safe.qadr(_mc[k], n, mjm)
+                    for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+        ft["dof"] = {n: safe.dofadr(_mc[k], n, mjm) for n in ft["iq"]}
+        ft["cvt_init"] = lambda q1, q2, _l=float(li): qpos_from_crank(
+            1.0, -q1 - np.pi / 2, -q2, _l)[0]
+        qg, rg = FC.RU.rtab(float(li))
+        ft["cvt_diss"] = (cc, qg, rg)
     SP = FR._sess_params()
     sp = SP["26.04.29"]
 
@@ -60,6 +75,7 @@ def main():
             continue
         try:
             d = FD.load2(p); seg = FD.segment(d)
+            _bind_li(d["l_i"])                 # ★ trial 별 실측 l_i
             pw = FD.plot_window(p, d)          # 원본 xlsx 창 = 점프 (훅 규약)
             tt = d["t"]
             mw = (tt >= pw[0]) & (tt <= pw[1])

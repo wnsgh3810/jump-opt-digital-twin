@@ -43,21 +43,31 @@ def rmse6(d, m, thm1, q2s, dq1s, dq2s, t1s, t2s):
     return r
 
 
-LI_CVT = 0.02499        # 0429 l_i 실측 채택값 (마라톤C: 25.08 대신 24.99가 ModeA 전수 개선)
+# ★ 08-09: l_i 하드코딩 폐지. **trial 마다 그 trial 의 Clutch.xlsx 중앙값**을 쓴다
+#   (`fs_data.cvt_li`, 사용자 지시). 구 값 0.02499 는 "실측"으로 적혀 있었으나
+#   센서 실측 범위는 25.06~25.10mm 이고 24.99 는 그 밖이다 —
+#   실제 출처는 "25.08 대신 24.99 가 ModeA 전수 개선" = **점수에 맞춘 값**이었다.
 
 
-def _cvt_ft(ft0):
-    """0429(CVT l_i≠30) 전용 트윈 — fs_compare_cvt 경로 정본 미러 (폐쇄 초기화 픽스 포함)."""
+def _cvt_ft(ft0, li):
+    """0429(CVT l_i≠30) 전용 트윈 — **이 trial 의 l_i** 로 모델·초기화·전달비를 전부 맞춘다.
+
+    l_i 는 4절 입력 링크의 **치수**라 모델을 다시 지어야 한다 (l_i 2mm 차 → body_pos 2mm 차 검증).
+    초기화(cvt_init)만 바꾸고 모델을 두면 t=0 에 루프 구속이 어긋나 솔버가 스냅한다.
+    """
     import fs_cvt as FC
     import mujoco as mjm
     from cvt_core import qpos_from_crank
-    model_c, model_cf, ctx = FC.build_cvt_pair()
+    li = float(li)
+    model_c, model_cf, ctx = FC.build_cvt_pair(li)
+    if model_cf is None:
+        raise RuntimeError(f"fs 패치 CVT 모델 없음 (l_i={li})")
     ft = dict(ft0)
     ft["model"] = model_cf
     ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
     ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
-    ft["cvt_init"] = lambda q1, q2: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, LI_CVT)[0]
-    qg, rg = FC.RU.rtab(LI_CVT)
+    ft["cvt_init"] = lambda q1, q2, _l=li: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, _l)[0]
+    qg, rg = FC.RU.rtab(li)
     ft["cvt_diss"] = (float(ctx["nm"]["C_CVT"]), qg, rg)
     return ft
 
@@ -68,15 +78,18 @@ def run_board():
     OUT = {"CL": {}, "MA": {}}
     for s, p, g, cvt, ho in FD.registry():
         if cvt:
-            if "ft" not in _cv:
+            _li = FD.cvt_li(p)                     # ★ 이 trial 의 센서 실측
+            _k = round(_li, 7)
+            if _k not in _cv:
                 try:
-                    _cv["ft"] = _cvt_ft(ft0)
+                    _cv[_k] = _cvt_ft(ft0, _li)
                 except Exception as ex:
-                    print(f"CVT 트윈 생성 실패 → {s} 전체 건너뜀: {type(ex).__name__} {ex}", flush=True)
-                    _cv["ft"] = None
-            if _cv["ft"] is None:
+                    print(f"CVT 트윈 생성 실패 (l_i={_li*1000:.3f}mm) → {s}/{p.name} 건너뜀: "
+                          f"{type(ex).__name__} {ex}", flush=True)
+                    _cv[_k] = None
+            if _cv[_k] is None:
                 continue
-            ft = _cv["ft"]
+            ft = _cv[_k]
         else:
             ft = ft0
         try:

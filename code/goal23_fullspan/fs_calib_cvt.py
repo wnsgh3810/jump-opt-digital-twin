@@ -25,7 +25,9 @@ import safe                              # noqa: E402
 TW = FC.TW; RU = FC.RU
 from cvt_core import qpos_from_crank     # noqa: E402
 
-L_I = 0.02508                            # 데이터 사전: 0429 = CVT l_i=25.08mm (세션 상수)
+# ★ 08-09: l_i 하드코딩 폐지. trial 마다 `fs_data.cvt_li(trial폴더)` 로 읽는다.
+#   (구 0.02499 는 "실측" 주석과 달리 센서 범위 25.06~25.10 **밖**이었다 — 점수 튜닝값)
+L_I = 0.02508    # 폴백 기본값 — 결과 경로는 trial 값으로 덮어쓸 것
 
 
 def _ctx():

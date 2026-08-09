@@ -28,7 +28,9 @@ RU = FC.RU
 from cvt_core import qpos_from_crank     # noqa: E402
 import p23_v6_runners as V6              # noqa: E402
 
-L_I = 0.02508
+# ★ 08-09: l_i 하드코딩 폐지. trial 마다 `fs_data.cvt_li(trial폴더)` 로 읽는다.
+#   (구 0.02499 는 "실측" 주석과 달리 센서 범위 25.06~25.10 **밖**이었다 — 점수 튜닝값)
+L_I = 0.02508    # 폴백 기본값 — 결과 경로는 trial 값으로 덮어쓸 것
 TAU_LIM_DOC = 15.0                       # What.txt 0429 기록 (문서 출처)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 

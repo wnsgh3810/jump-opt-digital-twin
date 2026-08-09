@@ -294,8 +294,8 @@ def r0max(lst):
 
 
 # ── ⑤ 융합 ───────────────────────────────────────────────────────────────────
-# CVT 세션의 입력 링크 길이 [m] (Clutch.xlsx 실측, 데이터 사전 확정)
-CVT_LI = {"26.04.29": 0.02508}
+# CVT 입력 링크 길이는 **trial 마다** `fs_data.cvt_li` 로 읽는다 (세션 상수 금지, 사용자 지시 08-09).
+# 무변속 세션은 0.030 이 돌아오므로 별도 분기가 필요 없다.
 
 
 class ReducedCVT:
@@ -481,7 +481,9 @@ def measure(sess, trial, *, verbose=True, force_dia=None):
     #   "CVT 가 3배 미끄러진다"는 **인공 결론**이 나온다 (실제로 영상 Δx 는 거의 같다).
     #   발이 종아리와 한 덩어리이므로 θ_foot 은 (q1, 무릎각)의 함수 —
     #   크랭크→무릎 사상만 폐쇄 솔버로 바로잡으면 된다.
-    Rd = ReducedCVT(FR.fs_twin(), CVT_LI[sess]) if sess in CVT_LI else Reduced(FR.fs_twin())
+    _li = float(d.get("l_i", FD.L_I_NOM))
+    Rd = (Reduced(FR.fs_twin()) if abs(_li - FD.L_I_NOM) < 1e-6
+          else ReducedCVT(FR.fs_twin(), _li))
     rfoot = VS.FOOT_R_M
     q1f = lpf(d["q1"], 30.0); q2f = lpf(d["q2"], 30.0)
     th = np.array([Rd.state(q1f[i], q2f[i])[2] for i in range(0, len(t), 2)])

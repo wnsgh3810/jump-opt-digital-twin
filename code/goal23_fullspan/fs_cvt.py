@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """fs_cvt — 0429 CVT(l_i=25.08) 세션의 fs 편입: CVT 모델 캡처+직렬 힌지 패치+골든.
 
-정본 호출 규약 (H13 검증): RU.build_cvt23(x32, ref, sp, 0.02508, d_dq) →
+정본 호출 규약 (H13 검증): RU.build_cvt23(x32, ref, sp, l_i, d_dq) → l_i 는 trial 별 실측 →
 RU.a_full23_log(model_c, True, d.l_i, d, law, o1_429, o2_429, c_cvt, spr=spr_resolve(model_c), k_rise).
 골든: 기본(무패치) CVT 재생 dq2 RMSE ≈ 3.31 재현 → 러너 신뢰 후 fs 패치판 측정.
 CLI: golden — 기본/fs 패치 CVT 재생 비교 (R19 구창 trial).
@@ -24,7 +24,12 @@ import fs_model as FM            # noqa: E402
 RU = TW.RU; C = TW.C
 
 
-def build_cvt_pair():
+def build_cvt_pair(li=0.02508):
+    """CVT 모델 쌍 빌드. `li` = 그 **trial 의** Clutch.xlsx 실측 (fs_data.cvt_li).
+
+    ★ 세션 상수로 고정하지 말 것 (사용자 지시 08-09). 기본값은 하위호환용이며,
+      결과를 내는 경로는 반드시 trial 값을 넘긴다.
+    """
     """CVT XML 캡처 → (기본 model_c, fs 패치 model_cf, 파라미터)."""
     cand = safe.read_json(TW.CAND_PATH)
     nm = dict(zip(cand["names"], np.asarray(cand["x"], float)))
@@ -40,7 +45,7 @@ def build_cvt_pair():
         return orig(xml, *a, **k)
     mjm.MjModel.from_xml_string = staticmethod(cap)
     try:
-        model_c = RU.build_cvt23(x32, ref, sp, 0.02508, d_dq)
+        model_c = RU.build_cvt23(x32, ref, sp, float(li), d_dq)
     finally:
         mjm.MjModel.from_xml_string = orig
     if not captured:
@@ -249,19 +254,45 @@ def cl():
     import fs_data as FD
     import fs_metric as FMET
     from cvt_core import qpos_from_crank
-    model_c, model_cf, ctx = build_cvt_pair()
+    model_c, model_cf, ctx = build_cvt_pair()      # nm/ctx 확보용 (모델은 trial 별로 다시 짓는다)
     if model_cf is None:
         raise RuntimeError("fs 패치 CVT 모델 없음")
     nm = ctx["nm"]
-    li = 0.02499                   # Clutch.xlsx 실측 (전 trial σ0.00) — ModeA 전수 개선 확인 (P16)
+    # ★ 08-09 정정: 구 주석은 "0.02499 = Clutch.xlsx 실측" 이었으나 **사실이 아니다**.
+    #   센서 실측 범위는 25.06~25.10mm (10 trial 중앙 25.08). 24.99 는 그 밖이다.
+    #   진짜 출처는 "25.08 대신 24.99 가 ModeA 전수 개선" — 점수에 맞춘 값이었다.
+    #   이제 **trial 마다 그 trial 의 센서 중앙값**을 쓴다 (fs_data.cvt_li).
     ft0 = FR.fs_twin()
     ft = dict(ft0)
     ft["model"] = model_cf
     ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
     ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
-    ft["cvt_init"] = lambda q1, q2: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, li)[0]
-    qg, rg = RU.rtab(li)
-    ft["cvt_diss"] = (float(nm["C_CVT"]), qg, rg)
+
+    _mcache = {}
+
+    def _bind_li(li):
+        """이 trial 의 l_i 로 **모델 기하·폐쇄 초기화·전달비 표를 전부** 갱신한다.
+
+        l_i 는 4절의 입력 링크 길이라 **모델 치수 자체**다 (검증: l_i 2mm 차 → body_pos 2mm 차).
+        초기화만 바꾸고 모델을 그대로 두면 루프 구속이 t=0 에 어긋나 솔버가 스냅한다 —
+        `cvt_init` 이 애초에 그 사고를 막으려고 만든 훅이므로 반쪽만 맞추면 안 된다.
+        빌드는 캐시된다 (실측 2회차 0.00s).
+        """
+        li = float(li); key = round(li, 7)
+        if key not in _mcache:
+            _mc, _mcf, _ = build_cvt_pair(li)
+            if _mcf is None:
+                raise RuntimeError(f"fs 패치 CVT 모델 없음 (l_i={li})")
+            _mcache[key] = _mcf
+        m = _mcache[key]
+        ft["model"] = m
+        ft["iq"] = {n: safe.qadr(m, n, mjm)
+                    for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+        ft["dof"] = {n: safe.dofadr(m, n, mjm) for n in ft["iq"]}
+        ft["cvt_init"] = lambda q1, q2, _l=li: qpos_from_crank(
+            1.0, -q1 - np.pi / 2, -q2, _l)[0]
+        qg, rg = RU.rtab(li)
+        ft["cvt_diss"] = (float(nm["C_CVT"]), qg, rg)
     TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
     SP = FR._sess_params()
     OUT = {}
@@ -271,6 +302,7 @@ def cl():
         sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
         try:
             d = FD.load2(p); seg = FD.segment(d)
+            _bind_li(d["l_i"])          # ★ trial 별 실측 l_i (fs_data.cvt_li)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
             gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
                   g[3] * (float(_kds) if _kds else 0.20))

@@ -91,6 +91,45 @@ def gains_of(name: str):
     return None
 
 
+L_I_NOM = 0.030          # 무변속 공칭 입력 링크 길이 [m]
+_LI_CACHE = {}
+
+
+def cvt_li(fold, t_abs=None):
+    """이 **trial 의** CVT 입력 링크 길이 [m] — `Clutch.xlsx` 실측 중앙값.
+
+    ★ 세션 상수로 두지 말 것 (사용자 지시 08-09). trial 마다 그 trial 의 센서를 읽는다.
+      실측(0429 10 trial): 25.06~25.10 · trial 내 표준편차 0.004mm · trial 간 퍼짐 0.028mm.
+      흔들림은 작지만 **값을 손으로 고정할 이유가 없다** — 원본이 있으면 원본을 쓴다.
+
+    ⚠ 과거 코드에 `0.02499` 가 "Clutch.xlsx 실측"이라는 주석과 함께 박혀 있었다.
+      실제 센서 범위는 25.06~25.10 이라 **24.99 는 측정 범위 밖**이다.
+      진짜 출처는 `fs_uboard` 주석에 있다 — "25.08 대신 24.99 가 ModeA 전수 개선".
+      즉 **점수에 맞춰 튜닝한 값이 실측으로 기록돼 있었다.** (지표 출처 원칙 위반)
+
+    Clutch.xlsx 가 없으면(무변속 세션) `L_I_NOM`(30mm) 반환.
+    t_abs 를 주면 그 trial 이 실제로 돌아간 시간 창 안에서만 중앙값을 낸다.
+    """
+    fold = Path(fold)
+    key = (str(fold), None if t_abs is None else (float(t_abs[0]), float(t_abs[-1])))
+    if key in _LI_CACHE:
+        return _LI_CACHE[key]
+    f = fold / "Clutch.xlsx"
+    if not f.exists():
+        _LI_CACHE[key] = L_I_NOM
+        return L_I_NOM
+    cl = pd.read_excel(f)
+    v = cl["Current Link Length [mm]"].to_numpy(float)
+    if t_abs is not None and "Time" in cl.columns:
+        tc = cl["Time"].to_numpy(float)
+        m = (tc >= float(t_abs[0])) & (tc <= float(t_abs[-1]))
+        if m.sum() >= 5:
+            v = v[m]
+    li = float(np.median(v)) / 1000.0
+    _LI_CACHE[key] = li
+    return li
+
+
 def load2(fold: Path):
     """*2 로드 → dict (t=상대[s], 전부 rad/rad·s/Nm; t_abs=절대 타임축)."""
     _check_path(fold)
@@ -115,6 +154,7 @@ def load2(fold: Path):
         a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
         grf=grf["Current_GRF"].to_numpy(float),
         name=fold.name, fold=str(fold))
+    d["l_i"] = cvt_li(fold, t_abs)      # trial 별 실측 (무변속이면 0.030)
     if np.nanmax(np.abs(d["q2"])) > 7:
         raise ValueError(f"{fold}: *2 각도가 rad가 아님 (규약 위반?)")
     return d
@@ -151,6 +191,7 @@ def load3(fold: Path):
         a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
         grf=grf["Current_GRF"].to_numpy(float),
         name=fold.name, fold=str(fold))
+    d["l_i"] = cvt_li(fold, t_abs)      # trial 별 실측 (무변속이면 0.030)
     if np.nanmax(np.abs(d["q2"])) > 7:
         raise ValueError(f"{fold}: *3 각도가 rad가 아님 (규약 위반?)")
     return d
