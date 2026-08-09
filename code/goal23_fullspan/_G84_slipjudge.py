@@ -59,9 +59,18 @@ def main():
     ft = FR.fs_twin(); SP = FR._sess_params()
     print(f"그림자 슬립 채점: tag={tag} · 실측 {len(M)} trial · r={R.r*1000:.1f}mm")
     rows = []
+    skipped_cvt = []
     for s, p, g, cvt, ho in FD.registry():
         key = (s, p.name)
         if key not in M:
+            continue
+        if cvt:
+            # ★ CVT 세션은 여기서 채점하지 않는다.
+            #   실측(fs_slipmeas)은 ReducedCVT 로 바로잡았지만, **sim 쪽 플랜트가 무변속 모델**이다
+            #   (FR.fs_twin() = l_i 30mm). 기구학만 고쳐도 동역학이 다른 모델로 재생하는 셈이라
+            #   비교가 성립하지 않는다. CVT 채점은 build_cvt_pair 기반으로 따로 만들어야 한다
+            #   (fs_compare_cvt.py 계보). 08-09.
+            skipped_cvt.append(key)
             continue
         try:
             d = FD.load2(p); seg = FD.segment(d)
@@ -109,6 +118,8 @@ def main():
                   flush=True)
         except Exception as ex:
             print(f"  {s}/{p.name}: ERR {type(ex).__name__} {str(ex)[:60]}", flush=True)
+    if skipped_cvt:
+        print(f"\n[제외] CVT 세션 {len(skipped_cvt)} trial — sim 플랜트가 무변속 모델이라 비교 불가")
     if not rows:
         raise SystemExit("채점 대상 없음 — 측정 JSON 또는 registry 확인")
 

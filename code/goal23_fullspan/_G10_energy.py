@@ -60,7 +60,20 @@ def lpf(x, fc, fs=500.0, order=4):
 
 
 class Reduced:
-    """접지 상태 (q1,q2) 2자유도 축약 — M(q), V(q), z_base, x_foot 를 트윈 기구학에서 수치 구성."""
+    """접지 상태 (q1,q2) 2자유도 축약 — M(q), V(q), z_base, x_foot 를 트윈 기구학에서 수치 구성.
+
+    ⚠ **CVT 세션(l_i≠30mm)에 그대로 쓰면 안 된다.**
+      `_fw` 는 `knee = crank` (평행사변형)로 놓는데, 이건 **l_i=30 에서만 참**이다.
+      l_i=25.08(26.04.29)에서는 무릎각이 최대 18° 어긋나고 전달비가 0.83→0.09 로 변한다.
+      실측 사고(08-09): 미보정으로 구름을 계산했더니 0429 의 구름이 −19 대신 −37 로 나와
+      **"CVT 가 3배 미끄러진다"는 가짜 결론**이 7/7 일관되게 나왔다.
+      (영상 Δx 는 −11.5 vs −11.8 로 같았다 — 측정이 아니라 계산이 틀린 것이었다.)
+
+      → CVT 기구학이 필요하면 `fs_slipmeas.ReducedCVT` 를 쓴다
+        (크랭크→무릎을 `cvt_core.closure` 로 풀며, **l_i=30 에서 이 클래스와 차이 0** 으로 회귀검증).
+      → sim 플랜트까지 CVT 여야 하면 `build_cvt_pair` 계보(`fs_compare_cvt.py`)로 간다.
+      이 클래스 자체는 **바꾸지 않는다** — 동결 심판(_G13_board)의 p24 재현이 걸려 있다.
+    """
 
     def __init__(self, ft):
         self.m = ft["model"]; self.iq = ft["iq"]; self.md = mjm.MjData(self.m)
