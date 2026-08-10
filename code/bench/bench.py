@@ -53,8 +53,31 @@ def cand_key(cand, path):
 
 
 # ── eval ──
-def do_eval(path, judge="p19", tol=0.005, quiet=False):
+def judge_of(path, fallback="p19"):
+    """이 후보가 **어느 심판으로 등재됐는지** 레지스트리에서 읽는다 (08-11 신설).
+
+    왜: 저장 지표는 등재 당시 심판으로 잰 값인데 `eval` 기본값이 p19 로 박혀 있어,
+    인자를 안 주면 다른 자로 재고 DRIFT 로 오판한다. 실제로 08-11 에 p24(등재 심판 p24)를
+    p19 로 재서 FIT 59.0 → "골든 깨짐"으로 헛짚었다. 기본값을 **등재값**으로 바꾼다.
+    """
+    try:
+        reg = load_registry()
+        key = str(Path(path).resolve())
+        for k, v in (reg.get("candidates") or {}).items():
+            f = v.get("path") or v.get("file")      # 레지스트리 필드명은 "path"
+            if f and Path(HERE.parent.parent / str(f).replace("\\", "/")).resolve() == Path(key):
+                return v.get("judge") or fallback
+    except Exception:
+        pass
+    return fallback
+
+
+def do_eval(path, judge=None, tol=0.005, quiet=False):
     import p19_adapter as A
+    if judge is None:
+        judge = judge_of(path)
+        if not quiet:
+            print(f"[심판 {judge} — 레지스트리 등재값. 바꾸려면 --judge]")
     cand = A.load_candidate(path)
     if judge == "p14":
         r = A.eval_p14(cand)
@@ -246,7 +269,7 @@ def main():
     ap = argparse.ArgumentParser(prog="bench")
     sub = ap.add_subparsers(dest="cmd", required=True)
     e = sub.add_parser("eval"); e.add_argument("path")
-    e.add_argument("--judge", default="p19",
+    e.add_argument("--judge", default=None,        # None = 레지스트리 등재 심판
                    choices=["p19", "p20", "p22", "p23", "p24", "modea", "p14"])
     e.add_argument("--tol", type=float, default=0.005)
     c = sub.add_parser("compare"); c.add_argument("paths", nargs="+")
