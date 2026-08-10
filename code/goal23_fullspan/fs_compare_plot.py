@@ -69,6 +69,44 @@ def sh(x, n=QS):
     return y
 
 
+def tau_ref(raw, v, ch, *, old):
+    """모터 명령(raw) → 관절 토크. **비교의 기준선을 만드는 함수** (사용자 지시 08-11).
+
+    왜 이게 필요한가
+      모터가 남기는 기록은 "이만큼 힘을 내라"는 **명령**뿐이다. 관절에 실제로 걸린
+      토크는 이 데이터에 없다. 명령을 토크로 바꾸려면 변환식이 필요한데, 그 변환식은
+      **모델의 일부**다 (기존 배포판 = a_hat / 현행 = 정본곡선 canon_cap).
+
+      구판은 기준선을 **항상 a_hat 으로만** 그렸다. 그래서 현행 스택은 자기 변환식으로
+      계산한 토크를 **남의 변환식으로 만든 선**과 비교당했다 — 비교가 성립하지 않는다
+      (변환식 차이만으로 힙 2.16 · 무릎 3.66 Nm 가 오차로 잡힌다. 동역학 성분 0).
+
+      사용자 지시: 폐루프에서 알고 싶은 것은 "내 궤적·게인을 실제 로봇에 넣으면
+      계획대로 움직이고 계획한 토크가 나오는가"다. 그러려면 **실측 명령과 시뮬레이션을
+      같은 변환식으로 바꿔** 비교해야 한다. 그래서 기준선을 모델마다 따로 만든다.
+
+    한계 (그림 제목에도 적는다)
+      양쪽에 같은 변환식이 들어가므로 **변환식 자체가 맞는지는 이 비교로 알 수 없다.**
+      변환식이 틀려도 두 선이 함께 움직인다. 그건 분동/로드셀 교정으로 따로 결판낼 일.
+
+    old=True  → 배포판 변환식 (a_hat)
+    old=False → 현행 스택 변환식 (FS_TMAP 등 환경변수 그대로 존중)
+
+    ★ ch 규약: **0 = 힙, 1 = 무릎** (fs_runner 롤아웃 호출부와 동일 —
+      `_tmap(r1, v1c, 0)` / `_tmap(r2, v2c, 1)`). canon_cap 의 캡이 채널마다
+      다르므로(FS_TDCAP="무릎,힙") 뒤집으면 힙 기준선이 조용히 틀어진다.
+      실제로 08-11 첫 구현에서 뒤집었다가 힙이 1.20Nm 어긋나 잡았다.
+    """
+    raw = np.asarray(raw, float); v = np.asarray(v, float)
+    P = FMET.tw0["P"]; A = P.A_PAPER
+    if old:
+        return P.J.ahat(A, raw, v)
+    tm = FR._tmap_init(P, A)
+    if tm is None:                       # 현행도 a_hat 인 구성 (레거시 경로)
+        return P.J.ahat(A, raw, v)
+    return np.array([tm(float(r), float(w), ch) for r, w in zip(raw, v)])
+
+
 def panels(title, subtitle=""):
     fig, ax = plt.subplots(2, 3, figsize=(15.5, 7.2), sharex=True)
     fig.suptitle(title + (f"\n{subtitle}" if subtitle else ""), fontsize=11)
@@ -119,10 +157,17 @@ def cl_pair(d, seg, g, sess):
     old = [gi(Lo, "q1"), gi(Lo, "q2"), gi(Lo, "dq1"), gi(Lo, "dq2"), gi(Lo, "sh1"), gi(Lo, "sh2")]
     fs = [gi(Lf, "thm1"), gi(Lf, "q2"), gi(Lf, "dq1"), gi(Lf, "dq2"),
           np.clip(gi(Lf, "s1f"), -20.5, 20.5), gi(Lf, "s2")]
-    meas = {k: d[k][m] for k, _ in CH}
+    # ★ 08-11: τ 기준선을 **모델마다** 만든다 (tau_ref 참조).
+    #   각도·각속도는 센서 실측이라 하나뿐이고, τ 만 변환식에 따라 달라진다.
+    meas_o = {k: d[k][m] for k, _ in CH}
+    meas_f = dict(meas_o)
+    meas_o["a1"] = tau_ref(d["raw1"][m], d["dq1"][m], 0, old=True)
+    meas_o["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=True)
+    meas_f["a1"] = tau_ref(d["raw1"][m], d["dq1"][m], 0, old=False)
+    meas_f["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=False)
     cmd = [d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m], None, None]   # exp5 형식: 명령 병기
     pl = plan_of(sess, t, d["qd2"][m])                                        # 배포 계획 (있는 세션만)
-    return tt[m], meas, old, fs, np.ones(m.sum(), bool), cmd, pl
+    return tt[m], (meas_o, meas_f), old, fs, np.ones(m.sum(), bool), cmd, pl
 
 
 
@@ -371,16 +416,22 @@ def plot_cl(sess, name, d, seg, g):
     if r is None:
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
-    t, meas, old, fs, m, cmd, pl = r
+    t, (meas_o, meas_f), old, fs, m, cmd, pl = r
     _ht = h_title(sess, name)
     fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs 배포계획(τ*) vs 배포모델 재생(OLD) vs 현행({TAG})" + (f" | 계획 정렬 {pl[1]*1000:+.0f}ms" if pl else "")
                      + ("\n" + _ht if _ht else ""),
-                     f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   {TAG}: {rmse_line(meas, m, fs)}")
+                     f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas_o, m, old)}   {TAG}: {rmse_line(meas_f, m, fs)}"
+                     + "\n※ τ 는 **각 모델의 변환식으로 실측 명령을 바꾼 값**과 비교한다 "
+                       "(모터는 명령만 기록 — 축토크 실측은 없음). 변환식이 맞는지는 이 그림으로 알 수 없다.")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
-        y, yo, yf = meas[k], old[j], fs[j]
+        y, yf2, yo, yf = meas_o[k], meas_f[k], old[j], fs[j]
         if k in ("q1", "q2"):
-            y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
-        a.plot(t, y, lw=1.2, label="실측")
+            y, yf2, yo, yf = np.degrees(y), np.degrees(yf2), np.degrees(yo), np.degrees(yf)
+        _tau = k in ("a1", "a2")
+        a.plot(t, y, lw=1.2, label="실측 명령 → 배포판 변환" if _tau else "실측")
+        if _tau:
+            # ★ 현행 변환식 기준선 — 현행 sim 은 **이 선**과 비교해야 한다 (사용자 지시 08-11)
+            a.plot(t, yf2, lw=1.2, alpha=0.9, label=f"실측 명령 → {TAG} 변환")
         a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
         a.plot(t, yf, ":", lw=1.5, label=f"현행 ({TAG})")
         if pl is not None and os.environ.get("FS_PLAN") == "1":
@@ -391,13 +442,16 @@ def plot_cl(sess, name, d, seg, g):
             yc = np.degrees(cmd[j]) if k in ("q1", "q2") else cmd[j]
             a.plot(t, yc, "--", lw=0.8, alpha=0.5, label="명령 (qd)")
     ax[0].legend(fontsize=8, loc="best")
+    for _i in (4, 5):                    # τ 패널은 선이 4개라 범례를 따로 단다
+        ax[_i].legend(fontsize=6.5, loc="best")
     fig.tight_layout()
     fp = OUT / "CL" / sess
     fp.mkdir(parents=True, exist_ok=True)
     fig.savefig(fp / f"{name}.png", dpi=105)
     plt.close(fig)
-    conv = lambda k, v: np.sqrt(np.mean((meas[k][m] - v[m]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
-    return [conv(k, v) for (k, _), v in zip(CH, old)], [conv(k, v) for (k, _), v in zip(CH, fs)]
+    conv = lambda M, k, v: np.sqrt(np.mean((M[k][m] - v[m]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
+    return ([conv(meas_o, k, v) for (k, _), v in zip(CH, old)],
+            [conv(meas_f, k, v) for (k, _), v in zip(CH, fs)])
 
 
 H_LOG = {}          # (세션,trial) → (영상 h, OLD h, 현행 h) — 점프높이는 1급 게이트라 함께 남긴다
@@ -477,24 +531,34 @@ def plot_ma(sess, name, d, seg):
     # ★ τ = 총 인가 토크 (tq1/tq2). 구 sh1/sh2·s1/s2 는 토크맵 출력만이라 쓰지 않는다.
     old = [go("q1"), go("q2"), go("dq1"), go("dq2"), go("tq1"), go("tq2")]
     fs = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2"), gf("tq1"), gf("tq2")]
+    # ★ 08-11: CL 과 동일하게 τ 기준선을 **모델마다** 만든다 (tau_ref 참조).
     meas = {k: d[k][m] for k, _ in CH}
+    meas_f = dict(meas)
+    meas["a1"] = tau_ref(d["raw1"][m], d["dq1"][m], 0, old=True)
+    meas["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=True)
+    meas_f["a1"] = tau_ref(d["raw1"][m], d["dq1"][m], 0, old=False)
+    meas_f["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=False)
     mm = tg >= 0.0
     eo = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
           for (k, _), v in zip(CH, old)]
-    ef = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
+    ef = [np.sqrt(np.mean((meas_f[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
           for (k, _), v in zip(CH, fs)]
     fig, ax = panels(f"{sess} / {name} — ModeA 통짜 재생 (측정 raw 주입 · 점프 창 · 중간 리셋 없음)\n{HT}",
                      f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {' / '.join('%.2f' % x for x in eo)}   "
                      f"{TAG}: {' / '.join('%.2f' % x for x in ef)}"
-                     f"      ※ τ 는 **총 인가 토크**(보정 전부 포함) · 실측 τ 는 a_hat 변환값이라 참고용")
+                     f"\n※ τ 는 **각 모델의 변환식으로 실측 명령을 바꾼 값**과 비교 "
+                     f"(모터는 명령만 기록 — 축토크 실측은 없음). 변환식이 맞는지는 이 그림으로 알 수 없다.")
     for j_, (a, (k, _)) in enumerate(zip(ax, CH)):
-        y, yo, yf = meas[k], old[j_], fs[j_]
+        y, yf2, yo, yf = meas[k], meas_f[k], old[j_], fs[j_]
         if k in ("q1", "q2"):
-            y, yo, yf = np.degrees(y), np.degrees(yo), np.degrees(yf)
+            y, yf2, yo, yf = np.degrees(y), np.degrees(yf2), np.degrees(yo), np.degrees(yf)
         # ★ G58: τ 패널은 **각 선의 고점을 범례에 숫자로** 박는다 (축 오독 방지 — 사용자 지적).
-        pk = (lambda v: f"  [고점 {np.max(v):.2f}]") if k in ("a1", "a2") else (lambda v: "")
+        _tau = k in ("a1", "a2")
+        pk = (lambda v: f"  [고점 {np.max(v):.2f}]") if _tau else (lambda v: "")
         a.plot(t[m], y, lw=1.2,
-               label="실측" + (" (a_hat 변환)" if k in ("a1", "a2") else "") + pk(y))
+               label=("실측 명령 → 배포판 변환" if _tau else "실측") + pk(y))
+        if _tau:
+            a.plot(t[m], yf2, lw=1.2, alpha=0.9, label=f"실측 명령 → {TAG} 변환" + pk(yf2))
         a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가" + pk(yo))
         a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가" + pk(yf))
         if k in ("a1", "a2"):
