@@ -29,7 +29,7 @@ plt.rcParams["axes.unicode_minus"] = False
 #   `_compare` / `_compare_fs16` / `_compare_gate` / `_compare_svg25` / `_compare_G50` 이
 #   이미 git 에 추적돼 있다 (568 파일). 새로 **생성한** 그림이라 중복 저장도 아니다.
 #   (repo 밖에 두는 건 `_G79_collect` 처럼 **기존 이미지를 복사**해 모을 때의 규칙이다.)
-ROOT = Path(os.environ.get("G_PROMOTE_OUT", str(HERE / "_compare_G_promote")))
+ROOT = Path(os.environ.get("G_PROMOTE_OUT", str(HERE / "_compare_G50")))
 TAG = os.environ.get("FS_STACK_TAG", "마라톤G")
 GATE = ("26.03.24", "26.04.21")      # held-out(FF) · 위치제어 — fit 에 안 들어간 두 세션
 CVT_SESS = "26.04.29"
@@ -37,18 +37,20 @@ CVT_SESS = "26.04.29"
 
 def load():
     """비CVT·CVT 두 결과를 합쳐 {(mode, sess): dict} 로."""
+    # ★ 사용자 지시(08-09): 비CVT·CVT 를 **한 트리로 합친다** — ModeA/<세션>/ · CL/<세션>/ 안에
+    #   0429(변속)가 다른 세션과 나란히 놓인다. 색인·원수치만 파일명으로 구분한다.
     out = {}
-    for sub in ("nonCVT", "CVT"):
-        f = ROOT / sub / "_rmse.json"
+    for fn, is_cvt in (("_rmse.json", False), ("_rmse_cvt.json", True)):
+        f = ROOT / fn
         if not f.exists():
             raise SystemExit(
                 f"[없음] {f}\n"
-                f"  먼저 그림을 생성하라:\n"
-                f"    FS_CMP_OUT={ROOT/'nonCVT'} ... python fs_compare_plot.py\n"
-                f"    FS_CMP_OUT_CVT={ROOT/'CVT'} FS_CVT_ALL=1 ... python fs_cvt_plot.py")
+                f"  먼저 그림을 생성하라 (둘 다 **같은 폴더**로):\n"
+                f"    FS_CMP_OUT={ROOT} FS_CMP_HO=1 ... python fs_compare_plot.py\n"
+                f"    FS_CMP_OUT_CVT={ROOT} FS_CVT_ALL=1 ... python fs_cvt_plot.py")
         for k, v in json.load(io.open(f, encoding="utf-8")).items():
             mode, sess = k.split("|")
-            v["cvt"] = (sub == "CVT")
+            v["cvt"] = is_cvt
             out[(mode, sess)] = v
     return out
 
@@ -106,11 +108,12 @@ def doc(D):
     A("\n## 이 폴더를 읽는 법\n")
     A("| 경로 | 내용 |\n|---|---|\n")
     A("| `00_총평_ModeA.png` / `00_총평_CL.png` | **여기부터** — 세션별 자세 정확도 한 장 |\n")
-    A("| `nonCVT/ModeA/<세션>/<trial>.png` | 무변속 · 측정 토크 주입 재생 (1급 심판) |\n")
-    A("| `nonCVT/CL/<세션>/<trial>.png` | 무변속 · 폐루프 |\n")
-    A(f"| `CVT/ModeA/{CVT_SESS}/` · `CVT/CL/{CVT_SESS}/` | **변속(l_i≈25.08mm)** 같은 형식 |\n")
+    A("| `ModeA/<세션>/<trial>.png` | 측정 토크 주입 재생 (1급 심판) |\n")
+    A("| `CL/<세션>/<trial>.png` | 폐루프, 점프 창 |\n")
+    A(f"| `ModeA/{CVT_SESS}/` · `CL/{CVT_SESS}/` | **변속(CVT, l_i≈25.08mm)** — 같은 트리 안 |\n")
     A("| 각 세션 폴더의 `_summary.png` | 채널별 평균 RMSE 막대 |\n")
-    A("| `*/README.md` · `*/_rmse.json` | trial 단위 표와 원수치 |\n")
+    A("| `README.md`(무변속) · `README_CVT.md`(변속) | trial 단위 표 |\n")
+    A("| `_rmse.json` · `_rmse_cvt.json` · `_jumph*.json` | 원수치 |\n")
     A("\n각 그림은 **3자 겹침**이다 — 실측(실선) · 배포모델 p24(파선) · "
       f"현행 {TAG}(점선). 패널은 q1·q2·dq1·dq2·τ1·τ2.\n")
 
@@ -138,9 +141,12 @@ def doc(D):
 
     A("\n## 점프높이 (1급 게이트 · ModeA 연장 재생 vs 영상 실측)\n")
     A("자세가 맞아도 **높이가 틀리면 트윈이 아니다.** 배율오차 = |sim/영상 − 1| 의 평균 (작을수록 좋음).\n\n")
-    hj = ROOT / "nonCVT" / "_jumph.json"
+    hj = ROOT / "_jumph.json"
     if hj.exists():
         J = json.load(io.open(hj, encoding="utf-8"))
+        hjc = ROOT / "_jumph_cvt.json"          # 변속 세션도 같은 표에 (같은 정의·같은 자)
+        if hjc.exists():
+            J.update(json.load(io.open(hjc, encoding="utf-8")))
         S = {}
         for k, (hv, ho, hf) in J.items():
             if hv:

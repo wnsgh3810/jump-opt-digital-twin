@@ -372,7 +372,9 @@ def plot_cl(sess, name, d, seg, g):
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
     t, meas, old, fs, m, cmd, pl = r
-    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs 배포계획(τ*) vs 배포모델 재생(OLD) vs 현행({TAG})" + (f" | 계획 정렬 {pl[1]*1000:+.0f}ms" if pl else ""),
+    _ht = h_title(sess, name)
+    fig, ax = panels(f"{sess} / {name} — CL 점프 구간 (창 시작 실측 앵커 · 통짜) · 실측 vs 배포계획(τ*) vs 배포모델 재생(OLD) vs 현행({TAG})" + (f" | 계획 정렬 {pl[1]*1000:+.0f}ms" if pl else "")
+                     + ("\n" + _ht if _ht else ""),
                      f"창 RMSE (q1/q2/dq1/dq2/τ1/τ2)  OLD: {rmse_line(meas, m, old)}   {TAG}: {rmse_line(meas, m, fs)}")
     for j, (a, (k, _)) in enumerate(zip(ax, CH)):
         y, yo, yf = meas[k], old[j], fs[j]
@@ -399,6 +401,23 @@ def plot_cl(sess, name, d, seg, g):
 
 
 H_LOG = {}          # (세션,trial) → (영상 h, OLD h, 현행 h) — 점프높이는 1급 게이트라 함께 남긴다
+
+
+def h_title(sess, name):
+    """제목용 점프높이 한 줄 (사용자 지시: 그래프 제목에 점프높이).
+
+    ★ 정의는 **하나뿐**이다 — 지면 기준 베이스 중심 최고높이, ModeA 연장재생으로 판독
+      (`_F_jumph_abs` 정본). CL 은 이륙에서 롤아웃이 끝나 최고점이 없으므로 **같은 trial 의
+      ModeA 값을 그대로 쓰고 그렇게 표기**한다. 체공 상승분 등 다른 정의와 섞지 않는다.
+    """
+    v = H_LOG.get(f"{sess}|{name}")
+    if not v:
+        return ""
+    hv, ho_, hf_ = v
+    if hv:
+        return (f"점프높이(ModeA 연장재생)  영상 {hv:.3f} m  ·  OLD {ho_:.3f} m "
+                f"({100*(ho_/hv-1):+.1f}%)  →  {TAG} {hf_:.3f} m ({100*(hf_/hv-1):+.1f}%)")
+    return f"점프높이(ModeA 연장재생)  영상 실측 없음  ·  OLD {ho_:.3f} m → {TAG} {hf_:.3f} m"
 
 
 def plot_ma(sess, name, d, seg):
@@ -452,11 +471,7 @@ def plot_ma(sess, name, d, seg):
     ho_ = float(np.asarray(Ho["bz"]).max()) if Ho else np.nan
     hf_ = float(np.asarray(Hf["bz"]).max()) if Hf else np.nan
     H_LOG[f"{sess}|{name}"] = (hv, ho_, hf_)
-    if hv:
-        HT = (f"점프높이  영상 {hv:.3f} m  ·  OLD {ho_:.3f} m ({100*(ho_/hv-1):+.1f}%)"
-              f"  →  {TAG} {hf_:.3f} m ({100*(hf_/hv-1):+.1f}%)")
-    else:
-        HT = f"점프높이  영상 실측 없음  ·  OLD {ho_:.3f} m → {TAG} {hf_:.3f} m"
+    HT = h_title(sess, name)
     go = lambda k: np.interp(tg, Lo["t"], Lo[k])
     gf = lambda k: np.interp(tg, Lf["t"], Lf[k])
     # ★ τ = 총 인가 토크 (tq1/tq2). 구 sh1/sh2·s1/s2 는 토크맵 출력만이라 쓰지 않는다.
@@ -540,14 +555,16 @@ def main():
         # ★ held-out 은 **fit 금지**이지 평가 금지가 아니다 (철칙 9).
         #   승격 판단엔 게이트 세션의 CL 비악화도 봐야 하므로 FS_CMP_HO=1 로 포함시킨다.
         _ho_ok = (not ho) or os.environ.get("FS_CMP_HO") == "1"
+        # ★ ModeA 를 **먼저** 돌린다 — 점프높이는 ModeA 연장재생에서만 나오고(정본 정의),
+        #   CL 제목도 그 값을 쓰기 때문이다 (사용자 지시: 제목에 점프높이).
+        if want in ("BOTH", "MA", "CL"):
+            r = plot_ma(s, p.name, d, seg)
+            if r and want in ("BOTH", "MA"):
+                agg.setdefault(("ModeA", s), []).append(r)
         if want in ("BOTH", "CL") and _ho_ok and g:
             r = plot_cl(s, p.name, d, seg, g)
             if r:
                 agg.setdefault(("CL", s), []).append(r)
-        if want in ("BOTH", "MA"):
-            r = plot_ma(s, p.name, d, seg)
-            if r:
-                agg.setdefault(("ModeA", s), []).append(r)
         print(f"{s}/{p.name}: OK", flush=True)
     lines = [f"# 3자 비교 그래프 색인 (실측 / 배포모델 OLD α / 현행 {os.environ.get('FS_STACK_TAG', 'fs')})", "",
              "- `CL/<세션>/<trial>.png` — 폐루프, 점프(push) 구간",

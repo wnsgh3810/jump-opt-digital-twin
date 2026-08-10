@@ -28,6 +28,7 @@ import fs_cvt as FC
 import fs_runner as FR
 import fs_data as FD
 import mujoco as mjm
+from _G10_energy import real_h            # 점프높이 실측 (Real Data.txt)
 
 TW = FC.TW; RU = FC.RU
 OUT = HERE / os.environ.get("FS_CMP_OUT_CVT", "_plots")   # 스택별 분리 (repo 안 = _compare_* 관례)
@@ -155,6 +156,21 @@ def cl5q(model, tw, cc, d, seg, g, win=None, li=None):
 
 
 SESS = "26.04.29"
+H_CVT = {}          # trial → (영상 h, OLD h, 현행 h)
+
+
+def h_title(trial):
+    """제목용 점프높이 한 줄 — 비CVT 보드(fs_compare_plot.h_title)와 **같은 정의·같은 문장**.
+    지면 기준 베이스 중심 최고높이, ModeA 재생 +0.6s(T_AFTER) 연장에서 판독.
+    CL 은 이륙에서 롤아웃이 끝나 최고점이 없으므로 같은 trial 의 ModeA 값을 쓰고 그렇게 표기한다."""
+    v = H_CVT.get(trial)
+    if not v:
+        return ""
+    hv, ho_, hf_ = v
+    if hv:
+        return (f"점프높이(ModeA 연장재생)  영상 {hv:.3f} m  ·  OLD {ho_:.3f} m "
+                f"({100*(ho_/hv-1):+.1f}%)  →  {TAG} {hf_:.3f} m ({100*(hf_/hv-1):+.1f}%)")
+    return f"점프높이(ModeA 연장재생)  영상 실측 없음  ·  OLD {ho_:.3f} m → {TAG} {hf_:.3f} m"
 
 
 def main():
@@ -198,6 +214,7 @@ def main():
             print(f"{sub}: ModeA 실패", flush=True)
             continue
         T5, T6 = r5[3], r6[3]
+        H_CVT[sub] = (real_h(REG[sub]) if sub in REG else None, r5[2], r6[2])
         t = d["t"]
         # 채널 RMSE (τ 는 주입값이라 공통 — 비CVT ModeA 보드와 동일 규약)
         _M = [np.degrees(d["q1"]) + np.degrees(o1), np.degrees(d["q2"]) + np.degrees(o2),
@@ -223,7 +240,8 @@ def main():
         for a in ax[1]:
             a.set_xlabel("t [s]")
         fig.suptitle(f"{SESS} CVT (l_i={_li*1000:.2f}mm) ModeA — {sub}\n"
-                     f"창 RMSE (q1°/q2°/dq1/dq2)  OLD: "
+                     + (h_title(sub) + "\n" if h_title(sub) else "")
+                     + f"창 RMSE (q1°/q2°/dq1/dq2)  OLD: "
                      + " / ".join("%.2f" % x for x in agg["ModeA"][-1][1])
                      + f"   {TAG}: " + " / ".join("%.2f" % x for x in agg["ModeA"][-1][2]))
         fig.tight_layout()
@@ -315,7 +333,8 @@ def main():
         agg.setdefault("CL", []).append((p.name, eo, ef))
         fig.suptitle(f"{SESS} CVT (l_i={_li*1000:.2f}mm) CL 점프 창 — {p.name}  "
                      f"[게인 {g[0]:g}/{g[1]:g}/{g[2]:g}/{g[3]:g}]\n"
-                     f"창 RMSE (q1°/q2°/dq1/dq2/τ1/τ2)  OLD: " + " / ".join("%.2f" % x for x in eo)
+                     + (h_title(p.name) + "\n" if h_title(p.name) else "")
+                     + f"창 RMSE (q1°/q2°/dq1/dq2/τ1/τ2)  OLD: " + " / ".join("%.2f" % x for x in eo)
                      + f"   {TAG}: " + " / ".join("%.2f" % x for x in ef))
         fig.tight_layout()
         fp = OUT / "CL" / SESS
@@ -366,13 +385,15 @@ def write_summary(agg):
             f"**{a_:.2f}→{b_:.2f}**" for a_, b_ in zip(O.mean(axis=0), F.mean(axis=0))) + " |")
         won = int((F.mean(axis=1) < O.mean(axis=1)).sum())
         lines += ["", f"채널 평균 기준 **현행 승 {won}/{len(rows)} trial**.", ""]
-    (OUT / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    safe.atomic_json_write(OUT / "_rmse.json", {          # 원수치 동봉 (표 재파싱 금지)
+    (OUT / "README_CVT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    safe.atomic_json_write(OUT / "_rmse_cvt.json", {          # 원수치 동봉 (표 재파싱 금지)
         f"{mode}|{SESS}": dict(n=len(rows), ch=(MA_CH if mode == "ModeA" else CL_CH),
                                old=np.mean([r[1] for r in rows], axis=0).tolist(),
                                new=np.mean([r[2] for r in rows], axis=0).tolist(),
                                trials={r[0]: dict(old=r[1], new=r[2]) for r in rows})
         for mode, rows in agg.items() if rows})
+    safe.atomic_json_write(OUT / "_jumph_cvt.json",
+                           {f"{SESS}|{k}": v for k, v in H_CVT.items()})
 
 
 if __name__ == "__main__":
