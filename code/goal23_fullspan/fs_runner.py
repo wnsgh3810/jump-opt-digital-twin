@@ -47,7 +47,12 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     # 마라톤G G1-E3: 공중 동정 실측 마찰 반영용 (무릎측). 힙측은 기존 FS_HIPM_DAMP/FL.
     _kd = os.environ.get("FS_KNEEM_DAMP")
     _kf = os.environ.get("FS_KNEEM_FL")
-    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf)
+    # ★ 08-11: FS_FOOTR 가 캐시 키에 빠져 있었다 — fs_model 이 모델 빌드 때 읽는데 키에 없어서,
+    #   **한 프로세스 안에서 값을 바꿔도 캐시된 옛 모델이 그대로 나왔다.** 스윕이 조용히 무효가 된다
+    #   (마라톤H 스크리닝에서 FS_FOOTR 이 "변화 0.00%" 로 찍혀 발각). 모델 빌드가 읽는 env 는
+    #   전부 키에 있어야 한다.
+    _fr = os.environ.get("FS_FOOTR")
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _fr)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
