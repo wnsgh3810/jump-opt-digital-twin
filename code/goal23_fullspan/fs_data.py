@@ -126,6 +126,13 @@ def cvt_li(fold, t_abs=None):
         if m.sum() >= 5:
             v = v[m]
     li = float(np.median(v)) / 1000.0
+    # ★ 08-11 추가: **과거 기준선 재현 전용** 오버라이드 (예: FS_LI_FIX=0.02499).
+    #   `bench eval` 의 저장 지표(36.1%)는 구 하드코딩 0.02499 시절 값이라, 지금 실측을
+    #   쓰면 당연히 어긋난다. 그 차이가 l_i 때문인지 딴 것인지 가르려면 옛 값이 필요하다.
+    #   **분석·적합에는 쓰지 말 것** — 원본이 있으면 원본을 쓴다 (지표 출처 원칙).
+    _fx = os.environ.get("FS_LI_FIX")
+    if _fx:
+        li = float(_fx)
     _LI_CACHE[key] = li
     return li
 

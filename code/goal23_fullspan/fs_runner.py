@@ -747,10 +747,17 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             if lim_raw[1]:
                 c2 = float(np.clip(c2, -lim_raw[1], lim_raw[1]))
         # 관측 = 계산 시점 커맨드 (실기 로그 타이밍), 플랜트 = 지연 커맨드 (모터 실행 타이밍)
-        _cv = (lambda r, v: _tmap(r, v)) if _tmap is not None else \
-              (lambda r, v: float(P.J.ahat(A, np.array([r]), np.array([v]))[0]))
-        s1o = _cv(c1, v1c)
-        s2o = _cv(c2, v2c)
+        # ★ 08-11 버그픽스 2건 (마라톤G).
+        #  ① _cv 가 2인자 람다인데 아래 지연 분기가 3인자로 부른다 → FS_CMD_DELAY>0 이면
+        #     TypeError 즉사. **커맨드 지연 노브가 죽어 있었다** (마라톤C P12 가 7~9ms 를
+        #     요구했는데 켤 수가 없었다). 재현: FS_CMD_DELAY=0.008 → TypeError.
+        #  ② ch 미전달 → `tmap(raw, v, ch=1)` 기본값이 먹어 **힙에도 무릎 캡(3.8)** 적용
+        #     (힙은 2.6). 개루프 경로(rollout_ol_fs_b)는 0/1 을 제대로 넘긴다.
+        #     |raw|≳8 부터 캡이 물리므로 7월 세션 힙(명령 RMS 15~18)은 상시 과대였다.
+        _cv = (lambda r, v, ch=1: _tmap(r, v, ch)) if _tmap is not None else \
+              (lambda r, v, ch=1: float(P.J.ahat(A, np.array([r]), np.array([v]))[0]))
+        s1o = _cv(c1, v1c, 0)
+        s2o = _cv(c2, v2c, 1)
         if _dbuf is not None:
             _dbuf.append((c1, c2))
             c1, c2 = _dbuf[max(0, len(_dbuf) - 1 - _dly_n)]

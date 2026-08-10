@@ -2,7 +2,11 @@
 # CURRENT_STACK — 현행 디지털 트윈 스택 (수치의 단일 출처)
 
 **현행: p24** — P22~P24 3연전 산물: 측정 유지-지지 법칙+부하연동 스프링+게이트 상승항+hip 지지층+CVT 손실. FIT 36.1/HO CL 33.1 역대최고/재생 0429 2.61(-21%)/J_v6 0.826/자유상수 0. 사용자 승격 확정 2026-07-17  (승격 2026-07-17)
-- 후보 파일: `code\goal22\p23_veins\fourbar_p24a_candidate.json`  (judge: p19)
+- 후보 파일: `code\goal22\p23_veins\fourbar_p24a_candidate.json`  (**judge: p24**)
+  ★ 08-11 정정: 여기 `judge: p19` 로 적혀 있었으나 **오기**다. 저장 지표 FIT 36.1 / HO 33.1 은
+  **p24 심판**으로 기록된 값이다 (등록 커밋 867bb56 메시지와 일치). `bench eval` 기본 심판이
+  p19 라 인자를 안 주면 FIT 59.0 → DRIFT 로 보인다 (08-11 이걸로 헛짚었다).
+  재현 명령: `python bench/bench.py eval <후보> --judge p24` → REPRODUCED (재확인 08-11).
 
 - 3계층: 플랜트(x) × 커맨드층(p19_cmdlayer.json: α·클립±35.5·지연) × 변환식 A=Paper
 
