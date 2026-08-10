@@ -148,8 +148,17 @@ def cl_pair(d, seg, g, sess):
     Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
     ft = FR.fs_twin()
     sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
+    # ★ 08-11 판별용 노브 (사용자 제기 "알파 문제 아냐?"): 무릎 kp 를 줄여서 넣는다.
+    #   FS_KNEE_A="table" → α(kp) 표 보간 (게인 의존) · FS_KNEE_A="0.656" → 상수배 (게인 무관)
+    #   미설정 = 현행(=1.0, α 없음). 배포모델은 원래 α 를 쓴다(alphas_for) — 그래서 이 노브가
+    #   **게인 의존이 실체인지 단순 과대인지**를 가른다. 상수배로도 고쳐지면 α 가설은 기각.
+    _ka = os.environ.get("FS_KNEE_A")
+    gg = tuple(g)
+    if _ka:
+        _s = alpha_of(TK, g[2]) if _ka == "table" else float(_ka)
+        gg = (g[0], g[1], g[2] * _s, g[3])
     Lf = FR.rollout_cl_fs(ft, t, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
-                          tuple(g), t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
+                          gg, t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                           fade=True, taulim=None, vdes_ff=(sess != "26.04.21"), init_meas=init)
     if Lo is None or Lf is None:
         return None

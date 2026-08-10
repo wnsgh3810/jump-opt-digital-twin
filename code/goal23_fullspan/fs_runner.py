@@ -713,15 +713,48 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _svg = os.environ.get("FS_SUPP_VG") or None              # F-H8: supp 속도 게이트 spec (None=비활성)
     _vcl = _vceil_init()                   # 마라톤F F-H7: 전압 포락선 천장 (None = 비활성)
     _tmap = _tmap_init(P, A); _nosupp = _nosupp_init()   # 마라톤G A: 정본곡선 전달률 · 지지층 절제
+    # ★ 08-11 마라톤G: **무릎 벨트 직렬탄성(SEA)** — α(kp) 표의 물리화 (사용자 승인).
+    #   FS_KNEE_SEA="ks[,bs[,Jm]]" (미설정=강체=현행). 계보: goal22/p26_sea/sea_twin2 v2
+    #   ("컨트롤러측 적분" — MuJoCo DOF 를 안 늘려 질량행렬 병조건·CVT 폐쇄를 안 건드린다).
+    #
+    #   왜: α 표를 켜면 무릎 토크는 잡히는데(3.51→3.20) **무릎 각도를 잃는다**(1.42→2.54°).
+    #   명령을 그냥 깎기 때문이다. 스프링은 깎인 몫을 **저장했다 돌려주므로** 각도를 지킬 수 있다.
+    #   준정적 극한에서 실효 위치게인 = kp·ks/(kp+ks) → **α(kp) 가 창발**한다 (표를 안 쓴다).
+    #
+    #   ★ 인코더 규약: 실기 knee 채널은 **크랭크(모터)측** (데이터 사전). SEA 를 켜면
+    #     PD 입력도 로그도 링크가 아니라 **θ_m2/ω_m2** 여야 한다 — 안 그러면 스프링 변형만큼
+    #     조용히 어긋난다.
+    _sea = os.environ.get("FS_KNEE_SEA")
+    if _sea:
+        _sp = [float(x) for x in _sea.split(",")]
+        ks2 = _sp[0]
+        bs2 = _sp[1] if len(_sp) > 1 else 1.0
+        jm2 = _sp[2] if len(_sp) > 2 else 0.03
+        _q2l0 = -float(md.qpos[iq["knee_motor"]])
+        wm2 = -float(md.qvel[dof["knee_motor"]])
+        # ★ 초기 스프링을 **평형 변형**으로 채운다 (느슨하게 두면 t=0 에 무릎 토크가 0 이 되어
+        #   다리가 주저앉고 스프링이 되감기며 발산한다 — 08-11 실제로 겪음).
+        #   ks(θ_m − q_l) = s2(θ_m) 를 고정점 반복으로 푼다 (PD 가 θ_m 을 보므로 순환).
+        _cv0 = (lambda r, v: _tmap(r, v, 1)) if _tmap is not None else \
+               (lambda r, v: float(P.J.ahat(A, np.array([r]), np.array([v]))[0]))
+        thm2 = _q2l0
+        for _ in range(30):
+            _c0 = kp2 * (float(qd2g[0]) - thm2) + kd2 * ((float(dqd2g[0]) if vdes_ff else 0.0) - wm2)
+            _c0 = float(np.clip(_c0, -TW.R19.CLIP, TW.R19.CLIP))
+            thm2 = _q2l0 + _cv0(_c0, wm2) / ks2
+    else:
+        ks2 = None
     for k in range(N):
         tc = k * dt
         tm_ = min(tc, t_end)
         qd1 = float(np.interp(tm_, tg, qd1g)); qd2 = float(np.interp(tm_, tg, qd2g))
         dqd1 = float(np.interp(tm_, tg, dqd1g)); dqd2 = float(np.interp(tm_, tg, dqd2g))
         thm = -md.qpos[iq["hip_m"]] - np.pi / 2
-        q2c = -md.qpos[iq["knee_motor"]]
+        q2l = -md.qpos[iq["knee_motor"]]              # 링크(크랭크)측 실제 각
+        v2l = -md.qvel[dof["knee_motor"]]
+        q2c = thm2 if ks2 is not None else q2l        # PD·인코더가 보는 각 (SEA 면 모터측)
         v1c = -md.qvel[dof["hip_m"]]
-        v2c = -md.qvel[dof["knee_motor"]]
+        v2c = wm2 if ks2 is not None else v2l
         b_eff = 0.0
         if _vaf is not None:
             _v1f += _vaf * (v1c - _v1f)
@@ -800,7 +833,16 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         _hsupp = 0.0 if _nosupp else RU.hip_supp_scalar(s1, s2, v1c)
         if _esc is not None and "hsupp1" in _esc:
             _esc["hsupp1"], _hsupp = _escrow_gate(_esc["hsupp1"], _hsupp, v1c, dt)
-        md.ctrl[:] = [-(s1 + _hsupp), -(s2 + supp)]
+        # ★ SEA: 사지에 감기는 것은 **스프링이 전달한 토크**지 모터 명령이 아니다.
+        #   모터:   Jm·dω_m = s2 − τ_spr      (s2 = 명령 토크 — 로그·지지법칙엔 그대로 쓴다)
+        #   스프링: τ_spr  = ks(θ_m − q_link) + bs(ω_m − dq_link)
+        _s2p = s2
+        if ks2 is not None:
+            _tspr = ks2 * (thm2 - q2l) + bs2 * (wm2 - v2l)
+            wm2 += dt * (s2 - _tspr) / max(jm2, 1e-6)
+            thm2 += dt * wm2
+            _s2p = _tspr
+        md.ctrl[:] = [-(s1 + _hsupp), -(_s2p + supp)]
         md.qfrc_applied[dof["knee"]] = tql
         if _eled is not None:              # 마라톤E P9: 층별 순간 파워 원장 (진단 전용 — 동역학 무변경)
             _vkn = float(md.qvel[dof["knee"]])
@@ -887,9 +929,11 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["t"][k] = tc
         Lg["thm1"][k] = -md.qpos[iq["hip_m"]] - np.pi / 2
         Lg["q1"][k] = -(md.qpos[iq["hip_m"]] + md.qpos[iq["hip"]]) - np.pi / 2
-        Lg["q2"][k] = -md.qpos[iq["knee_motor"]]
+        # ★ SEA: 실기 knee 인코더는 **모터(크랭크)측** — 스프링 뒤 링크각이 아니라 θ_m 을 남긴다
+        #   (데이터 사전: "knee 채널 = 크랭크(모터)측"). 강체면 둘이 같아 기존과 동일.
+        Lg["q2"][k] = thm2 if ks2 is not None else -md.qpos[iq["knee_motor"]]
         Lg["dq1"][k] = -md.qvel[dof["hip_m"]]
-        Lg["dq2"][k] = -md.qvel[dof["knee_motor"]]
+        Lg["dq2"][k] = wm2 if ks2 is not None else -md.qvel[dof["knee_motor"]]
         Lg["s1"][k] = s1o
         Lg["s2"][k] = s2o
         Lg["c1"][k] = c1                     # G66: 맵 통과 전 명령 (N·m) — 맵 무관 τ 비교용
