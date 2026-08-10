@@ -30,7 +30,7 @@ import fs_data as FD
 import mujoco as mjm
 
 TW = FC.TW; RU = FC.RU
-OUT = HERE / os.environ.get("FS_CMP_OUT_CVT", "_plots")   # 승격 비교용 폴더 분리
+OUT = HERE / os.environ.get("FS_CMP_OUT_CVT", "_plots")   # 스택별 분리 (repo 안 = _compare_* 관례)
 OUT.mkdir(parents=True, exist_ok=True)
 # ★ 08-09: l_i 하드코딩 폐지. trial 마다 `fs_data.cvt_li(trial폴더)` 로 읽는다.
 #   (구 0.02499 는 "실측" 주석과 달리 센서 범위 25.06~25.10 **밖**이었다 — 점수 튜닝값)

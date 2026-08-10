@@ -25,7 +25,11 @@ import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(os.environ.get("G_PROMOTE_OUT", r"C:/Users/junho/Desktop/jump_opt/G_promote_260809"))
+# ★ 08-09 정정 (사용자 지적): 비교 그림은 **repo 안** 이 관례다 —
+#   `_compare` / `_compare_fs16` / `_compare_gate` / `_compare_svg25` / `_compare_G50` 이
+#   이미 git 에 추적돼 있다 (568 파일). 새로 **생성한** 그림이라 중복 저장도 아니다.
+#   (repo 밖에 두는 건 `_G79_collect` 처럼 **기존 이미지를 복사**해 모을 때의 규칙이다.)
+ROOT = Path(os.environ.get("G_PROMOTE_OUT", str(HERE / "_compare_G_promote")))
 TAG = os.environ.get("FS_STACK_TAG", "마라톤G")
 GATE = ("26.03.24", "26.04.21")      # held-out(FF) · 위치제어 — fit 에 안 들어간 두 세션
 CVT_SESS = "26.04.29"
