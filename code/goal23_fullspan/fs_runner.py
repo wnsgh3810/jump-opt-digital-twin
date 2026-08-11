@@ -675,8 +675,13 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     _vaf = dt / (_vtc + dt) if _vtc > 0 else None
     _v1f = _v2f = 0.0
     # P17: 커맨드 출력 1차 지연 LPF (지연군 판독 tc — 기록 raw=전달 전류이므로 관측·플랜트 동일값)
-    _ctc = float(os.environ.get("FS_CMD_LPF", "0") or 0)
-    _caf = dt / (_ctc + dt) if _ctc > 0 else None
+    # ★ 08-11: 관절별 시간상수 허용 — FS_CMD_LPF="힙,무릎" (한 값이면 양쪽 동일, 기존 호환).
+    #   힙과 무릎은 모터·감속비·부하가 달라 전류루프 대역이 같을 이유가 없다.
+    _ctcs = [float(x) for x in (os.environ.get("FS_CMD_LPF", "0") or "0").split(",")]
+    _ctc1 = _ctcs[0]; _ctc2 = _ctcs[1] if len(_ctcs) > 1 else _ctcs[0]
+    _caf1 = dt / (_ctc1 + dt) if _ctc1 > 0 else None
+    _caf2 = dt / (_ctc2 + dt) if _ctc2 > 0 else None
+    _caf = _caf1 or _caf2                    # 하나라도 켜져 있으면 분기 진입
     _c1f = _c2f = 0.0
     tc_f = float(os.environ.get("FS_TC", "0.010"))
     s1f = 0.0
@@ -776,9 +781,10 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         c1 = float(np.clip(c1, -TW.R19.CLIP, TW.R19.CLIP))
         c2 = float(np.clip(c2, -TW.R19.CLIP, TW.R19.CLIP))
         if _caf is not None:
-            _c1f += _caf * (c1 - _c1f)
-            _c2f += _caf * (c2 - _c2f)
-            c1, c2 = _c1f, _c2f
+            if _caf1 is not None:
+                _c1f += _caf1 * (c1 - _c1f); c1 = _c1f
+            if _caf2 is not None:
+                _c2f += _caf2 * (c2 - _c2f); c2 = _c2f
         if lim_raw is not None:
             if lim_raw[0]:
                 c1 = float(np.clip(c1, -lim_raw[0], lim_raw[0]))

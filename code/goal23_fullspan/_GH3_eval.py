@@ -16,7 +16,7 @@
 비교 대상 = 영상 실측의 **푸시~이륙 구간 슬립** (폐루프 창이 곧 도약 창이라 대응된다).
 ★ 하강 구간 슬립은 폐루프 창 밖이라 여기서 못 잰다 — 별도 과제.
 
-CLI: python _GH3_eval.py "FS_CMD_LPF=0.002,FS_MASS=3.34"
+CLI: python _GH3_eval.py "FS_CMD_LPF=0.002,0.004;FS_MASS=3.30"   (변수 구분 = 세미콜론)
      python _GH3_eval.py            # 현행 env 그대로 (기준선 확인용)
 """
 import os, sys, io, json
@@ -92,7 +92,8 @@ def score(R, SL):
 def main():
     cfg = {}
     if len(sys.argv) > 1 and sys.argv[1].strip():
-        for it in sys.argv[1].split(","):
+        # ★ 구분자는 **세미콜론** — 값 자체에 쉼표가 들어간다 (FS_CMD_LPF="0.002,0.004").
+        for it in sys.argv[1].split(";"):
             k, v = it.split("=", 1); cfg[k.strip()] = v.strip()
     import fs_runner as FR
     base_R, base_S = run(); b = score(base_R, base_S)
