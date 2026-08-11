@@ -73,6 +73,22 @@ def build_fs(ks=KS_HIP, bs=BS_HIP, arm=ARM_HIP, base_xml=None, endstop=False,
     if _fr:
         xml = safe.xml_patch(xml, 'type="cylinder" size="0.0210 0.0065"',
                              f'type="cylinder" size="{float(_fr):.4f} 0.0065"', count=1)
+    # ★ 08-11 신설 (사용자 제기 "발끝 위치의 오프셋도 중요할 것 같다"):
+    #   정본은 롤러 중심을 **종아리 축 위 정확히 0** 에 둔다 (pos="0 0 -0.25").
+    #   실제로 축이 앞뒤(x)로 치우쳐 있거나 링크 끝에서 위아래(z)로 어긋나 있으면
+    #   지면 반력의 **모멘트 팔**이 달라져 무릎·힙 토크가 직접 바뀐다.
+    #   FS_FOOTPOS="dx,dz" [m] — 공칭 위치에 더한다 (미지정이면 정본 그대로 = 골든 보존).
+    _fp = os.environ.get("FS_FOOTPOS")
+    if _fp:
+        _d = [float(x) for x in _fp.split(",")]
+        _dx = _d[0]; _dz = _d[1] if len(_d) > 1 else 0.0
+        xml = safe.xml_patch(xml, 'name="foot" class="foot" type="cylinder" size',
+                             'name="foot" class="foot" type="cylinder" size', count=1)  # 존재 확인
+        import re as _re
+        _m = _re.search(r'(name="foot"[^>]*?)pos="0 0 -0\.25"', xml)
+        if _m is None:
+            raise RuntimeError("발 geom pos 패턴 불일치 — FS_FOOTPOS 적용 불가")
+        xml = xml[:_m.start()] + _m.group(1) + f'pos="{_dx:.5f} 0 {-0.25 + _dz:.5f}"' + xml[_m.end():]
     if endstop:
         # 레일 하단 엔드스톱 (SEA P4: z_stop=0.169 soft) — s2s '의자'. 점프 자세는 구조적 미접촉
         xml = safe.xml_patch(xml, '<joint name="base_z" type="slide" axis="0 0 1"/>',

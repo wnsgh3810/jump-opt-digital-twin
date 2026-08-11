@@ -52,13 +52,22 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     #   (마라톤H 스크리닝에서 FS_FOOTR 이 "변화 0.00%" 로 찍혀 발각). 모델 빌드가 읽는 env 는
     #   전부 키에 있어야 한다.
     _fr = os.environ.get("FS_FOOTR")
-    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _fr)
+    # ★ 08-11 신설 (사용자 질문 "무조코에 정지마찰/운동마찰 구분 없어?"):
+    #   물리엔진은 미끄럼 마찰이 **숫자 하나**이고 정지/운동 구분이 없다 (확인: geom_friction
+    #   =[미끄럼, 비틀림, 구름]). 대신 `impratio` 가 "마찰 방향을 얼마나 단단히 붙잡나"를 정해
+    #   저속 크리프를 억제한다 = **정지마찰 흉내의 엔진측 손잡이**. 현행 100 (꽤 높다).
+    #   밖에서 붙인 점착-활주 코드와 **두 겹으로** 붙잡고 있어 하강 슬립이 실측의 60% 인지 시험.
+    _ir = os.environ.get("FS_IMPRATIO")
+    _fp = os.environ.get("FS_FOOTPOS")   # 발 롤러 앞뒤·상하 오프셋 (모델 빌드 축 → 키 필수)
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _fr, _ir, _fp)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
             _CACHE["base"] = (base_xml, tw)
         base_xml, tw = _CACHE["base"]
         model, xml = FM.build_fs(ks=ks, bs=bs, arm=arm, base_xml=base_xml, dm=dm, fl=fl)
+        if _ir:
+            model.opt.impratio = float(_ir)
         if _rx:
             _k, _b = (float(v) for v in _rx.split(","))
             _bz = '<joint name="base_z" type="slide" axis="0 0 1"/>'
