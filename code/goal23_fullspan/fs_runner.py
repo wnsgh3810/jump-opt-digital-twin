@@ -363,9 +363,12 @@ def _tmap_init(P=None, A=None):
     c = float(sp[0] or 0); gmin = float(sp[1]) if len(sp) > 1 else 0.35
     if md_ is None and k == 1.0 and c == 0.0:
         return None                                 # 완전 레거시 경로 (비트 동일)
-    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "model"):
+    # ★ 08-12: 새 모드를 만들면 **아래 두 목록에 반드시 이름을 넣어야 한다.** 안 넣으면 분기에
+    #   도달하지 못하고 조용히 a_hat 기본값으로 흘러간다 (canon_mix 첫 구현에서 밟았다 —
+    #   힙·무릎이 같은 값을 내고 정지 토크가 어긋나는 것으로 발각).
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "canon_mix", "model"):
         pass
-    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "canon_mix"):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
         d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
@@ -467,6 +470,32 @@ def _tmap_init(P=None, A=None):
                 c0, c1, bb, v0 = (_tk if ch else _th)
                 return (_canon(raw) - (c0 + c1 * abs(float(raw))) * np.tanh(float(v) / v0)
                         - bb * float(v))
+        elif md_ == "canon_mix":
+            # ★★ 08-12 (마라톤H): **채널마다 다른 형태**. 08-11 무게추 왕복 실측이 시키는 형태다.
+            #   `26_08_07/{0,2,4}kg` 왕복에서 상행−하행 절반차로 마찰만 뽑으면:
+            #     무릎 0.135 + **0.1197**·|명령| → 전달효율 88% (4절링크+벨트를 거친다)
+            #     힙   0.278 + 0.0029·|명령|    → 효율 ≈100% (모터가 허벅지를 거의 직접 돌린다)
+            #     무릎 기울기는 2kg/4kg 이 0.7% 내 일치 — 우연이 아니다.
+            #   ⇒ **힘비례 손실은 무릎에만 있다.** 그런데 REJECTED #82(canon_fric)는 양 채널에
+            #     같은 형태를 강제해, 힙이 실측(0.004)과 충돌하는 0.259 를 떠안고 졌다
+            #     (주입재생 +36% · 점프높이 +110%). 무릎 쪽 값은 오히려 실측과 맞았다
+            #     (속도비례 0.012 vs 실측 0.016) — 형태가 아니라 **적용 범위**가 틀렸던 것이다.
+            #   여기서는 **힙 = 상한형(H3 승자와 동일) · 무릎 = 하중비례형** 으로 나눈다.
+            #   FS_TMIX="fc0,fc1,b,v0" (무릎 전용) · 힙 상한은 FS_TDCAP 의 두 번째 값을 쓴다.
+            #   ★ fc1=0 이어도 무릎은 정본 전액이라 canon_cap 으로 **회귀하지 않는다** — 주의.
+            _mx = [float(x) for x in (os.environ.get("FS_TMIX", "0.18,0.16,0,0.3")).split(",")]
+            while len(_mx) < 4:
+                _mx.append(0.3 if len(_mx) == 3 else 0.0)
+            _m0, _m1, _mb, _mv = _mx[:4]
+
+            def base(raw, v, ch=1):
+                if ch:                                   # 무릎 = 하중비례형
+                    return (_canon(raw)
+                            - (_m0 + _m1 * abs(float(raw))) * np.tanh(float(v) / max(_mv, 1e-6))
+                            - _mb * float(v))
+                a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])   # 힙 = 상한형
+                dd = _canon(raw) - a
+                return a + (dd if dcap_h <= 0 else max(-dcap_h, min(dcap_h, dd)))
         else:
             # canon_cap: **분동 검증분만 채택**. τ = a_hat + clip(canon − a_hat, ±Δmax).
             #   canon−a_hat 은 raw 5 에서 3.4Nm → raw 35.5 에서 10.4Nm 로 계속 커지는데
