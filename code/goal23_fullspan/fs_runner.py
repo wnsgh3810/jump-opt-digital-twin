@@ -570,6 +570,52 @@ def _tmap_init(P=None, A=None):
     return tmap
 
 
+def apply_stack_physics(model, mjm=None):
+    """**다른 경로에서 지은 모델**(예: 변속기 모델)에 현행 스택의 물리값을 심는다.
+
+    왜 필요한가 (08-12 발각)
+      변속기 모델을 짓는 함수는 기본 인자로 모델을 만들고, `fs_twin()` 이 하는 빌드 후
+      손질도 하지 않는다. 그래서 **변속기 세션은 현행 스택의 물리값을 하나도 안 쓴 채**
+      채점돼 왔다 (총질량 3.2010/3.2988 · 힙스프링 150/138.53 · 힙마찰 0.2383/0.3026 ·
+      힙감쇠 0.3121/0.0964). 통과했던 변속기 게이트도 **플랜트가 똑같이 옛값**인 비교였다.
+      (영향 측정: 이 함수를 적용해 다시 채점하면 6채널 평균 −0.9% — 결함은 진짜지만
+       폐루프는 PD 추종이 지배해 그 판에서의 크기는 1% 미만이다.)
+
+    무엇을 옮기나 — 현행 env 로 지은 무변속 모델에서 **이름 기준**으로 복사한다.
+      질량 · 무게중심 · 관성 · 관절 스프링/감쇠/마찰/회전자관성 · 발 반경 · 접촉 강성비
+    ★ **부품 위치(body_pos)는 절대 옮기지 않는다** — 그게 변속기 기하 자체다
+      (링크 길이가 2mm 다르면 부품 위치가 2mm 다르다). 옮기면 변속기가 무변속이 된다.
+    """
+    if mjm is None:
+        import mujoco as mjm
+    ref = fs_twin()["model"]
+    B, J, G = mjm.mjtObj.mjOBJ_BODY, mjm.mjtObj.mjOBJ_JOINT, mjm.mjtObj.mjOBJ_GEOM
+    rb = {mjm.mj_id2name(ref, B, i): i for i in range(ref.nbody)}
+    for i in range(model.nbody):
+        n = mjm.mj_id2name(model, B, i)
+        if n in rb:
+            j = rb[n]
+            model.body_mass[i] = ref.body_mass[j]
+            model.body_ipos[i] = ref.body_ipos[j]
+            model.body_inertia[i] = ref.body_inertia[j]
+    rj = {mjm.mj_id2name(ref, J, i): i for i in range(ref.njnt)}
+    for i in range(model.njnt):
+        n = mjm.mj_id2name(model, J, i)
+        if n not in rj:
+            continue
+        k = rj[n]
+        model.jnt_stiffness[i] = ref.jnt_stiffness[k]
+        a, b = model.jnt_dofadr[i], ref.jnt_dofadr[k]
+        model.dof_damping[a] = ref.dof_damping[b]
+        model.dof_frictionloss[a] = ref.dof_frictionloss[b]
+        model.dof_armature[a] = ref.dof_armature[b]
+    fa = mjm.mj_name2id(model, G, "foot"); fb = mjm.mj_name2id(ref, G, "foot")
+    if fa >= 0 and fb >= 0:
+        model.geom_size[fa] = ref.geom_size[fb]
+    model.opt.impratio = ref.opt.impratio
+    return model
+
+
 def _nosupp_init():
     """FS_NOSUPP=1 → 인공 지지층(supp·rise·hip_supp) 전면 비활성 (마라톤G A 절제)."""
     return os.environ.get("FS_NOSUPP") == "1"

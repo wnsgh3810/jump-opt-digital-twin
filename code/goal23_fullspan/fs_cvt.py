@@ -59,6 +59,14 @@ def build_cvt_pair(li=0.02508):
         open(HERE / "_cvt_fs.xml", "w", encoding="utf-8").write(xml_cf)
     except Exception as ex:
         print(f"fs 패치 실패 (hip 라인 상이?): {type(ex).__name__} {ex}", flush=True)
+    # ★ 08-12: 여기까지의 모델은 **기본 물리값**이다 (힙스프링 150 · 힙마찰 0.2383 ·
+    #   힙감쇠 0.3121 · 총질량 3.2010 …). 현행 스택이 지정한 값이 하나도 안 들어가 있어서
+    #   **변속기 세션은 지금까지 옛 물리로 채점돼 왔다** (통과한 게이트 포함).
+    #   여기서 이름 기준으로 심는다. **부품 위치는 안 건드린다 — 그게 변속기 기하다.**
+    import fs_runner as _FR
+    for _m in (model_cf, model_c):
+        if _m is not None:
+            _FR.apply_stack_physics(_m, mjm)
     return model_c, model_cf, dict(nm=nm, tw=tw, v=v)
 
 
