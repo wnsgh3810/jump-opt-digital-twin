@@ -672,11 +672,16 @@ def run_mode(mode, budget_s, nproc):
     #   시작값을 현행 스택으로 옮길 때 **뒤쪽 2개를 빠뜨렸다** (힙 보정상한 2.6 vs 2.309).
     #   6시간을 잘못된 출발점에서 쓸 뻔했다. 이제 코드가 스스로 대조한다.
     if mode == "canon_cap":
-        bad = [(a[0], c, h) for a, c, h in zip(axes, cur, H3) if abs(c - h) > 1e-6 * max(1, abs(h))]
+        # ★ 08-13 정정: 대조 대상이 **출발점(X0)** 이다. 3 회차까지는 출발점과 배포 스택이
+        #   같은 지점이라 배포 스택과 대조해도 됐는데, 4 회차부터는 **일부러 다르게** 뒀다
+        #   (출발점 = 3 회차 승자 · 비교 기준 = 배포 스택). 대조 대상을 안 바꿔서 첫 시동이
+        #   "12 개 축이 전부 다르다"며 멈췄다. 이 장치의 목적은 어디까지나
+        #   **"시작값을 옮길 때 축 하나를 빠뜨리지 않았나"** 를 잡는 것이다.
+        bad = [(a[0], c, h) for a, c, h in zip(axes, cur, X0) if abs(c - h) > 1e-6 * max(1, abs(h))]
         if bad:
-            print("\n  ★★ 경고: 시작값이 현행 스택(H3)과 다르다 — 의도한 것인지 확인하라", flush=True)
+            print("\n  ★★ 경고: 시작값이 출발점(X0)과 다르다 — 의도한 것인지 확인하라", flush=True)
             for nm, c, h in bad:
-                print(f"      {nm:16s} 시작 {c:g}  vs  현행 {h:g}", flush=True)
+                print(f"      {nm:16s} 시작 {c:g}  vs  출발점 {h:g}", flush=True)
             if os.environ.get("FS_ALLOW_X0_DRIFT") != "1":
                 raise SystemExit("  중단. 일부러 다른 곳에서 출발하려면 FS_ALLOW_X0_DRIFT=1 로 켤 것.")
         else:
