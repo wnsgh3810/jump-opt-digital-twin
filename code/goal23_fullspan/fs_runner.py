@@ -1437,6 +1437,18 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         if _eta < 1.0:
             s1 = s1 * (_eta if s1 * v1c > 0 else 1.0)
             s2 = s2 * (_eta if s2 * v2c > 0 else 1.0)
+        # ★★ 08-12 저녁 발각: **변속기 손실이 이 경로에만 빠져 있었다.**
+        #   무릎을 돌리는 4절 링크는 자세에 따라 힘과 속도의 교환비가 변하고, 교환비가
+        #   불리한 자세일수록 링크에서 더 많이 샌다. 그 손실은 폐루프 함수에는 들어 있는데
+        #   (rollout_cl_fs, 마라톤C #266) 측정 토크 주입 재생에는 **없었다.**
+        #   같은 물리가 한쪽 판에만 있으면 그 판만 조용히 틀린다 — 실제로 변속기 실험의
+        #   무릎 각속도 오차가 다른 세션의 5~10배였다. 폐루프 코드를 그대로 옮긴다.
+        _cd = ft.get("cvt_diss")
+        if _cd is not None:
+            _cc, _qg, _rg = _cd
+            _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
+            _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
+            tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
         _hsupp = 0.0 if _nosupp else RU.hip_supp_scalar(s1, s2, v1c)
         if _esc is not None and "hsupp1" in _esc:
             _esc["hsupp1"], _hsupp = _escrow_gate(_esc["hsupp1"], _hsupp, v1c, dt)

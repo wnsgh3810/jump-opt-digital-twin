@@ -128,9 +128,13 @@ def rmse_line(d, m, sims):
     return " / ".join(out)
 
 
-def cl_pair(d, seg, g, sess):
+def cl_pair(d, seg, g, sess, ft=None):
     """CL을 **ModeA와 동일 규칙**으로: 점프 창 시작에서 실측 상태 1회 앵커 → 통짜 폐루프 (P16).
-    반환 (t, 실측, OLD, 현행, 창마스크) — 실패 시 None."""
+    반환 (t, 실측, OLD, 현행, 창마스크) — 실패 시 None.
+
+    ★ 08-12: `ft` 를 주면 그 트윈으로 돌린다. 변속기 실험은 링크 길이가 곧 모델 치수라
+      trial 마다 다른 모델을 써야 하기 때문이다 (`fs_cvt.cvt_ft`). 안 주면 지금까지처럼
+      무변속 트윈을 새로 받아 쓰므로 **무변속 세션의 결과는 한 자리도 안 바뀐다.**"""
     pw = FD.plot_window(d["_fold"], d)
     if pw is None:
         return None
@@ -146,7 +150,8 @@ def cl_pair(d, seg, g, sess):
     qd = (d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m])
     alphas = alphas_for(sess, g)
     Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
-    ft = FR.fs_twin()
+    if ft is None:
+        ft = FR.fs_twin()
     sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
     # ★ 08-11 판별용 노브 (사용자 제기 "알파 문제 아냐?"): 무릎 kp 를 줄여서 넣는다.
     #   FS_KNEE_A="table" → α(kp) 표 보간 (게인 의존) · FS_KNEE_A="0.656" → 상수배 (게인 무관)

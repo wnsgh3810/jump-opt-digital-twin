@@ -23,11 +23,15 @@
   점수 = 0.40×주입재생 + 0.40×폐루프 + 0.20×점프높이, **채널별로 기준선에 나눠 정규화**
   (큰 채널이 점수를 독식하는 것을 막는다 — 08-11 에 이 함정을 한 번 밟았다).
 
-  적합 세션 = 0424·0602·0722·0723·0724·0725·0727
+  적합 세션 = 0424·**0429(변속기)**·0602·0722·0723·0724·0725·0727
   게이트 전용 = **0324(별도 보관본)·0421(위치제어)** — 목적함수에 절대 안 들어간다.
   게이트 = 위 둘의 주입재생 + 0421 폐루프. 기준선보다 2% 넘게 나빠지면 벌점.
-  ★ 변속기 세션(0429)은 **이 판에서 완전히 제외**한다 — 이 모델에 변속기 기하가 없다
-    (08-12 사고, board() 주석). 변속기 게이트는 `python fs_cvt.py cl` 로 따로 본다.
+  ★ 변속기 세션(0429): 08-12 낮에는 이 판에서 빼야 했다 (모델에 변속기 기하가 없어서).
+    저녁에 `_cvt_twin()` 으로 **trial 마다 그 trial 의 링크 길이로 모델을 다시 지어**
+    태우도록 고쳐 **적합에 되살렸다.** FS_SWEEP_CVT=0 이면 옛 판(제외)이 그대로 재현된다.
+
+CLI 보조: python _GHB_sweep.py board   → 한 후보를 이 판으로 재고 **세션별로 펼쳐** 보여준다
+          (스윕을 돌리지 않는다. 통합이 맞는지 눈으로 확인하는 용도.)
 
 ★ 안 건드리는 축: 발 미끄럼 관련(FS_PRESLIDE·FS_IMPRATIO). 이 점수에는 미끄러짐이 안 들어가
   있어서, 같이 풀면 점수는 좋아지고 미끄러짐만 조용히 망가진다. 별도 심판이 있는 축이다.
@@ -55,10 +59,13 @@ BASE_ENV = {
     "FS_CMD_LPF": "0.002,0.0025",
     "FS_IMPRATIO": "20",
 }
-# ★ 26.04.29(변속기)는 제외 — 이 판의 모델에 변속기 기하가 없다 (08-12 사고, board() 주석 참조).
+# ★ 08-12 저녁: 변속기 세션(26.04.29)을 **적합에 되살렸다.** 그날 낮에 뺀 이유는 "이 판의
+#   모델에 변속기 기하가 없다"는 것이었는데, 이제 trial 마다 그 trial 의 링크 길이로 모델을
+#   다시 지어 태운다 (`_cvt_twin`). FS_SWEEP_CVT=0 이면 옛 판(제외)을 그대로 재현한다.
+_CVT_ON = os.environ.get("FS_SWEEP_CVT", "1") != "0"
 FIT = ("26.04.24", "26.06.02", "26.07.22",
-       "26.07.23", "26.07.24", "26.07.25", "26.07.27")
-GATE_MA = ("26.03.24", "26.04.21")     # 변속기 게이트는 `python fs_cvt.py cl` 로 따로 본다
+       "26.07.23", "26.07.24", "26.07.25", "26.07.27") + (("26.04.29",) if _CVT_ON else ())
+GATE_MA = ("26.03.24", "26.04.21")
 GATE_CL = ("26.04.21",)
 CH6 = ("q1", "q2", "dq1", "dq2", "a1", "a2")
 CH4 = ("q1", "q2", "dq1", "dq2")
@@ -134,6 +141,28 @@ def env_of(mode, x):
 _C = None
 _BASE = None
 
+# ── 변속기(26.04.29) 실험을 같은 판에 태우기 ────────────────────────────────────────
+#   이 로봇의 핵심 장치가 변속기인데, 그 데이터 10회분이 채점에서 빠져 있었다.
+#   빠진 이유는 "쓸 수 없어서"가 아니라 **잘못 채점되고 있어서**였다 (위 _ensure 주석).
+#
+#   무엇이 trial 마다 다른가: 4절 링크의 입력 변 길이. 그건 **모델 치수 자체**라
+#   trial 마다 모델을 다시 지어야 한다. 짓는 건 비싸므로(XML 빌드) 길이별로 캐시한다.
+#
+#   ★ 대신 조심할 것: 스윕은 질량·마찰·탄성 같은 **물리값을 매 평가마다 바꾼다.**
+#     모델을 캐시해 두고 가만두면 **옛 물리로 채점**하게 된다 — 그게 08-12 에 잡은
+#     결함 #3 과 똑같은 사고다. 그래서 물리는 평가할 때마다 다시 심는다(`restamp`).
+_CVT_STAMPED = set()      # 이번 env 로 물리를 이미 심은 링크 길이들
+
+
+def _cvt_twin(li, ft0):
+    """이 trial 의 링크 길이로 지은 변속기 트윈 (기하는 캐시, 물리는 env 바뀔 때마다 재이식)."""
+    import fs_cvt as FC
+    key = round(float(li), 7)
+    fresh = key not in _CVT_STAMPED
+    ft = FC.cvt_ft(li, ft_base=ft0, restamp=fresh)
+    _CVT_STAMPED.add(key)
+    return ft
+
 
 def _apply(e):
     import fs_runner as FR
@@ -144,6 +173,7 @@ def _apply(e):
         os.environ.pop(k, None)
     os.environ.update(e)
     FR._S2S = None
+    _CVT_STAMPED.clear()      # 물리가 바뀌었다 → 변속기 모델에도 다시 심어야 한다
     # 모델 캐시가 무한히 자라는 것을 막는다 (축 조합마다 새 모델 = 수만 개)
     if len(FR._CACHE) > 40:
         b = FR._CACHE.get("base")
@@ -155,10 +185,12 @@ def _apply(e):
 def board():
     """반환 {세션: dict(ma=[4], cl=[6], h=오차)}"""
     import fs_data as FD, fs_compare_plot as CP, fs_runner as FR
-    ft = FR.fs_twin()
+    ft0 = FR.fs_twin()
     G = collections.defaultdict(lambda: dict(ma=[], cl=[], h=[]))
     for s, p, g, cvt, d, seg, pw in _C:
         try:
+            # 변속기 실험은 **그 trial 의 링크 길이로 지은 모델**에 태운다 (아래 _cvt 주석).
+            ft = _cvt_twin(d["l_i"], ft0) if cvt else ft0
             t = d["t"]; m = (t >= pw[0]) & (t <= pw[1])
             i0 = int(np.argmax(m)); tg = t[m] - t[i0]
             sp = CP.sess_params(s)
@@ -188,7 +220,7 @@ def board():
                         G[s]["h"].append(hh)
             if g:
                 d["_sess"] = s; d["_fold"] = p
-                r = CP.cl_pair(d, seg, g, s)
+                r = CP.cl_pair(d, seg, g, s, ft=(ft if cvt else None))
                 if r is not None:
                     _t, (mo, mf), old, fs, _m, _c, _ = r
                     v = [float(np.sqrt(np.mean((np.asarray(mf[k]) - np.asarray(fs[i])) ** 2))) *
@@ -208,6 +240,7 @@ def _ensure():
     if _C is not None:
         return
     import fs_data as FD
+    os.environ["FS_CVT_XML"] = "0"     # 작업자 16개가 같은 파일에 동시에 쓰는 것을 막는다 (사본은 눈요기용)
     C = []
     for s, p, g, cvt, ho in FD.registry():
         # ★★ 08-12 사고: 변속기 trial(26.04.29)을 **무변속 모델로 채점**하고 있었다.
@@ -215,9 +248,11 @@ def _ensure():
         #   기본 트윈에는 그 기하도, 폐쇄 초기화(cvt_init)도, 전달비 소산도 없다.
         #   증상: 무릎각 오차 26.8° (다른 세션 1.1° 의 24배) · 측정토크를 넣어도 크랭크가
         #   실측 160° 중 52° 만 돌았다. 정본 경로(`python fs_cvt.py cl`)로는 0.97° 로 정상.
-        #   ⇒ 여기서는 **변속기 trial 을 제외**하고, 변속기 게이트는 정본 경로로 따로 본다.
-        #   (다른 채점 스크립트 `_GH3_eval` 등은 원래부터 `if cvt: continue` 로 빼고 있었다.)
-        if cvt:
+        #   ⇒ 그날은 **변속기 trial 을 통째로 제외**했다 (임시 조치).
+        #   ★ 마무리 (08-12 저녁): 이제 `_cvt_twin()` 이 trial 마다 **그 trial 의 링크 길이로
+        #     모델을 다시 지어** 주므로 **같은 판에서 채점한다.** 제외는 필요 없다.
+        #     FS_SWEEP_CVT=0 을 주면 옛 판(제외)을 그대로 재현한다 — 회귀 확인용.
+        if cvt and not _CVT_ON:
             continue
         try:
             d = FD.load2(p); seg = FD.segment(d); pw = FD.plot_window(p, d)
@@ -279,6 +314,70 @@ def evaluate(args):
 
 def obj(x, mode):
     return evaluate((mode, x))[0]
+
+
+# ── 통합 검증용 (스윕 아님) ──────────────────────────────────────────────────────────
+#   현행 스택 H3_260812 의 11개 값. 출처 = `_GHB_sweep.json` res.canon_cap.x
+#   (CURRENT_STACK.md 의 env 레시피와 같은 값이다 — 소수점만 더 길다.)
+H3 = [0.28800339596995117, 0.3026161419148566, 0.1616619445285898, 0.09635590731142543,
+      3.298807791477981, -0.0018907558052759432, 138.53436966212217,
+      0.0031654856062456323, 0.002924527588168392, 3.7328096049217248, 2.30925507208273]
+
+
+def show(x=None, mode="canon_cap"):
+    """후보 하나를 이 판으로 재고 **세션별로 펼쳐** 보여준다.
+
+    왜 필요한가: 종합 점수 하나만 보면 "변속기가 제대로 태워졌는지"를 못 본다.
+    08-12 사고 때 변속기 무릎각 오차가 26.8° 였는데도 종합 점수는 멀쩡해 보였다.
+    그래서 **채널 원값(도·rad/s)** 을 세션별로 찍는다.
+    """
+    import fs_data as FD
+    _ensure()
+    x = H3 if x is None else x
+    print(f"■ 판에 오른 trial {len(_C)} 개 "
+          f"(변속기 {sum(1 for c in _C if c[3])} 개 · 무변속 {sum(1 for c in _C if not c[3])} 개)")
+    print(f"  변속기 포함 여부: {'포함' if _CVT_ON else '제외 (FS_SWEEP_CVT=0)'}\n")
+    v, det = evaluate((mode, x))
+    _apply(env_of(mode, np.asarray(x, float)))
+    B = board()
+    # 오차의 절대 크기만 보면 판정이 안 된다 — 변속기는 크랭크가 더 빨리 돌아 신호 자체가 크다.
+    # 그래서 **그 세션 실측 신호의 크기(RMS)** 로 나눈 몫도 같이 찍는다 (작을수록 정확).
+    MAG = collections.defaultdict(lambda: collections.defaultdict(list))
+    for s, p, g, cvt, d, seg, pw in _C:
+        t = d["t"]; m = (t >= pw[0]) & (t <= pw[1])
+        for k in CH4:
+            w = np.asarray(d[k])[m]
+            w = np.degrees(w) if k in ("q1", "q2") else w
+            MAG[s][k].append(float(np.sqrt(np.mean(w ** 2))))
+    print(f"{'세션':11s} {'구분':8s} {'n':>3s} | "
+          f"{'힙각°':>13s} {'무릎각°':>14s} {'힙속도':>13s} {'무릎속도':>14s} | "
+          f"{'주입비':>7s} {'폐루프비':>8s} {'높이cm':>7s}")
+    print("-" * 128)
+    for s in sorted(B):
+        n = sum(1 for c in _C if c[0] == s)
+        kind = FD.kind_of(s) if hasattr(FD, "kind_of") else ""
+        kind = {"fit": "적합", "gate": "게이트", "heldout": "보관"}.get(kind, kind)
+        if any(c[3] for c in _C if c[0] == s):
+            kind += "·변속"
+        ma = B[s].get("ma"); rm = ratio(B, "ma", (s,)); rc = ratio(B, "cl", (s,))
+        h = B[s].get("h")
+        cols = []
+        for k, q in zip(CH4, ma or [None] * 4):
+            if q is None:
+                cols.append(" " * 13); continue
+            mg = float(np.mean(MAG[s][k]))
+            cols.append(f"{q:7.2f}({100*q/mg:4.1f}%)")
+        print(f"{s:11s} {kind:8s} {n:3d} | {' '.join(cols)} | {rm:7.4f} {rc:7.4f} "
+              f"{(h*100 if h else float('nan')):7.2f}")
+    print("-" * 128)
+    print(f"종합 {v:.5f}  (주입재생 {det['ma']:.5f} · 폐루프 {det['cl']:.5f} · "
+          f"점프높이 {det['h']:.5f} · 벌점 {det['pen']:.3f})")
+    print("  게이트: " + " · ".join(f"{k} {r:.4f}" for k, r in det["gate"].items()))
+    print("\n  · 힙각/무릎각 [도], 힙속도/무릎속도 [rad/s] = 측정 토크를 그대로 넣고 돌렸을 때의")
+    print("    오차 RMS (0 이면 완벽). 괄호 = 그 세션 실측 신호 크기 대비 몇 % 인가.")
+    print("    **변속기는 크랭크가 더 빨리 돌아 신호가 1.7배 크므로 절대값만 보면 오판한다.**")
+    print("  · 주입비/폐루프비 = 기준선(H2 배포 스택) 대비 배율. 1.0 이 기준선, 낮을수록 정확하다.")
+    print("  · 높이 = 점프 높이 예측이 영상 실측과 어긋난 크기 [cm]. 0 이면 완벽하다.")
 
 
 def compass(mode, x0, v0, lo, hi, nproc, t0, deadline_s, rounds=40):
@@ -369,6 +468,9 @@ class Tee:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "board":
+        show()
+        return
     budget_h = float(sys.argv[1]) if len(sys.argv) > 1 else 6.0
     sys.stdout = Tee(HERE / "_GHB_sweep.log")
     print(f"\n{'#'*78}\n# 시작 {time.strftime('%Y-%m-%d %H:%M:%S')}\n{'#'*78}")

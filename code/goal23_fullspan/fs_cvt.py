@@ -51,12 +51,18 @@ def build_cvt_pair(li=0.02508):
     if not captured:
         raise RuntimeError("CVT XML 캡처 실패")
     xml_c = captured[-1]
-    open(HERE / "_cvt_base.xml", "w", encoding="utf-8").write(xml_c)
+    # ★ 08-12: 이 두 파일은 **눈으로 보려고** 남기는 사본이다. 스윕은 작업자 16개가 동시에
+    #   같은 이름으로 쓰므로 서로 덮어써 내용이 섞인다 (동역학과는 무관하지만 보면 헷갈린다).
+    #   FS_CVT_XML=0 이면 안 쓴다 — 스윕이 그렇게 켠다.
+    _wx = os.environ.get("FS_CVT_XML") != "0"
+    if _wx:
+        open(HERE / "_cvt_base.xml", "w", encoding="utf-8").write(xml_c)
     # fs 패치 시도 (hip 라인 구조가 flip과 같은지 검사 후)
     model_cf = None
     try:
         model_cf, xml_cf = FM.build_fs(base_xml=xml_c)
-        open(HERE / "_cvt_fs.xml", "w", encoding="utf-8").write(xml_cf)
+        if _wx:
+            open(HERE / "_cvt_fs.xml", "w", encoding="utf-8").write(xml_cf)
     except Exception as ex:
         print(f"fs 패치 실패 (hip 라인 상이?): {type(ex).__name__} {ex}", flush=True)
     # ★ 08-12: 여기까지의 모델은 **기본 물리값**이다 (힙스프링 150 · 힙마찰 0.2383 ·
@@ -68,6 +74,59 @@ def build_cvt_pair(li=0.02508):
         if _m is not None:
             _FR.apply_stack_physics(_m, mjm)
     return model_c, model_cf, dict(nm=nm, tw=tw, v=v)
+
+
+# ── 변속기 트윈 묶기 (단일 출처) ────────────────────────────────────────────────────
+#   이 로봇은 무릎을 4절 링크로 돌리고, 그 링크 한 변의 길이(l_i)를 바꾸면 힘과 속도의
+#   교환비가 달라진다 — 자전거 기어와 같다. 그런데 **그 길이는 모델의 치수 자체**여서
+#   (2mm 다르면 부품 위치가 2mm 다르다) 길이가 다른 실험은 모델부터 다시 지어야 한다.
+#   그걸 안 하고 무변속 모델에 태운 것이 08-12 에 잡은 사고다 (무릎각 오차 26.8°).
+#
+#   여기 함수 하나로 모아 둔 이유: 예전에는 이 묶는 절차가 fs_cvt.cl() 안에만 있었고,
+#   채점판은 그 존재를 모른 채 변속기 실험을 통째로 건너뛰고 있었다. 사본이 둘이면
+#   한쪽만 고치는 사고가 또 난다.
+_MC = {}      # round(l_i, 7) → fs 패치된 변속기 모델. **기하 전용 캐시**
+_RT = {}      # round(l_i, 7) → 전달비 표 (링크 길이로만 정해진다)
+_NM = None    # 후보 파라미터 (전달비 손실 계수 C_CVT 를 여기서 꺼낸다)
+
+
+def cvt_ft(li, ft_base=None, restamp=True):
+    """이 trial 의 링크 길이 `li`[m] 로 묶인 트윈 dict 을 만들어 준다.
+
+    무엇을 묶나 (넷 다 있어야 한다 — 하나라도 빠지면 조용히 틀린다)
+      ① 모델      : 그 길이로 지은 4절 기하
+      ② 관절 주소 : 모델이 새로 지어졌으므로 관절 번호도 다시 찾는다
+      ③ 폐쇄 초기화: 4절은 고리라서 시작 자세가 고리를 닫고 있어야 한다. 안 그러면
+                     솔버가 벌어진 고리를 억지로 닫으며 힘이 폭발한다 (`cvt_init`)
+      ④ 전달비 손실: 링크를 거치며 새는 몫 (`cvt_diss`)
+
+    `restamp=True` 면 현행 스택의 **물리값**(질량·마찰·탄성·발 반경 …)을 다시 심는다.
+    기하는 링크 길이로만 정해지므로 캐시하지만, 물리는 값을 훑는 동안 계속 바뀌므로
+    평가할 때마다 다시 심어야 한다. 안 그러면 옛 물리로 채점하게 된다 (08-12 결함 #3).
+    """
+    global _NM
+    import fs_runner as FR
+    from cvt_core import qpos_from_crank
+    li = float(li); key = round(li, 7)
+    if key not in _MC:
+        _mc, _mcf, _ctx = build_cvt_pair(li)
+        if _mcf is None:
+            raise RuntimeError(f"fs 패치 CVT 모델 없음 (l_i={li})")
+        _MC[key] = _mcf
+        _RT[key] = RU.rtab(li)
+        _NM = _ctx["nm"]
+    m = _MC[key]
+    if restamp:
+        FR.apply_stack_physics(m, mjm)
+    ft = dict(ft_base if ft_base is not None else FR.fs_twin())
+    ft["model"] = m
+    ft["iq"] = {n: safe.qadr(m, n, mjm)
+                for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
+    ft["dof"] = {n: safe.dofadr(m, n, mjm) for n in ft["iq"]}
+    ft["cvt_init"] = lambda q1, q2, _l=li: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, _l)[0]
+    qg, rg = _RT[key]
+    ft["cvt_diss"] = (float(_NM["C_CVT"]), qg, rg)
+    return ft
 
 
 def golden():
@@ -261,46 +320,12 @@ def cl():
     import fs_runner as FR
     import fs_data as FD
     import fs_metric as FMET
-    from cvt_core import qpos_from_crank
-    model_c, model_cf, ctx = build_cvt_pair()      # nm/ctx 확보용 (모델은 trial 별로 다시 짓는다)
-    if model_cf is None:
-        raise RuntimeError("fs 패치 CVT 모델 없음")
-    nm = ctx["nm"]
     # ★ 08-09 정정: 구 주석은 "0.02499 = Clutch.xlsx 실측" 이었으나 **사실이 아니다**.
     #   센서 실측 범위는 25.06~25.10mm (10 trial 중앙 25.08). 24.99 는 그 밖이다.
     #   진짜 출처는 "25.08 대신 24.99 가 ModeA 전수 개선" — 점수에 맞춘 값이었다.
     #   이제 **trial 마다 그 trial 의 센서 중앙값**을 쓴다 (fs_data.cvt_li).
-    ft0 = FR.fs_twin()
-    ft = dict(ft0)
-    ft["model"] = model_cf
-    ft["iq"] = {n: safe.qadr(model_cf, n, mjm) for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
-    ft["dof"] = {n: safe.dofadr(model_cf, n, mjm) for n in ft["iq"]}
-
-    _mcache = {}
-
-    def _bind_li(li):
-        """이 trial 의 l_i 로 **모델 기하·폐쇄 초기화·전달비 표를 전부** 갱신한다.
-
-        l_i 는 4절의 입력 링크 길이라 **모델 치수 자체**다 (검증: l_i 2mm 차 → body_pos 2mm 차).
-        초기화만 바꾸고 모델을 그대로 두면 루프 구속이 t=0 에 어긋나 솔버가 스냅한다 —
-        `cvt_init` 이 애초에 그 사고를 막으려고 만든 훅이므로 반쪽만 맞추면 안 된다.
-        빌드는 캐시된다 (실측 2회차 0.00s).
-        """
-        li = float(li); key = round(li, 7)
-        if key not in _mcache:
-            _mc, _mcf, _ = build_cvt_pair(li)
-            if _mcf is None:
-                raise RuntimeError(f"fs 패치 CVT 모델 없음 (l_i={li})")
-            _mcache[key] = _mcf
-        m = _mcache[key]
-        ft["model"] = m
-        ft["iq"] = {n: safe.qadr(m, n, mjm)
-                    for n in ("base_z", "hip_m", "hip", "knee_motor", "cpin", "knee")}
-        ft["dof"] = {n: safe.dofadr(m, n, mjm) for n in ft["iq"]}
-        ft["cvt_init"] = lambda q1, q2, _l=li: qpos_from_crank(
-            1.0, -q1 - np.pi / 2, -q2, _l)[0]
-        qg, rg = RU.rtab(li)
-        ft["cvt_diss"] = (float(nm["C_CVT"]), qg, rg)
+    # ★ 08-12: 묶는 절차는 `cvt_ft()` 로 옮겼다 (채점판도 같은 것을 쓴다 — 사본 금지).
+    ft = None
     TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
     SP = FR._sess_params()
     OUT = {}
@@ -310,7 +335,7 @@ def cl():
         sp = SP.get(s, dict(bias1=0.0, knee_deep=None))
         try:
             d = FD.load2(p); seg = FD.segment(d)
-            _bind_li(d["l_i"])          # ★ trial 별 실측 l_i (fs_data.cvt_li)
+            ft = cvt_ft(d["l_i"])       # ★ trial 별 실측 l_i (fs_data.cvt_li)
             _tko = os.environ.get("FS_TKOVR"); _kds = os.environ.get("FS_KDSC")
             gm = (g[0], g[1], g[2] * (float(_tko) if _tko else TK.get(g[2], 0.656)),
                   g[3] * (float(_kds) if _kds else 0.20))
