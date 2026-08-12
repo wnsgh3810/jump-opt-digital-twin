@@ -84,17 +84,34 @@ MODES = tuple(m.strip() for m in
 #   ⚠ 2 회차는 **토크 겹침 오류를 고치기 전 데이터**로 돌았다 (탐색 15:15 시작, 코드 수정 18:47).
 #     그래서 이 값들은 "이겨야 할 상대"가 아니라 **출발점으로만** 쓴다. 이번 회차는 고친
 #     데이터로 처음부터 다시 채점하므로, 여기 적힌 점수와 직접 비교하면 안 된다.
-H3 = [0.15282936, 0.33847828, 0.15507681, 0.08251126,
-      3.2987234, 0.00648279, 135.7284577,
-      0.0023962, 0.00318871,
-      0.012, 0.0005,                       # ← 신규 2 축 (08-12 낮 탐색값)
-      3.68099698, 2.20596413]
-# 그 전 스택 H2 = **점수의 기준선**(아래 BASE_ENV 와 같은 지점). 이걸 넣으면 1.0000 근처가
-# 나와야 한다 — 판이 제대로 서 있는지 매 실행 첫머리에 확인하는 용도다.
-#   신규 2 축은 기준선에 **없던 것**이므로 0 이다 (환경변수 미설정 = 0 과 같다).
+# ★★ 08-13 4 회차: 축이 13 → **12 개**로 줄었다. "빠를 때 커지는 저항"(무릎 속도의 제곱에
+#   비례하는 손실)을 **뺐다.** 가르기 시험(`_GHC_axissplit`)에서 그 축만 0.0005 넣어도 점수가
+#   0.953 → 38.58 로 40 배 무너졌고(측정 토크 주입 판 2.67 배·점프 높이 5.67 배),
+#   3 회차 탐색도 스스로 그 축을 0 (2.6e-07) 으로 껐다. 사람과 기계가 같은 답을 냈다.
+#   레일 마찰은 반대로 **살아남았다** — 승자에서 그것만 빼면 0.9466 → 3.8733 으로 무너진다.
+#
+# 배포 스택(현행) = CURRENT_STACK.md 의 H3_260812. 레일 마찰은 여기 **없으므로 0** 이다.
+#   쓰임 ① 벌점의 기준 (검증 세션이 **이것보다** 2% 넘게 나빠지면 벌점 — 4 회차 변경점)
+#        ② 옛 자 성적 대조
+DEPLOY = [0.15282936, 0.33847828, 0.15507681, 0.08251126,
+          3.2987234, 0.00648279, 135.7284577,
+          0.0023962, 0.00318871,
+          0.0,                               # 레일 마찰 (배포 스택엔 없다)
+          3.68099698, 2.20596413]
+# 이번 판의 **출발점** = 3 회차 승자에서 죽은 축 하나를 뺀 12 개 (`_GHB_sweep3.json`).
+#   그 점은 옛 자로 0.9466 이고 재현 확인됨. 단 검증 세션은 배포 스택보다 5~6% 나쁘다 —
+#   그래서 새 벌점 기준(배포 스택) 아래서는 **출발부터 벌점을 안고 시작한다.** 의도된 것이다.
+X0 = [0.11324997, 0.27961191, 0.19666096, 0.02914296,
+      3.29969283, 0.02309691, 138.00508824,
+      0.00187135, 0.00315000,
+      0.02974061,                            # 레일 마찰 (3 회차가 상한까지 밀어 올린 값)
+      4.02106736, 2.38294435]
+# 그 전 스택 H2 = **옛 자의 1.0000**(아래 BASE_ENV 와 같은 지점). 새 자에서는 기준선으로
+#   쓰지 않지만, 옛 자 성적을 나란히 찍어 두 자를 대조하려면 여전히 필요하다.
 H2 = [0.2469, 0.2383, 0.150, 0.312, 3.28, 0.0, 150.0, 0.002, 0.0025,
-      0.0, 0.0,
+      0.0,
       3.8, 2.6]
+H3 = DEPLOY          # 옛 이름 유지 (아래 대조 코드가 쓴다)
 
 # ── 축 정의 (이름, 하한, 상한, 시작값) — 경계는 실측·설계공차에서만 온다 ─────────────
 # ★ 08-12 저녁: **시작값을 현행 스택 H3 로 갱신했다** (1회차 산물). 1회차는 그 전 스택(H2)
@@ -123,9 +140,8 @@ COMMON = [
     #   ⇒ 손으로 고정하지 않고 다른 축과 **함께** 풀게 한다. 둘 다 0 이면 지금 스택과 같아진다.
     ("레일 마찰",        0.000, 0.030, 0.012),   # 몸통이 수직 레일을 오르내릴 때 걸리는 마찰
                                                  # (발이 미는 힘에 비례). 0 이면 레일이 매끄럽다.
-    ("빠를 때 커지는 저항", 0.0000, 0.0020, 0.0005),  # 무릎 속도의 제곱에 비례하는 손실
-                                                 # [N·m/(rad/s)²]. 역기전력·감속기 효율 저하처럼
-                                                 # 빠를수록 커지는 몫. 0 이면 그런 손실이 없다.
+    # ★ 08-13: "빠를 때 커지는 저항"(무릎 속도의 제곱에 비례하는 손실)은 **여기서 뺐다.**
+    #   기각 근거는 위 X0 주석 참조 (그것만 넣어도 점수가 40 배 무너진다).
 ]
 # ★★ 08-11 무게추 왕복 데이터(`26_08_07/{0,2,4}kg/probe_sweep_v1`)로 하중비례 마찰을 **직접 쟀다.**
 #   마라톤G 는 상행·하행을 **평균내서 마찰을 지우고** 중력만 봤다. 지운 그 절반차가 곧 마찰이다.
@@ -165,7 +181,7 @@ EXTRA = {
 
 
 def _sync_x0():
-    """축 목록의 **시작값을 현행 스택의 정밀값으로 강제 일치**시킨다.
+    """축 목록의 **시작값을 이번 판 출발점(X0)의 정밀값으로 강제 일치**시킨다.
 
     ☠ 왜 필요한가 (08-12 사고, 6 시간을 날릴 뻔했다)
       위 표에 적힌 시작값은 **사람이 읽으려고 반올림한 숫자**다(0.2880). 실제 현행 값은
@@ -173,13 +189,13 @@ def _sync_x0():
       나뉘어 있어서**, 손으로 갱신하다 뒤쪽 2 개를 빠뜨렸다. 힙 보정상한이 현행 2.309 가
       아니라 그 전 스택 값 2.6 (12.6% 어긋남)으로 출발했고, 로그를 보고서야 발견했다.
       ⇒ 손으로 옮겨 적는 일 자체를 없앤다. 표의 숫자는 **눈으로 보기 위한 것**일 뿐이고,
-        실제 출발점은 언제나 위 H3 하나에서 온다 (단일 출처).
+        실제 출발점은 언제나 위 X0 하나에서 온다 (단일 출처).
     """
     n = len(COMMON)
     for i in range(n):
-        COMMON[i] = COMMON[i][:3] + (H3[i],)
+        COMMON[i] = COMMON[i][:3] + (X0[i],)
     for i in range(len(EXTRA["canon_cap"])):
-        EXTRA["canon_cap"][i] = EXTRA["canon_cap"][i][:3] + (H3[n + i],)
+        EXTRA["canon_cap"][i] = EXTRA["canon_cap"][i][:3] + (X0[n + i],)
 
 
 _sync_x0()
@@ -196,12 +212,11 @@ def env_of(mode, x):
     e["FS_COMZ"] = f"thigh={x[5]:.5f}"
     e["FS_KS_HIP"] = f"{x[6]:.2f}"
     e["FS_CMD_LPF"] = f"{x[7]:.5f},{x[8]:.5f}"
-    # ★ 08-12 밤 신규 2 축. 0 이면 환경변수를 아예 안 넣어 **기준선과 완전히 같은 지점**이 된다
-    #   (문자열 "0.00000" 을 넣어도 같지만, 안 넣는 쪽이 옛 판 재현을 문자 그대로 보장한다).
+    # 레일 마찰. 0 이면 환경변수를 아예 안 넣어 **배포 스택과 완전히 같은 지점**이 된다.
+    #   (08-13 픽스: 안 넣는 경우를 위해 _apply 가 이 변수를 먼저 지운다 — 안 지우면 직전
+    #    평가의 값이 살아남아 다음 평가를 오염시킨다. 실제로 그 사고가 있었다.)
     if x[9] > 0:
         e["FS_RAIL"] = f"{x[9]:.5f}"        # 몸통이 레일을 오르내릴 때의 마찰
-    if x[10] > 0:
-        e["FS_W2"] = f"{x[10]:.6f}"         # 무릎 속도의 제곱에 비례하는 손실
     e["FS_TMAP"] = mode
     n = len(COMMON)                          # ← 축을 늘려도 아래 인덱스가 저절로 따라온다
     if mode == "canon_cap":
@@ -216,7 +231,8 @@ def env_of(mode, x):
 
 # ── 작업자별 1회 준비 (엑셀 읽기 ~80초 + 기준선) ───────────────────────────────────
 _C = None
-_BASE = None
+_BASE = None      # 두 세대 전 모델의 성적 — **옛 자**의 1.0000
+_CUR = None       # 배포 스택(현행)의 성적 — **벌점의 기준** (08-13 변경점)
 
 # ── 변속기(26.04.29) 실험을 같은 판에 태우기 ────────────────────────────────────────
 #   이 로봇의 핵심 장치가 변속기인데, 그 데이터 10회분이 채점에서 빠져 있었다.
@@ -268,11 +284,42 @@ def _apply(e):
             FR._CACHE["base"] = b
 
 
+def _r80(t, meas, sim):
+    """★ 08-13 신설 — **새 자**. 창 앞 80% 구간에서 잰 오차를 **그 신호의 표준편차로 나눈다.**
+
+    왜 이 자인가 (VERDICT_260812 §6-1): 사용자가 그림 139 장을 보고 남긴 육안 판정을
+    분모 4 종 × 구간 12 종 = 48 개 자로 재현해 봤더니 이 조합이 0.945 로 가장 잘 맞았다
+    (1.00 이 완벽 재현, 0.50 이 동전 던지기). 그리고 오차의 40~61% 가 밀어내기 마지막
+    20% 에 몰려 있어서, 그 구간을 빼야 사용자가 "겹친다"고 본 것과 숫자가 맞는다.
+
+    돌려주는 값의 뜻: **0 이 완벽**이고, 0.24 면 "그 신호가 움직인 폭의 24% 만큼 틀렸다"
+    는 뜻이다. 합격선은 힙 토크 0.24 · 무릎 토크 0.08 이하 = "아주 완벽",
+    힙 0.53 · 무릎 0.43 이상 = "못 쓴다".
+    """
+    t = np.asarray(t, float)
+    if t.size < 5:
+        return np.nan
+    k = t <= t[0] + 0.8 * (t[-1] - t[0])
+    if k.sum() < 5:
+        return np.nan
+    a = np.asarray(meas, float)[k]
+    b = np.asarray(sim, float)[k]
+    sd = float(np.std(a))
+    if not np.isfinite(sd) or sd <= 1e-12:
+        return np.nan
+    e = float(np.sqrt(np.mean((a - b) ** 2)))
+    return e / sd if np.isfinite(e) else np.nan
+
+
 def board():
-    """반환 {세션: dict(ma=[4], cl=[6], h=오차)}"""
+    """반환 {세션: dict(ma=[4], cl=[6], h=오차, ma8=[4], cl8=[6], hr=상대오차)}
+
+    ma/cl/h  = **옛 자** (창 전체 RMS · 점프 높이는 미터 단위 절대 오차) — 대조용으로 남긴다
+    ma8/cl8/hr = **새 자** (창 앞 80% 오차 ÷ 그 신호 표준편차 · 높이는 실측 대비 비율)
+    """
     import fs_data as FD, fs_compare_plot as CP, fs_runner as FR
     ft0 = FR.fs_twin()
-    G = collections.defaultdict(lambda: dict(ma=[], cl=[], h=[]))
+    G = collections.defaultdict(lambda: dict(ma=[], cl=[], h=[], ma8=[], cl8=[], hr=[]))
     for s, p, g, cvt, d, seg, pw in _C:
         try:
             # 변속기 실험은 **그 trial 의 링크 길이로 지은 모델**에 태운다 (아래 _cvt 주석).
@@ -292,6 +339,10 @@ def board():
                      (180 / np.pi if k in ("q1", "q2") else 1) for k, w in zip(CH4, sim)]
                 if all(np.isfinite(v)) and max(v) < 1e4:
                     G[s]["ma"].append(v)
+                # 새 자 — 같은 재생 결과를 창 앞 80% 만 잘라 표준편차로 나눈다
+                v8 = [_r80(tg, d[k][m], w) for k, w in zip(CH4, sim)]
+                if all(np.isfinite(v8)) and max(v8) < 1e3:
+                    G[s]["ma8"].append(v8)
                 t_ext = min(t[m][-1] + 0.6, t[-1])
                 m2 = (t >= t[i0]) & (t <= t_ext); tg2 = t[m2] - t[i0]
                 H = FR.rollout_ol_fs_b(ft, tg2, d["raw1"][m2], d["raw2"][m2],
@@ -304,6 +355,9 @@ def board():
                     hh = abs(float(np.asarray(H["bz"]).max()) - float(hv))
                     if np.isfinite(hh):
                         G[s]["h"].append(hh)
+                        # 새 자 — 실측 높이로 나눈 **비율**. 0 이 완벽이고 0.05 면 5% 빗나감.
+                        if abs(float(hv)) > 1e-6:
+                            G[s]["hr"].append(hh / abs(float(hv)))
             if g:
                 d["_sess"] = s; d["_fold"] = p
                 r = CP.cl_pair(d, seg, g, s, ft=(ft if cvt else None))
@@ -313,16 +367,23 @@ def board():
                          (180 / np.pi if k in ("q1", "q2") else 1) for i, k in enumerate(CH6)]
                     if all(np.isfinite(v)) and max(v) < 1e4:
                         G[s]["cl"].append(v)
+                    # 새 자 — 같은 결과를 창 앞 80% 만 잘라 표준편차로 나눈다
+                    v8 = [_r80(_t, mf[k], fs[i]) for i, k in enumerate(CH6)]
+                    if all(np.isfinite(v8)) and max(v8) < 1e3:
+                        G[s]["cl8"].append(v8)
         except Exception:
             continue
     return {s: dict(ma=np.mean(v["ma"], axis=0).tolist() if v["ma"] else None,
                     cl=np.mean(v["cl"], axis=0).tolist() if v["cl"] else None,
-                    h=float(np.mean(v["h"])) if v["h"] else None)
+                    h=float(np.mean(v["h"])) if v["h"] else None,
+                    ma8=np.mean(v["ma8"], axis=0).tolist() if v["ma8"] else None,
+                    cl8=np.mean(v["cl8"], axis=0).tolist() if v["cl8"] else None,
+                    hr=float(np.mean(v["hr"])) if v["hr"] else None)
             for s, v in G.items() if v["ma"] or v["cl"]}
 
 
 def _ensure():
-    global _C, _BASE
+    global _C, _BASE, _CUR
     if _C is not None:
         return
     import fs_data as FD
@@ -363,6 +424,13 @@ def _ensure():
           flush=True)
     _apply(dict(BASE_ENV))
     _BASE = board()
+    # ★★ 08-13 변경점 — **벌점의 기준을 배포 스택으로 바꾼다.**
+    #   3 회차까지는 두 세대 전 모델이 기준이었다. 그래서 검증 세션이 **배포 스택보다**
+    #   5~6% 나빠져도 두 세대 전보다는 나으면 벌점이 0 이었다. 3 회차 승자가 정확히 그
+    #   사례다 (26.04.21 주입 0.9613 → 1.0092 · 폐루프 0.8733 → 0.9294 인데 벌점 0).
+    #   ⇒ 기준을 "지금 실제로 쓰는 모델" 로 옮긴다. 이제 배포 스택보다 2% 넘게 나빠지면 붙는다.
+    _apply(env_of("canon_cap", np.asarray(DEPLOY, float)))
+    _CUR = board()
 
 
 def ratio(B, key, sess):
@@ -376,8 +444,65 @@ def ratio(B, key, sess):
     return float(np.mean(v)) if v else np.nan
 
 
+def absm(B, key, sess, cols):
+    """**새 자**로 잰 성적을 세션·채널에 걸쳐 평균낸다. **0 이 완벽**이고 값이 클수록 부정확.
+
+    한 채널의 값 = (창 앞 80% 오차) ÷ (그 신호가 그 구간에서 움직인 폭의 표준편차).
+    예: 0.24 = "그 신호가 흔들린 폭의 24% 만큼 빗나갔다".
+    """
+    v = []
+    for s in sess:
+        a = (B.get(s) or {}).get(key)
+        if not a:
+            continue
+        w = [a[i] for i in cols if i < len(a) and np.isfinite(a[i])]
+        if w:
+            v.append(float(np.mean(w)))
+    return float(np.mean(v)) if v else np.nan
+
+
+def absh(B, sess):
+    """점프 높이 예측의 **상대 오차**. 0 이 완벽, 0.05 면 실측 높이의 5% 만큼 빗나감."""
+    v = [(B[s] or {}).get("hr") for s in sess if (B.get(s) or {}).get("hr") is not None]
+    v = [x for x in v if np.isfinite(x)]
+    return float(np.mean(v)) if v else np.nan
+
+
+def rel_cur(B, key, sess):
+    """**배포 스택(현행) 대비** 비율. 1.000 이 같음이고 1.02 를 넘으면 벌점이 붙는다."""
+    v = []
+    for s in sess:
+        a = (B.get(s) or {}).get(key)
+        b = (_CUR.get(s) or {}).get(key) if _CUR else None
+        if not a or not b:
+            continue
+        w = [p / q for p, q in zip(a, b)
+             if np.isfinite(p) and np.isfinite(q) and q > 1e-9]
+        if w:
+            v.append(float(np.mean(w)))
+    return float(np.mean(v)) if v else np.nan
+
+
+# ── 점수의 무게 (사용자 확정 08-13) ────────────────────────────────────────────────
+#   왜 바꿨나: 사용자 육안 판정에서 불만 22 건 중 **토크가 14 건(64%)** 인데, 옛 점수에서
+#   토크는 폐루프 6 채널 중 2 개 × 0.40 = **13%** 뿐이었다. 눈과 점수가 어긋나 있었다.
+W_MA   = 0.35   # 측정 토크를 그대로 넣고 돌린 판 — 각도·속도 4 채널
+W_CLQ  = 0.20   # PD 제어를 흉내 낸 판 — 각도·속도 4 채널
+W_CLT  = 0.35   # PD 제어를 흉내 낸 판 — **토크 2 채널** (옛 판에서는 0.13)
+W_H    = 0.10   # 점프 높이
+
+
 def evaluate(args):
-    """반환 (벌점 포함 점수, 세부). 실패·발산은 큰 값."""
+    """반환 (벌점 포함 점수, 세부). 실패·발산은 큰 값.
+
+    ★ 08-13 4 회차부터 **자가 바뀌었다.**
+      옛 자: 내 오차 ÷ 두 세대 전 모델의 오차 (창 전체). 1.0000 이 그 모델과 같음.
+      새 자: 창 앞 80% 오차 ÷ 그 신호의 표준편차 **그 자체**. **0 이 완벽**이고
+             합격선(힙 토크 0.24 · 무릎 토크 0.08)과 직접 견줄 수 있다.
+      ※ 옛 자 성적(Jold)도 같이 담아 둔다 — 두 자가 어긋나는지 봐야 하기 때문이다.
+      ※ 주의: 옛 구조 그대로 표준편차만 넣으면 위아래가 약분돼 **점수가 한 자리도 안 바뀐다.**
+        그래서 기준 모델 나누기를 버리는 것이 이 변경의 본체다.
+    """
     mode, x = args
     try:
         _ensure()
@@ -385,25 +510,34 @@ def evaluate(args):
         B = board()
         if not B:
             return 9e2, None
-        ma = ratio(B, "ma", FIT); cl = ratio(B, "cl", FIT)
-        hs = [B[s]["h"] / _BASE[s]["h"] for s in FIT
-              if s in B and B[s].get("h") and _BASE.get(s, {}).get("h")]
-        h = float(np.mean(hs)) if hs else np.nan
-        if not (np.isfinite(ma) and np.isfinite(cl)):
+        ma8 = absm(B, "ma8", FIT, (0, 1, 2, 3))     # 주입 재생 각도·속도
+        clq = absm(B, "cl8", FIT, (0, 1, 2, 3))     # PD 흉내 각도·속도
+        clt = absm(B, "cl8", FIT, (4, 5))           # PD 흉내 토크
+        hr = absh(B, FIT)
+        if not (np.isfinite(ma8) and np.isfinite(clq) and np.isfinite(clt)):
             return 9e2, None
-        if not np.isfinite(h):
-            h = 3.0
-        J = 0.40 * ma + 0.40 * cl + 0.20 * h
+        if not np.isfinite(hr):
+            hr = 1.0
+        J = W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
+        # 벌점 — 적합에 안 쓰는 세션이 **배포 스택보다** 2% 넘게 나빠지면 붙는다 (08-13 변경점)
         pen = 0.0; gl = {}
         for s in GATE_MA:
-            r = ratio(B, "ma", (s,)); gl[f"{s}MA"] = r
+            r = rel_cur(B, "ma8", (s,)); gl[f"{s}MA"] = r
             if np.isfinite(r):
                 pen += 10.0 * max(0.0, r - 1.02)
         for s in GATE_CL:
-            r = ratio(B, "cl", (s,)); gl[f"{s}CL"] = r
+            r = rel_cur(B, "cl8", (s,)); gl[f"{s}CL"] = r
             if np.isfinite(r):
                 pen += 10.0 * max(0.0, r - 1.02)
-        return J + pen, dict(J=J, ma=ma, cl=cl, h=h, pen=pen, gate=gl)
+        # 옛 자 성적 (대조 전용 — 점수에는 안 들어간다)
+        oma = ratio(B, "ma", FIT); ocl = ratio(B, "cl", FIT)
+        ohs = [B[s]["h"] / _BASE[s]["h"] for s in FIT
+               if s in B and B[s].get("h") and _BASE.get(s, {}).get("h")]
+        oh = float(np.mean(ohs)) if ohs else np.nan
+        Jold = (0.40 * oma + 0.40 * ocl + 0.20 * oh
+                if all(np.isfinite(q) for q in (oma, ocl, oh)) else np.nan)
+        return J + pen, dict(J=J, ma=ma8, clq=clq, clt=clt, h=hr, pen=pen, gate=gl,
+                             Jold=Jold, old_ma=oma, old_cl=ocl, old_h=oh)
     except Exception:
         return 9e2, None
 
@@ -524,7 +658,7 @@ def run_mode(mode, budget_s, nproc):
             if os.environ.get("FS_ALLOW_X0_DRIFT") != "1":
                 raise SystemExit("  중단. 일부러 다른 곳에서 출발하려면 FS_ALLOW_X0_DRIFT=1 로 켤 것.")
         else:
-            print("  시작값 대조: 11 개 축 모두 현행 스택과 일치 ✔", flush=True)
+            print(f"  시작값 대조: {len(axes)} 개 축 모두 출발점(3 회차 승자)과 일치 ✔", flush=True)
     print(f"\n{'='*78}\n■ {mode} — 축 {len(axes)} 개", flush=True)
     for a in axes:
         print(f"    {a[0]:16s} {a[1]:>8.4g} ~ {a[2]:<8.4g}  (현행 {a[3]:g})", flush=True)
@@ -537,7 +671,8 @@ def run_mode(mode, budget_s, nproc):
         hist.append((float(v), list(map(float, xk))))
         el = time.time() - t0
         print(f"    [{el/60:6.1f}분] 최고 {v:.4f}  "
-              f"(주입 {det['ma']:.4f} 폐루프 {det['cl']:.4f} 높이 {det['h']:.4f} 벌점 {det['pen']:.3f})"
+              f"(주입 {det['ma']:.4f} 폐루프각 {det['clq']:.4f} 폐루프토크 {det['clt']:.4f} "
+              f"높이 {det['h']:.4f} 벌점 {det['pen']:.3f} · 옛자 {det['Jold']:.4f})"
               if det else f"    [{el/60:6.1f}분] {v:.1f}", flush=True)
         with io.open(LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(dict(mode=mode, t=el, v=float(v),
@@ -588,36 +723,69 @@ def main():
       관절 마찰이 아니라 다른 곳의 손실을 대신 떠맡고 있다는 뜻이고, 그걸 진짜
       물리로 바꾸려면 여러 값을 같이 움직여야 한다. 한 축씩으로는 못 넘는다.
 
-  ★ 2 회차 (08-12 저녁) — 1 회차와 무엇이 다른가
-      ① **변속기 실험 10 회분이 판에 들어왔다.** 1 회차 때는 채점 코드가 그걸 잘못
-         태우고 있어서(무변속 모델에 태움 + 링크 손실 누락) 빼고 돌렸다. 이제
-         trial 마다 그 trial 의 링크 길이로 모델을 다시 지어 태운다. 적합 8 세션.
-      ② **출발점을 현행 스택(1 회차 승자)으로 옮겼다.** 이미 3.5% 더 정확한 자리다.
-      ③ **하중에 비례하는 마찰 구조는 안 돌린다.** 1 회차에서 크게 지고 기각됐다.
-         그 시간을 지금 구조에 얹어 더 촘촘히 훑는다 (6 시간 전부).
+  ★★ 4 회차 (08-13) — 3 회차와 무엇이 다른가 (세 가지 다 사용자 확정)
 
-  점수: 0.40×주입재생 + 0.40×폐루프 + 0.20×점프높이. **그 전 스택(H2)이 1.0000** 이고
-        낮을수록 좋다. 별도 보관본(0324)과 위치제어(0421)는 목적함수에서 빠지고
-        게이트로만 쓴다. 게이트가 2% 넘게 나빠지면 벌점.
-        이번에 이겨야 할 상대는 1.0000 이 아니라 **현행 스택 점수**다 (첫머리에 찍는다).
+   ① **점수를 재는 자를 사용자 육안 판정에 맞췄다.**
+      옛 자: 내 오차 ÷ 두 세대 전 모델의 오차 (창 전체). 1.0000 이 그 모델과 같음.
+      새 자: **창 앞 80% 오차 ÷ 그 신호가 그 구간에서 움직인 폭(표준편차).**
+             **0 이 완벽**이고, 사용자가 "아주 완벽" 이라 한 수준이 힙 토크 0.24 ·
+             무릎 토크 0.08 이다. 이제 점수를 보면 합격선의 어디쯤인지 바로 읽힌다.
+      고른 근거: 그림 139 장의 육안 판정을 분모 4 종 × 구간 12 종 = 48 개 자로
+             재현해 보니 이 조합이 0.945 로 최고였다 (1.00 완벽 재현 · 0.50 동전 던지기).
+      ※ 함정 하나를 미리 밝힌다 — 옛 구조(기준 모델로 나누기)를 그대로 두고 표준편차만
+        넣으면 위아래가 **약분돼 점수가 한 자리도 안 바뀐다.** 그래서 기준 모델 나누기를
+        버리는 것이 이 변경의 본체다.
+
+   ② **토크를 무겁게 본다: 13% → 35%.**
+      사용자 불만 22 건 중 **토크가 14 건(64%)** 인데 옛 점수에서 토크는 폐루프 6 채널
+      중 2 개 × 0.40 = 13% 뿐이었다. 눈과 점수가 어긋나 있었다.
+        측정 토크 주입 재생(각도·속도 4 채널)  0.35
+        PD 흉내 각도·속도 4 채널              0.20
+        PD 흉내 **토크 2 채널**               0.35   ← 옛 판 0.13
+        점프 높이                             0.10
+
+   ③ **벌점의 기준을 배포 스택으로 옮겼다.**
+      3 회차까지는 **두 세대 전 모델**이 기준이라, 검증 세션이 배포 스택보다 5~6%
+      나빠져도 벌점이 0 이었다. 3 회차 승자가 정확히 그 사례다. 이제 **지금 실제로 쓰는
+      모델보다** 2% 넘게 나빠지면 붙는다.
+
+   ④ 축이 13 → **12 개**. "빠를 때 커지는 저항"(무릎 속도의 제곱에 비례하는 손실)을 뺐다.
+      그것만 0.0005 넣어도 점수가 40 배 무너졌고, 3 회차 탐색도 스스로 0 으로 껐다.
+      레일 마찰은 반대로 살아남았다 — 승자에서 그것만 빼면 0.9466 → 3.8733 이 된다.
+
+  적합에 쓰는 세션은 8 개(변속기 포함)다. 별도 보관본(26.03.24)과 위치제어(26.04.21)는
+  점수에서 빠지고 **검증 전용**으로만 쓴다.
 
   안 건드림: 발 미끄럼 관련 두 값. 이 점수에 미끄러짐이 안 들어가 있어서 같이
              풀면 점수만 좋아지고 미끄러짐이 조용히 망가진다.
 
-  창을 닫지 마세요. 중간에 꺼도 진행 기록(_GHB_sweep2_trials.jsonl)은 남습니다.
-  1 회차 산출물(_GHB_sweep.json/.log/_trials.jsonl)은 **건드리지 않습니다.**
+  창을 닫지 마세요. 중간에 꺼도 진행 기록은 남습니다.
+  1·2·3 회차 산출물은 **건드리지 않습니다.**
 """, flush=True)
     nproc = max(1, min(16, (os.cpu_count() or 4) - 4))
     print(f"■ 마라톤H 공동 재적합 — 시간예산 {budget_h}시간 · 작업자 {nproc} 개", flush=True)
     print("  준비 중 (엑셀 읽기 + 기준선) …", flush=True)
     _ensure()
-    print(f"  trial {len(_C)} 개 · 기준선 세션 {len(_BASE)} 개", flush=True)
-    # 0.9998 근처가 나온다 — 정확히 1.0000 이 아닌 이유는 위 H2 목록이 **반올림된 값**이라서다
-    # (예: 힙 건마찰 코드 기본값 0.238254 vs 목록 0.2383). 1 회차도 0.99949 였다. 정상 범위.
+    print(f"  trial {len(_C)} 개 · 세션 {len(_BASE)} 개", flush=True)
+    # 옛 자로 재면 0.9998 근처가 나온다 (H2 목록이 반올림된 값이라 정확히 1.0000 은 아니다).
     b0, d0 = evaluate(("canon_cap", H2))
-    print(f"  기준선 재확인 (그 전 스택 H2): 점수 {b0:.4f} — 1.0000 근처여야 정상", flush=True)
-    b1, d1 = evaluate(("canon_cap", H3))
-    print(f"  현행 스택 재확인 (H3): 점수 {b1:.5f} — 이 값을 이겨야 승격 후보다\n", flush=True)
+    print(f"  두 세대 전 모델: 새 자 {b0:.4f} · 옛 자 {(d0 or {}).get('Jold', float('nan')):.4f}"
+          f"  (옛 자가 1.0000 근처여야 판이 정상)", flush=True)
+    b1, d1 = evaluate(("canon_cap", DEPLOY))
+    _d1 = d1 or {}
+    print(f"  ★ 배포 스택(현행) = **이겨야 할 상대**: 새 자 {b1:.5f} · 옛 자 "
+          f"{_d1.get('Jold', float('nan')):.4f}", flush=True)
+    print(f"      뜯어보면 — 주입 {_d1.get('ma', float('nan')):.4f} · "
+          f"폐루프각 {_d1.get('clq', float('nan')):.4f} · "
+          f"폐루프토크 {_d1.get('clt', float('nan')):.4f} · "
+          f"높이 {_d1.get('h', float('nan')):.4f} · 벌점 {_d1.get('pen', 0):.3f}", flush=True)
+    print(f"      (배포 스택이 벌점 기준이므로 여기 벌점은 반드시 0.000 이어야 한다)", flush=True)
+    b2, d2 = evaluate(("canon_cap", X0))
+    _d2 = d2 or {}
+    print(f"  출발점(3 회차 승자): 새 자 {b2:.5f} · 옛 자 {_d2.get('Jold', float('nan')):.4f}"
+          f" · 벌점 {_d2.get('pen', 0):.3f}", flush=True)
+    print(f"      (여기 벌점이 0 이 아니면 정상이다 — 3 회차 승자는 검증 세션이 배포 스택보다"
+          f" 5~6% 나빴고, 그걸 잡으려고 기준을 옮긴 것이다)\n", flush=True)
     R = {}
     # ★ 08-12 저녁: **하중비례 마찰 구조(canon_fric)는 안 돌린다.** 1회차에서 종합 1.3617 로
     #   크게 지고 기각됐고(REJECTED #82), 무릎에만 적용한 재심도 15조합 전부 탈락했다(#83).
@@ -626,17 +794,27 @@ def main():
         R[mode] = run_mode(mode, budget_h * 3600 / len(MODES), nproc)
         import safe
         safe.atomic_json_write(OUT, dict(base_check=b0, res=R))
-    print(f"\n{'='*78}\n■ 맞대결 (전부 낮을수록 정확 · 기준선 = 그 전 스택 H2)")
-    print(f"{'구조':14s} {'점수':>8s} {'주입재생':>9s} {'폐루프':>8s} {'점프높이':>9s} {'벌점':>7s}")
-    print(f"{'기준선 H2':14s} {1.0:8.4f} {1.0:9.4f} {1.0:8.4f} {1.0:9.4f} {0.0:7.3f}")
-    _dh = d1 or {}
-    print(f"{'현행 H3':14s} {b1:8.5f} {_dh.get('ma',float('nan')):9.4f} "
-          f"{_dh.get('cl',float('nan')):8.4f} {_dh.get('h',float('nan')):9.4f} {_dh.get('pen',0):7.3f}"
-          f"   ← 이걸 이겨야 한다")
+    print(f"\n{'='*78}\n■ 맞대결 — **새 자** (전부 0 이 완벽, 낮을수록 정확)")
+    print("   각 칸 = 창 앞 80% 오차 ÷ 그 신호가 그 구간에서 움직인 폭. 0.24 면 24% 빗나감.")
+    print("   합격선: 힙 토크 0.24 · 무릎 토크 0.08 이하 = '아주 완벽' /"
+          " 힙 0.53 · 무릎 0.43 이상 = '못 쓴다'")
+    hdr = (f"{'구조':16s} {'점수':>8s} {'주입':>8s} {'폐루프각':>9s} "
+           f"{'폐루프토크':>11s} {'높이':>8s} {'벌점':>7s} {'옛자':>8s}")
+    print(hdr)
+    _nan = float('nan')
+
+    def _row(nm, sc, d, tail=""):
+        d = d or {}
+        print(f"{nm:16s} {sc:8.4f} {d.get('ma',_nan):8.4f} {d.get('clq',_nan):9.4f} "
+              f"{d.get('clt',_nan):11.4f} {d.get('h',_nan):8.4f} {d.get('pen',0):7.3f} "
+              f"{d.get('Jold',_nan):8.4f}{tail}")
+
+    _row("배포 스택(현행)", b1, d1, "   ← 이걸 이겨야 한다")
+    _row("출발점(3회차 승자)", b2, d2)
     for m, r in R.items():
-        d = r["det"] or {}
-        print(f"{m:12s} {r['score']:8.4f} {d.get('ma',float('nan')):9.4f} "
-              f"{d.get('cl',float('nan')):8.4f} {d.get('h',float('nan')):9.4f} {d.get('pen',0):7.3f}")
+        _row(f"4회차 {m}", r["score"], r["det"])
+    print("\n   ※ 맨 오른쪽 '옛자' 는 3 회차까지 쓰던 자로 잰 같은 지점의 성적이다"
+          " (1.0000 = 두 세대 전 모델). 두 자가 서로 다른 답을 가리키는지 보려고 같이 찍는다.")
     for m, r in R.items():
         print(f"\n── {m} 최적값")
         for nm, v, c in zip(r["axes"], r["x"], r["cur"]):
@@ -646,8 +824,9 @@ def main():
             if abs(v - a[1]) < 1e-6 * max(1, abs(a[1])) or abs(v - a[2]) < 1e-6 * max(1, abs(a[2])):
                 tag = "  ★경계 포화 — 물리 재검 필요"
             print(f"    {nm:16s} {v:10.5f}  (현행 {c:g}){tag}")
-        print(f"    게이트: " + " · ".join(f"{k} {100*(x-1):+.1f}%"
-                                          for k, x in (r["det"] or {}).get("gate", {}).items()))
+        print(f"    적합에 안 쓰는 세션 (배포 스택 대비 · +2.0% 넘으면 벌점): "
+              + " · ".join(f"{k} {100*(x-1):+.1f}%"
+                           for k, x in (r["det"] or {}).get("gate", {}).items()))
     _s2s_report(R)
     print(f"\n저장 → {OUT}")
 
@@ -691,7 +870,7 @@ def _s2s_report(R):
     print("   차이(제곱평균). 0 이 완벽. PD 제어를 흉내 낸 판, 창 앞 80%.")
     try:
         cur = _s2s_board(env_of("canon_cap", H3))
-        rows = {"현행 출발점": cur}
+        rows = {"배포 스택(현행)": cur}
         for m, r in R.items():
             rows[m] = _s2s_board(env_of(m, r["x"]))
     except Exception as ex:
@@ -712,7 +891,7 @@ def _s2s_report(R):
           + " | ".join(f"{f(rows[k],2):7.2f} {f(rows[k],3):8.2f}" for k in rows))
     base = f(cur, 3)
     for k in rows:
-        if k == "현행 출발점":
+        if k == "배포 스택(현행)":
             continue
         v = f(rows[k], 3)
         print(f"\n   ⇒ {k}: 무릎 토크 오차 {base:.2f} → {v:.2f} N·m "
