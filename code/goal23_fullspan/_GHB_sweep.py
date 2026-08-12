@@ -639,7 +639,75 @@ def main():
             print(f"    {nm:16s} {v:10.5f}  (현행 {c:g}){tag}")
         print(f"    게이트: " + " · ".join(f"{k} {100*(x-1):+.1f}%"
                                           for k, x in (r["det"] or {}).get("gate", {}).items()))
+    _s2s_report(R)
     print(f"\n저장 → {OUT}")
+
+
+# ── 짐 지고 일어서기(26.06.04) 감시 — 고치는 대상이 아니라 **지켜보는 대상** ────────────
+#   사용자 지시 08-12: "점프를 고치다가 이게 조용히 망가지는 걸 막자."
+#   2 회차에서 실제로 무릎 토크 오차가 1.3% 나빠졌는데 아무도 몰랐다 — 이 데이터가
+#   채점에 아예 안 들어가기 때문이다.
+#   ★ 목적함수·벌점에는 **절대 넣지 않는다.** 탐색이 끝난 뒤 한 번만 재서 표로 찍는다.
+#     (매 평가마다 재면 6 시간이 늘고, 목적함수에 넣으면 사용자가 금지한 "적합 대상 추가"가 된다.)
+def _s2s_board(over):
+    """짐 지고 일어서기 4 경우의 토크 오차 [N·m]. 낮을수록 정확, 0 이 완벽.
+    창의 앞 80% 구간 (합격선의 자와 같은 기준)."""
+    import fs_data as FD, fs_compare_plot as CP, fs_runner as FR, fs_cvt as FC
+    _apply(over)
+    out = []
+    for sub, mass, cvt in FD.S2S_CASES:
+        try:
+            d = FD.load_s2s(sub)
+            if d is None:
+                continue
+            d["_sess"] = "26.06.04"; d["_fold"] = sub
+            ft = FC.cvt_ft(0.02525, ft_base=FR.fs_twin()) if cvt else None
+            r = CP.cl_pair(d, None, CP.S2S_GAIN, "26.06.04", ft=ft, show_old=False)
+            _t, (mo, mf), _o, fs, _m, _c, _p = r
+            e = []
+            for i, k in ((4, "a1"), (5, "a2")):
+                real = np.asarray(mf[k]); sim = np.asarray(fs[i])
+                ix = np.arange(int(len(real) * 0.80))
+                e.append(float(np.sqrt(np.mean((real[ix] - sim[ix]) ** 2))))
+            out.append((sub, mass, e[0], e[1]))
+        except Exception:
+            continue
+    return out
+
+
+def _s2s_report(R):
+    print(f"\n{'='*78}")
+    print("■ 짐 지고 일어서기(26.06.04) — **감시만** 한다 (점수에 안 들어감)")
+    print("   토크 오차 [N·m] = 실측 명령 토크를 현행 환산식으로 바꾼 값과 시뮬레이션 토크의")
+    print("   차이(제곱평균). 0 이 완벽. PD 제어를 흉내 낸 판, 창 앞 80%.")
+    try:
+        cur = _s2s_board(env_of("canon_cap", H3))
+        rows = {"현행 출발점": cur}
+        for m, r in R.items():
+            rows[m] = _s2s_board(env_of(m, r["x"]))
+    except Exception as ex:
+        print(f"   (재기 실패: {type(ex).__name__} {ex})")
+        return
+    names = [c[0] for c in cur]
+    print(f"\n   {'경우':16s} {'짐':>6s} | " + " | ".join(f"{k[:12]:>17s}" for k in rows))
+    print(f"   {'':16s} {'':>6s} | " + " | ".join("     힙     무릎" for _ in rows))
+    print("   " + "-" * (26 + 20 * len(rows)))
+    for i, nm in enumerate(names):
+        line = f"   {nm:16s} {cur[i][1]:4.1f}kg | "
+        line += " | ".join(f"{rows[k][i][2]:7.2f} {rows[k][i][3]:8.2f}"
+                           if i < len(rows[k]) else "        -        " for k in rows)
+        print(line)
+    print("   " + "-" * (26 + 20 * len(rows)))
+    f = lambda v, j: np.mean([x[j] for x in v]) if v else float("nan")
+    print(f"   {'평균':16s} {'':>6s} | "
+          + " | ".join(f"{f(rows[k],2):7.2f} {f(rows[k],3):8.2f}" for k in rows))
+    base = f(cur, 3)
+    for k in rows:
+        if k == "현행 출발점":
+            continue
+        v = f(rows[k], 3)
+        print(f"\n   ⇒ {k}: 무릎 토크 오차 {base:.2f} → {v:.2f} N·m "
+              f"({100*(v/base-1):+.1f}%)  " + ("좋아짐" if v < base else "**나빠짐 — 확인 필요**"))
 
 
 if __name__ == "__main__":
