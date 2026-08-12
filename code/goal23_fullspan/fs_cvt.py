@@ -130,7 +130,11 @@ def cvt_ft(li, ft_base=None, restamp=True):
     ft["dof"] = {n: safe.dofadr(m, n, mjm) for n in ft["iq"]}
     ft["cvt_init"] = lambda q1, q2, _l=li: qpos_from_crank(1.0, -q1 - np.pi / 2, -q2, _l)[0]
     qg, rg = _RT[key]
-    ft["cvt_diss"] = (float(_NM["C_CVT"]), qg, rg)
+    # ★ 08-12: 링크를 거치며 새는 몫의 크기를 배수로 조절하는 손잡이 (기본 1 = 지금 그대로).
+    #   깊게 접힌 자세에서 오차가 커지는 원인이 '새는 몫' 인지 '4절 기하' 인지 가르려고 넣었다.
+    #   0 을 주면 새는 몫이 사라지므로, 그래도 오차가 남으면 기하가 범인이다.
+    ft["cvt_diss"] = (float(_NM["C_CVT"]) * float(os.environ.get("FS_CVT_DISS_SCALE", "1")),
+                      qg, rg)
     return ft
 
 
