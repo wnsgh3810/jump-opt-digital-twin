@@ -41,8 +41,12 @@ set FS_SWEEP_TAG=3
 set FS_SWEEP_CVT=1
 set FS_SWEEP_MODES=canon_cap
 
+rem  Default is 4 hours, not 6.  RUN-2 log shows the score was already within
+rem  0.03%% of its 6-hour value at the 4-hour mark, and within 0.15%% at 2 hours.
+rem  The last improvement landed at 300 min and the final 60 min changed nothing.
+rem  Pass a number to override, e.g.  _GHB_sweep3.bat 6
 set HOURS=%1
-if "%HOURS%"=="" set HOURS=6
+if "%HOURS%"=="" set HOURS=4
 
 rem keep this run's own previous output (RUN-1 / RUN-2 files are untouched)
 if exist _GHB_sweep3.log          move /y _GHB_sweep3.log          _GHB_sweep3.prev.log   > nul
