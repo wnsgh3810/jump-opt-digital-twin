@@ -101,11 +101,21 @@ def run(ft, d, segs, nw, tmap, KS):
         md.qvel[dof["knee_motor"]] = -float(d["v2"][ix[0]])
         N = int(round(float(tg[-1]) / dt))
         Q = np.zeros((N, 2)); ok = True
+        # ★ 08-12: 기록된 토크 채널은 **명령**이고 실제 축토크는 그것을 **늦게** 따라간다.
+        #   지연도 반응을 느리게 만들어 관성 부족과 구별이 안 된다 — 여기에 넣어 가른다.
+        #   정본 폐루프 코드와 같은 형태(1차 저역통과 · 관절별 시간상수).
+        TL1 = float(os.environ.get("GHE_TLAG", "0,0").split(",")[0])
+        TL2 = float(os.environ.get("GHE_TLAG", "0,0").split(",")[1])
+        a1f = dt / (TL1 + dt) if TL1 > 0 else 1.0
+        a2f = dt / (TL2 + dt) if TL2 > 0 else 1.0
+        f1 = tmap(float(d["r1"][ix[0]]), 0.0, 0); f2 = tmap(float(d["r2"][ix[0]]), 0.0, 1)
         for kk in range(N):
             tc = kk * dt
             v1 = -float(md.qvel[dof["hip_m"]]); v2 = -float(md.qvel[dof["knee_motor"]])
             c1 = float(np.interp(tc, tg, d["r1"][ix])); c2 = float(np.interp(tc, tg, d["r2"][ix]))
-            md.ctrl[:] = [-tmap(c1, v1, 0), -tmap(c2, v2, 1)]
+            f1 += a1f * (tmap(c1, v1, 0) - f1)
+            f2 += a2f * (tmap(c2, v2, 1) - f2)
+            md.ctrl[:] = [-f1, -f2]
             # ① 몸통 지지력을 계산 안에 넣는다
             md.qfrc_applied[dof["base_z"]] = KB * (BZ - md.qpos[iq["base_z"]]) \
                 - 2.0 * np.sqrt(max(KB, 1e-9) * 3.3) * md.qvel[dof["base_z"]] \
@@ -145,15 +155,16 @@ def main():
     #   ⇒ "정체 모를 관성"이 아니라 "힙 모터가 다리 전체를 느껴야 하는데 못 느낀다" 는 뜻.
     #     지금 모델은 힙에 직렬 스프링이 있어 빠른 움직임에서 다리가 뒤로 처진다.
     #     그렇다면 **스프링을 단단하게 해도 같은 효과**가 나와야 한다 — 그것을 시험한다.
-    SCAN = [("(현행 스프링 138)", None),
-            ("힙 스프링 ×2 (277)", {"FS_KS_HIP": "277"}),
-            ("힙 스프링 ×5 (693)", {"FS_KS_HIP": "693"}),
-            ("힙 스프링 ×15 (2078)", {"FS_KS_HIP": "2078"}),
-            ("힙 스프링 ×50 (6927)", {"FS_KS_HIP": "6927"}),
-            ("힙 스프링 ×200 (27708)", {"FS_KS_HIP": "27708"}),
-            ("힙 모터축 관성 0.040", {"FS_HIPM_ARM": "0.040"}),
-            ("스프링×50 + 관성 원래", {"FS_KS_HIP": "6927"}),
-            ("스프링×50 + 관성 0.040", {"FS_KS_HIP": "6927", "FS_HIPM_ARM": "0.040"})]
+    # 관성 부족 vs **명령 지연** 정면 대결. 둘 다 반응을 느리게 만들어 서로 구별이 안 된다.
+    SCAN = [("(현행 · 지연 0)", None),
+            ("힙 지연 3ms", {"GHE_TLAG": "0.003,0"}),
+            ("힙 지연 6ms", {"GHE_TLAG": "0.006,0"}),
+            ("힙 지연 12ms", {"GHE_TLAG": "0.012,0"}),
+            ("힙 지연 25ms", {"GHE_TLAG": "0.025,0"}),
+            ("힙 지연 50ms", {"GHE_TLAG": "0.050,0"}),
+            ("힙 관성 +0.040", {"FS_HIPM_ARM": "0.040"}),
+            ("관성 +0.040 · 지연 12ms", {"FS_HIPM_ARM": "0.040", "GHE_TLAG": "0.012,0"}),
+            ("관성 +0.020 · 지연 12ms", {"FS_HIPM_ARM": "0.020", "GHE_TLAG": "0.012,0"})]
     print(f"{'바꾼 것':22s} | {'힙 각도 오차[도]':>15s} {'무릎 각도 오차[도]':>17s} {'합':>8s}")
     RES = {}
     base = None
