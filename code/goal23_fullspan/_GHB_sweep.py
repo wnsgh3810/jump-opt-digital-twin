@@ -246,7 +246,16 @@ def _apply(e):
     for k in ("FS_KNEEM_FL", "FS_HIPM_FL", "FS_KNEEM_DAMP", "FS_HIPM_DAMP", "FS_MASS",
               "FS_COMZ", "FS_KS_HIP", "FS_CMD_LPF", "FS_TMAP", "FS_TDCAP", "FS_TFRIC",
               "FS_FOOTR", "FS_NOSUPP", "FS_NOSPR", "FS_NOBIAS", "FS_NODEEP",
-              "FS_PRESLIDE", "FS_IMPRATIO"):
+              "FS_PRESLIDE", "FS_IMPRATIO",
+              # ★ 08-13 버그픽스: 신규 2 축을 env_of 에는 추가했는데 **여기 지우는 목록에는
+              #   안 넣었다.** env_of 는 값이 0 이면 변수를 아예 안 넣으므로(옛 판 재현 보장),
+              #   지우지 않으면 **직전 평가의 값이 그대로 남아** 다음 평가를 오염시킨다.
+              #   실제로 08-13 가르기 시험에서 "레일 마찰만 0.0005 없이" 를 쟀는데 직전 값이
+              #   살아남아 두 경우가 소수점 4 자리까지 똑같이 나왔다 (C 와 D 가 39.1540 동일).
+              #   4 시간 탐색 자체는 무사할 가능성이 높다 — 탐색이 내놓는 실수값이 정확히 0.0
+              #   이 되는 일은 사실상 없어서 매번 두 변수를 명시로 덮어썼기 때문이다
+              #   (승자도 2.6e-07 로 0 이 아니었다). 그래도 침묵 실패이므로 막는다.
+              "FS_RAIL", "FS_W2"):
         os.environ.pop(k, None)
     os.environ.update(e)
     FR._S2S = None
