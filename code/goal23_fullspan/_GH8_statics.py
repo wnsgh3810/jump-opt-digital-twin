@@ -35,19 +35,30 @@ import numpy as np
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 OUT = HERE / "_GH8_statics.json"
-G_TH = 8.0          # 지면반력 문턱 [센서 단위] — 0/비0 판정에만 쓴다 (절대값 분석 아님)
 MIN_N = 100         # 평형 한 개로 인정할 최소 샘플 수 (500Hz 기준 0.2초)
 
 
 def plateaus(d3, w):
-    """창 안에서 **접촉 없는 정지**와 **접촉 있는 정지** 두 구간을 지면반력으로 가른다."""
+    """창 안에서 **접촉 없는 정지**와 **접촉 있는 정지** 두 구간을 발밑 힘센서로 가른다.
+
+    ★ 08-12 사용자 지시: 이 센서는 **절대값을 믿으면 안 되고**(측정이 정확하지 않다)
+      **세션마다 교정이 달라 세션 간 비교도 안 된다.**
+      → 그래서 고정된 절대 문턱(구 8.0)을 쓰지 않는다. **각 trial 이 자기 창 안에서**
+        낮은 무리와 높은 무리의 중간을 문턱으로 삼는다 = 교정에 전혀 의존하지 않는다.
+      쓰는 정보는 오직 "닿았나 / 안 닿았나" 뿐이고, 힘의 크기는 어디에도 안 들어간다.
+      (두 무리 간격은 실측 28 [센서 단위] 이라 어떤 교정 오차로도 안 뒤집힌다.)
+    """
     t = d3["t"]
     ix = np.flatnonzero((t >= w[0]) & (t <= w[1]))
     if len(ix) < 3 * MIN_N:
         return None
     g = d3["grf"][ix]
-    air = ix[g < G_TH]
-    gnd = ix[g > G_TH]
+    lo, hi = np.percentile(g, 10), np.percentile(g, 90)
+    if hi - lo < 5.0:                      # 두 무리가 안 갈리면 이 trial 은 버린다
+        return None
+    th = lo + 0.5 * (hi - lo)              # trial 자기 값으로만 정한 문턱
+    air = ix[g < th]
+    gnd = ix[g > th]
     if len(air) < MIN_N or len(gnd) < MIN_N:
         return None
     air = air[air < gnd.min()] if len(gnd) else air        # 접지 이전만
