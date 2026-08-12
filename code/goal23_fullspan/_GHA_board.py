@@ -32,8 +32,8 @@ sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 OUT = HERE / "_GHA_board.json"
 CH6 = ("q1", "q2", "dq1", "dq2", "a1", "a2")
 CH4 = ("q1", "q2", "dq1", "dq2")
-GATE_MA = ("26.03.24", "26.04.21", "26.04.29")
-GATE_CL = ("26.04.21", "26.04.29")
+GATE_MA = ("26.03.24", "26.04.21")
+GATE_CL = ("26.04.21",)
 
 # 기본 후보 = 08-11 매달림 실측으로 잰 마찰값 (`_GH9_friction.py`)
 #   실측: 힙 건마찰 0.28 N·m · 무릎 건마찰 0.46 N·m · 속도 비례 성분은 둘 다 거의 0
@@ -57,6 +57,9 @@ def board():
     ft = FR.fs_twin()
     G = collections.defaultdict(lambda: dict(ma=[], cl=[], h=[]))
     for s, p, g, cvt, ho in FD.registry():
+        # ★ 08-12: 변속기 trial 은 이 모델에 기하가 없어 채점 불가 — 정본 fs_cvt.py 로 따로 본다.
+        if cvt:
+            continue
         try:
             d = FD.load2(p); seg = FD.segment(d)
             d["_sess"] = s; d["_fold"] = p

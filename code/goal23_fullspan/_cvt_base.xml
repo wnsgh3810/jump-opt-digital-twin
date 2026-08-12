@@ -21,8 +21,8 @@
       <body name="crank" pos="0 0 0">
         <joint name="knee_motor" type="hinge" armature="0.00795495" damping="0.149630" frictionloss="0.246893" stiffness="0.000000" springref="1.87751"/>
         <inertial pos="0 0 0.02078" mass="0.43700" diaginertia="0.000628 0.000628 0.000628"/>
-        <geom type="capsule" size="0.008" fromto="0 0 0 0 0 0.02509" contype="0" conaffinity="0"/>
-        <body name="coupler" pos="0 0 0.02509">
+        <geom type="capsule" size="0.008" fromto="0 0 0 0 0 0.02508" contype="0" conaffinity="0"/>
+        <body name="coupler" pos="0 0 0.02508">
           <site name="ctip" pos="0 0 -0.25" size="0.003"/><joint name="cpin" type="hinge" damping="0.00040"/>
           <inertial pos="0 0 -0.10659" mass="0.15002" diaginertia="0.001235 0.001235 0.00005"/>
           <geom type="capsule" size="0.006" fromto="0 0 0 0 0 -0.25" contype="0" conaffinity="0"/>
