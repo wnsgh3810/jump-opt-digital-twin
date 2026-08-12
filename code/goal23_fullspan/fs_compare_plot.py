@@ -59,6 +59,8 @@ def alpha_of(tab, kp):
         return tab[ks[-1]]
     return float(np.interp(np.log(kp), np.log(ks), [tab[k] for k in ks]))
 QS = 2                      # qd 스큐 보정 [샘플] (4ms@500Hz)
+# 짐 지고 일어서기(26.06.04) 게인 — 폴더에 없어 기록에서 되돌려 푼 추정값 (08-12)
+S2S_GAIN = (147.0, 2.2, 205.0, 2.5)   # (힙 비례, 힙 미분, 무릎 비례, 무릎 미분)
 MA_W, MA_S = 0.10, 0.05     # 점프 창(~0.2~0.3s) 내 mshoot 창/stride
 CH = [("q1", "q1 [°]"), ("q2", "q2 [°]"), ("dq1", "dq1 [rad/s]"),
       ("dq2", "dq2 [rad/s]"), ("a1", "τ1 [N·m]"), ("a2", "τ2 [N·m]")]
@@ -128,7 +130,7 @@ def rmse_line(d, m, sims):
     return " / ".join(out)
 
 
-def cl_pair(d, seg, g, sess, ft=None):
+def cl_pair(d, seg, g, sess, ft=None, show_old=True):
     """CL을 **ModeA와 동일 규칙**으로: 점프 창 시작에서 실측 상태 1회 앵커 → 통짜 폐루프 (P16).
     반환 (t, 실측, OLD, 현행, 창마스크) — 실패 시 None.
 
@@ -149,7 +151,9 @@ def cl_pair(d, seg, g, sess, ft=None):
             float(d["raw1"][i0]), float(d["raw2"][i0]))
     qd = (d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m])
     alphas = alphas_for(sess, g)
-    Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init)
+    # ★ 08-12: show_old=False 면 배포 모델을 안 돌린다 (짐 지고 일어서기 — 배포 모델에는
+    #   짐을 넣을 방법이 없어 비교가 성립하지 않는다).
+    Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init) if show_old else None
     if ft is None:
         ft = FR.fs_twin()
     sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
@@ -165,10 +169,11 @@ def cl_pair(d, seg, g, sess, ft=None):
     Lf = FR.rollout_cl_fs(ft, t, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
                           gg, t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                           fade=True, taulim=None, vdes_ff=(sess != "26.04.21"), init_meas=init)
-    if Lo is None or Lf is None:
+    if (show_old and Lo is None) or Lf is None:
         return None
     gi = lambda L, k: np.interp(t, L["t"], L[k])
-    old = [gi(Lo, "q1"), gi(Lo, "q2"), gi(Lo, "dq1"), gi(Lo, "dq2"), gi(Lo, "sh1"), gi(Lo, "sh2")]
+    old = ([gi(Lo, "q1"), gi(Lo, "q2"), gi(Lo, "dq1"), gi(Lo, "dq2"), gi(Lo, "sh1"), gi(Lo, "sh2")]
+           if show_old else [np.full(len(t), np.nan)] * 6)
     fs = [gi(Lf, "thm1"), gi(Lf, "q2"), gi(Lf, "dq1"), gi(Lf, "dq2"),
           np.clip(gi(Lf, "s1f"), -20.5, 20.5), gi(Lf, "s2")]
     # ★ 08-11: τ 기준선을 **모델마다** 만든다 (tau_ref 참조).
@@ -425,8 +430,8 @@ def golden_mirror(d, seg, g, sess):
     return float(np.max(np.abs(A_["q1"][:n] - B_["q1"][:n]))), float(np.max(np.abs(A_["sh1"][:n] - B_["sh1"][:n])))
 
 
-def plot_cl(sess, name, d, seg, g):
-    r = cl_pair(d, seg, g, sess)
+def plot_cl(sess, name, d, seg, g, ft=None, show_old=True, note=""):
+    r = cl_pair(d, seg, g, sess, ft=ft, show_old=show_old)
     if r is None:
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
@@ -446,7 +451,8 @@ def plot_cl(sess, name, d, seg, g):
         if _tau:
             # ★ 현행 변환식 기준선 — 현행 sim 은 **이 선**과 비교해야 한다 (사용자 지시 08-11)
             a.plot(t, yf2, lw=1.2, alpha=0.9, label=f"실측 명령 → {TAG} 변환")
-        a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
+        if show_old:
+            a.plot(t, yo, "--", lw=1.0, label="배포모델 (OLD)")
         a.plot(t, yf, ":", lw=1.5, label=f"현행 ({TAG})")
         if pl is not None and os.environ.get("FS_PLAN") == "1":
             # 기본 미표시 (사용자 결정 P22): OLD 재생이 계획을 RMSE≤0.2로 포함 + 계획은 27일만 존재.
@@ -488,7 +494,7 @@ def h_title(sess, name):
     return f"점프높이(ModeA 연장재생)  영상 실측 없음  ·  OLD {ho_:.3f} m → {TAG} {hf_:.3f} m"
 
 
-def plot_ma(sess, name, d, seg):
+def plot_ma(sess, name, d, seg, ft=None, show_old=True):
     """ModeA = **점프 창 통짜 개루프 재생** (측정 raw 주입, 초기상태만 실측 — 중간 리셋 없음).
 
     사용자 지적 (08-01): 창 분할 재생은 에러가 매 창 초기화돼 모델 발전의 자가 될 수 없다.
@@ -499,8 +505,16 @@ def plot_ma(sess, name, d, seg):
       · 현행 = 토크맵(canon_cap 등) 출력 + 커맨드층 보정 전부           (`rollout_ol_fs_b.tq*`)
       구 방식(`sh1/sh2` vs `s1/s2`)은 **a_hat 출력만**이라 OLD 를 과소 표시했다.
       제목에 **점프높이**(영상 실측 vs 두 모델, 부호 있는 오차)를 병기한다.
+
+    ★ 08-12: `ft` 를 주면 그 트윈으로 돌린다 — 변속기는 trial 마다 모델이 다르고,
+      짐 지고 일어서기는 짐 무게가 모델에 들어간다. 안 주면 지금까지와 완전히 동일하다.
+
+    ★ 08-12 (사용자 지시): `show_old=False` 면 **배포 모델 선을 그리지 않는다.**
+      짐 지고 일어서기에서 쓴다 — 배포 모델에는 **짐을 넣을 방법이 없어서**, 5kg 을 지고
+      있는데 그걸 모르는 모델과 비교하면 성립하지 않는다 (실제로 무릎 각도 3532도가 나왔다).
+      비교 대상이 없는 그림은 실측 vs 현행 둘만 그린다.
     """
-    ft = FR.fs_twin()
+    ft = ft if ft is not None else FR.fs_twin()
     sp = sess_params(sess)
     t = d["t"]
     pw = FD.plot_window(d["_fold"], d)          # 그래프·재생 창 = 원본 xlsx (점프) — 훅 규약
@@ -520,18 +534,18 @@ def plot_ma(sess, name, d, seg):
     st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0]), float(d["q2"][i0]),
                            float(d["dq1"][i0]), float(d["dq2"][i0]),
                            float(d["raw1"][i0]), float(d["raw2"][i0]))
-    Lo = ol_old_meas(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end, 0.004)
+    Lo = ol_old_meas(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end, 0.004) if show_old else None
     Lf = FR.rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
                             float(d["q1"][i0]), float(d["q2"][i0]),
                             float(d["dq1"][i0]), float(d["dq2"][i0]),
                             t_end, bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
-    if Lo is None or Lf is None:
+    if (show_old and Lo is None) or Lf is None:
         print(f"  MA {sess}/{name}: 재생 실패 (old {Lo is None} / fs {Lf is None})", flush=True)
         return
     # 점프높이 (연장 재생으로 최고점 직접 판독)
     hv = real_h(d["_fold"])
     te2 = float(tg2[-1] - 0.004)
-    Ho = ol_old_meas(FMET.tw0, tg2, d["raw1"][m2], d["raw2"][m2], st, te2, 0.004)
+    Ho = ol_old_meas(FMET.tw0, tg2, d["raw1"][m2], d["raw2"][m2], st, te2, 0.004) if show_old else None
     Hf = FR.rollout_ol_fs_b(ft, tg2, d["raw1"][m2], d["raw2"][m2],
                             float(d["q1"][i0]), float(d["q2"][i0]),
                             float(d["dq1"][i0]), float(d["dq2"][i0]),
@@ -540,10 +554,11 @@ def plot_ma(sess, name, d, seg):
     hf_ = float(np.asarray(Hf["bz"]).max()) if Hf else np.nan
     H_LOG[f"{sess}|{name}"] = (hv, ho_, hf_)
     HT = h_title(sess, name)
-    go = lambda k: np.interp(tg, Lo["t"], Lo[k])
+    go = (lambda k: np.interp(tg, Lo["t"], Lo[k])) if show_old else None
     gf = lambda k: np.interp(tg, Lf["t"], Lf[k])
     # ★ τ = 총 인가 토크 (tq1/tq2). 구 sh1/sh2·s1/s2 는 토크맵 출력만이라 쓰지 않는다.
-    old = [go("q1"), go("q2"), go("dq1"), go("dq2"), go("tq1"), go("tq2")]
+    old = ([go("q1"), go("q2"), go("dq1"), go("dq2"), go("tq1"), go("tq2")]
+           if show_old else [np.full(len(tg), np.nan)] * 6)
     fs = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2"), gf("tq1"), gf("tq2")]
     # ★ 08-11: CL 과 동일하게 τ 기준선을 **모델마다** 만든다 (tau_ref 참조).
     meas = {k: d[k][m] for k, _ in CH}
@@ -553,8 +568,8 @@ def plot_ma(sess, name, d, seg):
     meas_f["a1"] = tau_ref(d["raw1"][m], d["dq1"][m], 0, old=False)
     meas_f["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=False)
     mm = tg >= 0.0
-    eo = [np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
-          for (k, _), v in zip(CH, old)]
+    eo = ([np.sqrt(np.mean((meas[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
+           for (k, _), v in zip(CH, old)] if show_old else [np.nan] * 6)
     ef = [np.sqrt(np.mean((meas_f[k][mm] - v[mm]) ** 2)) * (180 / np.pi if k in ("q1", "q2") else 1)
           for (k, _), v in zip(CH, fs)]
     fig, ax = panels(f"{sess} / {name} — ModeA 통짜 재생 (측정 raw 주입 · 점프 창 · 중간 리셋 없음)\n{HT}",
@@ -569,11 +584,14 @@ def plot_ma(sess, name, d, seg):
         # ★ G58: τ 패널은 **각 선의 고점을 범례에 숫자로** 박는다 (축 오독 방지 — 사용자 지적).
         _tau = k in ("a1", "a2")
         pk = (lambda v: f"  [고점 {np.max(v):.2f}]") if _tau else (lambda v: "")
-        a.plot(t[m], y, lw=1.2,
-               label=("실측 명령 → 배포판 변환" if _tau else "실측") + pk(y))
+        if not (_tau and not show_old):
+            a.plot(t[m], y, lw=1.2,
+                   label=("실측 명령 → 배포판 변환" if _tau else "실측") + pk(y))
         if _tau:
-            a.plot(t[m], yf2, lw=1.2, alpha=0.9, label=f"실측 명령 → {TAG} 변환" + pk(yf2))
-        a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가" + pk(yo))
+            a.plot(t[m], yf2, lw=1.2, alpha=0.9,
+                   label=("실측 명령 → 변환" if not show_old else f"실측 명령 → {TAG} 변환") + pk(yf2))
+        if show_old:
+            a.plot(t[m], yo, "--", lw=1.0, label="배포모델 (OLD) 총 인가" + pk(yo))
         a.plot(t[m], yf, ":", lw=1.5, label=f"현행 ({TAG}) 총 인가" + pk(yf))
         if k in ("a1", "a2"):
             # ★ G57 (사용자 정정): `currentTorque` 는 **단위가 이미 N·m** 이다.
@@ -644,6 +662,47 @@ def main():
             if r:
                 agg.setdefault(("CL", s), []).append(r)
         print(f"{s}/{p.name}: OK", flush=True)
+    # ── 짐 지고 일어서기 (26.06.04) — **검증 전용** (FS_CMP_S2S=0 으로 끌 수 있다) ──
+    #   최종 목표가 "짐 지고 일어서기 같은 해본 적 없는 동작 예측"인데 채점 세션이 전부
+    #   점프라 외삽을 한 번도 그려 본 적이 없었다 (08-12 발견). 창은 `plot_window` 가
+    #   '몸통이 떠 있는 구간'으로 준다 (규약 §7 off-stop — 앉은 구간은 물리가 없다).
+    #   ★ 재생 자체는 여기서도 **통짜**다. 조각으로 자르면 오차가 초기화된다 (규약 §11-2).
+    if want in ("BOTH", "MA", "S2S") and os.environ.get("FS_CMP_S2S", "1") != "0":
+        import fs_cvt as FC
+        _m0 = os.environ.get("FS_MASS", "3.2988")
+        for nm, fold, pay, cvt in FD.s2s_registry():
+            try:
+                d = FD.load_s2s(nm)
+                d["_sess"] = "26.06.04"; d["_fold"] = fold
+                os.environ["FS_MASS"] = f"{float(_m0) + pay:.4f}"   # 짐은 몸통에 통째로 (사용자 확인)
+                FR._S2S = None
+                if cvt:
+                    FC._MC.clear(); FC._RT.clear()
+                ft_s = FC.cvt_ft(d["l_i"], ft_base=FR.fs_twin()) if cvt else FR.fs_twin()
+                _nm = f"{nm.replace('/', '_')}_짐{pay:g}kg"
+                r = plot_ma("26.06.04", _nm, d, None, ft=ft_s, show_old=False)
+                if r:
+                    agg.setdefault(("ModeA", "26.06.04"), []).append(r)
+                # ── 폐루프 ────────────────────────────────────────────────────────
+                # ★ 이 세션은 폴더 이름에 게인이 없다 (점프 세션은 폴더명이 곧 게인).
+                #   그래서 **기록에서 되돌려 풀었다**: 토크 = 비례x각도오차 + 미분x속도오차
+                #   를 최소제곱으로 푼다 (목표 채널을 2샘플 뒤로 밀어 시각을 맞춘 뒤).
+                #   · 무릎 비례 = 네 경우 모두 200~211 로 일관 (맞춘 정도 0.86~0.99)
+                #   · 힙 비례 = 99~149 로 흔들려, 가장 잘 맞은 경우(무변속 0kg, 0.94)의 147 채택
+                #   · 미분 게인은 되돌려 풀면 음수까지 나온다(속도 신호 잡음) -> 점프 세션의
+                #     비례:미분 비율(약 1.5%)을 적용. **여기만 추정이 섞였다.**
+                _note = ("* 게인은 폴더에 없어 **기록에서 되돌려 푼 추정값**이다 "
+                         f"(비례 힙 {S2S_GAIN[0]:g} / 무릎 {S2S_GAIN[2]:g}; "
+                         "미분은 점프 세션 비율 적용). 실제 게인이 확인되면 다시 그릴 것.")
+                r2 = plot_cl("26.06.04", _nm, d, None, S2S_GAIN, ft=ft_s,
+                             show_old=False, note=_note)
+                if r2:
+                    agg.setdefault(("CL", "26.06.04"), []).append(r2)
+                print(f"26.06.04/{nm} (짐 {pay:g}kg): OK", flush=True)
+            except Exception as ex:
+                print(f"26.06.04/{nm}: {type(ex).__name__} {ex}", flush=True)
+        os.environ["FS_MASS"] = _m0
+        FR._S2S = None
     lines = [f"# 3자 비교 그래프 색인 (실측 / 배포모델 OLD α / 현행 {os.environ.get('FS_STACK_TAG', 'fs')})", "",
              "- `CL/<세션>/<trial>.png` — 폐루프, 점프(push) 구간",
              "- `ModeA/<세션>/<trial>.png` — 측정 토크 주입 재생 (0.4s 창)",

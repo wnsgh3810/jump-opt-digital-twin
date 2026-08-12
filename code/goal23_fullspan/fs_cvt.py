@@ -69,10 +69,15 @@ def build_cvt_pair(li=0.02508):
     #   힙감쇠 0.3121 · 총질량 3.2010 …). 현행 스택이 지정한 값이 하나도 안 들어가 있어서
     #   **변속기 세션은 지금까지 옛 물리로 채점돼 왔다** (통과한 게이트 포함).
     #   여기서 이름 기준으로 심는다. **부품 위치는 안 건드린다 — 그게 변속기 기하다.**
+    #
+    # ☠ 08-12 저녁 정정 (사용자 적발): 처음엔 `model_c` 에도 같이 심었는데 **그건 틀렸다.**
+    #   `model_c` 는 **비교용 배포 모델**이다. 거기에 현행 물리(질량 3.2988·스프링 138.53·
+    #   마찰 0.3026/0.0964)를 넣으면 더 이상 배포 모델이 아니고, 배포 모델이 쓰는 게인
+    #   보정표와 안 맞아 **발산한다** (변속기 폐루프 그림에서 힙 각도가 −91도까지 갔다).
+    #   ⇒ 현행 물리는 **현행 모델(model_cf)에만** 심는다. 배포 모델은 옛 물리 그대로 둔다.
     import fs_runner as _FR
-    for _m in (model_cf, model_c):
-        if _m is not None:
-            _FR.apply_stack_physics(_m, mjm)
+    if model_cf is not None:
+        _FR.apply_stack_physics(model_cf, mjm)
     return model_c, model_cf, dict(nm=nm, tw=tw, v=v)
 
 

@@ -94,6 +94,58 @@ def gains_of(name: str):
 L_I_NOM = 0.030          # 무변속 공칭 입력 링크 길이 [m]
 _LI_CACHE = {}
 
+# ── 짐 지고 일어서기 (26.06.04) — **검증 전용, 적합 금지** ─────────────────────────
+#   최종 목표가 "짐 지고 일어서기·앞으로 뛰기 같은 해본 적 없는 동작 예측" 인데
+#   채점 세션이 전부 점프라 외삽 능력을 한 번도 잰 적이 없었다 (08-12 발견).
+#   유효분 (데이터 사전 + 파일 확인): 변속기 0/2.5/5kg · 무변속은 **0kg 만**
+#   (무변속 5·7.5kg 은 기립 실패라 파일 자체가 없다).
+S2S_DIR = ROOT / "26_06_04" if (ROOT / "26_06_04").exists() else ROOT / "26.06.04"
+S2S_ZMIN = 0.10          # 몸통이 이 높이[m] 위로 떠 있는 구간만 (아래는 받침에 얹힘)
+S2S_CASES = [("cvt/no_load", 0.0, True), ("cvt/load_2.5", 2.5, True),
+             ("cvt/load_5", 5.0, True), ("no_cvt/no_load", 0.0, False)]
+
+
+def load_s2s(sub):
+    """짐 지고 일어서기 1건 → `load2` 와 **같은 형식**의 dict (정본 그림·러너가 그대로 쓴다).
+
+    점프 세션과 다른 점: 확장판(*2) 파일이 없어 원본 hip/knee.xlsx 를 쓰고,
+    발밑 힘센서 값은 창 판정에 쓰지 않는다 (규약: 이 센서는 절대값 사용 금지).
+    `kind="s2s"` 를 달아 두면 `plot_window` 가 '떠 있는 구간' 을 창으로 준다.
+    """
+    fold = S2S_DIR / sub
+    hip = pd.read_excel(fold / "hip.xlsx")
+    knee = pd.read_excel(fold / "knee.xlsx")
+    n = min(len(hip), len(knee))
+    hip, knee = hip.iloc[:n], knee.iloc[:n]
+    t_abs = hip["Time"].to_numpy(float)
+    v1 = hip["currentAngleVelocity"].to_numpy(float)
+    v2 = knee["currentAngleVelocity"].to_numpy(float)
+    raw1 = hip["currentTorque"].to_numpy(float)
+    raw2 = knee["currentTorque"].to_numpy(float)
+    d = dict(t=t_abs - t_abs[0], t_abs=t_abs,
+             q1=hip["currentAngle"].to_numpy(float), q2=knee["currentAngle"].to_numpy(float),
+             qd1=hip["desiredAngle"].to_numpy(float), qd2=knee["desiredAngle"].to_numpy(float),
+             dq1=v1, dq2=v2,
+             dqd1=hip["desiredAngleVelocity"].to_numpy(float),
+             dqd2=knee["desiredAngleVelocity"].to_numpy(float),
+             raw1=raw1, raw2=raw2, a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
+             grf=np.zeros(n), name=sub.replace("/", "_"), fold=str(fold), kind="s2s")
+    f = fold / "clutch.xlsx"
+    li = L_I_NOM
+    if f.exists():
+        c = pd.read_excel(f)
+        col = [x for x in c.columns if "ink" in x]
+        if col:
+            li = float(np.median(c[col[0]].to_numpy(float))) / 1000.0
+    d["l_i"] = li
+    return d
+
+
+def s2s_registry():
+    """(이름, 폴더, 짐[kg], 변속기 여부) — **검증 전용**. registry() 에는 절대 넣지 않는다."""
+    return [(sub, S2S_DIR / sub, pay, cvt) for sub, pay, cvt in S2S_CASES
+            if (S2S_DIR / sub / "hip.xlsx").exists()]
+
 
 def cvt_li(fold, t_abs=None):
     """이 **trial 의** CVT 입력 링크 길이 [m] — `Clutch.xlsx` 실측 중앙값.
@@ -137,6 +189,53 @@ def cvt_li(fold, t_abs=None):
     return li
 
 
+def _fix_unwrap(fold: Path, t_abs, raw1, raw2):
+    """확장판(*2·*3) 토크를 **원본(hip/knee.xlsx) 값으로 교정**한다 (08-12 신설).
+
+    왜 (사용자 확정 08-12: "언랩은 항상 hip/knee.xlsx 가 맞다")
+      모터는 토크 명령을 12비트로 보내는데 전송 범위가 ±18 N·m 다. 넘으면 값이 **감기고**,
+      엑셀의 토크는 그 감긴 것을 **편(unwrap) 값**이다. 그런데 확장판은 **감긴 횟수를 한 칸
+      잘못 센 곳**이 있다 — 전수 감사 결과 변속기 세션 무릎 4 trial 46 점이 **정확히 +36.00**
+      (=2×18) 어긋나 있었고, **전부 채점 창 안**이었다.
+
+      판별 증거: 그 구간은 목표 토크가 0 이다(이륙해서 제어가 끊김). 실제 토크도 0 을 향해야
+      하는데 원본은 0 을 지나 음으로 가고 확장판만 위로 44 까지 올라간다.
+
+    무엇을 하나
+      원본 파일과 **겹치는 구간**만 원본 값으로 덮어쓴다. 원본이 없는 구간(앉기·착지)은
+      확장판 그대로 둔다 — 거기엔 어긋남이 없음을 감사로 확인했다(인접 점프 서명 0 곳).
+      ★ **원본 xlsx 는 절대 수정하지 않는다** (규약). 읽는 쪽에서만 바로잡는다.
+
+    감사 도구: `_GHM_unwrap.py` — 새 데이터가 들어오면 돌릴 것.
+    FS_NO_UNWRAP_FIX=1 이면 교정하지 않는다 (감사 자신이 쓴다).
+    """
+    if os.environ.get("FS_NO_UNWRAP_FIX") == "1":
+        return raw1, raw2, 0
+    # pandas 가 돌려주는 배열은 읽기 전용일 수 있다 → 복사본에 쓴다 (원본 파일은 무관)
+    raw1 = np.array(raw1, dtype=float, copy=True)
+    raw2 = np.array(raw2, dtype=float, copy=True)
+    n_fix = 0
+    t_rel = t_abs - t_abs[0]
+    for f, arr in ((fold / "hip.xlsx", raw1), (fold / "knee.xlsx", raw2)):
+        if not f.exists():
+            continue
+        try:
+            o = pd.read_excel(f, usecols=["Time", "currentTorque"])
+        except Exception:
+            continue
+        to = o["Time"].to_numpy(float) - t_abs[0]
+        qo = o["currentTorque"].to_numpy(float)
+        ov = (t_rel >= to[0]) & (t_rel <= to[-1])
+        if not ov.any():
+            continue
+        qi = np.interp(t_rel, to, qo)
+        bad = ov & (np.abs(arr - qi) > 1.0)
+        if bad.any():
+            arr[bad] = qi[bad]
+            n_fix += int(bad.sum())
+    return raw1, raw2, n_fix
+
+
 def load2(fold: Path):
     """*2 로드 → dict (t=상대[s], 전부 rad/rad·s/Nm; t_abs=절대 타임축)."""
     _check_path(fold)
@@ -150,6 +249,7 @@ def load2(fold: Path):
     v2 = knee["currentAngleVelocity"].to_numpy(float)
     raw1 = hip["currentTorque"].to_numpy(float)
     raw2 = knee["currentTorque"].to_numpy(float)
+    raw1, raw2, _nfix = _fix_unwrap(fold, t_abs, raw1, raw2)   # ★ 08-12 원본 우선 교정
     d = dict(
         t=t_abs - t_abs[0], t_abs=t_abs,
         q1=hip["currentAngle"].to_numpy(float), q2=knee["currentAngle"].to_numpy(float),
@@ -160,7 +260,7 @@ def load2(fold: Path):
         raw1=raw1, raw2=raw2,
         a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
         grf=grf["Current_GRF"].to_numpy(float),
-        name=fold.name, fold=str(fold))
+        name=fold.name, fold=str(fold), n_unwrap_fix=_nfix)
     d["l_i"] = cvt_li(fold, t_abs)      # trial 별 실측 (무변속이면 0.030)
     if np.nanmax(np.abs(d["q2"])) > 7:
         raise ValueError(f"{fold}: *2 각도가 rad가 아님 (규약 위반?)")
@@ -187,6 +287,7 @@ def load3(fold: Path):
     v2 = knee["currentAngleVelocity"].to_numpy(float)
     raw1 = hip["currentTorque"].to_numpy(float)
     raw2 = knee["currentTorque"].to_numpy(float)
+    raw1, raw2, _nfix = _fix_unwrap(fold, t_abs, raw1, raw2)   # ★ 08-12 원본 우선 교정
     d = dict(
         t=t_abs - t_abs[0], t_abs=t_abs,
         q1=hip["currentAngle"].to_numpy(float), q2=knee["currentAngle"].to_numpy(float),
@@ -197,7 +298,7 @@ def load3(fold: Path):
         raw1=raw1, raw2=raw2,
         a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
         grf=grf["Current_GRF"].to_numpy(float),
-        name=fold.name, fold=str(fold))
+        name=fold.name, fold=str(fold), n_unwrap_fix=_nfix)
     d["l_i"] = cvt_li(fold, t_abs)      # trial 별 실측 (무변속이면 0.030)
     if np.nanmax(np.abs(d["q2"])) > 7:
         raise ValueError(f"{fold}: *3 각도가 rad가 아님 (규약 위반?)")
@@ -234,7 +335,20 @@ def plot_window(fold: Path, d=None, pad=0.0):
 
     사용자 규약 (2026-08-01, 훅 강제): 모든 비교/진단 그래프는 이 창으로만 그린다.
     반환: (t0, t1) — load2의 상대 시간축 d["t"] 기준 [s]. 원본 부재 시 None.
+
+    ★ 08-12 추가 — **짐 지고 일어서기(26.06.04)** 는 점프가 아니라 창 정의가 다르다.
+      규약 §7 "접촉 상태가 바뀌는 과제(s2s 착좌)는 물리 부재 창을 채점에서 분리" 를 따라
+      **몸통이 받침에서 떠 있는 구간**을 창으로 준다. 앉아 있는 동안은 몸통이 레일 아래
+      받침에 얹혀 있는데 모델에 그 하중 경로가 없다 (과거 발산 220~267도의 원인).
+      ※ 이건 '중간 리셋'이 아니다 — 물리가 없는 구간을 빼는 것이고, 창 안은 통짜로 돈다.
     """
+    if d is not None and d.get("kind") == "s2s":
+        z = -0.25 * (np.sin(d["q1"]) + np.sin(d["q1"] + d["q2"]))   # 몸통 높이 [m] (발 기준)
+        ok = z > S2S_ZMIN
+        if ok.sum() < 30:
+            return None
+        i0 = int(np.argmax(ok)); i1 = int(len(ok) - np.argmax(ok[::-1]))
+        return float(d["t"][i0]) - pad, float(d["t"][i1 - 1]) + pad
     f = fold / "hip.xlsx"
     if not f.exists():
         return None
