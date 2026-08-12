@@ -904,15 +904,31 @@ def _s2s_board(over):
     """짐 지고 일어서기 4 경우의 토크 오차 [N·m]. 낮을수록 정확, 0 이 완벽.
     창의 앞 80% 구간 (합격선의 자와 같은 기준)."""
     import fs_data as FD, fs_compare_plot as CP, fs_runner as FR, fs_cvt as FC
-    _apply(over)
     out = []
+    m0 = float(over.get("FS_MASS", "3.30"))
     for sub, mass, cvt in FD.S2S_CASES:
         try:
             d = FD.load_s2s(sub)
             if d is None:
                 continue
             d["_sess"] = "26.06.04"; d["_fold"] = sub
-            ft = FC.cvt_ft(0.02525, ft_base=FR.fs_twin()) if cvt else None
+            # ☠☠ 08-13 발각 — **짐을 모델에 안 넣고 있었다.**
+            #   네 경우 전부 로봇 자체 질량(3.2988kg)으로 돌았다. 실제로는 5kg 짐이면 8.3kg 이라
+            #   모델이 실물의 **40%** 무게로 일어서기를 흉내내고 있었다. 감시표의 "짐이 늘수록
+            #   무릎 토크 오차 폭증" 이 상당 부분 이것 때문이다.
+            #   고친 효과 (무릎 토크 오차 [N·m], 0 이 완벽):
+            #     2.5kg  4.75 → **2.13** (-55%) · 5.0kg  10.57 → **7.88** (-25%)
+            #   ※ 그림 그리는 코드(`fs_compare_plot`)는 원래 넣고 있었다 — 이 감시표만 빠졌다.
+            #   짐은 몸통에 통째로 붙인다 (사용자 확인).
+            e = dict(over)
+            if mass > 0:
+                e["FS_MASS"] = f"{m0 + float(mass):.4f}"
+            _apply(e)
+            FR._CACHE.clear()          # 질량이 바뀌었으니 지어 둔 모델을 버린다
+            _CVT_STAMPED.clear()
+            # ☠ 링크 길이도 손으로 박혀 있었다 (0.02525). 실측은 25.1933mm 이고
+            #   `load_s2s` 가 이미 그 trial 의 clutch 기록에서 읽어 둔다. 원본을 쓴다.
+            ft = FC.cvt_ft(float(d["l_i"]), ft_base=FR.fs_twin()) if cvt else None
             r = CP.cl_pair(d, None, CP.S2S_GAIN, "26.06.04", ft=ft, show_old=False)
             _t, (mo, mf), _o, fs, _m, _c, _p = r
             e = []
