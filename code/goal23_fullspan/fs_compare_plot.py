@@ -150,13 +150,33 @@ def rmse_line(d, m, sims):
     return " / ".join(out)
 
 
-def cl_pair(d, seg, g, sess, ft=None, show_old=True):
+def cl_pair(d, seg, g, sess, ft=None, show_old=True, runup=0.0):
     """CL을 **ModeA와 동일 규칙**으로: 점프 창 시작에서 실측 상태 1회 앵커 → 통짜 폐루프 (P16).
     반환 (t, 실측, OLD, 현행, 창마스크) — 실패 시 None.
 
     ★ 08-12: `ft` 를 주면 그 트윈으로 돌린다. 변속기 실험은 링크 길이가 곧 모델 치수라
       trial 마다 다른 모델을 써야 하기 때문이다 (`fs_cvt.cvt_ft`). 안 주면 지금까지처럼
-      무변속 트윈을 새로 받아 쓰므로 **무변속 세션의 결과는 한 자리도 안 바뀐다.**"""
+      무변속 트윈을 새로 받아 쓰므로 **무변속 세션의 결과는 한 자리도 안 바뀐다.**
+
+    ★★ 08-13 신설 `runup` — **재생만 앞당겨 시작하고, 그림·채점 구간은 그대로 둔다.**
+
+      왜 필요한가: 시뮬레이션을 실측에 맞춰 놓을 때 맞출 수 있는 건 **관절 각도와 속도뿐**
+      이다. 그런데 로봇이 이미 움직이는 중이면 그 순간 **눈에 안 보이는 것들**(알루미늄
+      구조가 휘어 있는 양 · 발과 바닥이 붙었는지 미끄러지는 중인지 · 토크 기록의 걸러내기
+      직전 값)이 이미 힘을 받고 있고, 그건 맞출 방법이 없다. 그래서 출발 직후 몇 ms 만에
+      튄다. 정지 상태에서 시작하면 그것들이 자연스럽게 0 이라 이 문제가 없다.
+
+      실측 (짐 지고 일어서기 26.06.04, 변속기 세 경우):
+        창이 278~382ms 에서 시작하는데 그때 무릎축이 이미 초당 1.5~2.1 라디안으로 움직인다.
+        그래서 시뮬 속도가 6ms 만에 2.2 → **10.1** 로 튄다 (실측 최대는 4.0).
+        무변속 경우만 창이 0ms(정지)에서 시작하고 **안 튄다** — 정확히 갈린다.
+      고친 효과 (오차 ÷ 신호가 움직인 폭 · 0 이 완벽 · 채점 구간 동일):
+        무릎 속도  짐0 0.164→**0.100** · 짐2.5 0.365→**0.203** · 짐5 0.970→**0.666**
+      이는 7 월 판(p24a)과 같거나 더 좋다. 그 판은 창보다 400ms 앞에서 재생을 시작했다.
+
+      · runup=0 (기본) 이면 지금까지와 **한 자리도 안 바뀐다.**
+      · 점프 세션은 창이 앉기 시작부터라 이미 정지에서 출발한다 — 손댈 필요가 없다.
+    """
     pw = FD.plot_window(d["_fold"], d)
     if pw is None:
         return None
@@ -167,13 +187,19 @@ def cl_pair(d, seg, g, sess, ft=None, show_old=True):
     i0 = int(np.argmax(m))
     t = tt[m] - tt[i0]
     t_end = float(t[-1])
-    init = (float(d["q1"][i0]), float(d["q2"][i0]), float(d["dq1"][i0]), float(d["dq2"][i0]),
-            float(d["raw1"][i0]), float(d["raw2"][i0]))
-    qd = (d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m])
+    # 재생용 구간 = 창을 runup 초만큼 앞으로 늘린 것 (기록 시작을 넘지 않는다)
+    mr = ((tt >= max(float(tt[0]), pw[0] - runup)) & (tt <= pw[1])) if runup > 0 else m
+    i0r = int(np.argmax(mr))
+    tr = tt[mr] - tt[i0r]
+    t_end_r = float(tr[-1])
+    t_in_r = tt[m] - tt[i0r]            # 원래 창의 시각을 재생 시간축으로 옮긴 것
+    init = (float(d["q1"][i0r]), float(d["q2"][i0r]), float(d["dq1"][i0r]), float(d["dq2"][i0r]),
+            float(d["raw1"][i0r]), float(d["raw2"][i0r]))
+    qd = (d["qd1"][mr], d["qd2"][mr], d["dqd1"][mr], d["dqd2"][mr])
     alphas = alphas_for(sess, g)
     # ★ 08-12: show_old=False 면 배포 모델을 안 돌린다 (짐 지고 일어서기 — 배포 모델에는
     #   짐을 넣을 방법이 없어 비교가 성립하지 않는다).
-    Lo = cl_old_meas(FMET.tw0, t, *qd, tuple(g), alphas, t_end, init) if show_old else None
+    Lo = cl_old_meas(FMET.tw0, tr, *qd, tuple(g), alphas, t_end_r, init) if show_old else None
     if ft is None:
         ft = FR.fs_twin()
     sp = sess_params(sess)          # ★ G53: FS_NOBIAS/FS_NODEEP 존중 (정본 단일 출처)
@@ -186,12 +212,13 @@ def cl_pair(d, seg, g, sess, ft=None, show_old=True):
     if _ka:
         _s = alpha_of(TK, g[2]) if _ka == "table" else float(_ka)
         gg = (g[0], g[1], g[2] * _s, g[3])
-    Lf = FR.rollout_cl_fs(ft, t, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
-                          gg, t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
+    Lf = FR.rollout_cl_fs(ft, tr, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
+                          gg, t_end_r, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                           fade=True, taulim=None, vdes_ff=(sess != "26.04.21"), init_meas=init)
     if (show_old and Lo is None) or Lf is None:
         return None
-    gi = lambda L, k: np.interp(t, L["t"], L[k])
+    # ★ 재생은 앞당겨 돌았어도 **돌려주는 것은 원래 창만**이다 (그림·채점 구간 불변).
+    gi = lambda L, k: np.interp(t_in_r, L["t"], L[k])
     old = ([gi(Lo, "q1"), gi(Lo, "q2"), gi(Lo, "dq1"), gi(Lo, "dq2"), gi(Lo, "sh1"), gi(Lo, "sh2")]
            if show_old else [np.full(len(t), np.nan)] * 6)
     fs = [gi(Lf, "thm1"), gi(Lf, "q2"), gi(Lf, "dq1"), gi(Lf, "dq2"),
@@ -450,8 +477,8 @@ def golden_mirror(d, seg, g, sess):
     return float(np.max(np.abs(A_["q1"][:n] - B_["q1"][:n]))), float(np.max(np.abs(A_["sh1"][:n] - B_["sh1"][:n])))
 
 
-def plot_cl(sess, name, d, seg, g, ft=None, show_old=True, note=""):
-    r = cl_pair(d, seg, g, sess, ft=ft, show_old=show_old)
+def plot_cl(sess, name, d, seg, g, ft=None, show_old=True, note="", runup=0.0):
+    r = cl_pair(d, seg, g, sess, ft=ft, show_old=show_old, runup=runup)
     if r is None:
         print(f"  CL {sess}/{name}: 롤아웃 실패", flush=True)
         return
@@ -514,7 +541,7 @@ def h_title(sess, name):
     return f"점프높이(ModeA 연장재생)  영상 실측 없음  ·  OLD {ho_:.3f} m → {TAG} {hf_:.3f} m"
 
 
-def plot_ma(sess, name, d, seg, ft=None, show_old=True):
+def plot_ma(sess, name, d, seg, ft=None, show_old=True, runup=0.0):
     """ModeA = **점프 창 통짜 개루프 재생** (측정 raw 주입, 초기상태만 실측 — 중간 리셋 없음).
 
     사용자 지적 (08-01): 창 분할 재생은 에러가 매 창 초기화돼 모델 발전의 자가 될 수 없다.
@@ -551,14 +578,22 @@ def plot_ma(sess, name, d, seg, ft=None, show_old=True):
     t_ext = min(t[m][-1] + 0.6, t[-1])
     m2 = (t >= t[i0]) & (t <= t_ext)
     tg2 = t[m2] - t[i0]
-    st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0]), float(d["q2"][i0]),
-                           float(d["dq1"][i0]), float(d["dq2"][i0]),
-                           float(d["raw1"][i0]), float(d["raw2"][i0]))
-    Lo = ol_old_meas(FMET.tw0, tg, d["raw1"][m], d["raw2"][m], st, t_end, 0.004) if show_old else None
-    Lf = FR.rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
-                            float(d["q1"][i0]), float(d["q2"][i0]),
-                            float(d["dq1"][i0]), float(d["dq2"][i0]),
-                            t_end, bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
+    # ★ 08-13 `runup` — 재생만 앞당겨 시작하고 **그림·채점 구간은 그대로** (설명은 cl_pair 참조).
+    #   runup=0 (기본) 이면 지금까지와 한 자리도 안 바뀐다.
+    mr = ((t >= max(float(t[0]), pw[0] - runup)) & (t <= pw[1])) if runup > 0 else m
+    i0r = int(np.argmax(mr))
+    tgr = t[mr] - t[i0r]
+    t_end_r = float(tgr[-1] - 0.004)
+    tg_in_r = t[m] - t[i0r]              # 원래 창의 시각을 재생 시간축으로 옮긴 것
+    st = FMET.st_from_meas(FMET.tw0, float(d["q1"][i0r]), float(d["q2"][i0r]),
+                           float(d["dq1"][i0r]), float(d["dq2"][i0r]),
+                           float(d["raw1"][i0r]), float(d["raw2"][i0r]))
+    Lo = (ol_old_meas(FMET.tw0, tgr, d["raw1"][mr], d["raw2"][mr], st, t_end_r, 0.004)
+          if show_old else None)
+    Lf = FR.rollout_ol_fs_b(ft, tgr, d["raw1"][mr], d["raw2"][mr],
+                            float(d["q1"][i0r]), float(d["q2"][i0r]),
+                            float(d["dq1"][i0r]), float(d["dq2"][i0r]),
+                            t_end_r, bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True)
     if (show_old and Lo is None) or Lf is None:
         print(f"  MA {sess}/{name}: 재생 실패 (old {Lo is None} / fs {Lf is None})", flush=True)
         return
@@ -574,8 +609,9 @@ def plot_ma(sess, name, d, seg, ft=None, show_old=True):
     hf_ = float(np.asarray(Hf["bz"]).max()) if Hf else np.nan
     H_LOG[f"{sess}|{name}"] = (hv, ho_, hf_)
     HT = h_title(sess, name)
-    go = (lambda k: np.interp(tg, Lo["t"], Lo[k])) if show_old else None
-    gf = lambda k: np.interp(tg, Lf["t"], Lf[k])
+    # ★ 재생은 앞당겨 돌았어도 **돌려주는 것은 원래 창만**이다 (그림·채점 구간 불변).
+    go = (lambda k: np.interp(tg_in_r, Lo["t"], Lo[k])) if show_old else None
+    gf = lambda k: np.interp(tg_in_r, Lf["t"], Lf[k])
     # ★ τ = 총 인가 토크 (tq1/tq2). 구 sh1/sh2·s1/s2 는 토크맵 출력만이라 쓰지 않는다.
     old = ([go("q1"), go("q2"), go("dq1"), go("dq2"), go("tq1"), go("tq2")]
            if show_old else [np.full(len(tg), np.nan)] * 6)
@@ -689,6 +725,11 @@ def main():
     #   ★ 재생 자체는 여기서도 **통짜**다. 조각으로 자르면 오차가 초기화된다 (규약 §11-2).
     if want in ("BOTH", "MA", "S2S") and os.environ.get("FS_CMP_S2S", "1") != "0":
         import fs_cvt as FC
+        # ★ 08-13: 짐 지고 일어서기는 창이 로봇이 **이미 움직이는 중**에 시작한다
+        #   (변속기 세 경우 278~382ms, 그때 무릎축이 초당 1.5~2.1 라디안). 그러면 눈에 안 보이는
+        #   것들(구조 처짐·발 마찰 이력)을 맞출 수 없어 출발 직후 속도가 튄다. 재생만 앞당겨
+        #   시작해 그것들이 자연스럽게 쌓이게 한다. 7 월 판(p24a)이 쓰던 것과 같은 방식이다.
+        _RUNUP = float(os.environ.get("FS_S2S_RUNUP", "0.4"))
         _m0 = os.environ.get("FS_MASS", "3.2988")
         for nm, fold, pay, cvt in FD.s2s_registry():
             try:
@@ -700,7 +741,12 @@ def main():
                     FC._MC.clear(); FC._RT.clear()
                 ft_s = FC.cvt_ft(d["l_i"], ft_base=FR.fs_twin()) if cvt else FR.fs_twin()
                 _nm = f"{nm.replace('/', '_')}_짐{pay:g}kg"
-                r = plot_ma("26.06.04", _nm, d, None, ft=ft_s, show_old=False)
+                # ★ 08-13: 앞당겨 시작하는 것은 **PD 제어를 흉내 낸 판에만** 쓴다.
+                #   측정 토크를 그대로 넣는 이 판은 되돌려 주는 힘이 없어서, 앞당긴 400ms
+                #   동안 오히려 실측에서 멀어진 채 채점 구간에 들어온다. 실제로 재 보니
+                #   힙 각도 오차가 56.85 → 86.44 도로 **나빠졌다.** 그래서 여기는 0 으로 둔다.
+                #   (PD 흉내 판은 그 400ms 동안 제어기가 실측 근처에 붙들어 두므로 이득만 남는다.)
+                r = plot_ma("26.06.04", _nm, d, None, ft=ft_s, show_old=False, runup=0.0)
                 if r:
                     agg.setdefault(("ModeA", "26.06.04"), []).append(r)
                 # ── 폐루프 ────────────────────────────────────────────────────────
@@ -715,7 +761,7 @@ def main():
                          f"(비례 힙 {S2S_GAIN[0]:g} / 무릎 {S2S_GAIN[2]:g}; "
                          "미분은 점프 세션 비율 적용). 실제 게인이 확인되면 다시 그릴 것.")
                 r2 = plot_cl("26.06.04", _nm, d, None, S2S_GAIN, ft=ft_s,
-                             show_old=False, note=_note)
+                             show_old=False, note=_note, runup=_RUNUP)
                 if r2:
                     agg.setdefault(("CL", "26.06.04"), []).append(r2)
                 print(f"26.06.04/{nm} (짐 {pay:g}kg): OK", flush=True)

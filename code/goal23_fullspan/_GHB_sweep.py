@@ -964,7 +964,12 @@ def _s2s_board(over):
             # ☠ 링크 길이도 손으로 박혀 있었다 (0.02525). 실측은 25.1933mm 이고
             #   `load_s2s` 가 이미 그 trial 의 clutch 기록에서 읽어 둔다. 원본을 쓴다.
             ft = FC.cvt_ft(float(d["l_i"]), ft_base=FR.fs_twin()) if cvt else None
-            r = CP.cl_pair(d, None, CP.S2S_GAIN, "26.06.04", ft=ft, show_old=False)
+            # ☠ 08-13: 이 세션은 창이 **로봇이 이미 움직이는 중**에 시작한다 (변속기 세 경우
+            #   278~382ms, 그때 무릎축이 초당 1.5~2.1 라디안). 그러면 눈에 안 보이는 것들
+            #   (구조 처짐·발 마찰 이력)을 맞출 수 없어 출발 직후 속도가 튄다. 재생만 앞당겨
+            #   시작해 그것들이 자연스럽게 쌓이게 한다 — 채점 구간은 그대로다.
+            r = CP.cl_pair(d, None, CP.S2S_GAIN, "26.06.04", ft=ft, show_old=False,
+                           runup=float(os.environ.get("FS_S2S_RUNUP", "0.4")))
             _t, (mo, mf), _o, fs, _m, _c, _p = r
             e = []
             for i, k in ((4, "a1"), (5, "a2")):
