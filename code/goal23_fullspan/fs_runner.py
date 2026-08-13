@@ -148,7 +148,7 @@ def _settle(ft, q1_0, q2_0, t_settle=None):
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
     _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
-    A = P.A_PAPER
+    A = tq_shape(P.A_PAPER)
     md = mjm.MjData(model)
     _ci = ft.get("cvt_init")            # 마라톤C #266: CVT 폐쇄 정합 초기화 (qpos_from_crank)
     if _ci is not None:
@@ -742,6 +742,39 @@ def _unlock_base(model, dofadr):
     if dofadr in _BASE_ARM0:
         model.dof_armature[dofadr] = _BASE_ARM0[dofadr]
 
+
+def tq_shape(A):
+    """**명령 토크 → 축 토크 비율의 \"모양\"** 을 조절하는 손잡이 (08-13 신설).
+
+    ■ 무엇을 조절하나
+      기록 파일의 토크는 모터에 **내린 명령**이지 축에서 잰 값이 아니다. 축에서 실제로
+      나오는 토크는 명령과 다르고, 그 비율은 **명령 크기에 따라 변한다.**
+      분동을 매달아 잰 실험(26.08.07): 작은 명령에서 **1.26 배** → 큰 명령에서 **0.86 배**.
+      매달림 데이터로 운동방정식을 직접 맞춰 잰 값(08-13): **1.23 / 1.42 배** (작은 명령 구간).
+
+    ■ 무엇이 문제였나
+      모델은 이 비율이 **어느 크기에서나 0.65~0.68 로 평평**했다. 점프(명령 10~15 N·m)에서는
+      1.3 배 어긋나고, **매달림 실험(명령 0.2~1.2 N·m)에서는 1.9 배 어긋난다.**
+      적합 8 세션이 전부 점프라 작은 토크 구간이 한 번도 데이터로 구속된 적이 없었다.
+
+    ■ 어떻게 조절하나 (계수 4 개짜리 식의 앞 둘)
+      A[0] = **명령에 그대로 비례하는 항** — 비율의 기본 높이를 정한다 (작은 토크 쪽 지배).
+      A[1] = **명령이 클수록 깎이는 항** — 비율이 떨어지는 기울기를 정한다 (큰 토크 쪽).
+      두 손잡이는 **곱하는 배수**다. 둘 다 1.0 이면 지금까지와 완전히 동일하다.
+      비율 0.68(평평) → 1.26(작은 토크)/0.86(큰 토크) 로 만들려면 대략 앞이 1.85, 뒤가 13 이다.
+
+    ★ 정본 계수 파일은 건드리지 않는다 — 읽어 온 값의 **사본**만 고쳐서 쓴다.
+    """
+    lin = float(os.environ.get("FS_TQ_LIN", "1") or 1)
+    sq = float(os.environ.get("FS_TQ_SQ", "1") or 1)
+    if lin == 1.0 and sq == 1.0:
+        return A
+    B = np.array(A, float).copy()
+    B[0] *= lin
+    B[1] *= sq
+    return B
+
+
 def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None, ret_state=False, air=False):
     """PD 제어를 흉내 낸 재생.
     ★★ 08-13 신설 `air` — **공중(매달림) 재생.** 로봇을 들어 올려 발이 땅에 안 닿는 실험용.
@@ -771,7 +804,7 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
     _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
-    A = P.A_PAPER
+    A = tq_shape(P.A_PAPER)
     kp1, kd1, kp2, kd2 = gains
     if init_meas is not None:
         _q1m, _q2m, _dq1m, _dq2m, _r1m, _r2m = init_meas
@@ -1167,7 +1200,7 @@ def rollout_ol_fs(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
     _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
-    A = P.A_PAPER
+    A = tq_shape(P.A_PAPER)
     md = mjm.MjData(model)
     r1_0 = float(np.interp(0.0, tg, raw1g))
     v1_0 = float(dq1_0)
@@ -1428,7 +1461,7 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
     _nospr = os.environ.get("FS_NOSPR") == "1"   # 마라톤G: 부하연동 무릎 스프링(|s2| 비례) 절제
     iq, dof = ft["iq"], ft["dof"]
-    A = P.A_PAPER
+    A = tq_shape(P.A_PAPER)
     md = mjm.MjData(model)
     r1_0 = float(np.interp(0.0, tg, raw1g))
     s1_0 = float(P.J.ahat(A, np.array([np.clip(r1_0, -TW.R19.CLIP, TW.R19.CLIP)]), np.array([float(dq1_0)]))[0])

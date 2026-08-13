@@ -120,7 +120,11 @@ def tau_ref(raw, v, ch, *, old):
       실제로 08-11 첫 구현에서 뒤집었다가 힙이 1.20Nm 어긋나 잡았다.
     """
     raw = np.asarray(raw, float); v = np.asarray(v, float)
-    P = FMET.tw0["P"]; A = P.A_PAPER
+    # ★ 08-13 — 지금 모델의 환산 손잡이를 **실측 기준 곡선에도 같이** 건다.
+    #   기록 토크는 명령이라 축 토크의 실측이 없다. 그래서 "실제 축 토크" 기준선도 같은
+    #   환산식으로 만든다. 두 쪽이 어긋나면 토크 채널 비교가 뜻을 잃는다.
+    #   `old=True`(두 세대 전 기준 곡선)는 고정 — 대조군이 움직이면 안 된다.
+    P = FMET.tw0["P"]; A = P.A_PAPER if old else FR.tq_shape(P.A_PAPER)
     if old:
         return P.J.ahat(A, raw, v)
     tm = FR._tmap_init(P, A)
