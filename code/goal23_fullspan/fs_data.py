@@ -147,6 +147,113 @@ def s2s_registry():
             if (S2S_DIR / sub / "hip.xlsx").exists()]
 
 
+# ── 공중(매달림)·지면 일어서기 — **저속을 구속하려고 새로 넣는 데이터** (08-13) ────────
+#
+#   ■ 왜 필요한가 (한 문장): 적합에 쓰는 8 세션이 전부 점프라 **느린 동작이 데이터로
+#     구속된 적이 없다.** 점프에서 무릎 속도의 중앙값은 5.31 rad/s 이고 1 rad/s 아래는
+#     전체 시간의 18% 뿐이다. 느린 일어서기는 그 비율이 41~63% 다. 그래서 마찰 곡선의
+#     저속 끝이 자유롭게 떠 있었고, 공중 실측(무릎 0.423 + 0.034×속도)과 크게 어긋난
+#     값(0.118 + 0.228×속도 → 저속에서 24~37% 부족)이 들어와 있었다.
+#
+#   ■ 공중 데이터가 특히 좋은 이유: 발이 땅에 안 닿으므로 **발 마찰·미끄러짐·접지 강성이
+#     아예 안 섞인다.** 남는 것은 중력·관성·관절 마찰뿐 = 지금 고치려는 것 그 자체.
+#
+#   ■ 채점 방식: **측정 토크를 그대로 넣고 돌리는 재생만** 쓴다 (PD 흉내는 안 쓴다).
+#     ① PD 가 오차를 감춰 주지 않아 마찰·관성이 그대로 드러난다.
+#     ② 게인이 아예 필요 없다 — 0319 는 게인 라벨이 없고, 회귀로 되찾아 보니
+#        옛 세션(0324)은 정답보다 14~26% 낮게 나왔다 (26.08.02 는 1.00 으로 정확).
+#        스큐·포화·속도 어느 것으로도 안 메워지는 미해결 차이라, 게인에 기대지 않는다.
+_AIR_SPEC = [(f"0802_knee{kp}_v{v}", f"26_08_02/150_2.2_{kp}_3/sysid_air_{v}_v1", True)
+             for kp in (120, 250, 500) for v in ("k070", "k095", "k118")] + \
+            [(f"0324s2s_{s}", f"26_03_24/sit2stand/sit2stand_{s}", True)
+             for s in ("P10_D0", "P10_D1", "P20_D1", "P30_D1", "P60_D1.5_P60_D2")] + \
+            [("0319_air", "26_03_19/position/sit2stand_air", True),
+             ("0319_gnd", "26_03_19/position/sit2stand_gnd", False)]
+
+
+def _air_fold(rel):
+    p = ROOT / rel
+    return p if p.exists() else ROOT / rel.replace("_", ".", 2)
+
+
+def load_air(rel):
+    """공중·지면 일어서기 1 건 → `load2` 와 **같은 형식**의 dict.
+
+    확장판(*2) 이 없는 옛 형식이라 원본 hip/knee.xlsx 를 쓴다. 각도는 전 세션 라디안
+    (확인함). 목표 속도 열이 비어 있는(NaN) 세션이 있는데 그건 위치 제어라 0 이 맞다.
+    """
+    fold = _air_fold(rel)
+    hip = pd.read_excel(fold / "hip.xlsx")
+    knee = pd.read_excel(fold / "knee.xlsx")
+    n = min(len(hip), len(knee))
+    hip, knee = hip.iloc[:n], knee.iloc[:n]
+    t_abs = hip["Time"].to_numpy(float)
+    v1 = hip["currentAngleVelocity"].to_numpy(float)
+    v2 = knee["currentAngleVelocity"].to_numpy(float)
+    raw1 = hip["currentTorque"].to_numpy(float)
+    raw2 = knee["currentTorque"].to_numpy(float)
+    z = lambda a: np.nan_to_num(a, nan=0.0)      # 목표 속도 빈 칸 = 위치 제어 = 0
+    d = dict(t=t_abs - t_abs[0], t_abs=t_abs,
+             q1=hip["currentAngle"].to_numpy(float), q2=knee["currentAngle"].to_numpy(float),
+             qd1=hip["desiredAngle"].to_numpy(float), qd2=knee["desiredAngle"].to_numpy(float),
+             dq1=v1, dq2=v2,
+             dqd1=z(hip["desiredAngleVelocity"].to_numpy(float)),
+             dqd2=z(knee["desiredAngleVelocity"].to_numpy(float)),
+             raw1=raw1, raw2=raw2, a1=ahat_np(raw1, v1), a2=ahat_np(raw2, v2),
+             grf=np.zeros(n), name=rel.split("/")[-1], fold=str(fold),
+             kind="air", l_i=L_I_NOM)
+    return d
+
+
+def air_windows(d, nwin=4, wmax=1.5, wmin=0.35):
+    """이 기록을 **채점할 창 목록** [(t0,t1), …] 으로 자른다.
+
+    ■ 왜 통짜로 안 쓰나: 측정 토크를 그대로 넣고 돌리는 재생은 토크를 두 번 적분하므로
+      오차가 시간에 따라 쌓인다. 실제로 26.08.02 를 3 초 통짜로 돌리면 무릎각 오차가
+      39.75 도까지 간다. 점프 창(~0.5초)과 같은 눈금으로 재려면 짧게 끊어야 한다.
+    ■ 어디서 끊나: **로봇이 실제로 움직이기 시작하는 순간**부터. 창을 목표각의 방향
+      전환으로 잡아 봤더니 목표각의 잔물결을 전환으로 잘못 세어, 고른 창 안에
+      1 rad/s 를 넘는 표본이 하나도 안 들어왔다 (그 기록의 최대는 2.01 rad/s). 그래서
+      속도로 직접 잡는다. 움직임 직전(0.06초 앞)부터 시작해 시작 속도를 0 에 가깝게 둔다.
+    ■ 문턱은 **각 기록이 자기 값으로** 정한다 (그 기록 속도 95 백분위의 20%). 세션마다
+      동작 속도가 다르므로 고정 숫자를 쓰면 어떤 기록은 전부 걸리고 어떤 기록은 전부
+      빠진다 — 발밑 힘센서에서 쓰는 규약과 같은 이유다.
+    ■ 몇 개 쓰나: 한 기록당 nwin 개를 **고르게 흩어서** (앞쪽만 쓰면 한 국면만 본다).
+    """
+    t = d["t"]
+    dt = float(np.median(np.diff(t))) if len(t) > 2 else 0.002
+    v = np.hypot(np.nan_to_num(d["dq1"]), np.nan_to_num(d["dq2"]))
+    v = _smooth(v, max(3, int(round(0.02 / dt))))          # 1샘플 차분이라 잡음이 크다
+    thr = 0.20 * float(np.percentile(v, 95))
+    if not np.isfinite(thr) or thr <= 0:
+        return []
+    on = v > thr
+    edge = np.diff(on.astype(np.int8))
+    starts = list(np.nonzero(edge == 1)[0] + 1)
+    if on[0]:
+        starts = [0] + starts
+    lead = int(round(0.06 / dt))
+    segs = []
+    for a in starts:
+        b = a + int(np.argmax(~on[a:])) if (~on[a:]).any() else len(on)
+        if (b - a) * dt < 0.10:                            # 잠깐 튄 것은 버린다
+            continue
+        i0 = max(0, a - lead)
+        i1 = min(len(t) - 1, min(b + lead, i0 + int(round(wmax / dt))))
+        if float(t[i1] - t[i0]) >= wmin:
+            segs.append((float(t[i0]), float(t[i1])))
+    if not segs:
+        return []
+    idx = np.unique(np.linspace(0, len(segs) - 1, min(nwin, len(segs))).round().astype(int))
+    return [segs[i] for i in idx]
+
+
+def air_registry():
+    """(이름, 상대경로, 공중인가) — 파일이 실제로 있는 것만."""
+    return [(nm, rel, air) for nm, rel, air in _AIR_SPEC
+            if (_air_fold(rel) / "hip.xlsx").exists()]
+
+
 def cvt_li(fold, t_abs=None):
     """이 **trial 의** CVT 입력 링크 길이 [m] — `Clutch.xlsx` 실측 중앙값.
 

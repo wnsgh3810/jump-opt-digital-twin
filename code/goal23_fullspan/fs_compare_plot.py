@@ -214,7 +214,7 @@ def cl_pair(d, seg, g, sess, ft=None, show_old=True, runup=0.0):
         gg = (g[0], g[1], g[2] * _s, g[3])
     Lf = FR.rollout_cl_fs(ft, tr, sh(qd[0]), sh(qd[1]), sh(qd[2]), sh(qd[3]),
                           gg, t_end_r, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
-                          fade=True, taulim=None, vdes_ff=(sess != "26.04.21"), init_meas=init)
+                          fade=True, taulim=None, vdes_ff=FD.vdes_applied(sess), init_meas=init)
     if (show_old and Lo is None) or Lf is None:
         return None
     # ★ 재생은 앞당겨 돌았어도 **돌려주는 것은 원래 창만**이다 (그림·채점 구간 불변).

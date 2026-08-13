@@ -64,7 +64,7 @@ def main():
             sp = CP.sess_params(s)
             L = FR.rollout_cl_fs(ft, t, *qd, tuple(g), float(t[-1]), two_stage=True,
                                  bias1=sp["bias1"], knee_deep=sp["knee_deep"], fade=True,
-                                 taulim=None, vdes_ff=(s != "26.04.21"), init_meas=init)
+                                 taulim=None, vdes_ff=FD.vdes_applied(s), init_meas=init)
             if L is None:
                 continue
             gi = lambda k: np.interp(t, L["t"], L[k])

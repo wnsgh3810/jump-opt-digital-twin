@@ -135,7 +135,7 @@ def run_board():
                                       sh(d["dqd1"][m]), sh(d["dqd2"][m]),
                                       gcl, float(t[-1]), two_stage=True, bias1=sp["bias1"],
                                       knee_deep=sp["knee_deep"], fade=True, taulim=None,
-                                      vdes_ff=(s != "26.04.21"), init_meas=init)
+                                      vdes_ff=FD.vdes_applied(s), init_meas=init)
                 if Lc is not None:
                     gc = lambda k: np.interp(t, Lc["t"], Lc[k])
                     OUT["CL"].setdefault(s, []).append(

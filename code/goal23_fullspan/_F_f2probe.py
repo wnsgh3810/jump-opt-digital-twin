@@ -33,7 +33,7 @@ def run_one(want, tr):
         i0 = max(0, seg["i_desc"] - 5); t = d["t"][i0:] - d["t"][i0]
         L = FR.rollout_cl_fs(ft, t, sh(d["qd1"][i0:]), sh(d["qd2"][i0:]), sh(d["dqd1"][i0:]), sh(d["dqd2"][i0:]),
                              tuple(g), seg["t_lo"] - d["t"][i0], two_stage=True, bias1=SP[s]["bias1"],
-                             knee_deep=SP[s]["knee_deep"], fade=True, taulim=None, vdes_ff=(s != "26.04.21"))
+                             knee_deep=SP[s]["knee_deep"], fade=True, taulim=None, vdes_ff=FD.vdes_applied(s))
         if L is None:
             return None
         dtm = float(np.median(np.diff(L["t"])))

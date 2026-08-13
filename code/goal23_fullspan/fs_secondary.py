@@ -46,7 +46,8 @@ def main():
             i0 = max(0, seg["i_desc"] - 5)
             t = d["t"][i0:] - d["t"][i0]
             t_end = seg["t_lo"] - d["t"][i0]
-            _vff = s not in os.environ.get("FS_VDES0", "").split(",")
+            _vff = ((s not in os.environ["FS_VDES0"].split(","))
+                    if os.environ.get("FS_VDES0") else FD.vdes_applied(s))
             L = FR.rollout_cl_fs(ft, t, sh(d["qd1"][i0:]), sh(d["qd2"][i0:]), sh(d["dqd1"][i0:]), sh(d["dqd2"][i0:]),
                                  gm, t_end, two_stage=True, bias1=sp["bias1"], knee_deep=sp["knee_deep"],
                                  fade=os.environ.get("FS_FADE") == "1", taulim=None, vdes_ff=_vff)

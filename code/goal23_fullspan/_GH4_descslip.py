@@ -57,7 +57,7 @@ def run():
                 CP.sh(d["dqd1"][i0:]), CP.sh(d["dqd2"][i0:]),
                 tuple(g), t_end, two_stage=True, bias1=sp["bias1"],
                 knee_deep=sp["knee_deep"], fade=True, taulim=None,
-                vdes_ff=(s != "26.04.21"))
+                vdes_ff=FD.vdes_applied(s))
         except Exception as ex:
             print(f"  ✗ {s}/{p.name}: {type(ex).__name__} {str(ex)[:50]}", flush=True); continue
         if L is None or "slipv" not in L:

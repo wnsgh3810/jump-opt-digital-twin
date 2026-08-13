@@ -1838,7 +1838,8 @@ def baseline_fs3():
                     _ne = safe.read_json(_nj).get(s)
                     if _ne and _ne.get("lim2_nm") and _ne["lim2_nm"] < 19.0:
                         _l2n = float(_ne["lim2_nm"])
-            _vff = s not in os.environ.get("FS_VDES0", "").split(",")
+            _vff = ((s not in os.environ["FS_VDES0"].split(","))
+                    if os.environ.get("FS_VDES0") else FD.vdes_applied(s))
             _qsn = int(os.environ.get("FS_QDSHIFT", "0") or 0)
             def _sh(x, _n=_qsn):
                 # P18: qd 채널 로깅 스큐 보정 (qd가 q/raw보다 _n샘플 선행 기록 — δ4ms=2샘플 판독)

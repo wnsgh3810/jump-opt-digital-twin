@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """_F_vceil — F-H7 프로브: 전압 포락선 천장 (w0,w1) 스캔. dq2 말기 꺾임 + h + push RMSE."""
 import os, sys
+import fs_data as FD
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 exec(open("_F_f2probe.py", encoding="utf-8").read().split('CFG = ')[0])  # run_one/TR 재사용
 
@@ -12,7 +13,7 @@ def run_dq2late(want, tr):
         i0 = max(0, seg["i_desc"] - 5); t = d["t"][i0:] - d["t"][i0]
         L = FR.rollout_cl_fs(ft, t, sh(d["qd1"][i0:]), sh(d["qd2"][i0:]), sh(d["dqd1"][i0:]), sh(d["dqd2"][i0:]),
                              tuple(g), seg["t_lo"] - d["t"][i0], two_stage=True, bias1=SP[s]["bias1"],
-                             knee_deep=SP[s]["knee_deep"], fade=True, taulim=None, vdes_ff=(s != "26.04.21"))
+                             knee_deep=SP[s]["knee_deep"], fade=True, taulim=None, vdes_ff=FD.vdes_applied(s))
         if L is None: return None
         pm = seg["push"][i0:][:len(t)]; idx = np.where(pm)[0]
         late = idx[-len(idx)//3:]
