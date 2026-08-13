@@ -39,24 +39,9 @@ sys.path.insert(0, str(HERE.parent / "bench"))
 #     set FS_STACK_TAG=H4_260813            ← 그림 범례에 찍힐 이름 (안 주면 폴더 이름에서)
 #     python fs_compare_plot.py
 #   안 주면 지금까지처럼 **바깥에서 넣어 준 환경변수**를 그대로 쓴다 (기존 동작 불변).
-_CMP_FROM = os.environ.get("FS_CMP_FROM")
-if _CMP_FROM:
-    _p = Path(_CMP_FROM)
-    if not _p.is_absolute():
-        _p = HERE / _p
-    _res = json.loads(_p.read_text(encoding="utf-8"))["res"]
-    _mode = os.environ.get("FS_CMP_MODE") or next(iter(_res))
-    _r = _res[_mode]
-    import _GHB_sweep as _SW                # 축 벡터 → 환경변수 변환 (단일 출처)
-    for _k, _v in _SW.env_of(_mode, np.asarray(_r["x"], float)).items():
-        os.environ[_k] = _v
-    _stem = _p.stem.replace("_GHB_sweep", "run")
-    os.environ.setdefault("FS_CMP_OUT", f"_compare_{_stem}")
-    os.environ.setdefault("FS_STACK_TAG", os.environ["FS_CMP_OUT"].replace("_compare_", ""))
-    print(f"■ 모델 값을 {_p.name} 에서 불러왔다 (구조 {_mode} · 축 {len(_r['x'])} 개 · "
-          f"점수 {_r.get('score', float('nan')):.4f} · 0 이 완벽)", flush=True)
-    for _k, _v in zip(_r["axes"], _r["x"]):
-        print(f"    {_k:16s} {_v:>12.5f}", flush=True)
+if os.environ.get("FS_CMP_FROM"):
+    import _GHB_sweep as _SW                # 축 벡터 → 환경변수 변환의 단일 출처
+    _SW.apply_from_json()
 
 import matplotlib
 matplotlib.use("Agg")

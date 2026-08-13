@@ -19,6 +19,14 @@ import numpy as np
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "bench"))
+
+# 모델 값을 탐색 결과 파일에서 바로 불러오는 길 (2026-08-13) — `fs_compare_plot` 과 같은 규약.
+#   set FS_CMP_FROM=_GHB_sweep4.json  →  그 승자의 값 열두 개가 자동으로 들어간다.
+#   모델을 짓기 **전에** 넣어야 하므로 다른 것들보다 먼저 부른다.
+if os.environ.get("FS_CMP_FROM"):
+    import _GHB_sweep as _SW                # 축 벡터 → 환경변수 변환의 단일 출처
+    _SW.apply_from_json()
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt

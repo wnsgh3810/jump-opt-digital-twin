@@ -217,6 +217,41 @@ def _sync_x0():
 _sync_x0()
 
 
+def apply_from_json(path=None):
+    """탐색 결과 파일 → 그 승자의 **환경변수를 지금 프로세스에 넣는다.** 반환 = 넣은 dict.
+
+    ★ 왜 있나 (2026-08-13 신설)
+      그림을 그리려면 모델 값 열두 개를 환경변수로 넣어 줘야 하는데, 지금까지는 사람이
+      손으로 옮겨 적었다. 08-12 에 그러다 축 2 개를 빠뜨린 채 6 시간을 돌 뻔했다.
+      ⇒ 옮겨 적는 일 자체를 없앤다. **축 벡터 → 환경변수 변환은 `env_of` 하나뿐**이므로
+        그림도 점수도 문자 그대로 같은 지점을 가리키게 된다.
+
+    · path 를 안 주면 환경변수 FS_CMP_FROM 을 본다. 그것도 없으면 아무것도 안 하고 None.
+    · 여러 구조가 담긴 파일이면 FS_CMP_MODE 로 고르고, 안 주면 첫 번째를 쓴다.
+    · 산출 폴더(FS_CMP_OUT)와 그림 범례(FS_STACK_TAG)는 파일 이름에서 만들어 주되,
+      이미 지정돼 있으면 건드리지 않는다.
+    """
+    p = path or os.environ.get("FS_CMP_FROM")
+    if not p:
+        return None
+    p = Path(p)
+    if not p.is_absolute():
+        p = HERE / p
+    res = json.loads(p.read_text(encoding="utf-8"))["res"]
+    mode = os.environ.get("FS_CMP_MODE") or next(iter(res))
+    r = res[mode]
+    e = env_of(mode, np.asarray(r["x"], float))
+    os.environ.update(e)
+    stem = p.stem.replace("_GHB_sweep", "run")
+    os.environ.setdefault("FS_CMP_OUT", f"_compare_{stem}")
+    os.environ.setdefault("FS_STACK_TAG", os.environ["FS_CMP_OUT"].replace("_compare_", ""))
+    print(f"■ 모델 값을 {p.name} 에서 불러왔다 (구조 {mode} · 축 {len(r['x'])} 개 · "
+          f"점수 {r.get('score', float('nan')):.4f} · 0 이 완벽)", flush=True)
+    for k, v in zip(r["axes"], r["x"]):
+        print(f"    {k:16s} {v:>12.5f}", flush=True)
+    return e
+
+
 def env_of(mode, x):
     """축 벡터 → 환경변수 dict (현행 스택 위에 덮어쓴다)."""
     e = dict(BASE_ENV)
