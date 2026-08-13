@@ -49,11 +49,30 @@ rem         Now the body is truly pinned; the leg falls 75.21 deg as it should.
 rem       - 8 call sites were switched to a helper that was never written,
 rem         which silently killed ALL closed-loop scoring (score 900).
 rem
-rem  Expected first lines (verify before leaving it to run):
-rem    - "torque wrap fix 46" spots.  If 0, close the window and report it.
-rem    - starting point penalty must be 0.000 and total about 0.3656
-rem      (injection 0.1747 / cl-angle 0.1233 / cl-torque 0.2984 /
-rem       height 0.0416 / hanging 1.3291)
+rem    5. SCOREBOARD REPAIRS (08-14, before this run -- all four were real holes):
+rem       a) CL torque ruler is now COMMAND vs COMMAND (pre-map).  The old ruler
+rem          compared sim shaft torque to "measured command converted by the
+rem          candidate's own map" -- and the map is a search axis in this run,
+rem          so a candidate could bend the ruler it is measured by.
+rem       b) If the hanging replay diverges entirely, the old code scored it as
+rem          PERFECT (0.0).  Now it counts as failure; missing records = 3.0.
+rem       c) The failed trial 0802_knee250_vk118 (hip ignored its command,
+rem          gain recovery 0.6x) is excluded -> hanging is now 15 records.
+rem       d) SIT-TO-STAND JOINS THE SCORE (user approval 08-14, reversing the
+rem          08-12 "monitor only" rule): 26.06.04 cvt 0/2.5/5kg + no_cvt 0kg,
+rem          measured-torque injection replay only (no gain guessing), payload
+rem          mass added to the trunk, per-trial clutch link length.
+rem       Weights now: injection 0.27 / cl-angle 0.15 / cl-torque 0.27 /
+rem                    height 0.07 / hanging 0.14 / sit-to-stand 0.10
+rem
+rem  Expected first lines (verified 08-14 by running the repaired board once):
+rem    - data line: "56 trial (cvt 10) . torque wrap fix 46 . hanging 15
+rem      records . sit-to-stand 4 cases".  If wrap fix is 0, close and report.
+rem    - starting point (deployed stack) penalty must be 0.000, total 0.6714
+rem      (injection 0.1747 / cl-angle 0.1233 / cl-torque(command ruler) 0.3403 /
+rem       height 0.0416 / hanging 1.3553 / sit-to-stand 3.2121)
+rem      sit-to-stand 3.21 vs jump injection 0.17 = the never-constrained regime,
+rem      now visible in the score for the first time.
 rem    - 16 axes listed, axis 12 and 13 starting at 1.0
 rem
 rem  Outputs are tagged "5" so RUN-1..4 artifacts are NEVER touched.
@@ -65,6 +84,7 @@ set PYTHONUNBUFFERED=1
 set FS_SWEEP_TAG=5
 set FS_SWEEP_CVT=1
 set FS_SWEEP_AIR=1
+set FS_SWEEP_S2S=1
 set FS_SWEEP_MODES=canon_cap
 
 rem  Default 8 hours.  RUN 4 used 4 h with 14 axes; RUN 5 has 16 axes and a
@@ -92,9 +112,10 @@ if errorlevel 1 (
 
 echo.
 echo   CHECK THE FIRST LINES:
-echo     1. "torque wrap fix N spots" must not be 0.
-echo     2. starting-point penalty must be 0.000, total about 0.3656
-echo     3. 16 axes; axis 12 and 13 (torque ratio shape) start at 1.0
+echo     1. "torque wrap fix N spots" must not be 0 (expect 46).
+echo     2. data line says "hanging 15 records" and "sit-to-stand 4 cases".
+echo     3. starting-point penalty 0.000, total 0.6714.
+echo     4. 16 axes; axis 12 and 13 (torque ratio shape) start at 1.0
 echo.
 
 %PY% -u _GHB_sweep.py %HOURS%

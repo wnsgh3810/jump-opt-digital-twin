@@ -154,7 +154,7 @@ def rmse_line(d, m, sims):
     return " / ".join(out)
 
 
-def cl_pair(d, seg, g, sess, ft=None, show_old=True, runup=0.0):
+def cl_pair(d, seg, g, sess, ft=None, show_old=True, runup=0.0, cmd_tau=False):
     """CL을 **ModeA와 동일 규칙**으로: 점프 창 시작에서 실측 상태 1회 앵커 → 통짜 폐루프 (P16).
     반환 (t, 실측, OLD, 현행, 창마스크) — 실패 시 None.
 
@@ -235,7 +235,13 @@ def cl_pair(d, seg, g, sess, ft=None, show_old=True, runup=0.0):
     meas_o["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=True)
     meas_f["a1"] = tau_ref(d["raw1"][m], d["dq1"][m], 0, old=False)
     meas_f["a2"] = tau_ref(d["raw2"][m], d["dq2"][m], 1, old=False)
-    cmd = [d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m], None, None]   # exp5 형식: 명령 병기
+    # ★ 08-14 `cmd_tau` — 채점용으로 시뮬레이션의 **환산식 통과 전 명령**(PD 가 만든 값,
+    #   ±35.5 클립 후, N·m)을 토크 자리(4·5)에 실어 준다. 기록된 실측 토크도 명령이므로
+    #   "명령끼리" 비교가 성립한다 — 환산식(탐색 축)이 점수의 자에서 빠진다.
+    #   그림 경로(cmd_tau=False)는 종전과 한 자리도 안 바뀐다.
+    cmd = [d["qd1"][m], d["qd2"][m], d["dqd1"][m], d["dqd2"][m],
+           gi(Lf, "c1") if cmd_tau else None,
+           gi(Lf, "c2") if cmd_tau else None]   # exp5 형식: 명령 병기
     pl = plan_of(sess, t, d["qd2"][m])                                        # 배포 계획 (있는 세션만)
     return tt[m], (meas_o, meas_f), old, fs, np.ones(m.sum(), bool), cmd, pl
 

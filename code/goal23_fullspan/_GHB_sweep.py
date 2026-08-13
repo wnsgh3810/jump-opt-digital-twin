@@ -47,6 +47,9 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 # 실행 회차별로 산출 파일을 분리한다 (FS_SWEEP_TAG="2" → _GHB_sweep2.json).
 # 1회차 결과가 현행 스택 H3 의 출처이므로 **절대 덮어쓰면 안 된다.**
+# ★ 08-14 — 태그 없이(빈 문자열) 탐색을 돌리면 바로 그 1회차 파일을 덮어쓴다.
+#   주석으로만 지키던 것을 코드로 막는다: 탐색 실행(__main__)은 태그가 없으면 거부한다.
+#   (모듈 import 만 하는 경우는 막지 않는다 — 채점 함수는 태그와 무관하다.)
 _TAG = os.environ.get("FS_SWEEP_TAG", "")
 OUT = HERE / f"_GHB_sweep{_TAG}.json"
 LOG = HERE / f"_GHB_sweep{_TAG}_trials.jsonl"
@@ -349,6 +352,7 @@ def env_of(mode, x):
 # ── 작업자별 1회 준비 (엑셀 읽기 ~80초 + 기준선) ───────────────────────────────────
 _C = None
 _A = None      # 공중·지면 일어서기 (읽어 둔 것)
+_S = None      # 짐 지고 일어서기 26.06.04 (읽어 둔 것 — 08-14 편입, 사용자 승인)
 _BASE = None      # 두 세대 전 모델의 성적 — **옛 자**의 1.0000
 _CUR = None       # 배포 스택(현행)의 성적 — **벌점의 기준** (08-13 변경점)
 
@@ -381,6 +385,10 @@ def _apply(e):
               "FS_COMZ", "FS_KS_HIP", "FS_CMD_LPF", "FS_TMAP", "FS_TDCAP", "FS_TFRIC",
               "FS_FOOTR", "FS_NOSUPP", "FS_NOSPR", "FS_NOBIAS", "FS_NODEEP",
               "FS_PRESLIDE", "FS_IMPRATIO", "FS_TQ_LIN", "FS_TQ_SQ",
+              # ★ 08-14: 모터축 관성 2 종도 지운다 — env_of 가 항상 덮어쓰므로 평가 사이는
+              #   안전하지만, 기준선(BASE_ENV)을 잴 때와 부모 프로세스 env 를 상속할 때
+              #   직전 값이 살아남는 길이 있었다 (레일 마찰 잔존 사고와 같은 계열).
+              "FS_HIPM_ARM", "FS_KNEEM_ARM",
               # ★ 08-13 버그픽스: 신규 2 축을 env_of 에는 추가했는데 **여기 지우는 목록에는
               #   안 넣었다.** env_of 는 값이 0 이면 변수를 아예 안 넣으므로(옛 판 재현 보장),
               #   지우지 않으면 **직전 평가의 값이 그대로 남아** 다음 평가를 오염시킨다.
@@ -517,19 +525,38 @@ def board():
                             G[s]["hr"].append(hh / abs(float(hv)))
             if g:
                 d["_sess"] = s; d["_fold"] = p
-                r = CP.cl_pair(d, seg, g, s, ft=(ft if cvt else None))
+                r = CP.cl_pair(d, seg, g, s, ft=(ft if cvt else None), cmd_tau=True)
                 if r is not None:
                     _t, (mo, mf), old, fs, _m, _c, _ = r
                     v = [float(np.sqrt(np.mean((np.asarray(mf[k]) - np.asarray(fs[i])) ** 2))) *
                          (180 / np.pi if k in ("q1", "q2") else 1) for i, k in enumerate(CH6)]
                     if all(np.isfinite(v)) and max(v) < 1e4:
                         G[s]["cl"].append(v)
-                    # 새 자 — 같은 결과를 창 앞 80% 만 잘라 표준편차로 나눈다
-                    v8 = [_r80(_t, mf[k], fs[i]) for i, k in enumerate(CH6)]
+                    # ★★ 08-14 토크 자 교체 (사용자 위임 → 채택) — 새 자의 토크 두 채널(4·5)은
+                    #   **환산식 통과 전 "명령끼리"** 비교한다.
+                    #   왜: 종전에는 "실측 명령을 후보의 환산식으로 바꾼 값"과 시뮬 축토크를
+                    #   비교하고 그 폭으로 나눴다. 그런데 그 환산식(작은/큰 토크 배수 2축 + 보정
+                    #   상한 2축)이 이번 판부터 탐색 대상이라, **후보가 자기를 재는 자의 모양을
+                    #   바꿀 수 있었다** (심판의 줄자를 선수가 깎는 구조). 명령은 실측(기록 그대로,
+                    #   N·m)과 시뮬(PD 가 만든 값, ±35.5 클립 후, 환산 전) 양쪽 다 원값이라
+                    #   환산식이 자에서 빠진다 — 환산식이 틀리면 이제 각도·속도(물리)로만 드러난다.
+                    #   각도·속도 채널(0~3)은 종전과 동일하다.
+                    _okc = (_c[4] is not None and _c[5] is not None
+                            and len(_t) == int(np.sum(m)))
+                    _mc = {4: d["raw1"][m], 5: d["raw2"][m]} if _okc else {}
+
+                    def _ch(i, k, fn):
+                        if i in (4, 5):
+                            # 명령 길이가 안 맞으면(있어선 안 되는 일) NaN → 이 trial 의
+                            # 새 자 채점을 통째로 버린다. 옛 자기참조 자로 조용히 돌아가는
+                            # 침묵 실패를 막기 위해서다.
+                            return fn(_t, _mc[i], _c[i]) if _okc else np.nan
+                        return fn(_t, mf[k], fs[i])
+                    v8 = [_ch(i, k, _r80) for i, k in enumerate(CH6)]
                     if all(np.isfinite(v8)) and max(v8) < 1e3:
                         G[s]["cl8"].append(v8)
-                    # 이륙 직전 20% — 잠금장치 전용 (점수에는 안 들어간다)
-                    v2 = [_r20(_t, mf[k], fs[i]) for i, k in enumerate(CH6)]
+                    # 이륙 직전 20% — 잠금장치 전용 (점수에는 안 들어간다). 같은 자 규약.
+                    v2 = [_ch(i, k, _r20) for i, k in enumerate(CH6)]
                     if all(np.isfinite(v2)) and max(v2) < 1e3:
                         G[s]["cl2"].append(v2)
         except Exception:
@@ -545,7 +572,7 @@ def board():
 
 
 def _ensure():
-    global _C, _A, _BASE, _CUR
+    global _C, _A, _S, _BASE, _CUR
     if _C is not None:
         return
     import fs_data as FD
@@ -590,6 +617,24 @@ def _ensure():
             if _W:
                 A.append((_nm, _d, _W, bool(_air)))
     _A = A
+    # ── 짐 지고 일어서기(26.06.04) 읽어 두기 (08-14 편입 — 사용자 승인) ─────────────────
+    #   유효 4 경우만 (변속기 있음 0/2.5/5kg + 변속기 없음 0kg — 사전: 무변속은 0kg 만 유효).
+    #   창은 매달림 판과 같은 규칙(속도 기반, 최대 1.5초) — 앉아서 정지한 구간(하드스톱
+    #   접촉, 물리 미모델)은 속도 문턱이 자연히 걸러낸다. 완전하지는 않다(하강 재착좌
+    #   순간이 섞일 수 있음) — v2 에서 하드스톱 창 선별로 다듬을 것.
+    S = []
+    if os.environ.get("FS_SWEEP_S2S", "1") != "0":
+        for _sub, _pay, _cvt in FD.S2S_CASES:
+            try:
+                _d = FD.load_s2s(_sub)
+                if _d is None:
+                    continue
+                _W = FD.air_windows(_d, nwin=int(os.environ.get("FS_S2S_NWIN", "4")))
+            except Exception:
+                continue
+            if _W:
+                S.append((_sub, float(_pay), bool(_cvt), _d, _W))
+    _S = S
     # ★ 08-12 밤 안전장치 — **토크 겹침 교정이 실제로 걸렸는지 첫머리에 찍는다.**
     #   2 회차는 이 교정이 파일에 들어가기 3 시간 전에 시작해서, 어긋난 토크로 6 시간을
     #   돌고 나서야 발각됐다 (파이썬은 시작할 때 코드를 한 번 읽고 그 뒤엔 안 다시 읽는다).
@@ -598,7 +643,8 @@ def _ensure():
     _nfix = sum(int(d.get("n_unwrap_fix", 0) or 0) for _s, _p, _g, _cvt, d, _sg, _pw in C)
     _ncvt = sum(1 for _s, _p, _g, _cvt, _d, _sg, _pw in C if _cvt)
     print(f"  데이터 {len(C)} trial (변속기 {_ncvt}) · "
-          f"토크 겹침 교정 {_nfix} 곳" + ("" if _nfix else "  ⚠ 0 이면 교정 미적용 — 중단할 것"),
+          f"토크 겹침 교정 {_nfix} 곳" + ("" if _nfix else "  ⚠ 0 이면 교정 미적용 — 중단할 것") +
+          f" · 매달림 {len(A)} 기록 · 일어서기 {len(S)} 경우",
           flush=True)
     _apply(dict(BASE_ENV))
     _BASE = board()
@@ -669,19 +715,81 @@ def air_board():
     return out
 
 
-def absa(A):
+def absa(A, expected=None):
     """공중 판 성적 하나로 — **기록마다 먼저 평균내고 그 다음 기록끼리 평균**.
 
     왜 두 단계인가: 26.08.02 이 9 건이고 나머지가 7 건이라, 창을 통째로 평균내면
     한 세션이 점수의 절반을 넘게 가져간다. 기록 단위로 먼저 묶어 균형을 맞춘다.
     **0 이 완벽**이고 클수록 부정확하다.
+
+    ★ 08-14 `expected` — 재생이 통째로 실패한 기록은 "없던 일"이 아니라 **최악 수준
+      (3.0)** 으로 계상한다. 종전에는 조용히 평균에서 빠져서, 어려운 기록을 발산시키는
+      후보가 그 기록을 지우는 이득을 봤다 (침묵 탈락). 3.0 은 배포 스택에서 관측된
+      최악 기록(3.13) 규모다.
     """
-    if not A:
-        return np.nan
     g = collections.defaultdict(list)
-    for nm, v in A:
+    for nm, v in (A or []):
         g[nm].append(float(np.mean(v)))
-    return float(np.mean([np.mean(x) for x in g.values()]))
+    vals = [float(np.mean(x)) for x in g.values()]
+    if expected:
+        vals += [3.0] * sum(1 for nm in expected if nm not in g)
+    return float(np.mean(vals)) if vals else np.nan
+
+
+def s2s_ma_score():
+    """짐 지고 일어서기(26.06.04) — **측정 토크 주입 재생** 성적 (08-14 편입, 사용자 승인).
+
+    ■ 무엇을 무엇과 비교하나: 실기에서 기록된 모터 명령 토크를 그대로 넣고(PD 제어 없음)
+      지면 위에서 돌린 뒤, 관절 각도·각속도 4채널을 같은 순간의 실측과 비교한다.
+      PD 흉내가 아니라 주입 재생을 쓰는 이유: 이 세션은 게인 기록이 없어 PD 쪽은 추정
+      게인에 기대야 한다 (그쪽은 감시 전용으로 유지).
+    ■ 자: 채널마다 (창 앞 80% 오차 RMS) ÷ (창 전체 실측 표준편차, 매달림 판과 같은 분모
+      바닥). **0 이 완벽**, 1.0 이면 그 신호가 움직인 폭만큼 빗나갔다는 뜻.
+      경우(변속기 0/2.5/5kg + 무변속 0kg)마다 창 평균 → 경우끼리 평균.
+    ■ 짐은 몸통에 통째로 붙인다 (사용자 확인 08-13) — 그 경우만큼 총질량 env 를 올려
+      모델을 다시 짓는다. 변속기 경우는 그 trial 의 링크 길이 실측으로 짓는다.
+    ■ 재생이 통째로 실패한 경우는 최악 수준(3.0)으로 계상 — 침묵 탈락 방지 (absa 와 동일).
+    """
+    import fs_runner as FR, fs_cvt as FC
+    m0 = float(os.environ.get("FS_MASS", "3.30"))
+    keep = os.environ.get("FS_MASS")
+    vals = {}
+    try:
+        for sub, pay, cvt, d, W in (_S or []):
+            per = []
+            try:
+                os.environ["FS_MASS"] = f"{m0 + pay:.4f}"
+                FR._CACHE.clear(); _CVT_STAMPED.clear()
+                ft = FC.cvt_ft(float(d["l_i"]), ft_base=FR.fs_twin()) if cvt else FR.fs_twin()
+                t = d["t"]
+                for w0, w1 in W:
+                    mm = (t >= w0) & (t <= w1)
+                    if mm.sum() < 20:
+                        continue
+                    i0 = int(np.argmax(mm)); tg = t[mm] - t[i0]
+                    L = FR.rollout_ol_fs_b(ft, tg, d["raw1"][mm], d["raw2"][mm],
+                                           float(d["q1"][i0]), float(d["q2"][i0]),
+                                           float(d["dq1"][i0]), float(d["dq2"][i0]),
+                                           float(tg[-1] - 0.004), fade=True)
+                    if L is None:
+                        continue
+                    gf = lambda k: np.interp(tg, L["t"], L[k])
+                    sim = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2")]
+                    v = [_r80(tg, d[k][mm], sm, floor=fl)
+                         for k, sm, fl in zip(CH4, sim, AIR_FLOOR)]
+                    if all(np.isfinite(v)) and max(v) < 1e3:
+                        per.append(float(np.mean(v)))
+            except Exception:
+                per = []
+            vals[sub] = float(np.mean(per)) if per else 3.0
+    finally:
+        # 질량 env 원복 + 캐시 청소 — 다음 평가가 짐 붙은 모델을 물려받으면 안 된다
+        if keep is None:
+            os.environ.pop("FS_MASS", None)
+        else:
+            os.environ["FS_MASS"] = keep
+        FR._CACHE.clear(); _CVT_STAMPED.clear()
+    return float(np.mean(list(vals.values()))) if vals else np.nan
 
 
 def absm(B, key, sess, cols):
@@ -731,11 +839,16 @@ def rel_cur(B, key, sess):
 #   없었다** (점프 무릎 속도 중앙 5.31 rad/s · 1 rad/s 아래가 시간의 18%). 매달림 16 건은
 #   발이 땅에 안 닿아 발 마찰·미끄러짐이 안 섞이고, 남는 것이 중력·관성·관절 마찰뿐이라
 #   지금 고치려는 것을 그대로 본다. 다만 최종 목표는 점프의 토크 일치이므로 **주역은 점프**다.
-W_MA   = 0.30   # 측정 토크를 그대로 넣고 돌린 판 (점프) — 각도·속도 4 채널
-W_CLQ  = 0.17   # PD 제어를 흉내 낸 판 (점프) — 각도·속도 4 채널
-W_CLT  = 0.30   # PD 제어를 흉내 낸 판 (점프) — **토크 2 채널** (옛 판에서는 0.13)
-W_H    = 0.08   # 점프 높이
-W_AIR  = 0.15   # 매달림 16 건 — 측정 토크 주입 재생만 (각도·속도 4 채널)
+# ★ 08-14 — 짐 지고 일어서기(26.06.04)가 **측정 토크 주입 재생으로 점수에 들어온다**
+#   (사용자 승인 08-14: "최소한 측정 토크 주입 판에는 들어가야 할 것 같다").
+#   08-12 의 "적합 대상 추가 금지"를 사용자가 직접 번복한 것이다. PD 흉내 쪽은 게인이
+#   기록에 없어(추정값) 계속 감시 전용으로 둔다. 합계 1.00 유지를 위해 재배분.
+W_MA   = 0.27   # 측정 토크를 그대로 넣고 돌린 판 (점프) — 각도·속도 4 채널
+W_CLQ  = 0.15   # PD 제어를 흉내 낸 판 (점프) — 각도·속도 4 채널
+W_CLT  = 0.27   # PD 제어를 흉내 낸 판 (점프) — **토크 2 채널** (08-14 부터 "명령끼리" 자)
+W_H    = 0.07   # 점프 높이
+W_AIR  = 0.14   # 매달림 15 건 — 측정 토크 주입 재생만 (각도·속도 4 채널)
+W_S2S  = 0.10   # 짐 지고 일어서기 4 경우 — 측정 토크 주입 재생만 (각도·속도 4 채널)
 
 
 def evaluate(args):
@@ -764,10 +877,21 @@ def evaluate(args):
             return 9e2, None
         if not np.isfinite(hr):
             hr = 1.0
-        air = absa(air_board()) if os.environ.get("FS_SWEEP_AIR", "1") != "0" else 0.0
-        if not np.isfinite(air):
-            air = 0.0
-        J = W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr + W_AIR * air
+        _airon = os.environ.get("FS_SWEEP_AIR", "1") != "0"
+        air = absa(air_board(), expected=[nm for nm, _d, _W, _a in (_A or [])]) if _airon else 0.0
+        # ★ 08-14 — 매달림 판이 통째로 무너지면(전 기록 발산) 종전에는 0.0(만점)으로
+        #   대체했다. 매달림을 부수는 후보가 이 몫을 공짜로 받는 구멍이므로 **실패**로 처리.
+        #   (FS_SWEEP_AIR=0 으로 판을 끈 경우의 0 은 그대로 — 점수 정의가 다른 판이 된다는
+        #    것을 알고 쓰는 스위치다.)
+        if _airon and not np.isfinite(air):
+            return 9e2, None
+        # ★ 08-14 — 짐 지고 일어서기 판 (아래 s2s_ma_score 참조). 실패 경우는 3.0 계상이라
+        #   NaN 은 "판 자체가 안 섰다"는 뜻 → 실패 처리.
+        s2s = s2s_ma_score() if _S else 0.0
+        if _S and not np.isfinite(s2s):
+            return 9e2, None
+        J = (W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
+             + W_AIR * air + W_S2S * s2s)
         # 벌점 — 적합에 안 쓰는 세션이 **배포 스택보다** 2% 넘게 나빠지면 붙는다 (08-13 변경점)
         pen = 0.0; gl = {}
         for s in GATE_MA:
@@ -823,8 +947,8 @@ def evaluate(args):
         oh = float(np.mean(ohs)) if ohs else np.nan
         Jold = (0.40 * oma + 0.40 * ocl + 0.20 * oh
                 if all(np.isfinite(q) for q in (oma, ocl, oh)) else np.nan)
-        return J + pen, dict(J=J, ma=ma8, clq=clq, clt=clt, h=hr, air=air, pen=pen, gate=gl,
-                             Jold=Jold, old_ma=oma, old_cl=ocl, old_h=oh)
+        return J + pen, dict(J=J, ma=ma8, clq=clq, clt=clt, h=hr, air=air, s2s=s2s,
+                             pen=pen, gate=gl, Jold=Jold, old_ma=oma, old_cl=ocl, old_h=oh)
     except Exception:
         return 9e2, None
 
@@ -884,8 +1008,12 @@ def show(x=None, mode="canon_cap"):
         print(f"{s:11s} {kind:8s} {n:3d} | {' '.join(cols)} | {rm:7.4f} {rc:7.4f} "
               f"{(h*100 if h else float('nan')):7.2f}")
     print("-" * 128)
-    print(f"종합 {v:.5f}  (주입재생 {det['ma']:.5f} · 폐루프 {det['cl']:.5f} · "
-          f"점프높이 {det['h']:.5f} · 벌점 {det['pen']:.3f})")
+    # ★ 08-14 픽스 — det 에는 'cl' 키가 없다 (clq/clt 로 갈라진 지 오래). 이 도구가
+    #   그동안 KeyError 로 죽어 있었다 (변속기 검수용 보드가 실행 불가였던 셈).
+    print(f"종합 {v:.5f}  (주입재생 {det['ma']:.5f} · 폐루프각속 {det['clq']:.5f} · "
+          f"폐루프토크 {det['clt']:.5f} · 점프높이 {det['h']:.5f} · "
+          f"매달림 {det.get('air', float('nan')):.5f} · 일어서기 {det.get('s2s', float('nan')):.5f} · "
+          f"벌점 {det['pen']:.3f})")
     print("  게이트: " + " · ".join(f"{k} {r:.4f}" for k, r in det["gate"].items()))
     print("\n  · 힙각/무릎각 [도], 힙속도/무릎속도 [rad/s] = 측정 토크를 그대로 넣고 돌렸을 때의")
     print("    오차 RMS (0 이면 완벽). 괄호 = 그 세션 실측 신호 크기 대비 몇 % 인가.")
@@ -1004,6 +1132,12 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "board":
         show()
         return
+    # ★ 08-14 — 태그 없는 탐색 거부 (1회차 산출물 덮어쓰기 방지, 위 _TAG 주석 참조)
+    if not _TAG and os.environ.get("FS_SWEEP_ALLOW_UNTAGGED", "") != "1":
+        print("[중단] FS_SWEEP_TAG 가 비어 있다 — 이대로 돌리면 1회차 산출물"
+              " (_GHB_sweep.json, 현행 스택의 출처) 을 덮어쓴다."
+              " 태그를 지정하거나 FS_SWEEP_ALLOW_UNTAGGED=1 로 명시 승인할 것.")
+        sys.exit(2)
     budget_h = float(sys.argv[1]) if len(sys.argv) > 1 else 6.0
     sys.stdout = Tee(HERE / f"_GHB_sweep{_TAG}.log")
     print(f"\n{'#'*78}\n# 시작 {time.strftime('%Y-%m-%d %H:%M:%S')}\n{'#'*78}")

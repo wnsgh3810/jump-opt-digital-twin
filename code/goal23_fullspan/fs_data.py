@@ -264,10 +264,16 @@ def air_windows(d, nwin=4, wmax=1.5, wmin=0.35):
     return [segs[i] for i in idx]
 
 
+# ★ 08-14 제외 — 26.08.02 knee250_vk118 은 **실패 시행**이다: 힙이 명령을 안 따라갔다
+#   (시킨 폭 24.00° vs 실제 67.30°, 게인 되찾기 0.6배 — 모델 없는 부호 전수검사에서 판독).
+#   장비/제어 이상이 섞인 기록이라 채점에 넣으면 멀쩡한 물리를 그 이상에 맞추게 된다.
+_AIR_EXCLUDE = {"0802_knee250_vk118"}
+
+
 def air_registry():
-    """(이름, 상대경로, 공중인가) — 파일이 실제로 있는 것만."""
+    """(이름, 상대경로, 공중인가) — 파일이 실제로 있는 것만. 실패 시행은 제외."""
     return [(nm, rel, air) for nm, rel, air in _AIR_SPEC
-            if (_air_fold(rel) / "hip.xlsx").exists()]
+            if nm not in _AIR_EXCLUDE and (_air_fold(rel) / "hip.xlsx").exists()]
 
 
 def cvt_li(fold, t_abs=None):
