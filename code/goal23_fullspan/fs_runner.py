@@ -714,7 +714,7 @@ class _PreSlide:
         self.model.geom_friction[self.gf][0] = self.orig[1]
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None, ret_state=False):
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
     init_meas=(q1,q2,dq1,dq2,raw1,raw2): settle 대신 **창 시작 실측 상태 1회 앵커** (ModeA와 동일 규칙,
     마라톤D P16 사용자 지시). thm1을 실측 q1에 앵커·처짐은 측정 토크에서 (F15/P12 규약).
@@ -1082,6 +1082,23 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         Lg["tsp1"][k] = _tau2s(float(md.qpos[iq["hip"]])) + (b_eff if (two_stage or bias1) else 0.0)
         s1f += af * (s1o - s1f)
         Lg["s1f"][k] = s1f
+    # ★★ 08-13 신설 `ret_state` — **끝난 순간의 상태를 통째로 내보낸다.**
+    #
+    #   왜: 측정 토크를 그대로 넣는 재생은 창 시작에서 상태를 맞춰 놓고 출발하는데, 그때
+    #   맞출 수 있는 건 **관절 각도와 속도뿐**이다. 로봇이 이미 움직이는 중이면 **눈에 안
+    #   보이는 것들**(구조가 휘어 있는 양 · 발이 붙었나 미끄러지는 중인가 · 걸러내기 직전 값)
+    #   을 맞출 방법이 없어서 출발 직후 몇 ms 만에 튄다.
+    #   ⇒ 사용자 제안(08-13): **PD 제어로 잡고 있다가 안정되면 넘겨준다.** PD 가 도는 동안
+    #     제어기가 모델을 실측 근처에 붙들어 주고, 그 사이 안 보이는 것들이 저절로 올바른
+    #     값에 도달한다. 그러고 넘기면 보이는 것도 안 보이는 것도 다 맞은 채로 출발한다.
+    #   실측 근거: 창 시작에서 그냥 출발하면 무릎각 5도까지 20~40ms, 정지에서 출발하면
+    #     118~182ms — **3~6 배** 차이다 (26.06.04 세 경우).
+    #   넘길 것은 이 넷뿐이다: 관절 위치·속도 + 발이 붙었나(slide) + 직전 접선력(fx_prev).
+    if ret_state:
+        Lg["state"] = dict(qpos=np.array(md.qpos, float), qvel=np.array(md.qvel, float),
+                           psl_slide=(bool(_psl.slide) if _psl is not None else None),
+                           psl_fx=(None if _psl is None or _psl.fx_prev is None
+                                   else float(_psl.fx_prev)))
     if _psl is not None:
         _psl.restore()
     if _eled is not None:
@@ -1340,8 +1357,17 @@ def modea_fs():
     print("done")
 
 
-def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False, bz_floor=None, knee_rel=None):
-    """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경)."""
+def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False, bz_floor=None, knee_rel=None, state0=None):
+    """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경).
+
+    ★★ 08-13 신설 `state0` — **PD 제어로 잡고 있다가 넘겨받아 출발한다** (사용자 제안).
+      `rollout_cl_fs(..., ret_state=True)` 가 내보낸 상태를 그대로 넣으면, 관절 각도·속도만
+      맞추는 게 아니라 **눈에 안 보이는 것들**(구조 처짐 · 발이 붙었나 미끄러지는 중인가)까지
+      맞은 채로 출발한다. state0=None (기본) 이면 지금까지와 **한 자리도 안 바뀐다.**
+      쓰는 법:
+        Lc = rollout_cl_fs(..., ret_state=True)          # 창 시작까지 PD 로 데려다준다
+        Lo = rollout_ol_fs_b(..., state0=Lc["state"])    # 거기서부터 측정 토크 주입
+    """
     _ramp = _bias_ramp()
     model = ft["model"]; P = ft["P"]; S = P.J._P["S"]
     law_a, law_b, law_v0 = ft["law"]; kr = ft["kr"]; sprm = ft["sprm"]
@@ -1396,6 +1422,33 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         md.qvel[dof["knee_motor"]] = -dq2_0
         md.qvel[dof["cpin"]] = dq2_0
         md.qvel[dof["knee"]] = -dq2_0
+    # ★★ 08-13 — 넘겨받은 상태에서 **안 보이는 것만** 가져온다.
+    #
+    #   처음엔 상태를 통째로 덮어썼는데 두 경우가 오히려 나빠졌다 (짐 5kg 20ms->0ms,
+    #   무변속 506ms->34ms). 원인: PD 단계가 짐 5kg 에서 잘 못 따라가서 **이미 5도 어긋난
+    #   자리를 넘겨주고 있었다.** 무변속은 창이 0ms(정지)에서 시작해 넘겨줄 구간이 아예 없다.
+    #   ⇒ 올바른 나눔은 이렇다:
+    #       **보이는 것**(관절 각도·속도) = 실측으로 맞춘다. 우리는 그 값을 안다.
+    #       **안 보이는 것**(구조 처짐 · 발이 붙었나) = PD 단계가 쌓아 준 것을 쓴다. 알 수 없으니까.
+    #   그래서 위 초기화(실측 앵커)를 그대로 살리고 처짐 관절 하나만 갈아 끼운다.
+    #   ★ 어디까지 넘겨받나 — FS_WARM_MODE 로 고른다 (기본 vel).
+    #     "hid" : 구조 처짐만        · "vel" : 처짐 + **속도 전부** · "all" : 상태 통째로
+    #     왜 속도인가: 실측 속도 채널은 **각도의 1샘플 차분이라 필터가 없고 잡음이 크다**
+    #       (신호 변동 폭의 7~10%). 그걸 개루프 재생의 출발 속도로 쓰면 그 잡음을 그대로
+    #       적분한다. PD 단계가 만든 속도는 매끈하고 물리적으로 앞뒤가 맞는다.
+    #     실측(26.06.04): 상태를 통째로 넘기면 무릎각 5도까지 40->266ms · 28->142ms 로 크게
+    #       좋아졌는데, 처짐만 넘기면 40->42ms 로 **변화가 없었다** ⇒ 이득의 출처는 속도다.
+    if state0 is not None and "qpos" in state0:
+        _wm = os.environ.get("FS_WARM_MODE", "vel")
+        _sq = np.asarray(state0["qpos"], float); _sv = np.asarray(state0["qvel"], float)
+        if _wm == "all":
+            md.qpos[:] = _sq; md.qvel[:] = _sv
+        else:
+            _dfl = float(_sq[iq["hip"]])                       # 구조가 휘어 있는 양
+            md.qpos[iq["hip_m"]] += (md.qpos[iq["hip"]] - _dfl)  # 관절각 합 보존하며 처짐만 교체
+            md.qpos[iq["hip"]] = _dfl
+            if _wm == "vel":
+                md.qvel[:] = _sv                              # 위치는 실측 앵커 · 속도는 매끈한 값
     mjm.mj_forward(model, md)
     dt = model.opt.timestep
     N = int(round((t_end + t_after) / dt))
@@ -1422,6 +1475,11 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     _w2 = float(os.environ.get("FS_W2", "0") or 0)
     _eta = float(os.environ.get("FS_ETA", "1") or 1)   # P7 고속 제곱 소산 (버스트 전용)
     _psl = _PreSlide(model, fg) if os.environ.get("FS_PRESLIDE") else None
+    # 발이 붙었나 미끄러지는 중인가도 넘겨받는다 (08-13). 이게 빠지면 넘겨준 의미가 절반이 된다.
+    if _psl is not None and state0 is not None and state0.get("psl_slide") is not None:
+        _psl.slide = bool(state0["psl_slide"])
+        _psl.fx_prev = state0.get("psl_fx")
+        _psl._set(_psl.mu_k if _psl.slide else _psl.mu_hold)
     _esc = _escrow_init()                  # 마라톤F F1: CL과 동일 플랜트 (에너지 회계)
     _est = float(os.environ.get("FS_ESC_STORE", "1") or 1)   # F1b 동일
     _svg = os.environ.get("FS_SUPP_VG") or None              # F-H8 동일
