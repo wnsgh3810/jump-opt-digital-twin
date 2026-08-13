@@ -714,7 +714,24 @@ class _PreSlide:
         self.model.geom_friction[self.gf][0] = self.orig[1]
 
 
-def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None, ret_state=False):
+def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None, ret_state=False, air=False):
+    """PD 제어를 흉내 낸 재생.
+    ★★ 08-13 신설 `air` — **공중(매달림) 재생.** 로봇을 들어 올려 발이 땅에 안 닿는 실험용.
+
+      왜 필요한가: 지금 적합에 쓰는 8 세션이 **전부 점프**라, 느리게 움직이는 구간이 데이터로
+      거의 구속되지 않는다 (점프 무릎 속도 중앙 5.31 rad/s · 시간의 18% 만 초당 1 라디안 아래.
+      느린 일어서기는 41~63%). 그래서 마찰 곡선의 저속 끝이 자유롭게 떠 있었고, 실제로
+      공중 실측(0.423 + 0.034·속도)과 크게 어긋난 값이 들어와 있었다.
+      공중 실험을 넣으면 그 구간이 구속되는데, **공중이 특히 좋은 이유는 발이 안 닿아서
+      발 마찰·미끄러짐·접지 모델이 아예 안 섞인다**는 것이다. 남는 것은 중력·관성·관절
+      마찰뿐이고 그게 정확히 지금 고치려는 것이다.
+
+      어떻게: 실제 실험에서 로봇은 매달려 있어 **몸통이 위아래로 안 움직인다.** 모델의 몸통은
+      수직 레일을 타는 자유 관절이라 아무것도 안 잡아 주면 떨어진다. 그래서 계산 단계마다
+      몸통 높이를 처음 값으로 되돌리고 속도를 0 으로 만든다 — 매달아 놓은 것과 같다.
+      그리고 발이 땅에 닿게 낮추는 초기 보정을 **건너뛴다** (닿으면 안 되므로).
+      air=False (기본) 이면 지금까지와 한 자리도 안 바뀐다.
+    """
     """CL 통짜 — settle 후 폴더 게인 PD(θ_m 기준, hip α 없음·knee α는 gains에 이미 반영).
     init_meas=(q1,q2,dq1,dq2,raw1,raw2): settle 대신 **창 시작 실측 상태 1회 앵커** (ModeA와 동일 규칙,
     마라톤D P16 사용자 지시). thm1을 실측 q1에 앵커·처짐은 측정 토크에서 (F15/P12 규약).
@@ -755,10 +772,12 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             md.qpos[iq["knee"]] = -_q2m
         mjm.mj_forward(model, md)
         _fg0 = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
-        md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[_fg0][2]) + P.J._P["S"].FOOT_RADIUS
+        if not air:
+            md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[_fg0][2]) + P.J._P["S"].FOOT_RADIUS
         _c1, _c12 = np.cos(_q1m), np.cos(_q1m + _q2m)
         md.qvel[:] = 0
-        md.qvel[dof["base_z"]] = -0.25 * (_c1 * _dq1m + _c12 * (_dq1m + _dq2m))
+        md.qvel[dof["base_z"]] = 0.0 if air else -0.25 * (_c1 * _dq1m + _c12 * (_dq1m + _dq2m))
+        _bz_air = float(md.qpos[iq["base_z"]])   # 매달린 높이 (계산 단계마다 여기로 되돌린다)
         md.qvel[dof["hip_m"]] = -_dq1m
         if _ci0 is not None:
             # 폐쇄 정합 속도: d(qpos)/d(q2) 수치 미분 × dq2 (전달비 r(q)이 자동 반영) — 5q 인덱스 2/3/4
@@ -1040,6 +1059,9 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
             _v1m = float(md.qvel[dof["hip_m"]])
             md.qfrc_applied[dof["hip_m"]] = -_w2 * _v1m * abs(_v1m)   # 순할당 (hip_m 유일 기록자)
         mjm.mj_step(model, md)
+        if air:                      # 매달려 있으므로 몸통은 위아래로 안 움직인다
+            md.qpos[iq["base_z"]] = _bz_air
+            md.qvel[dof["base_z"]] = 0.0
         if not np.isfinite(md.qpos).all():
             if _psl is not None:
                 _psl.restore()
@@ -1357,7 +1379,7 @@ def modea_fs():
     print("done")
 
 
-def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False, bz_floor=None, knee_rel=None, state0=None):
+def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_after=0.004, bias1=0.0, knee_deep=None, fade=False, bz_floor=None, knee_rel=None, state0=None, air=False):
     """rollout_ol_fs + 2단·바이어스 qfrc (mshoot용 래퍼 — 별도 구현 유지로 원본 무변경).
 
     ★★ 08-13 신설 `state0` — **PD 제어로 잡고 있다가 넘겨받아 출발한다** (사용자 제안).
@@ -1403,14 +1425,17 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         md.qpos[iq["base_z"]] = 1.0
     mjm.mj_forward(model, md)
     fg = mjm.mj_name2id(model, mjm.mjtObj.mjOBJ_GEOM, "foot")
-    md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
-    if bz_floor is not None:
+    # ★ 08-13 `air` — 공중(매달림)이면 발이 땅에 닿게 낮추는 보정을 **건너뛴다** (닿으면 안 된다).
+    if not air:
+        md.qpos[iq["base_z"]] = 1.0 - float(md.geom_xpos[fg][2]) + S.FOOT_RADIUS
+    if bz_floor is not None and not air:
         md.qpos[iq["base_z"]] = max(float(md.qpos[iq["base_z"]]), bz_floor)   # 엔드스톱 위 초기화 (착좌)
     Lseg = 0.25
     c1_, c12 = np.cos(q1_0), np.cos(q1_0 + q2_0)
     dbz = -Lseg * (c1_ * dq1_0 + c12 * (dq1_0 + dq2_0))
     md.qvel[:] = 0
-    md.qvel[dof["base_z"]] = dbz
+    md.qvel[dof["base_z"]] = 0.0 if air else dbz
+    _bz_air = float(md.qpos[iq["base_z"]])   # 매달린 높이 (계산 단계마다 여기로 되돌린다)
     md.qvel[dof["hip_m"]] = -dq1_0
     if _ci0 is not None:
         # 폐쇄 정합 속도: d(qpos)/d(q2) 수치미분 × dq2 (전달비 r(q) 자동 반영) — CL 경로와 동일
@@ -1594,6 +1619,9 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
                 _q += float(_fcut) * gg * float(np.tanh(v_hm / 0.05))
             md.qfrc_applied[dof["hip_m"]] = _q
         mjm.mj_step(model, md)
+        if air:                      # 매달려 있으므로 몸통은 위아래로 안 움직인다
+            md.qpos[iq["base_z"]] = _bz_air
+            md.qvel[dof["base_z"]] = 0.0
         if not np.isfinite(md.qpos).all():
             if _psl is not None:
                 _psl.restore()
