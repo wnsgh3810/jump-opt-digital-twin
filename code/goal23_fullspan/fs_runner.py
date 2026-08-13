@@ -714,6 +714,34 @@ class _PreSlide:
         self.model.geom_friction[self.gf][0] = self.orig[1]
 
 
+
+_BASE_ARM0 = {}
+
+
+def _lock_base(model, dofadr):
+    """매달린 실험에서 **몸통을 계산 도중에도 못 움직이게** 못 박는다.
+
+    ☠ 08-13 에 한 번 틀렸다 — 계산이 **끝난 뒤에** 몸통 높이를 되돌리는 방식이었다.
+      그러면 계산하는 동안에는 몸통이 자유낙하하고, **로봇 전체가 같이 떨어지므로
+      다리는 몸통에 대해 회전할 이유가 없다.** 실제로 모터 토크 0 으로 놓아 보니
+      중력이 힙에 1.262 N·m 걸리는데 0.5 초 동안 힙이 **0.00 도** 움직였다
+      (마찰 0.311 N·m 보다 훨씬 큰데도). 그 상태로 토크를 넣으면 다리가 실측과
+      반대로 올라갔다 — 공중 판이 통째로 못 쓰게 된 원인이 이것이다.
+
+    고치는 법: 몸통 축의 회전관성을 아주 크게 준다. 그러면 어떤 힘을 받아도 몸통은
+    사실상 안 움직이고 **다리만 몸통에 대해 제대로 회전한다** (= 천장에 단단히 매단 것과 같다).
+    고친 뒤 같은 시험에서 힙이 0.5 초에 **75.21 도** 떨어졌다 — 물리적으로 맞는 값이다.
+    """
+    if dofadr not in _BASE_ARM0:
+        _BASE_ARM0[dofadr] = float(model.dof_armature[dofadr])
+    model.dof_armature[dofadr] = 1.0e6
+
+
+def _unlock_base(model, dofadr):
+    """`_lock_base` 를 되돌린다 — 같은 모델을 지면 재생에도 쓰므로 반드시 짝지어 부른다."""
+    if dofadr in _BASE_ARM0:
+        model.dof_armature[dofadr] = _BASE_ARM0[dofadr]
+
 def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, two_stage=False, bias1=0.0, knee_deep=None, fade=False, taulim=None, lim_raw=None, lim2_nm=None, vdes_ff=True, init_meas=None, ret_state=False, air=False):
     """PD 제어를 흉내 낸 재생.
     ★★ 08-13 신설 `air` — **공중(매달림) 재생.** 로봇을 들어 올려 발이 땅에 안 닿는 실험용.
@@ -778,6 +806,9 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         md.qvel[:] = 0
         md.qvel[dof["base_z"]] = 0.0 if air else -0.25 * (_c1 * _dq1m + _c12 * (_dq1m + _dq2m))
         _bz_air = float(md.qpos[iq["base_z"]])   # 매달린 높이 (계산 단계마다 여기로 되돌린다)
+        _unlock_base(model, dof["base_z"])   # 앞선 재생이 남긴 잠금을 먼저 푼다 (중간에 빠져나가도 안전)
+        if air:
+            _lock_base(model, dof["base_z"])
         md.qvel[dof["hip_m"]] = -_dq1m
         if _ci0 is not None:
             # 폐쇄 정합 속도: d(qpos)/d(q2) 수치 미분 × dq2 (전달비 r(q)이 자동 반영) — 5q 인덱스 2/3/4
@@ -1125,6 +1156,8 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         _psl.restore()
     if _eled is not None:
         Lg["eledger"] = _eled
+    if air:
+        _unlock_base(model, dof["base_z"])
     return Lg
 
 
@@ -1436,6 +1469,9 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
     md.qvel[:] = 0
     md.qvel[dof["base_z"]] = 0.0 if air else dbz
     _bz_air = float(md.qpos[iq["base_z"]])   # 매달린 높이 (계산 단계마다 여기로 되돌린다)
+    _unlock_base(model, dof["base_z"])   # 앞선 재생이 남긴 잠금을 먼저 푼다 (중간에 빠져나가도 안전)
+    if air:
+        _lock_base(model, dof["base_z"])
     md.qvel[dof["hip_m"]] = -dq1_0
     if _ci0 is not None:
         # 폐쇄 정합 속도: d(qpos)/d(q2) 수치미분 × dq2 (전달비 r(q) 자동 반영) — CL 경로와 동일
@@ -1643,6 +1679,8 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         Lg["thf"][k] = np.arctan2(md.xmat[_bfoot][2], md.xmat[_bfoot][0])
     if _psl is not None:
         _psl.restore()
+    if air:
+        _unlock_base(model, dof["base_z"])
     return Lg
 
 def fit_knee_deep():
