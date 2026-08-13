@@ -240,6 +240,11 @@ def air_windows(d, nwin=4, wmax=1.5, wmin=0.35):
     dt = float(np.median(np.diff(t))) if len(t) > 2 else 0.002
     v = np.hypot(np.nan_to_num(d["dq1"]), np.nan_to_num(d["dq2"]))
     v = _smooth(v, max(3, int(round(0.02 / dt))))          # 1샘플 차분이라 잡음이 크다
+    # ☠ 08-14 시도 후 철회 — "잡음 바닥 가드(중앙값×3 바닥)" 를 넣었다가 되돌렸다.
+    #   그 가드는 50~70초 **전체 기록**(대부분 정지 → 중앙값 = 잡음 바닥)용 처방인데,
+    #   이 함수가 실제로 받는 것은 일어서기만 잘라낸 1.7~1.9초 창과 움직임 위주의 매달림
+    #   기록이다 — 거기서는 중앙값이 실제 동작 속도라 3배 바닥이 문턱을 집어삼켜
+    #   창을 없앴다 (실측: 매달림 15→12 기록 · 일어서기 4→1 경우). 원래 문턱으로 복귀.
     thr = 0.20 * float(np.percentile(v, 95))
     if not np.isfinite(thr) or thr <= 0:
         return []

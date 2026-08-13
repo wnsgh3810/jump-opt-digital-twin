@@ -353,6 +353,13 @@ def env_of(mode, x):
 _C = None
 _A = None      # 공중·지면 일어서기 (읽어 둔 것)
 _S = None      # 짐 지고 일어서기 26.06.04 (읽어 둔 것 — 08-14 편입, 사용자 승인)
+# ★ 08-14 — 기대 목록은 **적재 결과(_A/_S)가 아니라 등록부**에서 뽑는다.
+#   적재 단계에서 창이 사라진 기록은 _A/_S 에 아예 안 들어오므로, _A 를 기대 목록으로
+#   쓰면 "사라진 기록 = 채점 면제"가 된다 (실제로 창 함수를 잘못 고쳤을 때 매달림이
+#   15→12 기록으로 줄었는데 점수가 1.355→1.335 로 조용히 좋아졌다). 등록부 기준이면
+#   그런 기록이 3.0(최악 규모)으로 계상되어 즉시 눈에 띈다.
+_A_EXPECT = None
+_S_EXPECT = None
 _BASE = None      # 두 세대 전 모델의 성적 — **옛 자**의 1.0000
 _CUR = None       # 배포 스택(현행)의 성적 — **벌점의 기준** (08-13 변경점)
 
@@ -572,7 +579,7 @@ def board():
 
 
 def _ensure():
-    global _C, _A, _S, _BASE, _CUR
+    global _C, _A, _S, _A_EXPECT, _S_EXPECT, _BASE, _CUR
     if _C is not None:
         return
     import fs_data as FD
@@ -607,6 +614,8 @@ def _ensure():
     #   그래서 마찰 곡선의 저속 끝이 자유롭게 떠 있었고, 공중 실측(무릎 0.423+0.034×속도)
     #   과 크게 어긋난 값이 들어와 있었다. 여기 16 건은 그 구간을 직접 구속한다.
     A = []
+    _A_EXPECT = ([nm for nm, _r, _a in FD.air_registry()]
+                 if os.environ.get("FS_SWEEP_AIR", "1") != "0" else [])
     if os.environ.get("FS_SWEEP_AIR", "1") != "0":
         for _nm, _rel, _air in FD.air_registry():
             try:
@@ -623,13 +632,19 @@ def _ensure():
     #   접촉, 물리 미모델)은 속도 문턱이 자연히 걸러낸다. 완전하지는 않다(하강 재착좌
     #   순간이 섞일 수 있음) — v2 에서 하드스톱 창 선별로 다듬을 것.
     S = []
+    _S_EXPECT = ([_sub for _sub, _p, _c in FD.S2S_CASES
+                  if any(_sub == r[0] for r in FD.s2s_registry())]
+                 if os.environ.get("FS_SWEEP_S2S", "1") != "0" else [])
     if os.environ.get("FS_SWEEP_S2S", "1") != "0":
         for _sub, _pay, _cvt in FD.S2S_CASES:
             try:
                 _d = FD.load_s2s(_sub)
                 if _d is None:
                     continue
-                _W = FD.air_windows(_d, nwin=int(os.environ.get("FS_S2S_NWIN", "4")))
+                # 창 상한 2.0초 — 변속기 일어서기의 실길이가 1.83~1.85초라 1.5초 상한이면
+                # 밀어올리는 마지막 감속 구간이 잘린다 (08-14 원자료 분석).
+                _W = FD.air_windows(_d, nwin=int(os.environ.get("FS_S2S_NWIN", "4")),
+                                    wmax=float(os.environ.get("FS_S2S_WMAX", "2.0")))
             except Exception:
                 continue
             if _W:
@@ -777,8 +792,12 @@ def s2s_ma_score():
                     sim = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2")]
                     v = [_r80(tg, d[k][mm], sm, floor=fl)
                          for k, sm, fl in zip(CH4, sim, AIR_FLOOR)]
-                    if all(np.isfinite(v)) and max(v) < 1e3:
-                        per.append(float(np.mean(v)))
+                    # 채널당 상한 10 — 발산한 창의 "얼마나 크게 발산했나"는 정보가 아니라
+                    # 잡음이다. 상한 없이는 한 창이 수십~수백을 찍어 점수 전체(무게 0.10)를
+                    # 혼자 흔들 수 있다. 10 은 "이미 못 쓰는 수준"의 규모다 (합격선 0.24 의
+                    # 40 배). 0~10 사이의 기울기는 그대로 살아 있어 탐색 신호는 유지된다.
+                    if all(np.isfinite(v)):
+                        per.append(float(np.mean([min(x, 10.0) for x in v])))
             except Exception:
                 per = []
             vals[sub] = float(np.mean(per)) if per else 3.0
@@ -789,6 +808,9 @@ def s2s_ma_score():
         else:
             os.environ["FS_MASS"] = keep
         FR._CACHE.clear(); _CVT_STAMPED.clear()
+    # 등록부에 있는데 적재 단계에서 빠진 경우(창 소실 등)도 3.0 으로 계상 — 침묵 탈락 방지
+    for sub in (_S_EXPECT or []):
+        vals.setdefault(sub, 3.0)
     return float(np.mean(list(vals.values()))) if vals else np.nan
 
 
@@ -878,7 +900,7 @@ def evaluate(args):
         if not np.isfinite(hr):
             hr = 1.0
         _airon = os.environ.get("FS_SWEEP_AIR", "1") != "0"
-        air = absa(air_board(), expected=[nm for nm, _d, _W, _a in (_A or [])]) if _airon else 0.0
+        air = absa(air_board(), expected=_A_EXPECT) if _airon else 0.0
         # ★ 08-14 — 매달림 판이 통째로 무너지면(전 기록 발산) 종전에는 0.0(만점)으로
         #   대체했다. 매달림을 부수는 후보가 이 몫을 공짜로 받는 구멍이므로 **실패**로 처리.
         #   (FS_SWEEP_AIR=0 으로 판을 끈 경우의 0 은 그대로 — 점수 정의가 다른 판이 된다는
@@ -886,9 +908,9 @@ def evaluate(args):
         if _airon and not np.isfinite(air):
             return 9e2, None
         # ★ 08-14 — 짐 지고 일어서기 판 (아래 s2s_ma_score 참조). 실패 경우는 3.0 계상이라
-        #   NaN 은 "판 자체가 안 섰다"는 뜻 → 실패 처리.
-        s2s = s2s_ma_score() if _S else 0.0
-        if _S and not np.isfinite(s2s):
+        #   NaN 은 "판 자체가 안 섰다"는 뜻 → 실패 처리. 기대 목록은 등록부(_S_EXPECT).
+        s2s = s2s_ma_score() if _S_EXPECT else 0.0
+        if _S_EXPECT and not np.isfinite(s2s):
             return 9e2, None
         J = (W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
              + W_AIR * air + W_S2S * s2s)

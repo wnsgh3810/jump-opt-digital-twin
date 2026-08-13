@@ -68,9 +68,9 @@ rem
 rem  Expected first lines (verified 08-14 by running the repaired board once):
 rem    - data line: "56 trial (cvt 10) . torque wrap fix 46 . hanging 15
 rem      records . sit-to-stand 4 cases".  If wrap fix is 0, close and report.
-rem    - starting point (deployed stack) penalty must be 0.000, total 0.6714
+rem    - starting point (deployed stack) penalty must be 0.000, total 0.6665
 rem      (injection 0.1747 / cl-angle 0.1233 / cl-torque(command ruler) 0.3403 /
-rem       height 0.0416 / hanging 1.3553 / sit-to-stand 3.2121)
+rem       height 0.0416 / hanging 1.3553 / sit-to-stand 3.1628)
 rem      sit-to-stand 3.21 vs jump injection 0.17 = the never-constrained regime,
 rem      now visible in the score for the first time.
 rem    - 16 axes listed, axis 12 and 13 starting at 1.0
@@ -114,7 +114,7 @@ echo.
 echo   CHECK THE FIRST LINES:
 echo     1. "torque wrap fix N spots" must not be 0 (expect 46).
 echo     2. data line says "hanging 15 records" and "sit-to-stand 4 cases".
-echo     3. starting-point penalty 0.000, total 0.6714.
+echo     3. starting-point penalty 0.000, total 0.6665.
 echo     4. 16 axes; axis 12 and 13 (torque ratio shape) start at 1.0
 echo.
 
