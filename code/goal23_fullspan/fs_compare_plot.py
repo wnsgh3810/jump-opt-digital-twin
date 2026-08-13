@@ -10,6 +10,9 @@
 출력: _compare/CL/<세션>/<trial>.png · _compare/ModeA/<세션>/<trial>.png
       + 세션별 _summary.png (채널 RMSE 막대) + _compare/README.md (색인)
 CLI: python fs_compare_plot.py [CL|MA]   (인자 없으면 둘 다)
+     ★ 08-13 추가 — 모델 값을 탐색 결과 파일에서 바로 불러올 수 있다:
+         set FS_CMP_FROM=_GHB_sweep4.json & python fs_compare_plot.py
+       (안 주면 지금까지처럼 바깥에서 넣어 준 환경변수를 쓴다 — 기존 동작 불변)
 """
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
@@ -23,6 +26,38 @@ import numpy as np
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "bench"))
+
+# ── 탐색 결과 파일에서 모델 값을 **직접** 불러오는 길 (2026-08-13 추가) ────────────────
+#   지금까지는 그림을 그리려면 모델 값 열몇 개를 환경변수로 손수 넣어 줘야 했다.
+#   그러다 08-12 에 축 2 개를 빠뜨린 채 6 시간을 돌 뻔한 사고가 있었다 — 손으로 옮겨 적는
+#   일 자체를 없앤다. 탐색이 남긴 결과 파일에서 읽어, **탐색이 쓰던 것과 같은 함수**로
+#   환경을 만든다. 그러면 그림과 점수가 문자 그대로 같은 지점을 가리킨다.
+#
+#   쓰는 법:
+#     set FS_CMP_FROM=_GHB_sweep4.json      ← 어느 탐색 결과를 그릴지
+#     set FS_CMP_OUT=_compare_H4_260813     ← 산출 폴더 (안 주면 파일 이름에서 만든다)
+#     set FS_STACK_TAG=H4_260813            ← 그림 범례에 찍힐 이름 (안 주면 폴더 이름에서)
+#     python fs_compare_plot.py
+#   안 주면 지금까지처럼 **바깥에서 넣어 준 환경변수**를 그대로 쓴다 (기존 동작 불변).
+_CMP_FROM = os.environ.get("FS_CMP_FROM")
+if _CMP_FROM:
+    _p = Path(_CMP_FROM)
+    if not _p.is_absolute():
+        _p = HERE / _p
+    _res = json.loads(_p.read_text(encoding="utf-8"))["res"]
+    _mode = os.environ.get("FS_CMP_MODE") or next(iter(_res))
+    _r = _res[_mode]
+    import _GHB_sweep as _SW                # 축 벡터 → 환경변수 변환 (단일 출처)
+    for _k, _v in _SW.env_of(_mode, np.asarray(_r["x"], float)).items():
+        os.environ[_k] = _v
+    _stem = _p.stem.replace("_GHB_sweep", "run")
+    os.environ.setdefault("FS_CMP_OUT", f"_compare_{_stem}")
+    os.environ.setdefault("FS_STACK_TAG", os.environ["FS_CMP_OUT"].replace("_compare_", ""))
+    print(f"■ 모델 값을 {_p.name} 에서 불러왔다 (구조 {_mode} · 축 {len(_r['x'])} 개 · "
+          f"점수 {_r.get('score', float('nan')):.4f} · 0 이 완벽)", flush=True)
+    for _k, _v in zip(_r["axes"], _r["x"]):
+        print(f"    {_k:16s} {_v:>12.5f}", flush=True)
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
