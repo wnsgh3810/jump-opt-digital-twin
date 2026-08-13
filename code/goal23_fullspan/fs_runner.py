@@ -47,6 +47,16 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     # 마라톤G G1-E3: 공중 동정 실측 마찰 반영용 (무릎측). 힙측은 기존 FS_HIPM_DAMP/FL.
     _kd = os.environ.get("FS_KNEEM_DAMP")
     _kf = os.environ.get("FS_KNEEM_FL")
+    # ★★ 08-13 신설 — **무릎 모터축의 회전 관성**.
+    #   왜: 모터 로터는 감속기를 거치므로 관절에서 보면 관성이 감속비의 제곱만큼 커진다.
+    #   그 몫이 지금 모델에 **고정값(0.00795)으로 박혀 있고 한 번도 적합된 적이 없다.**
+    #   힙 쪽은 자유 흔들림 실측이 0.0164 인데 모델은 0.010 — **39% 부족**이고 그 차이가
+    #   "미규명"으로 남아 있었다. 무릎은 아예 측정된 적이 없다.
+    #   크기: 점프에서 힙 각가속도 중앙 51 / 상위10% 189, 무릎 92 / 380 [rad/s^2] 이므로
+    #   관성이 0.005 모자라면 무릎에서 0.47~1.94 N.m 이 빈다 — 지금 토크 오차와 같은 크기다.
+    #   ⇒ 관성이 모자라면 모델이 너무 빨리 가속하고, 탐급이 그걸 **속도비례 감쇠로 때운다.**
+    #     실제로 무릎 속도비례가 실측(0.034)의 6.7 배인 0.228 에서 상한에 붙어 있었다.
+    _ka = os.environ.get("FS_KNEEM_ARM")
     # ★ 08-11: FS_FOOTR 가 캐시 키에 빠져 있었다 — fs_model 이 모델 빌드 때 읽는데 키에 없어서,
     #   **한 프로세스 안에서 값을 바꿔도 캐시된 옛 모델이 그대로 나왔다.** 스윕이 조용히 무효가 된다
     #   (마라톤H 스크리닝에서 FS_FOOTR 이 "변화 0.00%" 로 찍혀 발각). 모델 빌드가 읽는 env 는
@@ -59,7 +69,9 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     #   밖에서 붙인 점착-활주 코드와 **두 겹으로** 붙잡고 있어 하강 슬립이 실측의 60% 인지 시험.
     _ir = os.environ.get("FS_IMPRATIO")
     _fp = os.environ.get("FS_FOOTPOS")   # 발 롤러 앞뒤·상하 오프셋 (모델 빌드 축 → 키 필수)
-    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _fr, _ir, _fp)
+    # ☠ 모델 빌드가 읽는 env 는 **전부 이 열쇠에 있어야 한다** (08-11 사고: FS_FOOTR 가
+    #   빠져서 한 프로세스 안에서 값을 바꿔도 캐시된 옛 모델이 그대로 나왔다 = 탐색 무효).
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _ka, _fr, _ir, _fp)
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
@@ -102,12 +114,14 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
         if _ib:
             for _n, _v in _kv(_ib).items():
                 model.body_inertia[_bid(_n)] *= float(_v)
-        if _kd or _kf:
+        if _kd or _kf or _ka:
             _kj = safe.dofadr(model, "knee_motor", mjm)
             if _kd:
                 model.dof_damping[_kj] = float(_kd)
             if _kf:
                 model.dof_frictionloss[_kj] = float(_kf)
+            if _ka:
+                model.dof_armature[_kj] = float(_ka)
         if _cz:
             # CoM z 이동 → 관성은 평행축 정리로 보정하지 않는다 (여기 I는 **CoM 기준** 관성이므로
             # 형상이 그대로면 불변). 이동량은 물리적 합당 범위에서만 쓸 것.
