@@ -327,6 +327,7 @@ def env_of(mode, x):
 
 # ── 작업자별 1회 준비 (엑셀 읽기 ~80초 + 기준선) ───────────────────────────────────
 _C = None
+_A = None      # 공중·지면 일어서기 (읽어 둔 것)
 _BASE = None      # 두 세대 전 모델의 성적 — **옛 자**의 1.0000
 _CUR = None       # 배포 스택(현행)의 성적 — **벌점의 기준** (08-13 변경점)
 
@@ -380,7 +381,7 @@ def _apply(e):
             FR._CACHE["base"] = b
 
 
-def _r80(t, meas, sim):
+def _r80(t, meas, sim, floor=0.0):
     """★ 08-13 신설 — **새 자**. 창 앞 80% 구간에서 잰 오차를 **그 신호의 표준편차로 나눈다.**
 
     왜 이 자인가 (VERDICT_260812 §6-1): 사용자가 그림 139 장을 보고 남긴 육안 판정을
@@ -409,6 +410,12 @@ def _r80(t, meas, sim):
     sd = float(np.std(a_all))            # ← 분모: 창 **전체** 실측 (합격선과 같은 규약)
     if not np.isfinite(sd) or sd <= 1e-12:
         return np.nan
+    # ★ 08-13 `floor` — 공중 판 전용. 26.08.02 은 **무릎을 일부러 고정**한 실험이라
+    #   무릎각이 움직인 폭이 0.003 rad 밖에 안 된다. 그대로 나누면 1 도(0.017 rad)
+    #   어긋난 것도 "폭의 5 배 틀렸다" 가 되어 그 채널 하나가 점수를 지배한다.
+    #   그래서 분모에 **물리적 바닥**을 깐다 (각도 1 도 · 속도 0.2 rad/s = 1샘플 차분
+    #   잡음과 같은 규모). 점프 판은 floor=0 이라 영향이 없다.
+    sd = max(sd, float(floor))
     e = float(np.sqrt(np.mean((a_all[k] - np.asarray(sim, float)[k]) ** 2)))
     return e / sd if np.isfinite(e) else np.nan
 
@@ -517,7 +524,7 @@ def board():
 
 
 def _ensure():
-    global _C, _BASE, _CUR
+    global _C, _A, _BASE, _CUR
     if _C is not None:
         return
     import fs_data as FD
@@ -546,6 +553,22 @@ def _ensure():
         except Exception:
             continue
     _C = C
+    # ── 공중(매달림)·지면 일어서기 읽어 두기 (08-13 신설) ──────────────────────
+    #   왜: 적합 8 세션이 전부 점프라 **느린 동작이 데이터로 구속된 적이 없다**
+    #   (점프 무릎 속도 중앙 5.31 rad/s · 1 rad/s 아래가 시간의 18% 뿐).
+    #   그래서 마찰 곡선의 저속 끝이 자유롭게 떠 있었고, 공중 실측(무릎 0.423+0.034×속도)
+    #   과 크게 어긋난 값이 들어와 있었다. 여기 16 건은 그 구간을 직접 구속한다.
+    A = []
+    if os.environ.get("FS_SWEEP_AIR", "1") != "0":
+        for _nm, _rel, _air in FD.air_registry():
+            try:
+                _d = FD.load_air(_rel)
+                _W = FD.air_windows(_d, nwin=int(os.environ.get("FS_AIR_NWIN", "4")))
+            except Exception:
+                continue
+            if _W:
+                A.append((_nm, _d, _W, bool(_air)))
+    _A = A
     # ★ 08-12 밤 안전장치 — **토크 겹침 교정이 실제로 걸렸는지 첫머리에 찍는다.**
     #   2 회차는 이 교정이 파일에 들어가기 3 시간 전에 시작해서, 어긋난 토크로 6 시간을
     #   돌고 나서야 발각됐다 (파이썬은 시작할 때 코드를 한 번 읽고 그 뒤엔 안 다시 읽는다).
@@ -576,6 +599,68 @@ def ratio(B, key, sess):
         if np.all(b > 0) and np.all(np.isfinite(a)):
             v.append(float(np.mean(a / b)))
     return float(np.mean(v)) if v else np.nan
+
+
+AIR_FLOOR = (0.0175, 0.0175, 0.20, 0.20)   # 분모 바닥: 각도 1 도 · 속도 0.2 rad/s
+
+
+def air_board():
+    """공중(매달림)·지면 일어서기 성적 — **측정 토크를 그대로 넣고 돌린 재생**만 쓴다.
+
+    ■ 무엇을 무엇과 비교하나
+      실제 실험에서 기록된 모터 명령 토크를 시뮬레이션에 그대로 집어넣고 돌린 뒤,
+      나온 관절 각도·각속도를 같은 순간의 실측과 비교한다. PD 제어를 흉내내지 않으므로
+      **제어기가 오차를 되받아 감춰 주는 일이 없다** — 마찰과 관성이 그대로 드러난다.
+      게인도 필요 없다 (0319 는 게인 라벨이 아예 없고, 옛 세션은 게인 되찾기가 14~26%
+      어긋난다). 채널은 힙각·무릎각·힙속도·무릎속도 네 개.
+
+    ■ 어떻게 계산하나 / 완벽하면 얼마인가
+      채널마다 (창 앞 80% 구간의 오차 제곱평균제곱근) ÷ (그 신호가 창 전체에서 움직인
+      폭의 표준편차, 단 아래 바닥 적용). 점프 판과 **같은 자**다. **0 이 완벽**이고,
+      0.24 면 "그 신호가 움직인 폭의 24% 만큼 빗나갔다" 는 뜻이다.
+
+    ■ 왜 몸통을 고정하나
+      실제로 로봇이 레일에 매달려 있어 몸통이 위아래로 안 움직인다. 지면 기록 1 건
+      (26.03.19 지면 일어서기)만 평소처럼 발을 땅에 붙여 돌린다.
+    """
+    import fs_runner as FR
+    ft = FR.fs_twin()
+    out = []
+    for nm, d, W, air in (_A or []):
+        t = d["t"]
+        for w0, w1 in W:
+            m = (t >= w0) & (t <= w1)
+            if m.sum() < 20:
+                continue
+            i0 = int(np.argmax(m)); tg = t[m] - t[i0]
+            L = FR.rollout_ol_fs_b(ft, tg, d["raw1"][m], d["raw2"][m],
+                                   float(d["q1"][i0]), float(d["q2"][i0]),
+                                   float(d["dq1"][i0]), float(d["dq2"][i0]),
+                                   float(tg[-1] - 0.004), fade=True, air=air)
+            if L is None:
+                continue
+            gf = lambda k: np.interp(tg, L["t"], L[k])
+            sim = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2")]
+            v = [_r80(tg, d[k][m], sm, floor=fl)
+                 for k, sm, fl in zip(CH4, sim, AIR_FLOOR)]
+            if all(np.isfinite(v)) and max(v) < 1e3:
+                out.append((nm, v))
+    return out
+
+
+def absa(A):
+    """공중 판 성적 하나로 — **기록마다 먼저 평균내고 그 다음 기록끼리 평균**.
+
+    왜 두 단계인가: 26.08.02 이 9 건이고 나머지가 7 건이라, 창을 통째로 평균내면
+    한 세션이 점수의 절반을 넘게 가져간다. 기록 단위로 먼저 묶어 균형을 맞춘다.
+    **0 이 완벽**이고 클수록 부정확하다.
+    """
+    if not A:
+        return np.nan
+    g = collections.defaultdict(list)
+    for nm, v in A:
+        g[nm].append(float(np.mean(v)))
+    return float(np.mean([np.mean(x) for x in g.values()]))
 
 
 def absm(B, key, sess, cols):
