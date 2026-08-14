@@ -380,9 +380,9 @@ def _tmap_init(P=None, A=None):
     # ★ 08-12: 새 모드를 만들면 **아래 두 목록에 반드시 이름을 넣어야 한다.** 안 넣으면 분기에
     #   도달하지 못하고 조용히 a_hat 기본값으로 흘러간다 (canon_mix 첫 구현에서 밟았다 —
     #   힙·무릎이 같은 값을 내고 정지 토크가 어긋나는 것으로 발각).
-    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "canon_mix", "model"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "canon_mix", "canon_mixv", "model"):
         pass
-    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "canon_mix"):
+    if md_ in ("canon", "canon_cap", "canon_env", "canon_fric", "canon_capv", "canon_fv", "canon_capS", "canon_mix", "canon_mixv"):
         import json as _j
         cf = _j.load(open(HERE / "_G5_curve_final.json", encoding="utf-8"))
         d1, d2, d3 = cf["d1"], cf["d2"], cf["d3"]
@@ -518,6 +518,40 @@ def _tmap_init(P=None, A=None):
                             - _mb * float(v))
                 a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])   # 힙 = 상한형
                 dd = _canon(raw) - a
+                return a + (dd if dcap_h <= 0 else max(-dcap_h, min(dcap_h, dd)))
+        elif md_ == "canon_mixv":
+            # ★★ 08-14 (6 회차) — **세 손실을 한 판에**. 지금까지는 이것들이 서로 배타적인
+            #   갈래라 같이 열 수 없었다. 08-14 훑기가 셋이 서로를 대신한다는 것을 보였으므로
+            #   (따로 열면 답이 갈린다) 하나로 합친다. `REJECTED #83` 의 재심 조건
+            #   "포화형과 결합해서만 재심" 을 그대로 이행하는 형태이기도 하다.
+            #
+            #     무릎 τ = a_hat + clip(정본 − a_hat, ±천장(v)) − (fc0 + fc1·|명령|)·tanh(v/v0)
+            #              천장(v) = max(c0k + c1k·|v|, 0)
+            #     힙   τ = a_hat + clip(정본 − a_hat, ±c0h)          (지금과 완전히 동일)
+            #
+            #   · fc1·|명령| = 전달 효율 손실 (누르는 힘이 전달 토크에 비례 → 쿨롱 마찰도 비례).
+            #     08-07 분동 실측 = 무릎 0.135 + 0.1197·|명령| (효율 88%) · 힙 ≈ 0 (직결이라).
+            #   · c1k < 0 = 빠를수록 천장이 닫힌다 = 공급 전압이 유한해서 생기는 한계.
+            #     48 V·감속비 9·역기전력상수 0.091 이면 무부하 관절 속도가 58.6 rad/s 이고,
+            #     실측 무릎 속도 14~22 rad/s 에서 토크 여력이 76%~62% 로 준다 ⇒ c1k ≈ −0.07 예상.
+            #
+            #   ★ 회귀 불가 보장: fc0=fc1=0 **그리고** c1k=0 이면 아래 canon_cap 과 **한 자리도
+            #     안 다르다** (기본값이 정확히 그것이다). 새 축이 쓸모없으면 탐색이 0 으로 가면 된다.
+            #   FS_TMIXV="fc0,fc1,v0,c1k"  · 천장의 기본 높이 c0k·c0h 는 FS_TDCAP 를 그대로 쓴다.
+            _mv = [float(x) for x in (os.environ.get("FS_TMIXV", "0,0,0.3,0")).split(",")]
+            while len(_mv) < 4:
+                _mv.append(0.0)
+            _q0, _q1, _qv, _qc = _mv[:4]
+
+            def base(raw, v, ch=1):
+                a = float(P.J.ahat(A, np.array([raw]), np.array([v]))[0])
+                dd = _canon(raw) - a
+                if ch:                                    # 무릎
+                    dc = max(dcap_k + _qc * abs(float(v)), 0.0) if dcap_k > 0 else dcap_k
+                    t = a + (dd if dc <= 0 else max(-dc, min(dc, dd)))
+                    if _q0 or _q1:
+                        t -= (_q0 + _q1 * abs(float(raw))) * np.tanh(float(v) / max(_qv, 1e-6))
+                    return t
                 return a + (dd if dcap_h <= 0 else max(-dcap_h, min(dcap_h, dd)))
         else:
             # canon_cap: **분동 검증분만 채택**. τ = a_hat + clip(canon − a_hat, ±Δmax).

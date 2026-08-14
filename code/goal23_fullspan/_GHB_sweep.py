@@ -78,7 +78,7 @@ CH4 = ("q1", "q2", "dq1", "dq2")
 # 훑을 변환식 구조. FS_SWEEP_MODES="canon_cap,canon_fric" 로 늘릴 수 있다.
 #   1회차는 둘을 3시간씩 맞붙였고 하중비례형이 크게 졌다 → 2회차는 현행 구조만 6시간.
 MODES = tuple(m.strip() for m in
-              os.environ.get("FS_SWEEP_MODES", "canon_cap").split(",") if m.strip())
+              os.environ.get("FS_SWEEP_MODES", "canon_mixv").split(",") if m.strip())
 
 # ── 스윕의 **출발점** 13 개 값 ─────────────────────────────────────────────────────
 #   순서 = COMMON 11 개 + EXTRA["canon_cap"] 2 개.
@@ -246,6 +246,27 @@ EXTRA = {
     #     안 옮겨서, 힙 보정상한이 2.6(H2) 으로 출발했다 (현행 2.309 대비 12.6% 어긋남).
     #     3 분 만에 로그에서 발견해 재시동. **축 목록은 두 군데(COMMON·EXTRA)에 나뉘어 있다.**
     "canon_cap":  [("무릎 보정상한", 2.0, 12.0, 3.733), ("힙 보정상한", 1.2, 10.0, 2.309)],
+    # ★★ 08-14 (6 회차) — **세 손실을 한 판에**. 08-14 훑기가 셋이 서로를 대신한다는 것을
+    #   보였으므로 (따로 열면 답이 갈린다) 같이 연다. 앞 2 축은 canon_cap 과 동일한 자리다.
+    #   신규 3 축은 **전부 0/1 이 "지금과 완전히 동일"** 이라 회귀가 불가능하다 (검산 완료:
+    #   FS_TMIXV="0,0,0.3,0" 에서 canon_cap 과 최대 차이 0.000e+00 N·m).
+    "canon_mixv": [
+        ("무릎 보정상한", 2.0, 12.0, 4.122),
+        ("힙 보정상한", 1.2, 10.0, 2.372),
+        # 전달 효율 손실: 4 절 링크·기어 접촉을 누르는 힘이 전달 토크에 비례 → 마찰도 비례.
+        #   준정적 실측 0.1197 (효율 88%) 은 **하한**이다 (고속 손실은 명령 채널로 안 보임).
+        #   새 구조는 천장이 살아 있어 같은 값이 더 세게 깎는다 — 08-14 검산: 0.20 에서
+        #   일어서기 6.281 → 1.060, 0.30 에서 0.790. 그래서 상한을 0.60 으로 둔다.
+        ("무릎 전달손실", 0.00, 0.60, 0.00),
+        # 변속기 자세 의존 손실 배수: 손실 = C·|명령|·(1/교환비 − 1)·tanh(속도).
+        #   무변속은 교환비가 정확히 1 이라 **원리상 0** (08-14 표에서 확인됨).
+        ("변속기 손실 배수", 0.0, 4.0, 1.0),
+        # 무릎 천장의 속도 의존: 천장(v) = 상한 + c1·|속도|. 음수 = 빠를수록 닫힌다.
+        #   48 V·감속비 9·역기전력상수 0.091 → 무부하 관절 속도 58.6 rad/s.
+        #   실측 무릎 속도 14~22 rad/s 에서 토크 여력 76%~62% ⇒ 물리 예상 c1 ≈ −0.07.
+        #   양수 쪽도 조금 열어 둔다 — 부호가 반대로 나오면 그 자체가 판정이다.
+        ("무릎 천장 속도의존", -0.25, 0.05, 0.0),
+    ],
     # ★ 범위 산정 (08-11 두 번 틀린 뒤 확정)
     #   하한 = **준정적 실측** (느릴 때의 손실은 반드시 있다): 무릎 0.156 · 힙 0.004
     #   상한 = "지금 상한이 하던 일을 전부 하중비례가 떠맡는" 극단까지 여유를 둔다.
@@ -277,6 +298,14 @@ def _sync_x0():
         COMMON[i] = COMMON[i][:3] + (X0[i],)
     for i in range(len(EXTRA["canon_cap"])):
         EXTRA["canon_cap"][i] = EXTRA["canon_cap"][i][:3] + (X0[n + i],)
+    # ★ 08-14 (6 회차) — 새 결합 구조도 **같은 단일 출처**에서 시작값을 받는다.
+    #   앞 2 개(보정 상한)는 X0 의 마지막 2 개 그대로. 신규 3 개는 **"지금과 완전히 동일"**
+    #   인 중립값(전달손실 0 · 변속기 배수 1 · 천장 속도의존 0). 그래야 출발점이 배포 스택과
+    #   같은 지점이 되고, 정규화된 점수가 출발에서 정확히 1.0000 이 된다.
+    _neu = [0.0, 1.0, 0.0]
+    for i in range(len(EXTRA["canon_mixv"])):
+        v = X0[n + i] if i < 2 else _neu[i - 2]
+        EXTRA["canon_mixv"][i] = EXTRA["canon_mixv"][i][:3] + (v,)
 
 
 _sync_x0()
@@ -341,6 +370,12 @@ def env_of(mode, x):
     n = len(COMMON)                          # ← 축을 늘려도 아래 인덱스가 저절로 따라온다
     if mode == "canon_cap":
         e["FS_TDCAP"] = f"{x[n]:.3f},{x[n+1]:.3f}"
+    elif mode == "canon_mixv":
+        e["FS_TDCAP"] = f"{x[n]:.3f},{x[n+1]:.3f}"
+        # 일정몫(속도만 반대인 건마찰)은 0 — 물리엔진의 무릎 건마찰 축(x[0])이 담당한다.
+        #   여기에도 넣으면 같은 물리를 두 축이 나눠 갖는다 (이중 계산).
+        e["FS_TMIXV"] = f"0,{x[n+2]:.5f},0.3,{x[n+4]:.5f}"
+        e["FS_CVT_DISS_SCALE"] = f"{x[n+3]:.5f}"
     else:
         e.pop("FS_TDCAP", None)
         # 일정몫(건마찰)은 0 — 물리엔진 관절 마찰이 담당한다. 점성도 0 (관절 감쇠가 담당).
@@ -404,6 +439,9 @@ def _apply(e):
               #   4 시간 탐색 자체는 무사할 가능성이 높다 — 탐색이 내놓는 실수값이 정확히 0.0
               #   이 되는 일은 사실상 없어서 매번 두 변수를 명시로 덮어썼기 때문이다
               #   (승자도 2.6e-07 로 0 이 아니었다). 그래도 침묵 실패이므로 막는다.
+              # ★ 08-14: 6 회차 신규 2 변수. 지우지 않으면 직전 평가 값이 살아남아 다음
+              #   평가를 오염시킨다 (08-13 에 같은 계열 사고가 두 번 있었다).
+              "FS_TMIXV", "FS_CVT_DISS_SCALE",
               "FS_RAIL", "FS_W2"):
         os.environ.pop(k, None)
     os.environ.update(e)
@@ -643,8 +681,18 @@ def _ensure():
                     continue
                 # 창 상한 2.0초 — 변속기 일어서기의 실길이가 1.83~1.85초라 1.5초 상한이면
                 # 밀어올리는 마지막 감속 구간이 잘린다 (08-14 원자료 분석).
-                _W = FD.air_windows(_d, nwin=int(os.environ.get("FS_S2S_NWIN", "4")),
-                                    wmax=float(os.environ.get("FS_S2S_WMAX", "2.0")))
+                # ★★ 08-14 (6 회차) — **창을 나누지 않는다** (사용자 상시 규칙 · 승인 완료).
+                #   나눈 판에는 바닥(≈1.40)이 있어 그 아래를 못 본다: 지금 모델 대비 좋은
+                #   모델의 벌어짐이 통짜 8.0 배 vs 나눈 것 2.3 배였다. 짧은 창은 신호가
+                #   조금밖에 안 움직여 분모가 작고 시작 과도가 지배하기 때문이다.
+                #   ⇒ 조각내면 **좋은 모델을 알아보지 못한다.** 규칙이 성능이기도 했다.
+                #   FS_S2S_NWIN=0 (기본) 이면 기록 전체를 한 창으로 준다. 4 를 주면 5 회차 판.
+                _nw = int(os.environ.get("FS_S2S_NWIN", "0"))
+                if _nw <= 0:
+                    _W = [(float(_d["t"][0]), float(_d["t"][-1]))]
+                else:
+                    _W = FD.air_windows(_d, nwin=_nw,
+                                        wmax=float(os.environ.get("FS_S2S_WMAX", "2.0")))
             except Exception:
                 continue
             if _W:
@@ -872,6 +920,30 @@ W_H    = 0.07   # 점프 높이
 W_AIR  = 0.14   # 매달림 15 건 — 측정 토크 주입 재생만 (각도·속도 4 채널)
 W_S2S  = 0.10   # 짐 지고 일어서기 4 경우 — 측정 토크 주입 재생만 (각도·속도 4 채널)
 
+# ★★ 08-14 (6 회차) — 점수 정규화 스위치와 기준값. `_ensure()` 가 배포 스택에서 한 번
+#   계산해 채운다. 여기가 비어 있으면 정규화는 저절로 꺼진다 (안전한 기본값).
+_NORM = os.environ.get("FS_SWEEP_NORM", "1") != "0"
+_NORM_KEYS = ("ma", "clq", "clt", "h", "air", "s2s")
+
+
+def norm_ref():
+    """정규화 기준값 = **배포 스택에서 각 항이 내는 값**. main 이 한 번 재서 환경변수로 넘긴다.
+
+    왜 환경변수인가: 작업자 프로세스마다 따로 재면 미세하게 달라질 수 있고, 그러면 같은
+    후보가 작업자에 따라 다른 점수를 받는다 (침묵 실패). **한 번 재서 전부에게 같은 수를
+    준다.** 변수가 없으면 빈 dict → 정규화가 저절로 꺼진다 (안전한 기본값).
+    """
+    v = os.environ.get("FS_SWEEP_NORMREF", "")
+    if not v:
+        return {}
+    try:
+        f = [float(x) for x in v.split(",")]
+    except ValueError:
+        return {}
+    if len(f) != len(_NORM_KEYS) or not all(np.isfinite(f)) or min(f) <= 0:
+        return {}
+    return dict(zip(_NORM_KEYS, f))
+
 
 def evaluate(args):
     """반환 (벌점 포함 점수, 세부). 실패·발산은 큰 값.
@@ -912,8 +984,20 @@ def evaluate(args):
         s2s = s2s_ma_score() if _S_EXPECT else 0.0
         if _S_EXPECT and not np.isfinite(s2s):
             return 9e2, None
-        J = (W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
-             + W_AIR * air + W_S2S * s2s)
+        # ★★ 08-14 (6 회차) — **점수 정규화**. 5 회차에서 실측된 결함을 고친다.
+        #   무게는 0.27/0.15/0.27/0.07/0.14/0.10 으로 줬는데 각 판의 값 크기가 달라
+        #   실제 비중이 일어서기 47% · 매달림 28% · 점프 전부 24% 가 됐다 — 무게가 거짓말을
+        #   하고 있었던 것이다. 각 항을 **배포 스택에서의 그 항 값**으로 나누면 출발점에서
+        #   모든 항이 1.0 이 되어 **무게가 곧 비중**이 된다. 0 이 완벽인 성질은 유지된다.
+        #   FS_SWEEP_NORM=0 이면 5 회차 판(정규화 없음)이 그대로 재현된다.
+        #   ⚠ 기준선이 바뀌므로 **점수를 5 회차와 직접 비교하면 안 된다.**
+        _r = norm_ref() if _NORM else {}
+        if _r:
+            J = (W_MA * ma8 / _r["ma"] + W_CLQ * clq / _r["clq"] + W_CLT * clt / _r["clt"]
+                 + W_H * hr / _r["h"] + W_AIR * air / _r["air"] + W_S2S * s2s / _r["s2s"])
+        else:
+            J = (W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
+                 + W_AIR * air + W_S2S * s2s)
         # 벌점 — 적합에 안 쓰는 세션이 **배포 스택보다** 2% 넘게 나빠지면 붙는다 (08-13 변경점)
         pen = 0.0; gl = {}
         for s in GATE_MA:
@@ -1086,13 +1170,20 @@ def run_mode(mode, budget_s, nproc):
     # ☠ 08-12 사고 방역: 축 목록이 COMMON(9개)+EXTRA(2개) 두 군데로 나뉘어 있어서,
     #   시작값을 현행 스택으로 옮길 때 **뒤쪽 2개를 빠뜨렸다** (힙 보정상한 2.6 vs 2.309).
     #   6시간을 잘못된 출발점에서 쓸 뻔했다. 이제 코드가 스스로 대조한다.
-    if mode == "canon_cap":
+    if mode in ("canon_cap", "canon_mixv"):
         # ★ 08-13 정정: 대조 대상이 **출발점(X0)** 이다. 3 회차까지는 출발점과 배포 스택이
         #   같은 지점이라 배포 스택과 대조해도 됐는데, 4 회차부터는 **일부러 다르게** 뒀다
         #   (출발점 = 3 회차 승자 · 비교 기준 = 배포 스택). 대조 대상을 안 바꿔서 첫 시동이
         #   "12 개 축이 전부 다르다"며 멈췄다. 이 장치의 목적은 어디까지나
         #   **"시작값을 옮길 때 축 하나를 빠뜨리지 않았나"** 를 잡는 것이다.
+        # ★ 08-14: 새 구조의 뒤 3 축은 X0 에 대응이 없다(중립값이 정답) — 앞부분만 대조한다.
         bad = [(a[0], c, h) for a, c, h in zip(axes, cur, X0) if abs(c - h) > 1e-6 * max(1, abs(h))]
+        if mode == "canon_mixv":
+            _nx = len(X0)
+            bad = [b for b in bad if b[0] not in ("무릎 전달손실", "변속기 손실 배수", "무릎 천장 속도의존")]
+            _neu3 = dict(zip(("무릎 전달손실", "변속기 손실 배수", "무릎 천장 속도의존"), (0.0, 1.0, 0.0)))
+            bad += [(a[0], c, _neu3[a[0]]) for a, c in zip(axes, cur)
+                    if a[0] in _neu3 and abs(c - _neu3[a[0]]) > 1e-9]
         if bad:
             print("\n  ★★ 경고: 시작값이 출발점(X0)과 다르다 — 의도한 것인지 확인하라", flush=True)
             for nm, c, h in bad:
@@ -1229,8 +1320,31 @@ def main():
     b0, d0 = evaluate(("canon_cap", H2))
     print(f"  두 세대 전 모델: 새 자 {b0:.4f} · 옛 자 {(d0 or {}).get('Jold', float('nan')):.4f}"
           f"  (옛 자가 1.0000 근처여야 판이 정상)", flush=True)
+    # ★★ 08-14 (6 회차) — **정규화 기준값을 여기서 한 번 잰다.**
+    #   순서가 중요하다: 기준값 없이(=정규화 꺼진 채) 배포 스택을 재서 각 항의 값을 얻고,
+    #   그걸 환경변수에 심은 뒤 다시 재면 점수가 정확히 무게의 합(=1.0000)이 되어야 한다.
+    #   그 검산이 아래 "출발점이 1.0000 인가" 줄이다. 어긋나면 배선이 틀린 것이다.
+    os.environ.pop("FS_SWEEP_NORMREF", None)
+    _b1r, _d1r = evaluate(("canon_cap", DEPLOY))
+    _r0 = _d1r or {}
+    if _NORM:
+        _ref = [_r0.get(k, float("nan")) for k in _NORM_KEYS]
+        if all(np.isfinite(_ref)) and min(_ref) > 0:
+            os.environ["FS_SWEEP_NORMREF"] = ",".join(f"{v:.10g}" for v in _ref)
+            print("  ■ 점수 정규화 켬 — 각 항을 배포 스택 값으로 나눈다 (출발에서 전부 1.0)",
+                  flush=True)
+            print("     기준값: " + " · ".join(
+                f"{n} {v:.4f}" for n, v in zip(
+                    ("주입", "폐루프각", "폐루프토크", "높이", "매달림", "일어서기"), _ref)), flush=True)
+        else:
+            print(f"  ★ 정규화 끔 — 기준값이 성립하지 않는다 {_ref}", flush=True)
     b1, d1 = evaluate(("canon_cap", DEPLOY))
     _d1 = d1 or {}
+    if _NORM and os.environ.get("FS_SWEEP_NORMREF"):
+        print(f"  ■ 배선 검산: 배포 스택의 정규화 점수 = {b1:.6f} "
+              f"(무게 합 {W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S:.4f} 와 같아야 한다)"
+              f"  {'통과' if abs(b1 - (W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S)) < 1e-6 else '★실패'}",
+              flush=True)
     print(f"  ★ 배포 스택(현행) = **이겨야 할 상대**: 새 자 {b1:.5f} · 옛 자 "
           f"{_d1.get('Jold', float('nan')):.4f}", flush=True)
     print(f"      뜯어보면 — 주입 {_d1.get('ma', float('nan')):.4f} · "
