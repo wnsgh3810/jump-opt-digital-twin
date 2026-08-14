@@ -16,9 +16,15 @@
 
 ■ 무엇을 좋다고 하나
   **점프 높이(몸통 중심의 최고 높이 [m], 클수록 좋다)** 를 최대로 하되, 아래를 어기면 벌점:
-  축 토크 15 N·m · 모터 속도-토크 한계선 · 관절 각도 범위 · 관절 속도 50 rad/s ·
-  발이 땅에 붙어 있는 시간 0.3 초. (제약 정의는 기존 파일 `t0_spec.py` 를 그대로 쓴다 —
-  이 값들은 최종 목표인 궤적 최적화 과제에서 온 것이라 여기서 바꾸면 안 된다.)
+  축 토크 상한(설계 목표) · 모터 속도-토크 한계선 · 관절 각도 범위 · 관절 속도 50 rad/s ·
+  발이 땅에 붙어 있는 시간 0.3 초. (제약 정의는 기존 파일 `t0_spec.py` 를 그대로 쓴다.)
+
+  ⛔ **축 토크 15 N·m 는 하드웨어 한계가 아니다** (사용자 명시 2026-08-14).
+    **"모터를 15 N·m 만 쓰는 궤적을 찾고 싶다"고 사용자가 거는 설계 목표**다.
+    그래서 `--taulim` 으로 바꿀 수 있게 열어 둔다 (기본 15).
+    **이 값이 맞는지 사용자에게 되묻지 말 것** — 바꾸고 싶으면 사용자가 먼저 말한다.
+    **진짜 하드웨어 천장은 명령 35.5 (≈ 축 20.5 N·m)** 이고, 그것은 별개로 항상 확인한다
+    (아래 감사 결과에 `cmd_hip`·`cmd_knee` 로 같이 찍는다).
 
 ■ 어느 트윈으로 도나
   기본은 지금 배포된 값 묶음. 탐색이 끝나 새 값이 나오면 `--stack _GHB_sweep5.json` 처럼
@@ -52,7 +58,7 @@ os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ.setdefault("FS_SWEEP_AIR", "0")
 os.environ.setdefault("FS_SWEEP_S2S", "0")
 
-import t0_spec as T0             # noqa: E402  제약 정의 (최종 과제에서 온 값 — 변경 금지)
+import t0_spec as T0             # noqa: E402  제약 정의 (파일 자체는 건드리지 않는다)
 
 T_END = 0.6          # 목표각 곡선의 길이 [s]
 N_KNOT = 8           # 관절당 매듭 수 (첫 매듭은 시작 자세)
@@ -126,31 +132,58 @@ def apex(L):
     return float(np.max(np.asarray(L["bz"], float)))
 
 
-def audit_of(L):
-    """제약 검사 — 기존 정의(t0_spec)를 그대로 쓴다. 축 토크 이름만 맞춰 준다."""
+CMD_CEIL = 35.5      # 명령의 하드웨어 천장 [N·m] — 전류 포화. 설계 목표와 **다른 것**이다.
+
+
+def audit_of(L, taulim=15.0):
+    """제약 검사 — 기존 정의(t0_spec)를 쓰되 **축 토크 목표만 바꿀 수 있게** 열어 둔다.
+
+    · `taulim` = 사용자가 거는 **설계 목표** (기본 15 N·m). 하드웨어 한계가 아니다.
+    · 그와 별개로 **명령이 하드웨어 천장(35.5)에 닿았는지**를 항상 같이 찍는다 —
+      26.07.27 배포 건이 정확히 그것을 놓쳐서 계획의 약속이 거짓이 됐다.
+    """
     m = np.asarray(L["t"], float) >= -1e-9
     A = {k: np.asarray(L[k], float)[m] for k in ("t", "q1", "q2", "dq1", "dq2")}
     A["sh1"] = np.asarray(L["s1"], float)[m]
     A["sh2"] = np.asarray(L["s2"], float)[m]
     out = T0.audit(A, t_end=T_END, cvt=False)
+    # t0_spec 은 15 로 고정이므로, 목표가 다르면 그만큼 되돌려 준다 (정의는 그대로 둔다)
+    if abs(taulim - 15.0) > 1e-9:
+        out["tau_hip"] += 15.0 - taulim
+        out["tau_knee"] += 15.0 - taulim
+        out["pass"] = bool(all(v <= 1e-6 for k, v in out.items()
+                               if k not in ("pass",) and isinstance(v, float)))
     out["stance"] = stance_time(L)
     out["stance_gap"] = out["stance"] - T0.T_ST_MAX
-    out["pass_all"] = bool(out["pass"] and out["stance_gap"] <= 1e-6)
+    # 하드웨어 천장 확인 (설계 목표와 별개 — 넘으면 계획이 실기에서 그대로 안 나온다)
+    c1 = float(np.max(np.abs(np.asarray(L["c1"], float)[m])))
+    c2 = float(np.max(np.abs(np.asarray(L["c2"], float)[m])))
+    out["cmd_hip"] = c1
+    out["cmd_knee"] = c2
+    out["cmd_ceiling_gap"] = max(c1, c2) - CMD_CEIL
+    out["pass_all"] = bool(out["pass"] and out["stance_gap"] <= 1e-6
+                           and out["cmd_ceiling_gap"] <= 1e-6)
     return out
 
 
-def objective(ft, x, gains, w=1.0):
+def objective(ft, x, gains, w=1.0, taulim=15.0):
     """작을수록 좋다. = −(점프 높이) + 제약 위반 벌점."""
     L = rollout(ft, x, gains)
     if L is None:
         return CRASH, None, None
-    a = audit_of(L)
+    a = audit_of(L, taulim)
     pen = 0.0
+    # 08-14 버그 하나 잡음: 이 반복문은 **위반량**(0 이하면 통과)만 더해야 하는데,
+    #   내가 새로 넣은 `cmd_hip`/`cmd_knee`(명령의 최대 크기 — 그냥 큰 양수)까지 위반으로
+    #   세어 벌점이 2910 만큼 부풀었다. 위반량이 아닌 항목은 여기서 뺀다.
+    NOT_VIOLATION = ("pass", "pass_all", "stance", "cmd_hip", "cmd_knee")
     for k, v in a.items():
-        if k in ("pass", "pass_all", "stance"):
+        if k in NOT_VIOLATION:
             continue
         pen += w * max(0.0, float(v)) * (500.0 if k.startswith("q") else 50.0)
     pen += w * 200.0 * max(0.0, a["stance_gap"])
+    # 하드웨어 천장을 넘는 계획은 실기에서 그대로 안 나온다 — 무겁게 막는다
+    pen += w * 500.0 * max(0.0, a["cmd_ceiling_gap"])
     return -apex(L) + pen, L, a
 
 
@@ -204,6 +237,8 @@ def main():
     ap.add_argument("--stack", default="deploy")
     ap.add_argument("--budget", type=int, default=2000, help="평가 횟수")
     ap.add_argument("--gains", default="150,2.2,250,3", help="로봇에 넣을 게인 라벨")
+    ap.add_argument("--taulim", type=float, default=15.0,
+                    help="축 토크 설계 목표 [N·m] — 사용자가 정하는 값 (하드웨어 한계 아님)")
     ap.add_argument("--smoke", action="store_true", help="배선만 확인 (3 회 평가)")
     args = ap.parse_args()
 
@@ -222,13 +257,13 @@ def main():
     else:
         x0 = np.clip(x0, lo, hi)
         print("  출발점: 옛 계획(v9)의 목표각 매듭")
-    v0, L0, a0 = objective(ft, x0, gains)
+    v0, L0, a0 = objective(ft, x0, gains, taulim=args.taulim)
     print(f"  출발점 점수 {v0:.4f} · 높이 {apex(L0) if L0 else float('nan'):.4f} m"
           f" · 제약통과 {a0['pass_all'] if a0 else '—'}")
     if args.smoke:
         for i in range(2):
             xx = np.clip(x0 + 0.02 * (hi - lo) * np.random.RandomState(i).randn(len(x0)), lo, hi)
-            v, L, a = objective(ft, xx, gains)
+            v, L, a = objective(ft, xx, gains, taulim=args.taulim)
             print(f"  흔들기 {i+1}: 점수 {v:.4f} · 높이 {apex(L) if L else float('nan'):.4f} m")
         print("배선 확인 완료 (실제 탐색은 --smoke 없이).")
         return
@@ -256,20 +291,20 @@ def main():
             F = []
             for z in Xn:
                 xx = lo + np.asarray(z, float) * (hi - lo)
-                v, _L, _a = objective(ft, xx, gains, w=w)
+                v, _L, _a = objective(ft, xx, gains, w=w, taulim=args.taulim)
                 F.append(v)
                 if v < rb[0]:
                     rb = (v, xx.copy())
             es.tell(Xn, F)
         xcur = rb[1].copy()
         # 판 사이 비교는 **같은 자(무게 1.0)** 로 한다 — 무게를 올린 판의 점수는 서로 못 견준다
-        v1, L1, a1 = objective(ft, xcur, gains, w=1.0)
+        v1, L1, a1 = objective(ft, xcur, gains, w=1.0, taulim=args.taulim)
         if v1 < best[0]:
             best = (v1, xcur.copy())
         print(f"  [{(time.time()-t0)/60:5.1f}분] {ri}판(벌점무게 {w:g}) 끝 · "
               f"높이 {apex(L1) if L1 else float('nan'):.4f} m · 제약통과 {a1['pass_all'] if a1 else '—'} · "
               f"공통자 점수 {v1:.4f}", flush=True)
-    v, L, a = objective(ft, best[1], gains)
+    v, L, a = objective(ft, best[1], gains, taulim=args.taulim)
     print(f"\n■ 결과: 점프 높이 {apex(L):.4f} m · 제약통과 {a['pass_all']} · "
           f"발 붙은 시간 {a['stance']:.3f}s")
     print("  제약 위반량 (0 이하가 통과): " +
