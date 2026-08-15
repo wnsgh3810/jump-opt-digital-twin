@@ -278,10 +278,14 @@ EXTRA = {
         #     크랭크 모터축 73.0 배 · **커플러 핀 80.2 배** · 무릎 1.0 배다.
         #     즉 **증폭이 가장 큰 관절이 정확히 안 맞추던 관절**이었다.
         #   출발값은 전부 **지금 값 그대로** → 이 축들이 무의미하면 탐색이 제자리에 두면 된다.
-        ("핀 쿨롱 마찰", 0.0, 0.20, 0.0),
-        ("무릎 쿨롱 마찰", 0.0, 0.20, 0.0),
-        ("핀 점성 감쇠", 0.0, 0.05, 0.00040),
-        ("무릎 점성 감쇠", 0.0, 0.20, 0.02309),
+        #   ★ 08-16 조합 훑기로 범위를 좁혔다 (하나씩 9 줄 + 조합 10 줄).
+        #     핀 쿨롱 마찰은 **변속**을, 무릎 점성 감쇠는 **무변속과 짐 5 kg**을 고친다 — 서로 보완한다.
+        #     둘 다 넣으면 각자보다 낫다: 변속 2.5 kg 3.339 → 0.382 (−89%) · 무변속 8.880 → 5.463 (−38%)
+        #     · 따라간 시간 0.590 → 0.734 s (+24%) · **점프 폐루프 토크는 비악화** (0.3474 → 0.3433~0.3478)
+        ("핀 쿨롱 마찰", 0.0, 0.25, 0.0),
+        ("무릎 쿨롱 마찰", 0.0, 0.12, 0.0),
+        ("핀 점성 감쇠", 0.0, 0.04, 0.00040),
+        ("무릎 점성 감쇠", 0.0, 0.25, 0.02309),
     ],
     # ★ 범위 산정 (08-11 두 번 틀린 뒤 확정)
     #   하한 = **준정적 실측** (느릴 때의 손실은 반드시 있다): 무릎 0.156 · 힙 0.004
@@ -843,10 +847,10 @@ def s2s_ma_score():
     import fs_runner as FR, fs_cvt as FC
     m0 = float(os.environ.get("FS_MASS", "3.30"))
     keep = os.environ.get("FS_MASS")
-    vals = {}
+    vals = {}; hvals = {}
     try:
         for sub, pay, cvt, d, W in (_S or []):
-            per = []
+            per = []; hper = []
             try:
                 os.environ["FS_MASS"] = f"{m0 + pay:.4f}"
                 FR._CACHE.clear(); _CVT_STAMPED.clear()
@@ -873,9 +877,25 @@ def s2s_ma_score():
                     # 40 배). 0~10 사이의 기울기는 그대로 살아 있어 탐색 신호는 유지된다.
                     if all(np.isfinite(v)):
                         per.append(float(np.mean([min(x, 10.0) for x in v])))
+                    # ★★ 08-16 신설 — **따라간 시간**도 같이 잰다.
+                    #   왜: 짐 5 kg 경우는 네 채널 중 셋이 상한 10 에 걸려 **점수가 아예 안 움직인다**
+                    #   (무릎 각도 최대 오차 2452° = 6.8 바퀴 = 완전 발산). 상한을 올리면 발산 후의
+                    #   잡음을 더 크게 듣게 되므로 답이 아니다. 발산 후 값은 못 믿어도
+                    #   **"언제 발산하기 시작하나"는 믿을 수 있다.** 그것을 잰다.
+                    #   문턱 4 개(5·10·30·90°)에서 각각 재서 평균 → 해상도를 4 배로.
+                    _ed = np.degrees(np.abs(sim[1] - d[CH4[1]][mm]))
+                    _hs = []
+                    for _th in (5.0, 10.0, 30.0, 90.0):
+                        _k = np.where(_ed > _th)[0]
+                        _hs.append(float(tg[_k[0]]) if len(_k) else float(tg[-1]))
+                    hper.append(float(np.mean(_hs)) / max(float(tg[-1]), 1e-6))
             except Exception:
-                per = []
+                per = []; hper = []
             vals[sub] = float(np.mean(per)) if per else 3.0
+            # 따라간 시간 비율을 **점수 방향(0 이 완벽)** 으로 뒤집는다.
+            #   1 − (버틴 시간 ÷ 창 길이). 0 이면 끝까지 한 번도 안 벌어졌다는 뜻,
+            #   1 이면 시작하자마자 발산. 재생 실패는 1.0(최악)으로 계상.
+            hvals[sub] = 1.0 - float(np.mean(hper)) if hper else 1.0
     finally:
         # 질량 env 원복 + 캐시 청소 — 다음 평가가 짐 붙은 모델을 물려받으면 안 된다
         if keep is None:
@@ -885,8 +905,10 @@ def s2s_ma_score():
         FR._CACHE.clear(); _CVT_STAMPED.clear()
     # 등록부에 있는데 적재 단계에서 빠진 경우(창 소실 등)도 3.0 으로 계상 — 침묵 탈락 방지
     for sub in (_S_EXPECT or []):
-        vals.setdefault(sub, 3.0)
-    return float(np.mean(list(vals.values()))) if vals else np.nan
+        vals.setdefault(sub, 3.0); hvals.setdefault(sub, 1.0)
+    if not vals:
+        return np.nan, np.nan
+    return float(np.mean(list(vals.values()))), float(np.mean(list(hvals.values())))
 
 
 def absm(B, key, sess, cols):
@@ -951,12 +973,18 @@ W_CLQ  = 0.15   # PD 제어를 흉내 낸 판 (점프) — 각도·속도 4 채�
 W_CLT  = 0.27   # PD 제어를 흉내 낸 판 (점프) — **토크 2 채널** (08-14 부터 "명령끼리" 자)
 W_H    = 0.07   # 점프 높이
 W_AIR  = 0.14   # 매달림 15 건 — 측정 토크 주입 재생만 (각도·속도 4 채널)
-W_S2S  = 0.10   # 짐 지고 일어서기 4 경우 — 측정 토크 주입 재생만 (각도·속도 4 채널)
+W_S2S  = 0.05   # 짐 지고 일어서기 4 경우 — **성적** (각도·속도 4 채널, 채널당 상한 10)
+# ★★ 08-16 신설 — 짐 지고 일어서기 **따라간 시간**. 옛 0.10 을 성적 0.05 + 시간 0.05 로 쪼갰다.
+#   왜 쪼갰나: 성적만으로는 **짐 5 kg 경우가 상한에 걸려 아예 안 보인다** (네 채널 중 셋이 10).
+#   상한을 올리면 발산 후 잡음을 더 크게 듣게 되므로 답이 아니다. "언제 발산하기 시작하나"를
+#   따로 재면 상한 포화가 원리적으로 없다. 08-16 검산: 문턱 10° 에서 링크 관절 마찰을 넣었을 때
+#   성적은 −9.6% 인데 따라간 시간으로는 **+31%** 로 훨씬 선명했다.
+W_S2H  = 0.05
 
 # ★★ 08-14 (6 회차) — 점수 정규화 스위치와 기준값. `_ensure()` 가 배포 스택에서 한 번
 #   계산해 채운다. 여기가 비어 있으면 정규화는 저절로 꺼진다 (안전한 기본값).
 _NORM = os.environ.get("FS_SWEEP_NORM", "1") != "0"
-_NORM_KEYS = ("ma", "clq", "clt", "h", "air", "s2s")
+_NORM_KEYS = ("ma", "clq", "clt", "h", "air", "s2s", "s2h")
 
 
 def norm_ref():
@@ -1014,8 +1042,8 @@ def evaluate(args):
             return 9e2, None
         # ★ 08-14 — 짐 지고 일어서기 판 (아래 s2s_ma_score 참조). 실패 경우는 3.0 계상이라
         #   NaN 은 "판 자체가 안 섰다"는 뜻 → 실패 처리. 기대 목록은 등록부(_S_EXPECT).
-        s2s = s2s_ma_score() if _S_EXPECT else 0.0
-        if _S_EXPECT and not np.isfinite(s2s):
+        s2s, s2h = s2s_ma_score() if _S_EXPECT else (0.0, 0.0)
+        if _S_EXPECT and not (np.isfinite(s2s) and np.isfinite(s2h)):
             return 9e2, None
         # ★★ 08-14 (6 회차) — **점수 정규화**. 5 회차에서 실측된 결함을 고친다.
         #   무게는 0.27/0.15/0.27/0.07/0.14/0.10 으로 줬는데 각 판의 값 크기가 달라
@@ -1027,10 +1055,11 @@ def evaluate(args):
         _r = norm_ref() if _NORM else {}
         if _r:
             J = (W_MA * ma8 / _r["ma"] + W_CLQ * clq / _r["clq"] + W_CLT * clt / _r["clt"]
-                 + W_H * hr / _r["h"] + W_AIR * air / _r["air"] + W_S2S * s2s / _r["s2s"])
+                 + W_H * hr / _r["h"] + W_AIR * air / _r["air"] + W_S2S * s2s / _r["s2s"]
+                 + W_S2H * s2h / _r["s2h"])
         else:
             J = (W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
-                 + W_AIR * air + W_S2S * s2s)
+                 + W_AIR * air + W_S2S * s2s + W_S2H * s2h)
         # 벌점 — 적합에 안 쓰는 세션이 **배포 스택보다** 2% 넘게 나빠지면 붙는다 (08-13 변경점)
         pen = 0.0; gl = {}
         for s in GATE_MA:
@@ -1104,7 +1133,7 @@ def evaluate(args):
         oh = float(np.mean(ohs)) if ohs else np.nan
         Jold = (0.40 * oma + 0.40 * ocl + 0.20 * oh
                 if all(np.isfinite(q) for q in (oma, ocl, oh)) else np.nan)
-        return J + pen, dict(J=J, ma=ma8, clq=clq, clt=clt, h=hr, air=air, s2s=s2s,
+        return J + pen, dict(J=J, ma=ma8, clq=clq, clt=clt, h=hr, air=air, s2s=s2s, s2h=s2h,
                              pen=pen, gate=gl, Jold=Jold, old_ma=oma, old_cl=ocl, old_h=oh)
     except Exception:
         return 9e2, None
