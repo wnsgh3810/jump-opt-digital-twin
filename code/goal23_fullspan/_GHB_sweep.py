@@ -1417,15 +1417,16 @@ def main():
                   flush=True)
             print("     기준값: " + " · ".join(
                 f"{n} {v:.4f}" for n, v in zip(
-                    ("주입", "폐루프각", "폐루프토크", "높이", "매달림", "일어서기"), _ref)), flush=True)
+                    ("주입", "폐루프각", "폐루프토크", "높이", "매달림",
+                     "일어서기 성적", "일어서기 따라간시간"), _ref)), flush=True)
         else:
             print(f"  ★ 정규화 끔 — 기준값이 성립하지 않는다 {_ref}", flush=True)
     b1, d1 = evaluate(("canon_cap", DEPLOY))
     _d1 = d1 or {}
     if _NORM and os.environ.get("FS_SWEEP_NORMREF"):
         print(f"  ■ 배선 검산: 배포 스택의 정규화 점수 = {b1:.6f} "
-              f"(무게 합 {W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S:.4f} 와 같아야 한다)"
-              f"  {'통과' if abs(b1 - (W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S)) < 1e-6 else '★실패'}",
+              f"(무게 합 {W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S+W_S2H:.4f} 와 같아야 한다)"
+              f"  {'통과' if abs(b1 - (W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S+W_S2H)) < 1e-6 else '★실패'}",
               flush=True)
     print(f"  ★ 배포 스택(현행) = **이겨야 할 상대**: 새 자 {b1:.5f} · 옛 자 "
           f"{_d1.get('Jold', float('nan')):.4f}", flush=True)
