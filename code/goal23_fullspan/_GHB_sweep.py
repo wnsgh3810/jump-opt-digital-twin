@@ -446,6 +446,8 @@ def _apply(e):
               # ★ 08-14: 6 회차 신규 2 변수. 지우지 않으면 직전 평가 값이 살아남아 다음
               #   평가를 오염시킨다 (08-13 에 같은 계열 사고가 두 번 있었다).
               "FS_TMIXV", "FS_CVT_DISS_SCALE",
+              # ★ 08-16: 링크 관절 마찰(방법 A). 지우지 않으면 직전 평가 값이 살아남는다.
+              "FS_LINKFL",
               "FS_RAIL", "FS_W2"):
         os.environ.pop(k, None)
     os.environ.update(e)

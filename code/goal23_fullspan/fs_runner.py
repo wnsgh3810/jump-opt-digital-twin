@@ -71,7 +71,8 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     _fp = os.environ.get("FS_FOOTPOS")   # 발 롤러 앞뒤·상하 오프셋 (모델 빌드 축 → 키 필수)
     # ☠ 모델 빌드가 읽는 env 는 **전부 이 열쇠에 있어야 한다** (08-11 사고: FS_FOOTR 가
     #   빠져서 한 프로세스 안에서 값을 바꿔도 캐시된 옛 모델이 그대로 나왔다 = 탐색 무효).
-    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _ka, _fr, _ir, _fp)
+    key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _ka, _fr, _ir, _fp,
+           os.environ.get("FS_LINKFL"))   # ★ 08-16: 링크 관절 마찰도 모델을 바꾼다 → 캐시 키에 포함
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
@@ -122,6 +123,29 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
                 model.dof_frictionloss[_kj] = float(_kf)
             if _ka:
                 model.dof_armature[_kj] = float(_ka)
+        # ★★ 08-16 신설 — **링크 자체 관절의 쿨롱 마찰** (사용자 결정: 방법 A)
+        #   왜: 링크에서 새는 손실은 실제로 **핀이 비벼지면서** 생긴다. 그런데 지금 모델은
+        #   모터축 두 관절에만 마찰이 있고(힙 0.238 · 크랭크 0.247 N·m) **링크 자체의 두 관절
+        #   (커플러 핀 · 무릎)은 0** 이었다. 손실이 생기는 자리가 비어 있었던 것이다.
+        #
+        #   여기에 마찰을 넣으면 **깊은 자세에서의 증폭이 저절로, 그리고 더 정확하게 나온다.**
+        #   물리 엔진이 닫힌 고리를 구속으로 풀기 때문이다. 08-16 직접 측정 (크랭크 1 도당):
+        #     무릎 −90°  : 핀 1.00 · 무릎 0.840 → 핀 마찰의 무릎당 증폭 1.2 배
+        #     무릎 −170° : 핀 1.08 · 무릎 0.192 → 5.6 배
+        #     무릎 −176° : 핀 1.10 · 무릎 0.014 → **80.2 배**
+        #     무릎 −177° : 무릎 **−0.017** (사점을 지나 방향이 뒤집힌다 — 손으로 쓴 식은 표현 못 함)
+        #   핀은 자세와 무관하게 크랭크와 거의 1:1 로 계속 도는데(1.00→1.10) 무릎만 멈춘다.
+        #   그래서 무릎 기준으로 마찰이 80 배가 된다.
+        #
+        #   ⚠ 한계: 쿨롱 마찰은 **크기가 고정**이라 "미는 힘이 셀수록 커지는 몫"은 표현 못 한다.
+        #   그 성분은 분동 실측이 있으므로(무릎 0.135 + 0.1197·|명령|) 남는 몫만 기존 식이 맡는다.
+        #   FS_LINKFL="cpin=0.02,knee=0.03" 형태. 미지정이면 종전과 완전히 동일(전부 0).
+        _lf = os.environ.get("FS_LINKFL")
+        if _lf:
+            for _n, _v in _kv(_lf).items():
+                if _n not in ("cpin", "knee"):
+                    raise ValueError(f"링크 관절 이름이 아니다: {_n} (cpin/knee 만 허용)")
+                model.dof_frictionloss[safe.dofadr(model, _n, mjm)] = float(_v)
         if _cz:
             # CoM z 이동 → 관성은 평행축 정리로 보정하지 않는다 (여기 I는 **CoM 기준** 관성이므로
             # 형상이 그대로면 불변). 이동량은 물리적 합당 범위에서만 쓸 것.
