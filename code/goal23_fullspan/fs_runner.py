@@ -357,6 +357,48 @@ def tmap_closed(raw, v, cap=3.8, *, A=None, curve=None):
     return ta + (np.abs(dd + cap) - np.abs(dd - cap)) / 2
 
 
+def cvt_ratio_now(model, md, iq, dof, mjm):
+    """**표 없이** 지금 상태에서 4절 링크의 힘/속도 교환비를 읽는다 (08-16 신설).
+
+    왜 만들었나
+      종전에는 크랭크 각도별 교환비를 미리 계산해 표로 저장해 두고 꺼내 썼다. 그런데 그 표에
+      세 가지 결함이 있었다 — ①격자가 ±171.9°에서 끝나는데 데이터는 −175.3°까지 간다
+      ②증폭을 4.00 에서 자른다 ③표를 만들 때 첫 점에서 조립 형태를 임의로 골라 **부호까지**
+      달라진다. 셋 다 **오차가 실제로 생기는 깊은 자세 구간**에 몰려 있었다.
+
+    무엇이 달라지나
+      물리 엔진은 닫힌 고리를 구속 조건으로 닫고 있고(모델 XML 의 connect), 그 구속의
+      야코비안에 두 관절의 연동 관계가 **이미 들어 있다.** 그것을 그대로 읽는다.
+      · 격자가 없으니 잘릴 것이 없다 (결함 ① 소멸)
+      · 자르는 값 없이 실제 증폭이 나온다 (결함 ② 소멸)
+      · **지금 시뮬레이션이 돌고 있는 그 조립 형태**의 값이다 — 다른 형태를 고를 길이
+        원리적으로 없다 (결함 ③ 소멸)
+
+    검산 (08-16): 닫힘식을 직접 미분한 값과 소수점 5 자리까지 일치.
+      크랭크 100° 0.83515 · 140° 0.69542 · 172° 0.13461 · 176° 0.01370 (표는 176°에서 격자
+      밖이라 끝값 고정 + 4.00 클램프 → 실제 증폭 72 를 4 로 본다).
+
+    반환: 교환비 r (무릎 각속도 ÷ 크랭크 각속도). 구속 행을 못 찾으면 None.
+    """
+    try:
+        n_efc = int(md.nefc)
+        if n_efc <= 0:
+            return None
+        J = np.asarray(md.efc_J).reshape(n_efc, model.nv)
+        rows = [i for i in range(n_efc)
+                if int(md.efc_type[i]) == int(mjm.mjtConstraint.mjCNSTR_EQUALITY)]
+        if not rows:
+            return None
+        A = J[np.ix_(rows, [dof["knee_motor"], dof["cpin"], dof["knee"]])]
+        A = A[np.abs(A).max(axis=1) > 1e-12]      # 실제로 구속하는 행만 (평면이라 3 행 중 2 행)
+        if A.shape[0] < 2:
+            return None
+        nvec = np.linalg.svd(A)[2][-1]            # 최소 특이값 방향 = 고리가 허용하는 유일한 움직임
+        return float(nvec[2] / nvec[0]) if abs(nvec[0]) > 1e-12 else None
+    except Exception:
+        return None
+
+
 def _tmap_init(P=None, A=None):
     """마라톤G A: raw → 축토크 변환기 교체 (None = 기존 a_hat 유지).
 
@@ -1062,8 +1104,17 @@ def rollout_cl_fs(ft, tg, qd1g, qd2g, dqd1g, dqd2g, gains, t_end, t_after=0.05, 
         _cd = ft.get("cvt_diss")        # 마라톤C #266: CVT 전달비 소산 (a_cvt_mirror 문자 미러)
         if _cd is not None:
             _cc, _qg, _rg = _cd
-            _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
-            _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
+            # ★ 08-16 — 교환비를 **표에서 꺼내지 않고 지금 상태에서 읽는다** (cvt_ratio_now 참조).
+            #   FS_CVT_RTAB=1 이면 옛 표 방식이 그대로 재현된다 (A/B 대조용).
+            _rr = None
+            if os.environ.get("FS_CVT_RTAB", "0") != "1":
+                _rr = cvt_ratio_now(model, md, iq, dof, mjm)
+            if _rr is None:
+                _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
+                _flo = 0.2                      # 옛 경로: 종전 바닥값 유지
+            else:
+                _flo = float(os.environ.get("FS_CVT_RFLOOR", "0.02"))   # 0 나누기만 막는 최소 가드
+            _amp = max(1.0 / max(abs(_rr), _flo) - 1.0, 0.0)
             tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
         _hsupp = 0.0 if _nosupp else RU.hip_supp_scalar(s1, s2, v1c)
         if _esc is not None and "hsupp1" in _esc:
@@ -1655,8 +1706,17 @@ def rollout_ol_fs_b(ft, tg, raw1g, raw2g, q1_0, q2_0, dq1_0, dq2_0, t_end, t_aft
         _cd = ft.get("cvt_diss")
         if _cd is not None:
             _cc, _qg, _rg = _cd
-            _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
-            _amp = max(1.0 / max(abs(_rr), 0.2) - 1.0, 0.0)
+            # ★ 08-16 — 교환비를 **표에서 꺼내지 않고 지금 상태에서 읽는다** (cvt_ratio_now 참조).
+            #   FS_CVT_RTAB=1 이면 옛 표 방식이 그대로 재현된다 (A/B 대조용).
+            _rr = None
+            if os.environ.get("FS_CVT_RTAB", "0") != "1":
+                _rr = cvt_ratio_now(model, md, iq, dof, mjm)
+            if _rr is None:
+                _rr = float(np.interp(float(md.qpos[iq["knee_motor"]]), _qg, _rg))
+                _flo = 0.2                      # 옛 경로: 종전 바닥값 유지
+            else:
+                _flo = float(os.environ.get("FS_CVT_RFLOOR", "0.02"))   # 0 나누기만 막는 최소 가드
+            _amp = max(1.0 / max(abs(_rr), _flo) - 1.0, 0.0)
             tql += -_cc * abs(s2) * _amp * float(np.tanh(float(md.qvel[dof["knee"]]) / 1.0))
         _hsupp = 0.0 if _nosupp else RU.hip_supp_scalar(s1, s2, v1c)
         if _esc is not None and "hsupp1" in _esc:
