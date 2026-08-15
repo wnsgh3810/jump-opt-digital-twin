@@ -72,7 +72,7 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
     # ☠ 모델 빌드가 읽는 env 는 **전부 이 열쇠에 있어야 한다** (08-11 사고: FS_FOOTR 가
     #   빠져서 한 프로세스 안에서 값을 바꿔도 캐시된 옛 모델이 그대로 나왔다 = 탐색 무효).
     key = (ks, bs, arm, dm, fl, _mu, _rx, _mt, _mb, _cz, _ib, _kd, _kf, _ka, _fr, _ir, _fp,
-           os.environ.get("FS_LINKFL"))   # ★ 08-16: 링크 관절 마찰도 모델을 바꾼다 → 캐시 키에 포함
+           os.environ.get("FS_LINKFL"), os.environ.get("FS_LINKDMP"))   # ★ 08-16: 링크 관절 마찰·감쇠도 모델을 바꾼다 → 캐시 키에 포함
     if key not in _CACHE:
         if "base" not in _CACHE:
             base_xml, tw = FM.capture_base_xml()
@@ -146,6 +146,18 @@ def fs_twin(ks=FM.KS_HIP, bs=FM.BS_HIP, arm=FM.ARM_HIP):
                 if _n not in ("cpin", "knee"):
                     raise ValueError(f"링크 관절 이름이 아니다: {_n} (cpin/knee 만 허용)")
                 model.dof_frictionloss[safe.dofadr(model, _n, mjm)] = float(_v)
+        # ★★ 08-16 신설 — **링크 관절의 점성 감쇠** (속도에 비례하는 저항)
+        #   왜: 이 두 값은 모델 파일에 상수로 박혀 있고 **한 번도 적합된 적이 없다**
+        #   (커플러 핀 0.00040 · 무릎 0.02309 N·m·s/rad, 둘의 비가 58 배인데 근거 기록이 없다).
+        #   무릎 쪽은 2 년 전 다른 캠페인에서 한 번 맞춘 값이고, 핀 쪽은 **출처를 못 찾았다.**
+        #   손실이 실제로 생기는 자리인데 근거 없이 고정돼 있었으므로 데이터가 정하게 연다.
+        #   FS_LINKDMP="cpin=0.001,knee=0.03". 미지정이면 종전과 완전히 동일.
+        _ld = os.environ.get("FS_LINKDMP")
+        if _ld:
+            for _n, _v in _kv(_ld).items():
+                if _n not in ("cpin", "knee"):
+                    raise ValueError(f"링크 관절 이름이 아니다: {_n} (cpin/knee 만 허용)")
+                model.dof_damping[safe.dofadr(model, _n, mjm)] = float(_v)
         if _cz:
             # CoM z 이동 → 관성은 평행축 정리로 보정하지 않는다 (여기 I는 **CoM 기준** 관성이므로
             # 형상이 그대로면 불변). 이동량은 물리적 합당 범위에서만 쓸 것.
