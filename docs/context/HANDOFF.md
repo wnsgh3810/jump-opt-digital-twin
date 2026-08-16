@@ -32,7 +32,13 @@ MuJoCo 시뮬레이션 모델(디지털 트윈)을 실제 로봇과 일치하도
 | 레거시 결과·문서 | `C:\Users\junho\Desktop\jump_opt\` | 참조용 (35 GB, 손대지 말 것) |
 | 연구 헌법 | `docs/context/CONSTITUTION.md` (원본: `C:\Users\junho\Desktop\CLAUDE.md`) | |
 | 데이터 사전 (함정 목록) | `docs/context/DATA_DICT.md` (원본: `Data\CLAUDE.md`) | **데이터 만지기 전 필독** |
-| 누적된 발견 41건 | `docs/context/memory/` (색인 = `MEMORY.md`) | |
+| 누적된 발견 **133건** | `docs/context/memory/` (색인 = `MEMORY.md`) | 시기별 3구역 |
+
+> ⚠️ **기억은 원래 네 군데로 갈라져 있었다.** Claude 의 기억은 대화를 시작한 폴더별로
+> 따로 쌓이는데, 몇 달 동안 폴더를 바꿔 가며 작업해서 8월분 40건 · 7월분 27건 ·
+> 6월 이전 66건이 서로를 못 보고 있었다 (겹치는 파일이 목차 하나뿐이었다).
+> 2026-08-16 에 전부 합쳤다. **충돌이 보이면 언제나 더 최근 것이 맞다** — 나중에
+> 뒤집힌 사실이 실제로 여러 건 있다. 목차가 시기별로 나뉘어 있으니 그것부터 볼 것.
 | 현행 모델 수치의 단일 출처 | `code/bench/CURRENT_STACK.md` | |
 | 이미 기각된 가설 | `code/bench/REJECTED.md` | **새 축 열기 전 필독** |
 | 방법론 | `code/bench/PLAYBOOK.md` | |
