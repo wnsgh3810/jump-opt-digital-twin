@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 > nul
-title Marathon-H joint refit sweep - RUN 9 (25 axes, CVT lock, s2s weight x2)
+title Marathon-H joint refit sweep - RUN 9 (32 axes, CVT lock, s2s weight x2)
 cd /d "%~dp0"
 
 rem ===========================================================================
@@ -65,7 +65,7 @@ rem  what broke the CVT session.  The new term scores ONLY each trial's own
 rem  top-10% speed samples (per-trial threshold, never a fixed one).
 rem
 rem  ---------------------------------------------------------------------
-rem  CHANGE 4 -- FIVE AXES OPENED (21 -> 25).
+rem  CHANGE 4 -- TWELVE AXES OPENED (21 -> 32).
 rem
 rem   (a) HIP SPRING DAMPING, 0 ~ 6, starting 1.5.  The knob (FS_BS) already
 rem       existed; it was simply never in the sweep.  In the model the hip motor
@@ -110,6 +110,29 @@ rem       0.000e+00.  The starting point is bit-identical.
 rem       Note honestly: hip spring damping, thigh CoM and calf CoM are now THREE
 rem       candidates for the hip-torque drift and they are not separated yet.
 rem
+rem   (d) MASS DISTRIBUTION AND THE REMAINING LINKS -- seven more axes, user
+rem       follow-up "what about crank, coupler, l_o -- and mass too?".
+rem       Measured today, current values and share of the whole robot:
+rem         base 1.388 (43.4%) . thigh 0.986 (30.8%) . CRANK 0.437 (13.7%) .
+rem         calf 0.239 (7.5%) . coupler 0.150 (4.7%)      total 3.201 kg
+rem       The crank is 13.7% of the robot and its mass has NEVER been fitted.
+rem       IMPORTANT -- total mass stays pinned at 3.26~3.30 kg (a measurement)
+rem       and the leftover goes to the base.  So these axes do not ADD weight;
+rem       they MOVE it.  Same total, but weight further from the joint is far
+rem       harder to swing -- that is what inertia means.
+rem       New: thigh / crank / coupler / calf mass, crank and coupler CoM z,
+rem            coupler inertia scale.
+rem       l_o (the output link) is NOT a separate body -- it lives inside the
+rem       calf, so the calf mass / CoM / inertia axes already cover it.
+rem       CRANK INERTIA IS DELIBERATELY NOT OPENED.  The crank body and the knee
+rem       motor rotor sit on the SAME joint, so their inertias simply add on that
+rem       degree of freedom; opening both would split one physical quantity
+rem       across two axes.  The motor-shaft term (0.00795) is already 12.7x the
+rem       crank body's own (0.000628), so the crank is buried in it anyway.
+rem       env_of therefore pins crank inertia scale at exactly 1.0.
+rem       Regression check 2026-08-16: with all twelve new axes at their neutral
+rem       start, body mass / inertia / CoM differ from RUN 8 by 0.000e+00.
+rem
 rem  ---------------------------------------------------------------------
 rem  UNCHANGED: transmission ratio still read live from the loop-closure
 rem  constraint (NO lookup table -- user decision: keep the physics engine
@@ -126,13 +149,14 @@ rem    - "normalization ON" with EIGHT reference values, the last being the new
 rem      "fast knee" term.
 rem    - "wiring check: normalized score of deployed stack = 1.000000  PASS"
 rem    - deployed stack penalty 0.000, total 1.00000
-rem    - "canon_mixv - 25 axes", the last four listed as
+rem    - "canon_mixv - 32 axes", among the last ones
 rem        hip spring damping    0 ~ 6      (now 1.5)
 rem        calf centre-of-mass  -0.05 ~ 0.05 (now 0)
 rem        thigh inertia scale   0.6 ~ 1.8   (now 1)
 rem        calf inertia scale    0.6 ~ 1.8   (now 1)
 rem      and thigh centre-of-mass now reading  -0.01 ~ 0.10
-rem    - "start values: all 25 axes match the starting point"
+rem        thigh/crank/coupler/calf mass  (now 0.98583 / 0.437 / 0.15002 / 0.23934)
+rem    - "start values: all 32 axes match the starting point"
 rem
 rem  PRE-REGISTERED PREDICTIONS (written before the run):
 rem    P15: the link-joint VISCOUS damping comes DOWN from RUN 8's values
@@ -150,7 +174,7 @@ rem         a bad search.
 rem    P17: sit-to-stand improves this time (it got worse in RUN 8), because
 rem         its weight nearly doubled.  If it STILL worsens at weight 0.19,
 rem         no available axis can move it and a new mechanism is required.
-rem    P19: at least one of the three mass/inertia axes moves more than 10% from
+rem    P19: at least one of the mass/inertia axes moves more than 10% from
 rem         its neutral start.  They have never been fitted, so sitting still
 rem         would mean the CAD values are already right -- possible, but it
 rem         would be the first time any never-fitted axis did that.
@@ -173,10 +197,14 @@ set FS_S2S_NWIN=0
 set FS_SWEEP_DEPLOCK=1
 set FS_SWEEP_CVTLOCK=1
 
-rem  Default 14 hours.  25 axes, four more than RUN 8 -- more axes need more time
-rem  to keep the search density per axis comparable.
+rem  Default 20 hours.  32 axes, eleven more than RUN 8.
+rem  HONEST NOTE ON COST: search density per axis drops as axes are added.  32 is
+rem  a lot.  The saving grace is that EVERY new axis starts bit-identical to the
+rem  deployed stack, so the run cannot end up worse than where it began -- the
+rem  worst case is that some axes simply do not move.  Watch for axes that pin at
+rem  a bound: that means the bound decided the value, not the data.
 rem  To change the duration, edit the number on the next line.
-set HOURS=14
+set HOURS=20
 
 rem keep this run's own previous output (RUN-1..8 files are untouched)
 if exist _GHB_sweep9.log          move /y _GHB_sweep9.log          _GHB_sweep9.prev.log   > nul
@@ -203,7 +231,7 @@ echo     1. "torque wrap fix N spots" must not be 0 (expect 46).
 echo     2. data line: "hanging 15 records" and "sit-to-stand 4 cases".
 echo     3. "wiring check ... = 1.000000  PASS"  -- if this fails, close it.
 echo     4. deployed stack penalty 0.000, total 1.00000
-echo     5. 25 axes; the last four are hip spring damping (1.5), calf
+echo     5. 32 axes; among them hip spring damping (1.5), calf
 echo        centre-of-mass (0), thigh inertia scale (1), calf inertia scale (1),
 echo        and thigh centre-of-mass now reads -0.01 ~ 0.10
 echo.
