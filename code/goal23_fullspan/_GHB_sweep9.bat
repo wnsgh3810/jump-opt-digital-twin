@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 > nul
-title Marathon-H joint refit sweep - RUN 9 (22 axes, CVT lock, s2s weight x2)
+title Marathon-H joint refit sweep - RUN 9 (25 axes, CVT lock, s2s weight x2)
 cd /d "%~dp0"
 
 rem ===========================================================================
@@ -65,7 +65,7 @@ rem  what broke the CVT session.  The new term scores ONLY each trial's own
 rem  top-10% speed samples (per-trial threshold, never a fixed one).
 rem
 rem  ---------------------------------------------------------------------
-rem  CHANGE 4 -- TWO AXES OPENED (21 -> 22).
+rem  CHANGE 4 -- FIVE AXES OPENED (21 -> 25).
 rem
 rem   (a) HIP SPRING DAMPING, 0 ~ 6, starting 1.5.  The knob (FS_BS) already
 rem       existed; it was simply never in the sweep.  In the model the hip motor
@@ -84,8 +84,31 @@ rem       This axis sets how the hip's gravity load changes with posture, and
 rem       the closed-loop sit-to-stand figures show exactly that failure: the
 rem       measured hip torque is flat while the simulated one drifts one way
 rem       (-2.0 to +1.5 N.m) and is worst at the end of the motion.
-rem       Note honestly: hip spring damping and thigh CoM are the TWO candidates
-rem       for that drift and they have not been separated yet.  Both are open.
+rem
+rem   (c) MASS DISTRIBUTION AND INERTIA -- three axes, user question "shouldn't we
+rem       add M, C, G too?".  Until now the only mass-side axes were TOTAL mass,
+rem       THIGH centre-of-mass, and the two motor-shaft inertias.  The BODY
+rem       inertias and everything about the CALF have never been fitted at all --
+rem       they sit at their CAD values.
+rem       Why now: today's diagnosis points here.  The error grows as a constant
+rem       ABSOLUTE amount per unit time, independent of how fast the joint turns.
+rem       That is the signature of a wrong ACCELERATION, i.e. torque divided by
+rem       inertia.  It can be confused with friction, but the two do separate:
+rem       inertia only acts while the speed CHANGES, friction acts even at
+rem       constant speed -- and this board already looks at fast jumps, slow
+rem       sit-to-stand and hanging swings together.
+rem         calf centre-of-mass z   -0.05 ~ 0.05 m  (added to the current value,
+rem                                 0 = unchanged).  The calf runs all the way to
+rem                                 the foot and its centre of mass sets the
+rem                                 gravity load on BOTH joints -- a third
+rem                                 candidate for the hip-torque drift.
+rem         thigh inertia scale      0.6 ~ 1.8  (multiplies today's value, 1 = same)
+rem         calf inertia scale       0.6 ~ 1.8  (same)
+rem       Regression check run 2026-08-16: with all three at their neutral start
+rem       the body mass / inertia / CoM arrays differ from RUN 8 by exactly
+rem       0.000e+00.  The starting point is bit-identical.
+rem       Note honestly: hip spring damping, thigh CoM and calf CoM are now THREE
+rem       candidates for the hip-torque drift and they are not separated yet.
 rem
 rem  ---------------------------------------------------------------------
 rem  UNCHANGED: transmission ratio still read live from the loop-closure
@@ -103,10 +126,13 @@ rem    - "normalization ON" with EIGHT reference values, the last being the new
 rem      "fast knee" term.
 rem    - "wiring check: normalized score of deployed stack = 1.000000  PASS"
 rem    - deployed stack penalty 0.000, total 1.00000
-rem    - "canon_mixv - 22 axes", the last one listed as
-rem        hip spring damping   0 ~ 6   (now 1.5)
+rem    - "canon_mixv - 25 axes", the last four listed as
+rem        hip spring damping    0 ~ 6      (now 1.5)
+rem        calf centre-of-mass  -0.05 ~ 0.05 (now 0)
+rem        thigh inertia scale   0.6 ~ 1.8   (now 1)
+rem        calf inertia scale    0.6 ~ 1.8   (now 1)
 rem      and thigh centre-of-mass now reading  -0.01 ~ 0.10
-rem    - "start values: all 22 axes match the starting point"
+rem    - "start values: all 25 axes match the starting point"
 rem
 rem  PRE-REGISTERED PREDICTIONS (written before the run):
 rem    P15: the link-joint VISCOUS damping comes DOWN from RUN 8's values
@@ -124,6 +150,10 @@ rem         a bad search.
 rem    P17: sit-to-stand improves this time (it got worse in RUN 8), because
 rem         its weight nearly doubled.  If it STILL worsens at weight 0.19,
 rem         no available axis can move it and a new mechanism is required.
+rem    P19: at least one of the three mass/inertia axes moves more than 10% from
+rem         its neutral start.  They have never been fitted, so sitting still
+rem         would mean the CAD values are already right -- possible, but it
+rem         would be the first time any never-fitted axis did that.
 rem    P18: hip spring damping does NOT land at 1.5.  It has never been fitted,
 rem         so 1.5 sitting still would itself be surprising.
 rem
@@ -143,9 +173,10 @@ set FS_S2S_NWIN=0
 set FS_SWEEP_DEPLOCK=1
 set FS_SWEEP_CVTLOCK=1
 
-rem  Default 12 hours.  22 axes, one more than RUN 8.
+rem  Default 14 hours.  25 axes, four more than RUN 8 -- more axes need more time
+rem  to keep the search density per axis comparable.
 rem  To change the duration, edit the number on the next line.
-set HOURS=12
+set HOURS=14
 
 rem keep this run's own previous output (RUN-1..8 files are untouched)
 if exist _GHB_sweep9.log          move /y _GHB_sweep9.log          _GHB_sweep9.prev.log   > nul
@@ -172,7 +203,8 @@ echo     1. "torque wrap fix N spots" must not be 0 (expect 46).
 echo     2. data line: "hanging 15 records" and "sit-to-stand 4 cases".
 echo     3. "wiring check ... = 1.000000  PASS"  -- if this fails, close it.
 echo     4. deployed stack penalty 0.000, total 1.00000
-echo     5. 22 axes; the last one is hip spring damping starting at 1.5,
+echo     5. 25 axes; the last four are hip spring damping (1.5), calf
+echo        centre-of-mass (0), thigh inertia scale (1), calf inertia scale (1),
 echo        and thigh centre-of-mass now reads -0.01 ~ 0.10
 echo.
 
