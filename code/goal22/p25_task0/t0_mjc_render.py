@@ -65,9 +65,10 @@ _spec = importlib.util.spec_from_file_location("_mauc", str(_CANON))
 _mauc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mauc)
 
-SCR = Path(r"C:/Users/junho/AppData/Local/Temp/claude/C--Users-junho-Desktop-Research"
-           r"-4-Bar-Link-CVT-Data-26-03-24-Jump/91aad6ed-e999-400c-bacd-e1da7d4a5da4"
-           r"/scratchpad") / "mjc_render"
+# 임시 작업 폴더 — 이 스크립트 옆에 만든다.
+# (2026-08-16 이전에는 옛 대화 하나에 딸린 AppData\Local\Temp 폴더가 박혀 있었다.
+#  그 폴더는 이미 없어서, 실행할 때마다 엉뚱한 깊은 곳에 새로 만들어지고 있었다.)
+SCR = HERE / "_scratch" / "mjc_render"
 SCR.mkdir(parents=True, exist_ok=True)
 OUT = HERE / "mjc_gifs"
 OUT.mkdir(exist_ok=True)

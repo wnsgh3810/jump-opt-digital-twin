@@ -27,7 +27,8 @@ import os
 # 데이터가 실제로 있는 곳 (Data 폴더의 한 단계 위).
 # 이 문자열이 저장소 전체에서 실험 데이터 경로가 적힌 유일한 자리다.
 # 2026-08-16: Desktop/Research/4-Bar_Link_CVT 에서 여기로 옮겼다.
-#   옛 자리에는 빈 폴더와 안내문(MOVED_TO_C_Users_junho_CVT.txt)만 남아 있다.
+#   ★ 같은 날 재확인: 옛 자리는 비어 있지 않다. 3.05 GB(16,133 파일)가 그대로 남아 있다.
+#   그래서 옛 경로를 쓰면 오류가 나는 게 아니라 '옛 사본'이 조용히 열린다. 주의.
 _DEFAULT_CVT_ROOT = "C:/Users/junho/CVT"
 
 CVT_ROOT = os.environ.get("JUMP_CVT_ROOT", _DEFAULT_CVT_ROOT).replace("\\", "/").rstrip("/")
@@ -38,11 +39,14 @@ DATA_ROOT = CVT_ROOT + "/Data"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace("\\", "/")
 
 # 옛 결과·문서 폴더 (그림·애니메이션·초기 단계 기록). 2026-08-16 에 바탕화면에서 여기로 옮겼다.
-# 옛 자리(C:\Users\junho\Desktop\jump_opt)에는 **바로가기 폴더**를 남겨 뒀으므로
-# 그 경로를 쓰는 옛 코드 약 4,000군데도 그대로 작동한다.
+# ★ 2026-08-16 재확인: 옛 자리(C:\Users\junho\Desktop\jump_opt)에 바로가기는 **없다**.
+#   안내문 한 장만 든 보통 폴더다. 즉 그 경로를 쓰는 옛 코드는 **작동하지 않는다.**
+#   이전 주석의 "바로가기를 남겨 4,000군데가 그대로 작동한다"는 서술은 사실이 아니었다.
+#   (연결 폴더 여부를 실제로 조회해 확인. 옛 경로로 파일 열기 시험도 실패)
 LEGACY_ROOT = os.environ.get("JUMP_LEGACY_ROOT", CVT_ROOT + "/jump_opt").replace("\\", "/").rstrip("/")
 
-# 다리 최적화·시스템 동정 작업 폴더 (AVT LEG). 위와 같이 옮겼고 바로가기를 남겼다.
+# 다리 최적화·시스템 동정 작업 폴더 (AVT LEG). 위와 같이 옮겼다.
+# ★ 여기도 바로가기 없음 — 옛 경로 C:\Users\junho\Desktop\AVT LEG 는 작동하지 않는다.
 AVT_ROOT = os.environ.get("JUMP_AVT_ROOT", CVT_ROOT + "/AVT LEG").replace("\\", "/").rstrip("/")
 
 
