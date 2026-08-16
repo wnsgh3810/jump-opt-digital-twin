@@ -1,58 +1,68 @@
-# jump-opt-digital-twin — 코드 지도 (≤60줄 유지)
+# CVT — 점프 로봇 디지털 트윈 연구 (본거지)
 
-> ## ▶ 새 세션이면 `docs/context/HANDOFF.md` 를 먼저 끝까지 읽어라.
-> 연구 배경 · 경로 지도 · **지금 돌아가고 있는 작업** · 누적 발견 41건 · 절대 규칙 · 보고 형식이 거기 있다.
-> 이 파일은 그 다음이다 (코드 구조 전용).
-> Codex 등 다른 에이전트용 진입점은 루트의 `AGENTS.md`.
+> **여기가 이 연구의 모든 것이 모인 자리다.** 2026-08-16 에 세 군데로 흩어져 있던 것을 합쳤다.
+> 새 세션이면 아래를 이 순서로 읽어라.
+> 1. 이 파일 (전체 지도)
+> 2. `twin/docs/context/HANDOFF.md` — **연구 배경 · 지금 하는 일 · 절대 규칙 · 보고 형식**
+> 3. `twin/docs/context/memory/MEMORY.md` — 누적된 발견 41건의 색인
 
-연구 헌법 = `docs/context/CONSTITUTION.md` — **이 파일이 정본**. (옛 원본 `C:/Users/junho/Desktop/CLAUDE.md` 는 2026-07-12 판에서 멈췄다. 참고만.)
-데이터 사전 = `docs/context/DATA_DICT.md` (원본 `Data/CLAUDE.md`) — 데이터 만지기 전 필독.
-현행 스택/지표 수치는 `code/bench/CURRENT_STACK.md`가 단일 출처.
-누적 발견은 `docs/context/memory/MEMORY.md` 색인 → 개별 문서.
+## 폴더 구조
 
-## 코드 지도
 ```
-code/
-├─ bench/            평가 하네스 (bench.py CLI, safe.py, p19_adapter, registry, PLAYBOOK/REJECTED)
-├─ goal18_CANONICAL/ 시각화 "규격" 정본 v14 — LOCK (수정 금지, import 전용).
-│                    주의: 내부 leg.xml은 pre-4bar 2링크 모델 — 4-bar 렌더 정본은
-│                    goal22/p18_cvt/cvt_anim.py::build_anim_model (canonical 규격 상속)
-├─ goal21/           4-bar 구조 정본 (g21_fourbar_flip.py = 모델 빌더 정본, g21_p13_linkage 등)
-├─ goal22/
-│   ├─ p14_ahat/     p14_judge.py = 이중 심판 (Mode A 창 + CL τ-채널, winit() 트라이얼 캐시)
-│   ├─ p16_structure/ P16 후보 + springref 패치 (p16a_spring.build_with_ref)
-│   ├─ p18_cvt/      CVT(l_i 가변) 빌더/러너 (cvt_core, cvt_run2) + P18b 후보
-│   ├─ p19_jump/     τ-fidelity 심판/러너 (p19_judge, p19_run, 커맨드층 p19_cmdlayer.json) + P19 후보
-│   └─ p20_rise/     pre30 해체 마라톤 (PLAN/HYPOTHESES, exp 프로브, 노션 빌더)
-└─ goal19/           GOAL19 유산 (참조용)
+C:\Users\junho\CVT\
+├─ twin\      ← 코드·하네스·문서·기억. **git 저장소는 여기다** (커밋 919개+)
+│                Orca / Codex / 워크트리는 이 폴더를 프로젝트로 잡는다.
+├─ Data\      ← 실험 원본 데이터 4GB. **읽기 전용, 수정 절대 금지.**
+│                git 바깥이라 저장소 청소 명령이 닿지 않는다 (일부러 이렇게 뒀다).
+└─ FKnIK\     ← 순기구학·역기구학 참고 자료 (코드가 참조한다)
 ```
 
-## import 규약 (ModuleNotFoundError 예방)
-- sys.path는 **절대경로**로: p19_jump·p18_cvt·p14_ahat·p16_structure·goal21 (bench/p19_adapter.py 상단이 정본 부트스트랩 — 복붙 말고 import 하라).
-- 모든 심판/러너 사용 전 `p19_judge.winit()` (또는 p14_judge.winit) 선행 필수.
-- 함정: `cvt_run2.A`는 모듈 전역 변환식 — 다른 A로 평가하려면 주입 후 복원 (p19_judge.eval_cl_cvt 패턴 참조).
-- 데이터 로더가 실행 시 산출물(JSON)을 쓰는 모듈 있음 — 다중 워커는 safe.read_json/atomic 사용.
+git 명령은 `twin` 안에서 실행한다: `cd twin` 후 `git status` 등.
 
-## 평가 하네스 (모든 후보 평가는 이걸로)
+## 이 연구가 무엇인가 (30초)
+
+2자유도(엉덩이·무릎) **4절 링크 무단변속기(CVT)를 단 한 다리 점프 로봇**의 MuJoCo 시뮬레이션
+모델(디지털 트윈)을 실제 로봇과 일치시키는 연구다. 몸통은 수직 레일에 매달려 위아래로만 움직인다.
+총질량 3.26~3.30 kg · 허벅지 250 mm · 종아리 250 mm · 발 접지 반지름 20 mm.
+무릎은 모터가 크랭크를 돌리고 4절 폐곡선을 거쳐 구동되며, 입력 링크 길이로 변속비가 바뀐다
+(무변속 30.00 mm · 변속 25.08~25.25 mm).
+
+**최종 목표**: 이 모델로 궤적 최적화를 한 뒤 실제 로봇을 PD 제어했을 때
+**측정 토크가 계획 토크와 같아지는 것**, 그리고 ① 짐 지고 일어서기 ② 수직 점프 ③ 수평 점프 성공.
+
+## 절대 규칙 (자세한 것은 `twin/docs/context/HANDOFF.md` §5)
+
+1. **`Data\` 아래 실측 원본 파일(xlsx·txt·영상)의 내용은 고치지 않는다.** 교정은 읽는 코드에서만.
+   단 **그 폴더 안에 분석 코드나 작업용 파일을 새로 만들고 고치는 것은 된다** — 실제로 그렇게 써 왔다.
+   원본 자체를 건드려야 하면 먼저 묻는다. 전량 백업이 `D:\CVT_backup_260816\` 에 있다
+   (2026-08-16 기준, Data 4.14 GB 전부 포함. 그 시점 이후 바뀐 파일 0개로 확인).
+2. **발밑 힘센서(GRF) 값의 크기를 쓰지 않는다.** 세션마다 교정이 달라 세션 간 비교도 금지.
+   접촉 여부와 상대 타이밍만, 그마저 고정 문턱 금지.
+3. **26.03.24 세션은 검증 전용.** 모델 적합에 절대 넣지 않는다.
+4. **긴 계산은 직접 실행하지 않는다.** `.bat` 파일을 만들어 사용자가 더블클릭하게 한다.
+   `.bat` 안에는 ASCII/영문만 (명령창이 cp949).
+5. `twin/code/goal18_CANONICAL/` 과 `fourbar_*_candidate.json` 은 **함부로 고치지 않는다.**
+   내용(렌더링 규격·후보 파라미터)의 갱신은 새 파일을 만들어 승격 절차로만 한다.
+   내용이 아닌 글자 고침(옛 경로 정정 등)은 **사용자에게 먼저 확인받고** 한다.
+6. **정본 코드를 고친다. 사본을 만들지 않는다.**
+7. python 실행 시 `PYTHONIOENCODING=utf-8`.
+8. **축 토크 15 N·m 는 사용자의 설계 목표다. 하드웨어 한계가 아니다. 맞는지 다시 묻지 않는다.**
+
+## 경로를 코드에서 어떻게 쓰나
+
+데이터 위치는 **`twin/code/bench/datapaths.py` 한 곳**에서만 정한다.
+폴더를 또 옮기면 그 파일 한 줄, 또는 환경변수 `JUMP_CVT_ROOT` 만 바꾸면 된다.
+
+```python
+from datapaths import DATA_ROOT, CVT_ROOT, REPO_ROOT, data
+p = data("26_07_27", "250_3_250_3", "hip2.xlsx")
 ```
-python code/bench/bench.py eval <candidate.json>      # per-ds τ-갭 + FIT/HO + 재현판정
-python code/bench/bench.py compare <a> <b> ...        # 맞대결 매트릭스
-python code/bench/bench.py promote <cand> --note ".." # 게이트(재현+held-out) 통과 시만 승격
-python code/bench/bench.py list | stack
-```
 
-## 후보 JSON 규약
-- 네이밍: `fourbar_pXX_candidate.json` (goal 하위 폴더에), **기존 파일 덮어쓰기 금지** (safe.candidate_save가 거부).
-- 스키마: `CANDIDATE`(라벨) · `names[]`/`x[]`(파라미터) · `A`("paper" 등) · 선택: `cmdlayer`, `metric_full/metric_push/heldout`(bench가 재현 대조에 사용), `rows`.
-- 3계층 구조: 플랜트 물리(x) × 커맨드층(α·클립·지연) × 변환식 A — 승격 시 세 계층 모두 명시.
+절대 경로를 새로 코드에 박지 말 것. 예전에 71개 파일에 박혀 있어서 폴더 이름이 바뀌었을 때 깨졌다.
 
-## 결과물 관례
-- 그림/GIF 결과 폴더: `C:/Users/junho/CVT/jump_opt/g22_<이름>_results/` (repo에 대용량 바이너리 커밋 금지)
-- GIF는 goal18_CANONICAL 규격으로만 (새 렌더러 금지) — cvt_anim.py가 상속 실례.
-- GIF 텍스트 오버레이는 `bench/render_kit.draw_overlay`만 (표준 7필드: trial/t/base_z/hip/knee/h_sim/h_real
-  + **l_i 상시 표기** — 사용자 선호 2026-07-13). CL 렌더/그래프는 커맨드층(α+클립) 반영 필수 (훅이 경고).
-- **sim vs real 트라이얼 그래프는 `bench/render_kit.fig_trial_std`만** (png_v2 규격 = cvt_results_v2 출처,
-  2×3: q(deg)+q_des/dq1/dq2/hipτ/kneeτ/GRF). 새 그림 포맷 발명 금지 — 지표는 `cvt_run2.metrics2` 재사용 (훅이 경고).
-- 일반 원칙: **새 러너/그림/지표 함수를 쓰기 전에 정본(cl_run·sim_run·metrics2·render_kit)을 import** —
-  기준 코드가 있으면 그걸 쓰고, 없을 때만 새로 만들어 bench에 정본화.
-- 커밋: 발견 단위로 즉시, 메시지에 수치 포함 (사용자 선호: 자동 커밋).
+## 지금 상태 (2026-08-16)
+
+- 9회차 파라미터 훑기는 **이사 때문에 중단**했다. 시동 파일 `twin/code/goal23_fullspan/_GHB_sweep9.bat`
+  을 사용자가 다시 더블클릭하면 새 위치에서 처음부터 돈다 (자기 폴더로 이동하는 방식이라 경로 무관).
+- 8회차는 승격 보류. 현행 배포 모델은 `H4_260813` 이다.
+- 미리 등록한 예측 P15~P19 는 `twin/docs/context/HANDOFF.md` §4 에 있다. 훑기가 끝나면 반드시 채점한다.
