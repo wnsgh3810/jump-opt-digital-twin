@@ -10,12 +10,21 @@ CL 경로(load_trial_xlsx)는 원래 xlsx 직독이라 청정 — 오염은 Mode
 사용: judge winit 후 apply() 1회 호출 — P12._G["trials"]의 0421 raw1/raw2를 xlsx currentTorque로
 교체하고 td.tau{1,2}_real을 ahat(xlsx)로 재계산. 반환: (sub, ch, 구/신 비율) 목록.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-ROOT0421 = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_21/Position Control")
+ROOT0421 = Path((DATA_ROOT + "/26_04_21/Position Control"))
 DS = "jump_position_0421"
 
 

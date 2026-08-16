@@ -6,6 +6,15 @@ h28 발견: 66이 경계가 아니라 22/25의 진짜 최소는 36~56/46 (드리
 ② 성분 분해: 07-25 오라클(46) vs 96 — 무른 스프링이 무엇을 고치나 (τ1 dqd킥 미결과 연결?)
 ③ 가드형 프로토콜: 캘리브 trial의 최소가 '안쪽'(경계 아님)이고 개선폭>5%일 때만 채택, 아니면 96 유지.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -17,7 +26,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 tw0 = TW.twin()
 BR = (2.40, 2.25, 1.05, 1.09, 3.86, 3.09)

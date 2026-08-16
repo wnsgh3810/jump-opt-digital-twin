@@ -5,6 +5,15 @@ h14 교훈: 5~6s 통짜 개루프 재생은 오차 적분 발산 (페이로드 �
 창 리셋: qpos/qvel을 측정 (q1,q2,dq1,dq2)+발접지 FK(bz,dbz)로 직접 설정.
 채점: 창별 q1/q2 RMSE 평균 (페이로드 반영 트윈), hip은 2단 관측보정 전/후.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, copy
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -18,7 +27,7 @@ import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 import safe                      # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
+ROOT = Path((DATA_ROOT + "/26_06_04"))
 TRIALS = [("0kg", ROOT/"no_cvt/no_load/raw_unwrap", 0.0, (47.8, 53.2)),
           ("5kg", ROOT/"no_cvt/load_5/raw_unwrap", 5.0, (47.0, 53.0)),
           ("7.5kg", ROOT/"no_cvt/load_7.5/raw_unwrap", 7.5, (52.9, 58.5))]

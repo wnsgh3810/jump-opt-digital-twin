@@ -23,13 +23,22 @@ p26 ruler_offset.py — 영상 눈금자(자)로 base 절대높이를 읽어 (de
 출력: _ruler_offset.json, ruler_offset_marks.png (같은 폴더)
 실행: PYTHONIOENCODING=utf-8 python ruler_offset.py
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import os
 import numpy as np
 
 D = np.pi / 180.0
 HERE = os.path.dirname(os.path.abspath(__file__))
-VID = r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04/no_cvt/no_load/KakaoTalk_20260604_170859513.mp4"
+VID = (DATA_ROOT + "/26_06_04/no_cvt/no_load/KakaoTalk_20260604_170859513.mp4")
 
 # ---------------------------------------------------------------------------
 # 1) 정적 구간 대표 프레임 평균 (프레임차분 quiet run에서 선정, 각 10장)

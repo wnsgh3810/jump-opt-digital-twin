@@ -8,6 +8,15 @@
   · H9: 몸통 2점 라인 각도 변화 (베이스 피치) — ~0°면 베이스 무죄
 정렬: 각도 곡선 자체의 시간 이동 최적화 (±0.1s), 기준선 = 푸시 전 프레임 (토크≈0).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -17,7 +26,7 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).parent
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27/250_3_250_3")
+DATA = Path((DATA_ROOT + "/26_07_27/250_3_250_3"))
 KT, GR, CF = 0.091, 9.0, 0.59
 A = np.array([1.15605006, 4.17389589e-4, 0.26855607, 0.04904241])
 def ahat(raw, v):

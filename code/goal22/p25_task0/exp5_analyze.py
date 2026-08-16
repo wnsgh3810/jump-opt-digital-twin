@@ -9,6 +9,15 @@ exp3/exp4 인라인 파이프라인의 파일화 재현 (규약 동일):
   · v_lo = FK base 높이 미분(5-샘플 평활)을 측정 이륙시각(GRF 지속-미만)에서 평가
 산출: _exp5.json + graphs/exp5/exp5_qdqtau_<라벨>.png + exp5_summary.png
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, re
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -21,7 +30,7 @@ plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).parent
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
+DATA = Path((DATA_ROOT + "/26_07_27"))
 OUT = HERE / "graphs" / "exp5"
 OUT.mkdir(parents=True, exist_ok=True)
 

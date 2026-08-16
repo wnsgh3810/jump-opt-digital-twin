@@ -29,6 +29,15 @@ SIGN_CONVENTION: +x = 영상 프레임(회전 보정 후, portrait) 픽셀 x좌�
 CLI: python _G_videoslip.py
 출력: _G_videoslip.json, _G_videoslip_*.png (오버레이/궤적 검증 이미지)
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -41,7 +50,7 @@ sys.path.insert(0, str(HERE.parent / "bench"))
 import safe                      # noqa: E402
 import fs_data as FD              # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 DAY = "26.07.23"
 TRIAL = "150_2.2_250_3"
 

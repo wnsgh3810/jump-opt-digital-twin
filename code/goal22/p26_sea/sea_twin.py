@@ -9,6 +9,15 @@
 H6: exp5 7게인을 라벨 게인 그대로(α=(1,1,1,1)) + k_s1=169로 CL 예측 → 실측과 비교.
   대조군 = 현행 방식(OLD α 테이블, 스프링 없음). SEA가 넓게 이기면 α는 스프링의 창발임이 입증.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"          # 배포와 동일 클립 (pdrep 규약)
@@ -125,7 +134,7 @@ if __name__ == "__main__":
     dmax = max(float(np.abs(La[k]-Lb[k]).max()) for k in ("q1", "q2", "dq2", "bz", "sh1", "sh2"))
     print(f"미러 골든 (ks=inf): 최대차 {dmax:.2e} → {'PASS' if dmax < 1e-12 else 'FAIL'}", flush=True)
     # ── H6: exp5 7게인 — 모델 3종 비교 ──
-    DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
+    DATA = Path((DATA_ROOT + "/26_07_27"))
     GAINS = [("60_2_250_3",(60,2)),("80_2_250_3",(80,2)),("100_1.5_250_3",(100,1.5)),("120_2_250_3",(120,2)),
              ("150_2.2_250_3",(150,2.2)),("200_2.5_250_3",(200,2.5)),("250_3_250_3",(250,3))]
     MODELS = {"OLD α (현행)": dict(alphas=(0.40,0.20,0.656,0.20), ks1=1e12, ks2=1e12),

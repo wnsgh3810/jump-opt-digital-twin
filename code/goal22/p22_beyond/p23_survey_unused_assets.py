@@ -5,6 +5,15 @@
 (C) 26.04.22/Torque Control (3 trials) + csv-vs-xlsx(Paper) torque ratio check
 Writes NOTHING into the data root. Output = stdout only.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json, io
 from pathlib import Path
 import numpy as np
@@ -12,7 +21,7 @@ import pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 REPO = Path("C:/Users/junho/Documents/jump-opt-digital-twin")
 
 # ---- Paper a_hat conversion (canonical constants; fallback if import fails) ----

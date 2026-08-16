@@ -9,6 +9,15 @@ exp5(26.07.27)에서 확립한 Mode A 검증을 7일치 세션에 동일 적용:
 e1 ~ â1 회귀 (기울기→k̂=강성 추정, r=상관). 스프링이 구조물이면 날짜 무관 k̂≈160±20.
 산출: _modea_sea_xday.json + graphs/exp5/modea_sea_xday.png
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -21,7 +30,7 @@ import p25_a_twin as TW          # noqa: E402
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 SESS = {  # 표시명: 베이스 경로
     "07-22 배포(exp1)": ROOT/"26_07_22",
     "07-23 배포(exp2)": ROOT/"26_07_23",

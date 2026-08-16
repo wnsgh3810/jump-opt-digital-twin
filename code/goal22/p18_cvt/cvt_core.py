@@ -5,6 +5,15 @@
 → 비평행사변형: crank각 ≠ calf각 (비선형 전달비). 엔코더/모터/토크 = crank 쪽 (기존과 동일).
 루프 폐쇄: site-site connect (qpos0 폐쇄 불필요) + 해석적 폐쇄 솔버로 IC/FK 처리.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 import pandas as pd
@@ -20,7 +29,7 @@ import g21_p13e_honest as PH
 L1 = 0.25          # thigh = coupler length
 L2 = 0.25          # calf
 LO = 0.03          # rocker (calf 쪽) — 세션 불변
-DATA429 = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_29")
+DATA429 = Path((DATA_ROOT + "/26_04_29"))
 SUBS429 = ["60_0.75_60_2", "60_1.5_60_1.5", "90_0.75_90_2", "90_1.5_90_2.5",
            "120_2_120_2", "120_2.2_150_2.5", "120_2.2_200_2.8",
            "150_2.2_250_3", "150_2.2_350_3.5", "150_2.2_500_4"]

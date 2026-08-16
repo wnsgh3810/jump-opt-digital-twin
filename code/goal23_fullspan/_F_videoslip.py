@@ -17,6 +17,15 @@
 CLI: python _F_videoslip.py [day ...]   (인자 없으면 5일 전부)
 출력: _F_videoslip.json (스키마는 하단 main() 참조), 콘솔에 날짜별 스케일·trial별 표.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, glob
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -30,7 +39,7 @@ sys.path.insert(0, str(HERE.parent / "bench"))
 import safe                      # noqa: E402
 import fs_data as FD              # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 DAYS = ["26.07.22", "26.07.23", "26.07.24", "26.07.25", "26.07.27"]
 
 # 27일 발볼트 기준 템플릿 좌표 (fs_video_gauge.py 검증 좌표 재사용 — 광역 코스탐색의 시드)

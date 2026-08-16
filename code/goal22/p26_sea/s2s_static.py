@@ -7,6 +7,15 @@
      (진짜 슬립이면 영상에 보여야 — 영상 대조는 후속)
   ③ 유사슬립 진폭 vs hip 토크 진폭 → 저토크 영역 k_s 점 추가 (H2 비선형)
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -15,7 +24,7 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
+ROOT = Path((DATA_ROOT + "/26_06_04"))
 TRIALS = [("no_cvt 0kg", ROOT/"no_cvt/no_load/raw_unwrap", 0.0),
           ("no_cvt 5kg", ROOT/"no_cvt/load_5/raw_unwrap", 5.0),
           ("no_cvt 7.5kg", ROOT/"no_cvt/load_7.5/raw_unwrap", 7.5),

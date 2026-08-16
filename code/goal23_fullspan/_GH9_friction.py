@@ -28,6 +28,15 @@
 
 CLI: python _GH9_friction.py
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, io, json, collections
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -37,7 +46,7 @@ import pandas as pd
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 OUT = HERE / "_GH9_friction.json"
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 
 FOLDS = [
     "26_03_24/sit2stand/sit2stand_P10_D0",

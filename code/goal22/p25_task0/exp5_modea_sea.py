@@ -7,6 +7,15 @@
 ③ 측정각 보정(q1−â1/k̂) 후 Mode A RMSE 감소량. 모델 수술 없음 (게이트 불변).
 산출: _exp5_modea_sea.json + graphs/exp5/modea_sea_verify.png
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -19,7 +28,7 @@ import p25_a_twin as TW          # noqa: E402 (env 플래그+경로 주입)
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
+DATA = Path((DATA_ROOT + "/26_07_27"))
 OUT = HERE / "graphs" / "exp5"
 KT, GR, CF = 0.091, 9.0, 0.59
 A = np.array([1.15605006, 4.17389589e-4, 0.26855607, 0.04904241])

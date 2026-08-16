@@ -12,6 +12,15 @@
 → 각 영상에 광역 코스 탐색(±90/±140) 후 자기 템플릿 재수립 (video_slip_alldays 방식).
 CLI: python fs_video_gauge.py <day>   (예: 26.07.25 · 골든: 26.07.27 = SEA 재현 확인)
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -22,7 +31,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 import fs_data as FD                     # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 DAY = sys.argv[1] if len(sys.argv) > 1 else "26.07.27"
 PTS0 = {"knee": (1065, 610), "foot": (1183, 368), "bodyL": (665, 212), "bodyR": (660, 502)}
 

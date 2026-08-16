@@ -8,6 +8,15 @@
   [Mode A] 0602 재생 dq2 RMSE (골든 게이트 지표, a_full23) + 0424 Mode A hip e1(2단 보정 후)
 주의: RU.HIP 런타임 변형 → 각 평가 후 원복. 원본 파일 무수정.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -21,7 +30,7 @@ import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
 RU = TW.RU
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 SEA = dict(ks1=96.0, ks1_hi=323.0, tau0_1=9.0, bs1=1.5, jm1=0.01, ks2=650.0, bs2=1.5, jm2=0.01)
 B1_0 = RU.HIP["b1"]
 

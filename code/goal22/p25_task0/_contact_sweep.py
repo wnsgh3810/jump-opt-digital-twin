@@ -2,6 +2,15 @@
 """접촉 스윕 (Stage 2) — 레벨1 μ × 레벨2 접선 컴플라이언스.
 μ ∈ {1.0, 0.9, 0.85} (데이터 하한 μ_s≥0.85 준수) × solreffriction ∈ {강체, 0.02, 0.05}.
 평가: 스크리닝 6 CL 슬립궤적 RMSE + 이지속도 오차 + Mode A 가드(0602×2+0424+exp4 멀티플슈팅)."""
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, time, tempfile
 for k in ("P23_SPRING_GATED", "P23_RISE_GATED", "P24_HIP_LAW", "P24_REFIT"):
     os.environ.setdefault(k, "1")
@@ -24,7 +33,7 @@ P = tw["P"]; A = P.A_PAPER; ahat = P.J.ahat
 C.TG = np.arange(0.0, TW.T_END + tw['dt'], tw['dt'])
 model0 = tw["model"]
 FOOT = mujoco.mj_name2id(model0, mujoco.mjtObj.mjOBJ_GEOM, "foot")
-ROOT = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 Lm = 0.25
 
 

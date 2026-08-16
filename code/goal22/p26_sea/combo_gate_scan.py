@@ -6,6 +6,15 @@
 ② 세션 드리프트 판별: 날짜별 최적 ks1이 서로 다른가 (조합 시험서 날짜별 성적 엇갈림
    → 전역 파라미터가 아니라 세션별 상수 문제라는 가설의 직접 판별 실험).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, copy
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -18,7 +27,7 @@ import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
 RU = TW.RU; R19 = TW.R19; E = TW.E
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 tw0 = TW.twin()
 mj = tw0["P"].J._P["mj"]

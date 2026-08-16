@@ -8,6 +8,15 @@
 규약: 정렬무결 (실기 로그 qd 미끼) · 단위 자동 (구세션 각도 deg→rad, 속도는 전 세션 rad/s)
      · OLD α = fit 세션은 R19.ALPH(정본), 배포는 TH/TK 테이블 · 변형 C = hip SEA 96/323@9 + knee TK α.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, re
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -23,7 +32,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 OUT = HERE / "promo_all_trials"
 OUT.mkdir(exist_ok=True)
 TH = {60: 0.70, 120: 0.50, 150: 0.40}

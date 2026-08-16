@@ -7,6 +7,15 @@
 대표 trial = 각 날짜의 150_2.2_250_3 (5일 공통 게인).
 Fig A: hip (q1/dq1/τ1) × 5일 · Fig B: knee (q2/dq2/τ2) × 5일 · Fig C: 6지표 날짜별 RMSE 바 (JSON 재사용).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -22,7 +31,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 TH = {60: 0.70, 120: 0.50, 150: 0.40}
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 def old_alpha(g):

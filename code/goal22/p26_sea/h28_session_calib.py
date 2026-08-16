@@ -7,6 +7,15 @@ H28: 날짜별 최적 ks1이 76~116 산포 (세션 드리프트). 실기 프로�
 비교 3열: ①고정 96 (현행) ②LOTO 캘리브 (프로토콜) ③날짜 오라클 (상한 — 그날 전 trial로 선택).
 그리드는 66~126 (76이 경계였으므로 아래로 1스텝 확장 — 바운더리 체이싱 점검).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -18,7 +27,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 tw0 = TW.twin()
 BASE_REF = dict(q1=2.40, q2=2.25, dq1=1.05, dq2=1.09, t1=3.86, t2=3.09)

@@ -9,6 +9,15 @@ h14b 문자 미러 (0.4s 창/0.3 stride/시간창/페이로드 질량 패치) + 
 데이터: 0604 s2s는 *2 미제공 (참관 전용) → raw_unwrap 원본 사용 (fs_data 금지목록은 점프 *2 규약).
 CLI: python fs_s2s.py [kd]  (kd 인자: 0602 간섭 항 적용 변형 — F9 교차 검증)
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, copy
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -23,7 +32,7 @@ import fs_runner as FR                   # noqa: E402
 import safe                              # noqa: E402
 import mujoco as mjm                     # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
+ROOT = Path((DATA_ROOT + "/26_06_04"))
 TRIALS = [("0kg", ROOT / "no_cvt/no_load/raw_unwrap", 0.0, (47.8, 53.2)),
           ("5kg", ROOT / "no_cvt/load_5/raw_unwrap", 5.0, (47.0, 53.0)),
           ("7.5kg", ROOT / "no_cvt/load_7.5/raw_unwrap", 7.5, (52.9, 58.5))]

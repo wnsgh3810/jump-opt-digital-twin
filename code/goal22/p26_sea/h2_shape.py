@@ -7,6 +7,15 @@
   ③백래시      e1 = sign(τ)·max(|τ|−d,0)/k + c  (3p; 데드밴드)
 판정: 풀드 SSE/BIC + 저게인 k̂(93~122) vs 고게인(170~220) 패턴 재현 여부.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -21,7 +30,7 @@ from sea_twin2 import ahat_np    # noqa: E402
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 DAYS = ["26_07_22", "26_07_23", "26_07_24", "26_07_25", "26_07_27"]
 tw = TW.twin()
 E1, T1, TRIAL = [], [], []

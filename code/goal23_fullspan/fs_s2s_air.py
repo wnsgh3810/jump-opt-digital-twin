@@ -8,6 +8,15 @@
 (측정 상태 초기화 + 측정 raw 주입 + 2단 스프링 qfrc + 세션 바이어스 fade). 채점 thm1 기준.
 구식 xlsx: deg 가능성 → rad 변환 가드. CLI: python fs_s2s_air.py
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -21,7 +30,7 @@ import fs_model as FM
 import safe
 import mujoco as mjm
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_24/sit2stand")
+ROOT = Path((DATA_ROOT + "/26_03_24/sit2stand"))
 WLEN, STRIDE = 0.4, 0.3
 
 

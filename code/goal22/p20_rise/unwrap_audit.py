@@ -13,6 +13,15 @@
               (|cur−des|>20 이면서 ±36 이동 시 |·|<10 이 되는 곳)
 출력: 세션별 표 + 의심 trial 겹침 그림 (raw/언랩/desired) → g22_p20_results/unwrap_audit/
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -25,7 +34,7 @@ import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results/unwrap_audit")
 DST.mkdir(parents=True, exist_ok=True)
 SPAN = 36.0

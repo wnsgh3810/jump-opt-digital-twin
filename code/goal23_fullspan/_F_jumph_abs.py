@@ -7,6 +7,15 @@
 ModeA(측정 토크 주입, 제어기 없음) 재생을 이륙 후 +0.6s까지 연장해 최고점을 직접 읽는다.
 CLI: FS_MASS=... python _F_jumph_abs.py
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, re
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -18,7 +27,7 @@ sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 import fs_data as FD
 import fs_runner as FR
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 PAT = re.compile(r"실제 점프 높이\s*:\s*([\d.]+)")
 
 

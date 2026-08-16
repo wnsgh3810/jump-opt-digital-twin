@@ -17,6 +17,15 @@
 높지만 **crank 조립은 다를 수 있다** → 이 세션은 thigh 레버 검증에 쓰고 crank엔 쓰지 않는다.
 CLI: FS_MBODY=... FS_COMZ=... python _G_air_grav.py
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, glob
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -33,7 +42,7 @@ import fs_runner as FR
 import p25_a_twin as TW
 from sea_twin2 import ahat_np
 
-S2S = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_24/sit2stand")
+S2S = Path((DATA_ROOT + "/26_03_24/sit2stand"))
 DQ_MAX = float(os.environ.get("G_DQMAX", "0.15"))   # 준정적 판정 [rad/s]
 STEP = 40              # 표본 간격 (500Hz → 80ms)
 MAXN = 45              # trial당 표본 상한 — **자세(q1)로 층화 추출**해 스윕 전체를 고르게 덮는다

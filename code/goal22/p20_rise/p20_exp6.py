@@ -8,6 +8,15 @@
   → 0422 기준선이 ≈+2 면: 하루 새 갈림 = 명령 구조(PD vs FF) 의존 (구조설 부활)
 주의: 0422는 파이프라인 밖 세션 — 각도 오프셋 미적합(o=0) 캐비앳 명시. held-out 아님(0319·0324만).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -21,7 +30,7 @@ import p19_judge as P
 from p20_exp4 import win_scan
 from cvt_run2 import takeoff_time
 
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_22/Torque Control")
+DATA = Path((DATA_ROOT + "/26_04_22/Torque Control"))
 
 
 def load_0422(sub):

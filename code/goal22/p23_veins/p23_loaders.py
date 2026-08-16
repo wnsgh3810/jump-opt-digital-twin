@@ -20,6 +20,15 @@
     (탐사에서 rms 비율 1.0000 검증된 청정본) — per-sub max|Δ|/max|τ| < 1e-3 필수.
   - load_s2s_air 사이클 분할 vs 레거시 캐시 (goal18/iter0R + goal12/xval_v2 cycle_final.npz).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import re
 import sys
 from pathlib import Path
@@ -27,7 +36,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 REPO = Path("C:/Users/junho/Documents/jump-opt-digital-twin")
 JO = Path("C:/Users/junho/Desktop/jump_opt")
 

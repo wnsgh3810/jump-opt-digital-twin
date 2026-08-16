@@ -9,6 +9,15 @@
 준정적 극한에서 τ_spr → s (기존과 동일), 위치 실효게인 = kp·k_s/(kp+k_s) 자연 창발.
 검증: ①수렴 골든 (k_s=1e5, b_s=50 → 정본 α=1 롤아웃과 근접) ②H6: exp5 7게인 예측 대결.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -143,7 +152,7 @@ if __name__ == "__main__":
         d = max(float(np.abs(La[k]-Lb[k]).max()) for k in ("q1", "q2", "bz"))
         print(f"수렴 골든 (ks=1e5): 정본 α=1 대비 최대차 {d:.2e} rad → {'PASS' if d < 5e-3 else 'CHECK'}", flush=True)
     # ── H6 v2: exp5 7게인 (hip만 SEA, b_s·J_m 소격자) ──
-    DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
+    DATA = Path((DATA_ROOT + "/26_07_27"))
     GAINS = [("60_2_250_3",(60,2)),("80_2_250_3",(80,2)),("100_1.5_250_3",(100,1.5)),("120_2_250_3",(120,2)),
              ("150_2.2_250_3",(150,2.2)),("200_2.5_250_3",(200,2.5)),("250_3_250_3",(250,3))]
     MODELS = {"OLD α (현행)": None}

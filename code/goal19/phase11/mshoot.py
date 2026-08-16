@@ -16,6 +16,15 @@ regression showed inconsistent torque, R2 0.33) + sit2stand_gnd.
 => jump_position_0421 (6) + jump_0424 (9) + jump_0602 (6) + sit2stand_gnd cycles.
 Validation (held out from fitting): full-trajectory Mode A replay + camera h + LODO.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 from pathlib import Path
 import numpy as np
@@ -42,7 +51,7 @@ LOADERS = {"jump_position_0421": S.load_jump_position,
 
 # ── March jumps (user 2026-07-05: include; not in canonical 31-exp) ──────────
 # Same file layout as 0424 (hip.xlsx/knee.xlsx/GRF.xlsx/Real Data.txt) => reuse load_one_trial.
-DATA_ROOT = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA_ROOT = Path(DATA_ROOT)
 MARCH = [
     # jump_0319 NO_TR_JUMP EXCLUDED (user 2026-07-05): confirmed data outlier — fit spent
     # ~16% of score on it yet q2 stayed 0.33 (10x others); different posture; h_real unparseable.

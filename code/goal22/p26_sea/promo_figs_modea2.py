@@ -7,6 +7,15 @@ H12 러너 규약 그대로 (세션 8개, 온셋~이륙 창). 채점:
 Fig A: 세션별 dq1 바 (OLD vs C) + knee q2/dq2 바 (공통)
 Fig B: 시계열 3종 (0602/exp5/0324) — 행: dq1, dq2
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -22,7 +31,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 SESS = {
     "fit 0424": ROOT/"26_04_24",
     "fit 0602": ROOT/"26_06_02"/"position",

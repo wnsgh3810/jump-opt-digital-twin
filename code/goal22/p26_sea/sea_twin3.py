@@ -6,6 +6,15 @@
   dF/dt = σ_f·dδ/dt·(1 − (F/τ_C)·sgn(dδ/dt))     (F는 ±τ_C로 포화 — 고리 생성)
 검증: ①정적 고리 재현 (H16 가지: 로딩 k178/언로딩 k266, 간격 0.4~1.3°) ②CL 전이 22 trial.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -123,7 +132,7 @@ def rollout_cl_sea3(tw, tg, qd1g, qd2g, dqd1g, dqd2g, gains,
 
 if __name__ == "__main__":
     tw = TW.twin()
-    ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+    ROOT = Path(DATA_ROOT)
     SESS = {"exp1": ("26_07_22", "t0nc_cl_pd15.npz"), "exp2": ("26_07_23", "t0nc_cl_v4.npz"),
             "exp3": ("26_07_24", "t0nc_cl_v7.npz"), "exp4": ("26_07_25", "t0nc_cl_v8.npz"),
             "exp5": ("26_07_27", "t0nc_cl_v9.npz")}

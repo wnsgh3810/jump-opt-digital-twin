@@ -8,6 +8,15 @@
 지표: 변형 C 정렬무결 CL 22 trial — J = q1/2.4 + q2/2.25 + dq1/1.05 + dq2/1.09 + τ1/3.86 + τ2/3.09 (기준=1씩, 총 6).
 주의: 진단 스캔 — 채택은 골든 게이트(0602 1.29±0.15) 동반 별도 절차. 후보 파일 무수정.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, copy
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -22,7 +31,7 @@ import safe                      # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
 RU = TW.RU; C = TW.C
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 TK = {60: 0.85, 120: 0.789, 250: 0.656, 500: 0.40}
 tw0 = TW.twin()
 P = tw0["P"]; mj = P.J._P["mj"]

@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """Figures for the per-date accuracy explainer Notion page (default color cycle)."""
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 from pathlib import Path
 import numpy as np
@@ -25,8 +34,8 @@ OUT = Path(r"C:/Users/junho/AppData/Local/Temp/claude/C--Users-junho-Desktop-Res
 OUT.mkdir(exist_ok=True)
 g18 = sys.modules[S.load_jump_0602.__module__]
 D = {
-    "0324": (Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_24/Jump/Jump_No_Tr"), "P60_D1.5", True),
-    "0421": (Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_21/Position Control"), "P100_D0.75_P100_D2", True),
+    "0324": (Path((DATA_ROOT + "/26_03_24/Jump/Jump_No_Tr")), "P60_D1.5", True),
+    "0421": (Path((DATA_ROOT + "/26_04_21/Position Control")), "P100_D0.75_P100_D2", True),
     "0424": (Path(g18.DATA_0424), "90_0.75_90_2", False),
     "0602": (Path(g18.DATA_0602), "60_0.75_60_2", False),
 }

@@ -7,6 +7,15 @@
 ③hip e1의 2단 관측보정 효과 (s2s 저토크 −2~−6Nm = 무른 구간 96의 시험대).
 대상: no_cvt 0/5/7.5kg (knee=관절각 직접 비교 가능).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -20,7 +29,7 @@ sys.path.insert(0, str(P25)); sys.path.insert(0, str(HERE.parent / "p25_deploy")
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
+ROOT = Path((DATA_ROOT + "/26_06_04"))
 TRIALS = [("0kg", ROOT/"no_cvt/no_load/raw_unwrap", 0.0),
           ("5kg", ROOT/"no_cvt/load_5/raw_unwrap", 5.0),
           ("7.5kg", ROOT/"no_cvt/load_7.5/raw_unwrap", 7.5)]

@@ -11,6 +11,15 @@ PD가 점프로 만드는 최적화라 이 채널에 딱 맞음. 소스 = t0nc_c
 구조: [홈 hold] + [IK2 관절공간 접근 home→크라우치(=미끼 시작 q0)] + [크라우치 hold] + [CL 점프]
 ★로봇 게인 = 150/2.2/500/4 (hip_kp/kd, knee_kp/kd) — 파일엔 없음, 로봇에 별도 입력.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -18,7 +27,7 @@ import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).parent
-IKDIR = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/FKnIK")
+IKDIR = Path((CVT_ROOT + "/FKnIK"))
 sys.path.insert(0, str(IKDIR))
 from IK2 import q2_to_qm, generate_bezier_curve, rot_matrix  # noqa
 

@@ -7,6 +7,15 @@
 1-at-a-time → exp5 7게인 + exp4 4게인 CL 전이 지표 Δ.
 주의: 진단 스캔 (채택은 별도 — 채택 시 Mode A 게이트 전수 필수).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json, copy
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -19,7 +28,7 @@ sys.path.insert(0, str(P25)); sys.path.insert(0, str(HERE.parent / "p25_deploy")
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import rollout_cl_sea2, ahat_np   # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 SESS = {"exp4": ("26_07_25", "t0nc_cl_v8.npz"), "exp5": ("26_07_27", "t0nc_cl_v9.npz")}
 SEA = dict(ks1=96.0, ks1_hi=323.0, tau0_1=9.0, bs1=1.5, jm1=0.01, ks2=650.0, bs2=1.5, jm2=0.01)
 

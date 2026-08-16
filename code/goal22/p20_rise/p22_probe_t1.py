@@ -14,6 +14,15 @@
 데이터: fit 세션만 (0421/0424/0602/0429). held-out 0324 제외 (철칙 9).
 원본 xlsx 읽기 전용. 산출물: 표(stdout) + JSON(Desktop/jump_opt/g22_p20_results).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 from pathlib import Path
 
@@ -21,7 +30,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 DST = Path("C:/Users/junho/Desktop/jump_opt/g22_p20_results")
 DST.mkdir(parents=True, exist_ok=True)
 

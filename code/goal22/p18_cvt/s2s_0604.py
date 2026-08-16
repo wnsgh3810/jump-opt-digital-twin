@@ -7,6 +7,15 @@ no_cvt/{load_5, load_7.5}는 기립 실패로 xlsx 미수출 (영상만) — 반
       프리로드 = l_i=30mm에만 +2.06 Nm (P18b), cvt는 0.
 검증: Mode A (τ replay) + CL (회귀 게인, dq_des 인가) + 반사실 (no_cvt에 로드, 천장 유/무).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 import pandas as pd
@@ -31,7 +40,7 @@ W = json.load(open(HERE / "p18b_iter11.json"))["x"]
 STIFF, REF = W[0], W[1]
 PRELOAD_30 = 2.06          # l_i=30mm 전용 (P18b, 세션 평균)
 CAP_SHAFT = float(J.ahat(A, np.array([35.5]), np.array([0.0]))[0]) if False else None
-D04 = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_06_04")
+D04 = Path((DATA_ROOT + "/26_06_04"))
 DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_s2s_0604_results")
 (DST / "png").mkdir(parents=True, exist_ok=True)
 (DST / "counterfactual").mkdir(exist_ok=True)

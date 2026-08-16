@@ -8,12 +8,21 @@ currentTorque, desiredTorque)에서 raw currentTorque(=펌웨어 커맨드 추�
 로 최소자승 → 실효 kp/kd, R², c_ff. 포화 샘플(|τ|>17.5) 제외.
 산출: 데이터셋×trial×관절 표 + 폴더 라벨 게인 대비 비율(α).
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 SETS = {
     "jump_0324": (DATA / "26_03_24/Jump/Jump_No_Tr", ["P40_D0.7", "P60_D1.5", "P100_D3"]),
     "jump_position_0421": (DATA / "26_04_21/Position Control",

@@ -7,6 +7,15 @@
   · 표기: 최대편위(★), 끝점(o), 방향 반전(가역) 여부
 개별 7장 + 전체 오버레이 1장 → graphs/exp5/slip_timeline/
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -15,7 +24,7 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Malgun Gothic"; plt.rcParams["axes.unicode_minus"] = False
 
 HERE = Path(__file__).parent
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_07_27")
+DATA = Path((DATA_ROOT + "/26_07_27"))
 OUT = HERE / "graphs" / "exp5" / "slip_timeline"; OUT.mkdir(parents=True, exist_ok=True)
 L_SEG = 0.25
 GAINS = sorted([p.name for p in DATA.iterdir() if p.is_dir() and (p/"hip.xlsx").exists()],

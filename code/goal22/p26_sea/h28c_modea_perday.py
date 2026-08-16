@@ -7,6 +7,15 @@ Mode A e1~â1 회귀는 PD 게인이 안 들어가므로, 여기서도 그날 �
 회귀: h2_shape와 동일 (rollout_ol, trial별 기준선 차감) — 날짜별로 분리.
 저부하역(|Δτ|<9Nm) k̂_lo와 전역 k̂ 둘 다 보고.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 os.environ["P25_CLIP_RAW"] = "35.5"
@@ -18,7 +27,7 @@ sys.path.insert(0, str(HERE.parent / "p25_task0")); sys.path.insert(0, str(HERE.
 import p25_a_twin as TW          # noqa: E402
 from sea_twin2 import ahat_np    # noqa: E402
 
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 DAYS = ["26_07_22", "26_07_23", "26_07_24", "26_07_25", "26_07_27"]
 tw = TW.twin()
 POOL = {d: dict(e=[], tau=[]) for d in DAYS}

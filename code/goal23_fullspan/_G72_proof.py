@@ -13,6 +13,15 @@
 
 CLI: python _G72_proof.py [세션 trial]      # 없으면 _G72_slipall.json 전부
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, io, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -25,7 +34,7 @@ import fs_vidscale as VS                                       # noqa: E402
 import fs_slipmeas as SM                                       # noqa: E402
 
 OUTDIR = HERE / "graphs" / "G72_proof"
-DATA = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 
 
 def _font(sz):

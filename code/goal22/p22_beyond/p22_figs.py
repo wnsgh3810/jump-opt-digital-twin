@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P22 노션용 그림: ① T3 에너지 원장 (W_in vs E_req) ② 0421 로더 인공물 오버레이."""
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -47,7 +56,7 @@ def fig_ledger():
 def fig_0421():
     import p19_judge as P
     sub = "P100_D0.75_P100_D2"
-    base = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_04_21/Position Control") / sub
+    base = Path((DATA_ROOT + "/26_04_21/Position Control")) / sub
     kx = pd.read_excel(base / "knee.xlsx")
     c = pd.read_csv(base / "jump_opt_compare" / "predicted_compare.csv")
     traw = kx["currentTorque"].values

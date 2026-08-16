@@ -23,6 +23,15 @@
 
 held-out 0324 제외 (철칙 9). fit no-CVT 세션만: 0421/0424/0602.
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -38,7 +47,7 @@ import p19_judge as P                     # noqa: E402
 from p20_exp4 import win_scan             # noqa: E402
 from p14_judge import KT, GR, CF          # noqa: E402
 
-DATA = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+DATA = Path(DATA_ROOT)
 DST = Path("C:/Users/junho/Desktop/jump_opt/g22_p20_results")
 DST.mkdir(parents=True, exist_ok=True)
 W = 0.12

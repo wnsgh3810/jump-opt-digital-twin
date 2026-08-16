@@ -10,6 +10,15 @@ GRF 절대값 금지 사전 준수: GRF는 비행 기준 상대 스팬 검출에
 출력: _fs3_recon.json + 세션 요약. 원본 무수정 (deny 훅 등록됨).
 CLI: python fs3_recon.py
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -17,7 +26,7 @@ import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 
 
 def load3(fold: Path):

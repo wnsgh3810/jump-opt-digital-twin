@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 """p23_survey detail — s2s_air 0319: cycle count, per-cycle repeatability (l_i drift proxy),
 knee desiredTorque NaN check."""
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, io
 import numpy as np
 import pandas as pd
 from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-D = Path("C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/26_03_19/position/sit2stand_air")
+D = Path((DATA_ROOT + "/26_03_19/position/sit2stand_air"))
 
 hip = pd.read_excel(D / "hip.xlsx")
 knee = pd.read_excel(D / "knee.xlsx")

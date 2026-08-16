@@ -6,6 +6,15 @@ exp5에서 확립한 파이프라인 확장: 점프클러스터 탐지 → 발�
 → 구름 차감(그 trial 인코더 정강이 회전) → 진짜 슬립 범위. 감사용 마킹 스트립 저장.
 사용법: python video_slip_alldays.py <day: 26.07.22|23|24|25>
 """
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT, CVT_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, json
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -13,7 +22,7 @@ import numpy as np, pandas as pd
 import imageio.v3 as iio
 
 HERE = Path(__file__).parent
-ROOT = Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")
+ROOT = Path(DATA_ROOT)
 DAY = sys.argv[1] if len(sys.argv) > 1 else "26_07_23"
 SCALE = (0.7, 1.2); R_FOOT = (20.0, 25.0)
 
