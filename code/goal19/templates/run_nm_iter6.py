@@ -17,12 +17,21 @@ Axis (2D, ★ user correction first applied):
 Loss = sum of per-sub scores
    (Wq=100, Wdq=50, Wh=200 jump-only, Wgrf=0.1, Wpen=50)
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json, time
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter6")
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter5")
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter4")
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter3")
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter2")
+sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter6"))
+sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter5"))
+sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter4"))
+sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter3"))
+sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter2"))
 sys.stdout.reconfigure(encoding='utf-8')
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
@@ -31,10 +40,10 @@ from contextlib import redirect_stderr
 import numpy as np
 from scipy.optimize import minimize
 
-ROOT = Path("C:/Users/junho/Desktop/jump_opt/goal18/iter6")
+ROOT = Path((LEGACY_ROOT + "/goal18/iter6"))
 ROOT.mkdir(exist_ok=True, parents=True)
 
-OFFSETS_PATH = Path("C:/Users/junho/Desktop/jump_opt/goal18/iter2/iter1_offsets.json")
+OFFSETS_PATH = Path((LEGACY_ROOT + "/goal18/iter2/iter1_offsets.json"))
 
 # ── Bounds ────────────────────────────────────────────────────────────────────
 AH_LO, AH_HI = 0.001, 0.05  # arm_hip
@@ -50,11 +59,11 @@ ITER5_SCORE_OLD_WEIGHTS = 31101.58945521695
 def _eval_sub(args):
     ds, sub, q1, q2, ah, ak = args
     import sys
-    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter6")
-    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter5")
-    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter4")
-    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter3")
-    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18/iter2")
+    sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter6"))
+    sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter5"))
+    sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter4"))
+    sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter3"))
+    sys.path.insert(0, (LEGACY_ROOT + "/goal18/iter2"))
     from sub_sim_6d import run_one_sub
     err_buf = io.StringIO()
     try:

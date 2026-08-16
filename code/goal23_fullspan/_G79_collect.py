@@ -17,6 +17,15 @@
 
 CLI: python _G79_collect.py
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, io, json, shutil, csv
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -30,7 +39,7 @@ G = HERE / "graphs"
 #      (실측 105MB · .git 이 이미 1.6GB). ② 사용자가 열어볼 곳은 탐색기지 repo 가 아니다.
 #   헌법상 분석 산출물 위치: repo 또는 `Desktop/jump_opt/`.
 DST = Path(os.environ.get("G79_OUT",
-                          r"C:/Users/junho/Desktop/jump_opt/G_slip_all_260809"))
+                          (LEGACY_ROOT + "/G_slip_all_260809")))
 SEGS = ("하강전반", "하강후반", "바닥유지", "푸시~이륙", "전체")
 
 

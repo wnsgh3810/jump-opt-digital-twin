@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P19 최종 마감 — cma3 vs cma6 승자 선택 + 전 지표 + 후보 저장 + 진행 차트."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -18,7 +27,7 @@ from p19_cma3 import G6
 IDX = dict(stiff=11, fv_hip=14, fc_hip=16, fv_knee=15, fc_knee=17,
            solref=12, imp0=13, arm_knee=9, M_c=4, I_th=5, I_ca=6, dz_th=7, dz_ca=8)
 N6IDX = {"s_rc": 26, "s_ic": 27, "s_rp": 28, "s_ip": 29, "d_cpin": 30, "d_kneep": 31}
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p19_results")
+DST = Path((LEGACY_ROOT + "/g22_p19_results"))
 
 
 def x32_of(W):

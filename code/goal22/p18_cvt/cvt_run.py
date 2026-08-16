@@ -5,6 +5,15 @@ Mode A: settle(PD, 측정 초기 crank각) -> a_hat(P16) 변환 τ replay -> cra
 CL   : 라벨 게인, dq_des=0 (What.txt: V_des≈0), 무클립+a_hat, 참조 τ = P16 a_hat 변환
 공통 : 오프셋 = 0 (신규 세션), sens_delay −1.5ms, 초기화는 폐쇄 솔버.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -25,7 +34,7 @@ C16 = json.load(open(HERE.parent / "p16_structure/fourbar_p16_candidate.json"))
 X = np.array(C16["x"])
 A = np.array([C16["x"][32], C16["x"][33], C16["x"][34], C16["x"][35]])
 REF = float(C16["x"][36])
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_cvt_0429_results")
+DST = Path((LEGACY_ROOT + "/g22_cvt_0429_results"))
 (DST / "png").mkdir(parents=True, exist_ok=True)
 (DST / "gif").mkdir(parents=True, exist_ok=True)
 TRAJD = HERE / "traj"; TRAJD.mkdir(exist_ok=True)

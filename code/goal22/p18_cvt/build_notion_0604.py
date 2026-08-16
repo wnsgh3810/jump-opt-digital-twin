@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """노션: P18c — 26.06.04 페이로드 s2s 검증 + CVT 효과 정량화."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import requests, time, json, mimetypes
 from pathlib import Path
 
@@ -7,7 +16,7 @@ TOKEN = "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"
 H = {"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2022-06-28"}
 HJ = {**H, "Content-Type": "application/json"}
 GOAL22 = "396ab81d2550814b9780f32285133840"
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_s2s_0604_results")
+DST = Path((LEGACY_ROOT + "/g22_s2s_0604_results"))
 
 
 def req(method, url, **kw):

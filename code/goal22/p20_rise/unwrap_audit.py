@@ -13,6 +13,15 @@
               (|cur−des|>20 이면서 ±36 이동 시 |·|<10 이 되는 곳)
 출력: 세션별 표 + 의심 trial 겹침 그림 (raw/언랩/desired) → g22_p20_results/unwrap_audit/
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -35,7 +44,7 @@ plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
 DATA = Path(DATA_ROOT)
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results/unwrap_audit")
+DST = Path((LEGACY_ROOT + "/g22_p20_results/unwrap_audit"))
 DST.mkdir(parents=True, exist_ok=True)
 SPAN = 36.0
 

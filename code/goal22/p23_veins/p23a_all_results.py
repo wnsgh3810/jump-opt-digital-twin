@@ -21,6 +21,15 @@ MANDATORY 교차검증 (스테이지 check — 통과 전 png/gif 생성 금지)
 
 스테이지: ref → sim → check → figs → gifs → bonus → index (기본 all = 순차 + 게이트).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os
 import sys
 import json
@@ -61,13 +70,13 @@ import mujoco
 from PIL import Image, ImageDraw
 from cvt_core import closure, qpos_from_crank  # noqa: F401 (qpos_from_crank: 러너 내부 사용)
 
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
+sys.path.insert(0, (LEGACY_ROOT + "/goal18_CANONICAL/code"))
 import make_anim as MA
 from cvt_anim import build_anim_model
 
 MODEL_TAG = "p23a"
 CAND = AD.load_candidate(HERE / "fourbar_p23a_candidate.json")
-ROOT = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p23a_all_results")
+ROOT = Path((LEGACY_ROOT + "/g22_p23a_all_results"))
 REF_JSON = ROOT / "p23a_crosscheck_ref.json"
 RESULT_JSON = ROOT / "p23a_crosscheck_result.json"
 DSDIR = {"jump_0324": "jump_0324_heldout", "jump_position_0421": "jump_position_0421",

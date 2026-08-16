@@ -7,6 +7,15 @@
 (2026-07-16, J_v6 0.8976 / 게이트 ALL=True 확인).
 실행: PYTHONIOENCODING=utf-8 python build_notion_p23.py   (커밋 금지 지시 — 실행만)
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -16,7 +25,7 @@ import notion_kit as N
 
 FIG_LAW = str(HERE / "p23_law_fit.png")
 FIG_X3 = str(HERE / "p23_x3_lambda.png")
-G22 = Path("C:/Users/junho/Desktop/jump_opt/g22_p23_results")
+G22 = Path((LEGACY_ROOT + "/g22_p23_results"))
 FIG_GATES = str(G22 / "p23a_gates.png")
 FIG_HO = str(G22 / "p23a_holdout.png")
 

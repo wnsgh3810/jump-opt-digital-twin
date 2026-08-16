@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P22 노션 4탄 — P22-6 최종 후보 p22b: 성적표·오버레이·남은 것."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -8,7 +17,7 @@ sys.path.insert(0, str(HERE.parent.parent / "bench"))
 import notion_kit as N
 
 ROOT = "39eab81d-2550-812c-9336-c48ab4af0dec"
-FIG = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p22_results")
+FIG = Path((LEGACY_ROOT + "/g22_p22_results"))
 
 
 def loc(txt):

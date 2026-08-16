@@ -4,6 +4,15 @@
 이전 판(마라톤 새벽 인라인 스크립트)은 trial/t/base_z/l_i만 표기 → 표준 위반이라 재생성.
 CL은 커맨드층(α) 반영 (마라톤 당시와 동일 — R.cl_run 사용).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -22,7 +31,7 @@ P.winit()
 import mujoco
 from PIL import Image, ImageDraw
 
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
+sys.path.insert(0, (LEGACY_ROOT + "/goal18_CANONICAL/code"))
 import make_anim as MA
 from cvt_anim import build_anim_model
 from cvt_core import closure
@@ -36,7 +45,7 @@ for i, n in enumerate(W["names"]):
     if n in IDX:
         x32[IDX[n]] = v[i]
 SP = "calf" if v[0] > 1e-3 else "none"
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p19_results/gif")
+DST = Path((LEGACY_ROOT + "/g22_p19_results/gif"))
 DST.mkdir(parents=True, exist_ok=True)
 
 

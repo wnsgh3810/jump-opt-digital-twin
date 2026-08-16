@@ -9,6 +9,15 @@
 동일 프로토콜로 jump vs s2s 재측정 (2.2 vs 1.34가 실측인지 적합맥락 잡음인지).
 0324(held-out)는 철칙 9(게이트 전용)로 제외. 스텝핑은 canonical P12.eval_windows.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -32,7 +41,7 @@ X32, V, SP, QOFF = AD._p19_args(CAND)
 A = P.A_PAPER
 P12 = P.J._P["P12"]
 mj = P.J._P["mj"]
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p19_all_results/pre30_probe")
+DST = Path((LEGACY_ROOT + "/g22_p19_all_results/pre30_probe"))
 DST.mkdir(parents=True, exist_ok=True)
 LGRID = np.arange(-2.0, 5.01, 0.5)
 

@@ -10,6 +10,15 @@
   F4 0604 λ* (no_load vs load_5)          [참조: +1.0 / +3.8 — 스케일링 소멸해야 함]
 이동축: dL=정강이 축 방향(다리 길이), dP=면내 수직(접촉점 앞뒤) — 런타임 유한차분으로 판별.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -28,7 +37,7 @@ sys.path.insert(0, str(HERE.parent / "p18_cvt"))
 import s2s_0604 as S0
 
 mj = P.J._P["mj"]
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 
 
 def perp_axis(model):

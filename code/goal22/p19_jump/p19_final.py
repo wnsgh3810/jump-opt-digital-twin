@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P19 최종 검증 — CMA-2 승자: 전 세션 CL τ-갭 + Mode A + 대표 그림 + 후보 저장."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -15,7 +24,7 @@ import p19_judge as P
 import p19_run as R
 from p19_cma2 import NAMES, IDX, parts_x, G6
 
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p19_results")
+DST = Path((LEGACY_ROOT + "/g22_p19_results"))
 (DST / "png").mkdir(parents=True, exist_ok=True)
 
 

@@ -16,6 +16,15 @@ regression showed inconsistent torque, R2 0.33) + sit2stand_gnd.
 => jump_position_0421 (6) + jump_0424 (9) + jump_0602 (6) + sit2stand_gnd cycles.
 Validation (held out from fitting): full-trajectory Mode A replay + camera h + LODO.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -60,7 +69,7 @@ MARCH = [
 
 
 def load_march(tdir, trial):
-    sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal12/data_loaders")
+    sys.path.insert(0, (LEGACY_ROOT + "/goal12/data_loaders"))
     from load_combined_15trial import load_one_trial
     td = load_one_trial(Path(tdir), trial, fallback_h=0.85)
     if float(td["h_real"]) > 3.0:      # cm logged instead of m (0324 P100_D3: 74.00)

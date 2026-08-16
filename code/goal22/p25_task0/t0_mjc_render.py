@@ -25,6 +25,15 @@ mj_saveLastXML로 임시 저장만 (컴파일 직후 즉시 저장; 시각 전�
 산출: p25_task0/mjc_gifs/mjc_{ol,cl,nlp,ppo}_{plan,deploy}.gif + mjc_wc_cl_li2508_plan.gif
   + mjc_render_summary.json (렌더 h vs npz h 대조표).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os
 import sys
 import importlib.util
@@ -49,7 +58,7 @@ import safe
 import mujoco
 
 # ── canonical 렌더러 로드 (원본 우선, 아카이브 사본 fallback) — import만 ──
-_CANON = Path("C:/Users/junho/Desktop/jump_opt/goal18_v9/_make_anim_universal_colored.py")
+_CANON = Path((LEGACY_ROOT + "/goal18_v9/_make_anim_universal_colored.py"))
 if not _CANON.exists():
     _CANON = HERE.parent.parent / "goal19/canonical_render/_make_anim_universal_colored.py"
 _spec = importlib.util.spec_from_file_location("_mauc", str(_CANON))

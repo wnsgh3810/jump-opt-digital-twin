@@ -10,6 +10,15 @@ a_hat 구조: â = A0·GR·KT·Iq − A1·GR·|Iq|Iq − A2·sgn(v) − A3·|Iq|
         + 0429 Mode A 개선(모터측이므로 0429에도 반드시 적용돼야 함 — 교차 검증).
 0324(held-out) 미사용. 스텝핑 = P12.eval_windows 프로토콜.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -36,7 +45,7 @@ P12 = P.J._P["P12"]
 mj = P.J._P["mj"]
 MS = P12._G["MS"]
 DD = dict(zip(P.J._P["FR"].NAMES, np.asarray(X32)[:26]))
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 DST.mkdir(parents=True, exist_ok=True)
 # 세션별 저속 기준선 (pre30_probe 초반 창 실측)
 BASE = {"jump_position_0421": 0.14, "jump_0424": 1.78, "jump_0602": 2.20,

@@ -17,6 +17,15 @@ QC 경고가 붙은 trial 은 **표시는 하되 회귀에서 뺀다** (버리�
 
 CLI: python _G80_trend.py
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import os, sys, io, json, re
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
@@ -28,7 +37,7 @@ import matplotlib.pyplot as plt
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE.parent / "bench"))
 OUT = Path(os.environ.get("G79_OUT",
-                          r"C:/Users/junho/Desktop/jump_opt/G_slip_all_260809")) / "05_trend"
+                          (LEGACY_ROOT + "/G_slip_all_260809"))) / "05_trend"
 SEGS = ("하강전반", "하강후반", "바닥유지", "푸시~이륙")
 CVT_SESS = {"26.04.29"}
 

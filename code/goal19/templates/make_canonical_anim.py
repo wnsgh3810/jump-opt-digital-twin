@@ -6,6 +6,15 @@ best-params sim, then hand it to render_sit2stand (handles air + gnd).
 
 canonical q1 = -mj_q1 - pi/2 ; canonical q2 = -mj_q2  (renderer re-applies inverse)
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 import numpy as np
@@ -14,7 +23,7 @@ warnings.filterwarnings("ignore")
 
 TEMPLATES = Path(__file__).resolve().parent
 sys.path.insert(0, str(TEMPLATES))
-CANON = Path("C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
+CANON = Path((LEGACY_ROOT + "/goal18_CANONICAL/code"))
 sys.path.insert(0, str(CANON))
 
 import sub_sim_iter6v2 as S

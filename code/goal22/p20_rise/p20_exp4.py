@@ -9,6 +9,15 @@
   · 같은 날 no_cvt(30mm) vs cvt(25.2mm) 기준선 비교 → l_i 무관성 세션내 확정
 프로토콜: exp3의 closure 리셋 + FK-bz (검증됨), λ 그리드 [-2,4].
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -27,7 +36,7 @@ import s2s_0604 as S0
 mj = P.J._P["mj"]
 S = P.J._P["S"]
 MS = E.P12._G["MS"]
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 LGRID = np.arange(-2.0, 4.01, 0.5)
 
 

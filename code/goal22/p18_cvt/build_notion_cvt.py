@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P18 노션 보고 — l_i CVT 세션(26.04.29) 검증: 방법·결과·원인 분석."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import requests, time, json, mimetypes
 import numpy as np
 from pathlib import Path
@@ -9,7 +18,7 @@ H = {"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2022-06-28"}
 HJ = {**H, "Content-Type": "application/json"}
 GOAL22 = "396ab81d2550814b9780f32285133840"
 HERE = Path(__file__).parent
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_cvt_0429_results")
+DST = Path((LEGACY_ROOT + "/g22_cvt_0429_results"))
 RES = json.load(open(HERE / "cvt_results.json"))
 
 

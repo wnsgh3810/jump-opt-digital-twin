@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P18c — 0604 s2s CL GIF (canonical 규격, l_i별 모델)."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -10,12 +19,12 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE.parent / "p14_ahat"))
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
+sys.path.insert(0, (LEGACY_ROOT + "/goal18_CANONICAL/code"))
 import make_anim as MA
 import p14_judge as J
 from cvt_anim import build_anim_model
 
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_s2s_0604_results/gif")
+DST = Path((LEGACY_ROOT + "/g22_s2s_0604_results/gif"))
 DST.mkdir(parents=True, exist_ok=True)
 
 

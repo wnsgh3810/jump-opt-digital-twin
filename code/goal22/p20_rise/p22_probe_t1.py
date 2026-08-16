@@ -14,6 +14,15 @@
 데이터: fit 세션만 (0421/0424/0602/0429). held-out 0324 제외 (철칙 9).
 원본 xlsx 읽기 전용. 산출물: 표(stdout) + JSON(Desktop/jump_opt/g22_p20_results).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -31,7 +40,7 @@ import pandas as pd
 from scipy.signal import savgol_filter
 
 DATA = Path(DATA_ROOT)
-DST = Path("C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 DST.mkdir(parents=True, exist_ok=True)
 
 # a_hat (Paper) — 출처: code/goal22/p14_ahat/p14_judge.py L26-27, L38-41 (사본, 검증된 상수)

@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P18 애니메이션 — CVT(l_i=25.08mm) 기하 그대로 canonical 규격 렌더 (비평행사변형 링키지 가시화)."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -8,7 +17,7 @@ from PIL import Image, ImageDraw
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
+sys.path.insert(0, (LEGACY_ROOT + "/goal18_CANONICAL/code"))
 import make_anim as MA
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
 import render_kit as RK
@@ -19,7 +28,7 @@ C16 = json.load(open(HERE.parent / "p16_structure/fourbar_p16_candidate.json"))
 X = np.array(C16["x"]); REF = float(C16["x"][36])
 V2 = len(sys.argv) > 1 and sys.argv[1] == "v2"
 TRAJD = HERE / ("traj_v2" if V2 else "traj")
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_cvt_0429_results")
+DST = Path((LEGACY_ROOT + "/g22_cvt_0429_results"))
 GIFD = DST / ("gif_v2" if V2 else "gif")
 GIFD.mkdir(parents=True, exist_ok=True)
 RES = json.load(open(HERE / ("cvt_results_v2.json" if V2 else "cvt_results.json")))

@@ -7,6 +7,15 @@ no_cvt/{load_5, load_7.5}는 기립 실패로 xlsx 미수출 (영상만) — 반
       프리로드 = l_i=30mm에만 +2.06 Nm (P18b), cvt는 0.
 검증: Mode A (τ replay) + CL (회귀 게인, dq_des 인가) + 반사실 (no_cvt에 로드, 천장 유/무).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -41,7 +50,7 @@ STIFF, REF = W[0], W[1]
 PRELOAD_30 = 2.06          # l_i=30mm 전용 (P18b, 세션 평균)
 CAP_SHAFT = float(J.ahat(A, np.array([35.5]), np.array([0.0]))[0]) if False else None
 D04 = Path((DATA_ROOT + "/26_06_04"))
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_s2s_0604_results")
+DST = Path((LEGACY_ROOT + "/g22_s2s_0604_results"))
 (DST / "png").mkdir(parents=True, exist_ok=True)
 (DST / "counterfactual").mkdir(exist_ok=True)
 TRIALS = [("cvt", "no_load", 0.0), ("cvt", "load_2.5", 2.5), ("cvt", "load_5", 5.0),

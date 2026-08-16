@@ -4,11 +4,20 @@ Load canonical .npz containing real robot data (q, dq, tau, grf) for each
 sub-experiment. Searches multiple candidate paths per sub.
 """
 from __future__ import annotations
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 from pathlib import Path
 from typing import NamedTuple, List, Optional
 import numpy as np
 
-JUMP_OPT_ROOT = Path("C:/Users/junho/Desktop/jump_opt")
+JUMP_OPT_ROOT = Path(LEGACY_ROOT)
 
 
 class ExpData(NamedTuple):

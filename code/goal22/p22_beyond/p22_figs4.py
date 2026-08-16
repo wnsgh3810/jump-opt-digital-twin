@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P22 노션 그림 4탄: 대표 trial 재생 dq2 오버레이 (실측 vs P19 vs p22b)."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -14,7 +23,7 @@ sys.path.insert(0, str(HERE.parent / "p20_rise"))
 sys.path.insert(0, str(HERE.parent / "p19_jump"))
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
 
-OUT = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p22_results")
+OUT = Path((LEGACY_ROOT + "/g22_p22_results"))
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
@@ -34,8 +43,8 @@ def main():
     if R.TRIALS is None:
         R.TRIALS = R.all_trials()
     real = {(ds, str(sub)): d for ds, sub, d, *_ in R.TRIALS}
-    b19 = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p19_all_results")
-    b22 = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p22b_all_results")
+    b19 = Path((LEGACY_ROOT + "/g22_p19_all_results"))
+    b22 = Path((LEGACY_ROOT + "/g22_p22b_all_results"))
     fig, axes = plt.subplots(2, 2, figsize=(13, 8))
     for ax, (ds, sub) in zip(axes.flat, PICKS):
         d = real[(ds, sub)]

@@ -5,6 +5,15 @@ p21_all_results 패턴. 차이: 후보 경로가 p22_beyond, Mode A의 0429 각�
 v5 프로토콜 고정값(B.QOFF_A429 기본 = 3.14°,−3.0°)을 유지 (p22_eval/OLdq 앵커와 동일 규약).
 CL 오프셋(B.QOFF)만 후보 적합값 사용.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -29,7 +38,7 @@ B.PRE30 = float(V[2])
 B.C_QSG = float(CAND["p20"]["c_qs"])
 B.V0G = float(CAND["p20"]["v0"])
 B.MODEL_TAG = TAG
-B.ROOT = Path(rf"C:/Users/junho/Desktop/jump_opt/g22_{TAG}_all_results")
+B.ROOT = Path(LEGACY_ROOT + f"/g22_{TAG}_all_results")
 
 
 def main():

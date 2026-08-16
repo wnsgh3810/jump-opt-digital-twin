@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P22 노션용 그림: ① T3 에너지 원장 (W_in vs E_req) ② 0421 로더 인공물 오버레이."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -22,7 +31,7 @@ import matplotlib.pyplot as plt
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent / "p19_jump"))
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
-OUT = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p22_results")
+OUT = Path((LEGACY_ROOT + "/g22_p22_results"))
 OUT.mkdir(parents=True, exist_ok=True)
 
 plt.rcParams["font.family"] = "Malgun Gothic"

@@ -18,6 +18,15 @@ Locks (from iter4 best):
   - thigh/calf contype=1 conaffinity=1
   - per-trial q_offsets from iter1
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 from pathlib import Path
 import numpy as np
@@ -26,8 +35,8 @@ warnings.filterwarnings('ignore')
 
 import mujoco
 
-GOAL12_DIR = Path("C:/Users/junho/Desktop/jump_opt/goal12")
-GOAL18_DIR = Path("C:/Users/junho/Desktop/jump_opt/goal18")
+GOAL12_DIR = Path((LEGACY_ROOT + "/goal12"))
+GOAL18_DIR = Path((LEGACY_ROOT + "/goal18"))
 sys.path.insert(0, str(GOAL12_DIR / "iter3"))
 sys.path.insert(0, str(GOAL12_DIR / "data_loaders"))
 sys.path.insert(0, str(GOAL18_DIR / "iter2"))

@@ -20,6 +20,15 @@
 
 held-out 26.03.24 은 표시만 하고 판정/상관에서 제외. 데이터 원본 읽기 전용.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 import json
 from pathlib import Path
@@ -42,7 +51,7 @@ MJ = P.J._P["mj"]
 S = P.J._P["S"]
 M_TOT = 3.2
 G = 9.81
-NPZ_ROOT = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p19_all_results")
+NPZ_ROOT = Path((LEGACY_ROOT + "/g22_p19_all_results"))
 DSDIR = {"jump_0324": "jump_0324_heldout", "jump_position_0421": "jump_position_0421",
          "jump_0424": "jump_0424", "jump_0602": "jump_0602",
          "jump_0429": "jump_0429_cvt"}

@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P18b 최종 스택으로 0429 결과 재생성 (png_v2 + traj_v2 + json)."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -23,7 +32,7 @@ A = np.array(C16["x"][32:36])
 W = json.load(open(HERE / "p18b_iter11.json"))["x"]
 STIFF, REF = W[0], W[1]
 O1Q, O2Q = 3.14 * np.pi / 180, -3.0 * np.pi / 180
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_cvt_0429_results")
+DST = Path((LEGACY_ROOT + "/g22_cvt_0429_results"))
 (DST / "png_v2").mkdir(parents=True, exist_ok=True)
 TRAJD = HERE / "traj_v2"; TRAJD.mkdir(exist_ok=True)
 

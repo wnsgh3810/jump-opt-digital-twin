@@ -5,13 +5,22 @@
 변경 (사용자 07-09): 모델 = P13h 4-bar flip XML (crank/coupler 링키지 표시).
 qpos = [bz, q1, q2, -q2, q2] (평행사변형), base_z는 폐루프 sim 값 그대로.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
 import mujoco
 from PIL import Image, ImageDraw
 
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code")
+sys.path.insert(0, (LEGACY_ROOT + "/goal18_CANONICAL/code"))
 import make_anim as MA
 
 REPO = Path(__file__).resolve().parents[2]

@@ -20,6 +20,15 @@
 Motor LPF, tau_scale forbidden. Contact ON. Mode A only. 31 exp.
 Phase 0 baseline = 41,271.18.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json, time, os
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
@@ -32,7 +41,7 @@ sys.path.insert(0, str(REPO / "code/goal19/templates"))
 sys.path.insert(0, str(REPO / "code/goal19/data_loaders"))
 
 # Load Phase 0 offsets
-OFFSETS_PATH = Path("C:/Users/junho/Desktop/jump_opt/goal18/iter2/iter1_offsets.json")
+OFFSETS_PATH = Path((LEGACY_ROOT + "/goal18/iter2/iter1_offsets.json"))
 with open(OFFSETS_PATH) as f:
     OFFSETS = json.load(f)
 OFFSET_MAP = {(o["ds"], o["sub"]): (o["q1_off"], o["q2_off"]) for o in OFFSETS}

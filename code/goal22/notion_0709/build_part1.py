@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """07-09 τ-fidelity 실험 시리즈 노션 보고서 — part1: 부모 + 용어사전 + ①목적 + ②실험A + ③실험B."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import requests, time, json, mimetypes
 from pathlib import Path
 
@@ -7,7 +16,7 @@ TOKEN = "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"
 H = {"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2022-06-28"}
 HJ = {**H, "Content-Type": "application/json"}
 GOAL22 = "396ab81d2550814b9780f32285133840"
-D = Path(r"C:/Users/junho/Desktop/jump_opt")
+D = Path(LEGACY_ROOT)
 HANDOFF = Path(__file__).parent / "handoff.json"
 
 

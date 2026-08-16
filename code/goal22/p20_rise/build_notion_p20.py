@@ -3,6 +3,15 @@
 
 표준: 각 child = 요약 콜아웃 → 쉬운 설명(비유) → 수식/정의 → 그림 → 표 → 한계/다음 → 산출물 경로.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -10,8 +19,8 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
 import notion_kit as N
 
-PROBE_FIG = r"C:/Users/junho/Desktop/jump_opt/g22_p19_all_results/pre30_probe/probe_lambda.png"
-EXP1_FIG = r"C:/Users/junho/Desktop/jump_opt/g22_p20_results/exp1_forms.png"
+PROBE_FIG = (LEGACY_ROOT + "/g22_p19_all_results/pre30_probe/probe_lambda.png")
+EXP1_FIG = (LEGACY_ROOT + "/g22_p20_results/exp1_forms.png")
 
 
 def loc(path_txt):

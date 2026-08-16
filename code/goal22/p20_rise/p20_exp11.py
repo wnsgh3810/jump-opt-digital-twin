@@ -8,6 +8,15 @@
 성공 = 어떤 μ가 [점프 창 → 79 근접] + [CL FIT/HO ≥ 두손(36.5/32.2)] + [0429 무악화]
       + [s2s/저속 무영향(슬립 없음)] 동시 달성 → 스펀지가 물리 파라미터로 대체됨.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -24,7 +33,7 @@ import p20_exp7 as X7
 from cvt_core import load_0429
 
 mj = P.J._P["mj"]
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 
 
 def set_mu(model, mu):

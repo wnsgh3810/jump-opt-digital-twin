@@ -5,6 +5,15 @@ grf_z) from the four-bar twin replaying the NLP tau*, then call
 goal18_v9/_make_anim_universal_colored.py :: make_anim_universal_colored.
 h_real overlay = NLP predicted apex (labelled as prediction via trial label).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json, importlib.util, tempfile
 from pathlib import Path
 import numpy as np
@@ -19,7 +28,7 @@ for p in ["templates", "data_loaders", "phase1", "phase2", "phase3", "phase4"]:
 import sub_sim_iter6v2 as S
 import mshoot_fourbar as FB
 
-CANON = Path("C:/Users/junho/Desktop/jump_opt/goal18_v9/_make_anim_universal_colored.py")
+CANON = Path((LEGACY_ROOT + "/goal18_v9/_make_anim_universal_colored.py"))
 spec = importlib.util.spec_from_file_location("_mauc", str(CANON))
 _mauc = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(_mauc)

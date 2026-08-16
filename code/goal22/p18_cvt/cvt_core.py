@@ -5,6 +5,15 @@
 → 비평행사변형: crank각 ≠ calf각 (비선형 전달비). 엔코더/모터/토크 = crank 쪽 (기존과 동일).
 루프 폐쇄: site-site connect (qpos0 폐쇄 불필요) + 해석적 폐쇄 솔버로 IC/FK 처리.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -124,7 +133,7 @@ def load_0429(sub):
     # h_real
     d["h_real"] = float("nan")
     try:
-        sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal12/data_loaders")
+        sys.path.insert(0, (LEGACY_ROOT + "/goal12/data_loaders"))
         from load_combined_15trial import parse_h_real
         d["h_real"] = float(parse_h_real(DATA429 / sub / "Real Data.txt"))
         if d["h_real"] > 3.0:

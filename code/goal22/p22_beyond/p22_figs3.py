@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """P22 노션 그림 3탄: 파레토 전선 (동결 개체군) + P19/p22a 마커."""
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -12,7 +21,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
 import safe
 
-OUT = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p22_results")
+OUT = Path((LEGACY_ROOT + "/g22_p22_results"))
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 

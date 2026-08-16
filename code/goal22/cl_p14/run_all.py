@@ -4,6 +4,15 @@
 단 모델 x32 = P14, 액추에이터·실측 τ 참조 변환 = P14 a_hat (4계수).
 산출: trial별 6-패널 그림(표준 규격) + traj npz + canonical 4-bar GIF + P13h+paper 대비 표.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 from pathlib import Path
@@ -25,7 +34,7 @@ CAND = json.load(open(HERE.parent / "p14_ahat/fourbar_p14_candidate.json"))
 X = np.array(CAND["x"])
 A = np.array(CAND["A_HAT"])
 OLD = json.load(open(HERE.parent / "p10_cl.json"))
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_cl_p14_results")
+DST = Path((LEGACY_ROOT + "/g22_cl_p14_results"))
 (DST / "png").mkdir(parents=True, exist_ok=True)
 (DST / "gif").mkdir(parents=True, exist_ok=True)
 TRAJD = HERE / "traj"; TRAJD.mkdir(exist_ok=True)

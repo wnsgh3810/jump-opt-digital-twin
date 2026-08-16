@@ -5,6 +5,15 @@
 점프 창(2층 입력벡터) ≤ 79.2(const2.25) + s2s/0429/0604 잔여 무악화 (exp9a 확인분).
 pre30 상수는 제거된 상태 (2층이 대체).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -18,7 +27,7 @@ import p19_judge as P
 import p19_run as R
 import p20_run as P20
 
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 
 
 def main():

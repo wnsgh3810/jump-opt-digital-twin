@@ -9,6 +9,15 @@ exp4 발견: 같은 세션 내에서 기준선이 부하에 비례 (0604: 1.0→
   2) 표본 외 예측: s2s_0319(+1.0), 0604(+1.0/+2.1/+3.8), 0429 저속(+1.0)의
      실측 λ*를 ĉ·⟨â⟩로 예측해 비교 + s2s/0429 총점 무악화 확인
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json
 import sys
 from pathlib import Path
@@ -21,7 +30,7 @@ import p20_exp1 as E
 import p19_judge as P
 from p14_judge import KT, GR, CF, invert_paper
 
-DST = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20_results")
+DST = Path((LEGACY_ROOT + "/g22_p20_results"))
 CS = [0.0, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40]
 
 

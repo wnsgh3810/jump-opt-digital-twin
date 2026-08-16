@@ -5,6 +5,15 @@
 구성 차이 (vs P19): pre30=0 (담요 제거), 보정층 c_qs≈0.005는 <0.1Nm이라 생략(INDEX에 명기),
 0429 각도 영점 = 재적합값 (7.0°, −5.0°) — A/CL 동일 적용. 플랜트 x = p20c.
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -28,7 +37,7 @@ B.QOFF = QOFF                        # CL용 0429 오프셋 = 재적합값
 B.QOFF_A429 = QOFF                   # Mode A도 동일 (엔코더 영점은 모드 무관)
 B.TM = float(V[15])
 B.PRE30 = 0.0                        # 담요 제거 (p20c 핵심)
-B.ROOT = Path(r"C:/Users/junho/Desktop/jump_opt/g22_p20c_all_results")
+B.ROOT = Path((LEGACY_ROOT + "/g22_p20c_all_results"))
 
 
 def main():

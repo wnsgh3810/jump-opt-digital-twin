@@ -1,21 +1,30 @@
 """v13 rev2 regen — jump XML + coord conversion + real-time pace + plot cp."""
 from __future__ import annotations
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 from pathlib import Path
 import sys, json, shutil
 import numpy as np
 
-V13 = Path("C:/Users/junho/Desktop/jump_opt/goal18_v13/Iter6")
-V10 = Path("C:/Users/junho/Desktop/jump_opt/goal18_v10/Iter6")
+V13 = Path((LEGACY_ROOT + "/goal18_v13/Iter6"))
+V10 = Path((LEGACY_ROOT + "/goal18_v10/Iter6"))
 
 sys.path.insert(0, str(V13))
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal12/iter38")
+sys.path.insert(0, (LEGACY_ROOT + "/goal12/iter38"))
 
 from _make_anim_sit2stand import render_sit2stand
 from run_i38 import build_xml_i38
 
 
 def load_pm():
-    with open("C:/Users/junho/Desktop/jump_opt/goal12/iter38/iter38_metrics.json") as f:
+    with open((LEGACY_ROOT + "/goal12/iter38/iter38_metrics.json")) as f:
         p = json.load(f)['per_trial']['0424_60_0.75_60_2']
     return dict(fv_hip=float(p['fv_hip']), fv_knee=float(p['fv_knee']),
                 fc_hip=float(p['fc_hip']),
@@ -89,7 +98,7 @@ def main():
     reports = []
 
     # sit2stand_0324 subfolders (canonical from goal16)
-    s2s_src = Path("C:/Users/junho/Desktop/jump_opt/goal16/cross_validation_clean/sit2stand_0324")
+    s2s_src = Path((LEGACY_ROOT + "/goal16/cross_validation_clean/sit2stand_0324"))
     for sub in sorted(s2s_src.iterdir()):
         if not sub.is_dir() or 'OLD' in sub.name:
             continue
@@ -103,7 +112,7 @@ def main():
 
     # sit2stand_air_0319 (canonical from v4)
     r = render_dataset(
-        Path("C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/sit2stand_air_0319/ROOT"),
+        Path((LEGACY_ROOT + "/goal18_v4/Iter6/sit2stand_air_0319/ROOT")),
         V13 / 'sit2stand_air_0319' / 'ROOT',
         "sit2stand_air_0319 ROOT", xml_path, 'air')
     r['folder'] = "sit2stand_air_0319/ROOT"; r['kind'] = 'air'
@@ -111,7 +120,7 @@ def main():
 
     # sit2stand_gnd_0319
     r = render_dataset(
-        Path("C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/sit2stand_gnd_0319/ROOT"),
+        Path((LEGACY_ROOT + "/goal18_v4/Iter6/sit2stand_gnd_0319/ROOT")),
         V13 / 'sit2stand_gnd_0319' / 'ROOT',
         "sit2stand_gnd_0319 ROOT", xml_path, 'gnd')
     r['folder'] = "sit2stand_gnd_0319/ROOT"; r['kind'] = 'gnd'

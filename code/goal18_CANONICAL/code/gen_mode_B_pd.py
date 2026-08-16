@@ -16,12 +16,21 @@ Task per user:
   4. If PD sim diverges (base falls too fast, or NaN), mark 'failed'.
 """
 from __future__ import annotations
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json, shutil, traceback
 from pathlib import Path
 import numpy as np
 import mujoco
 
-V13_ITER6 = Path("C:/Users/junho/Desktop/jump_opt/goal18_v13/Iter6")
+V13_ITER6 = Path((LEGACY_ROOT + "/goal18_v13/Iter6"))
 XML_PATH = V13_ITER6 / "leg.xml"
 
 sys.path.insert(0, str(V13_ITER6))
@@ -36,49 +45,49 @@ DIVERGE_BASE_M = 5.0
 
 ENTRIES = [
     {"dataset": "jump_0424", "sub": "120_2.2_150_2.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/120_2.2_150_2.5/sim_data/iter6_sim.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/120_2.2_150_2.5/sim_data/iter6_sim.npz"),
      "pd_gains": {"kp_hip": 120, "kd_hip": 2.2, "kp_knee": 150, "kd_knee": 2.5}},
     {"dataset": "jump_0424", "sub": "120_2.2_200_2.8",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/120_2.2_200_2.8/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/120_2.2_200_2.8/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 120, "kd_hip": 2.2, "kp_knee": 200, "kd_knee": 2.8}},
     {"dataset": "jump_0424", "sub": "120_2_120_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/120_2_120_2/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/120_2_120_2/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 120, "kd_hip": 2, "kp_knee": 120, "kd_knee": 2}},
     {"dataset": "jump_0424", "sub": "150_2.2_250_3",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_250_3/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/150_2.2_250_3/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 250, "kd_knee": 3}},
     {"dataset": "jump_0424", "sub": "150_2.2_350_3.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_350_3.5/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/150_2.2_350_3.5/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 350, "kd_knee": 3.5}},
     {"dataset": "jump_0424", "sub": "150_2.2_500_4",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_500_4/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/150_2.2_500_4/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 500, "kd_knee": 4}},
     {"dataset": "jump_0424", "sub": "60_0.75_60_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/60_0.75_60_2/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/60_0.75_60_2/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 60, "kd_hip": 0.75, "kp_knee": 60, "kd_knee": 2}},
     {"dataset": "jump_0424", "sub": "60_1.5_60_1.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/60_1.5_60_1.5/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/60_1.5_60_1.5/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 60, "kd_hip": 1.5, "kp_knee": 60, "kd_knee": 1.5}},
     {"dataset": "jump_0424", "sub": "90_0.75_90_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/90_0.75_90_2/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0424/90_0.75_90_2/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 90, "kd_hip": 0.75, "kp_knee": 90, "kd_knee": 2}},
     {"dataset": "jump_0602", "sub": "120_2_120_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/120_2_120_2/sim_data/iter6_sim.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0602/120_2_120_2/sim_data/iter6_sim.npz"),
      "pd_gains": {"kp_hip": 120, "kd_hip": 2, "kp_knee": 120, "kd_knee": 2}},
     {"dataset": "jump_0602", "sub": "150_2.2_250_3",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/150_2.2_250_3/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0602/150_2.2_250_3/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 250, "kd_knee": 3}},
     {"dataset": "jump_0602", "sub": "150_2.2_500_5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/150_2.2_500_5/sim_data/iter6_sim.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0602/150_2.2_500_5/sim_data/iter6_sim.npz"),
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 500, "kd_knee": 5}},
     {"dataset": "jump_0602", "sub": "60_0.75_60_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18/iter1/jump_0602/60_0.75_60_2/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18/iter1/jump_0602/60_0.75_60_2/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 60, "kd_hip": 0.75, "kp_knee": 60, "kd_knee": 2}},
     {"dataset": "jump_0602", "sub": "60_1.5_60_1.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18/iter1/jump_0602/60_1.5_60_1.5/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18/iter1/jump_0602/60_1.5_60_1.5/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 60, "kd_hip": 1.5, "kp_knee": 60, "kd_knee": 1.5}},
     {"dataset": "jump_0602", "sub": "90_0.75_90_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/90_0.75_90_2/sim_data/run_log.npz",
+     "mode_A_source": (LEGACY_ROOT + "/goal18_v4/Iter6/jump_0602/90_0.75_90_2/sim_data/run_log.npz"),
      "pd_gains": {"kp_hip": 90, "kd_hip": 0.75, "kp_knee": 90, "kd_knee": 2}},
 ]
 

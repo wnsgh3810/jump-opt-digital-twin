@@ -8,6 +8,15 @@
       cmd τ_sim vs raw currentTorque, 상태 q/dq, h.
 변형 (ii): 게인 4개(log)를 상태 매칭으로 Nelder-Mead 재적합 후 동일 비교 (사용자 지시).
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json
 import numpy as np
 import pandas as pd
@@ -20,7 +29,7 @@ plt.rcParams["axes.unicode_minus"] = False
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "code/goal21"))
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal12/data_loaders")
+sys.path.insert(0, (LEGACY_ROOT + "/goal12/data_loaders"))
 import g21_p13e_honest as PH
 import g21_p13_linkage as P13
 from g22_p10_pdlaw import SETS, label_gains, read_joint

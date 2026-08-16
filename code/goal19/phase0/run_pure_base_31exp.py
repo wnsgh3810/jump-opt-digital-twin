@@ -11,6 +11,15 @@ Runs Mode A sim on all 31 sub-experiments with PURE_BASE overrides:
 Score per md formula:
   Wq=100, Wdq=50, Wt=0, Wh_jump=100, Wgrf=0.1, Wpen=50
 """
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import sys, json, time
 from pathlib import Path
 import numpy as np
@@ -52,7 +61,7 @@ ARM_KNEE = 0.00490
 
 def main():
     # Load 31-exp offsets (per-trial q_offsets — Phase 0 uses whatever's inherited from iter1)
-    offsets_path = Path("C:/Users/junho/Desktop/jump_opt/goal18/iter2/iter1_offsets.json")
+    offsets_path = Path((LEGACY_ROOT + "/goal18/iter2/iter1_offsets.json"))
     with open(offsets_path) as f:
         offsets = json.load(f)
     offset_map = {(o["ds"], o["sub"]): (o["q1_off"], o["q2_off"]) for o in offsets}

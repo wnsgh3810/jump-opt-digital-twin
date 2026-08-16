@@ -23,7 +23,7 @@ B.PRE30 = float(V[2])
 B.C_QSG = float(CAND["p20"]["c_qs"])
 B.V0G = float(CAND["p20"]["v0"])
 B.MODEL_TAG = TAG
-B.ROOT = Path(rf"C:/Users/junho/Desktop/jump_opt/g22_{TAG}_all_results")
+B.ROOT = Path(LEGACY_ROOT + f"/g22_{TAG}_all_results")
 
 
 def main():
@@ -44,3 +44,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o3, sys as _s3
+_d3 = _o3.path.dirname(_o3.path.abspath(__file__))
+while _d3 != _o3.path.dirname(_d3) and not _o3.path.isdir(_o3.path.join(_d3, 'code', 'bench')):
+    _d3 = _o3.path.dirname(_d3)
+if _o3.path.join(_d3, 'code', 'bench') not in _s3.path:
+    _s3.path.append(_o3.path.join(_d3, 'code', 'bench'))
+from datapaths import LEGACY_ROOT  # noqa: E402
+# ---------------------------------------------------------------

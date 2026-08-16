@@ -37,6 +37,22 @@ DATA_ROOT = CVT_ROOT + "/Data"
 # 절대경로를 적어 두지 않으므로 저장소를 어디로 옮기든 저절로 따라온다.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace("\\", "/")
 
+# 옛 결과·문서 폴더 (그림·애니메이션·초기 단계 기록). 2026-08-16 에 바탕화면에서 여기로 옮겼다.
+# 옛 자리(C:\Users\junho\Desktop\jump_opt)에는 **바로가기 폴더**를 남겨 뒀으므로
+# 그 경로를 쓰는 옛 코드 약 4,000군데도 그대로 작동한다.
+LEGACY_ROOT = os.environ.get("JUMP_LEGACY_ROOT", CVT_ROOT + "/jump_opt").replace("\\", "/").rstrip("/")
+
+# 다리 최적화·시스템 동정 작업 폴더 (AVT LEG). 위와 같이 옮겼고 바로가기를 남겼다.
+AVT_ROOT = os.environ.get("JUMP_AVT_ROOT", CVT_ROOT + "/AVT LEG").replace("\\", "/").rstrip("/")
+
+
+def legacy(*parts):
+    """옛 결과·문서 폴더 아래의 경로를 만든다."""
+    out = LEGACY_ROOT
+    for p in parts:
+        out += "/" + str(p).replace("\\", "/").strip("/")
+    return out
+
 
 def data(*parts):
     """``DATA_ROOT`` 아래의 경로를 만든다. 슬래시 중복·역슬래시를 알아서 정리한다."""
