@@ -1,6 +1,14 @@
 # jump-opt-digital-twin — 코드 지도 (≤60줄 유지)
 
-연구 헌법은 `C:/Users/junho/Desktop/CLAUDE.md`. 현행 스택/지표 수치는 `code/bench/CURRENT_STACK.md`가 단일 출처.
+> ## ▶ 새 세션이면 `docs/context/HANDOFF.md` 를 먼저 끝까지 읽어라.
+> 연구 배경 · 경로 지도 · **지금 돌아가고 있는 작업** · 누적 발견 41건 · 절대 규칙 · 보고 형식이 거기 있다.
+> 이 파일은 그 다음이다 (코드 구조 전용).
+> Codex 등 다른 에이전트용 진입점은 루트의 `AGENTS.md`.
+
+연구 헌법 = `docs/context/CONSTITUTION.md` (원본 `C:/Users/junho/Desktop/CLAUDE.md`).
+데이터 사전 = `docs/context/DATA_DICT.md` (원본 `Data/CLAUDE.md`) — 데이터 만지기 전 필독.
+현행 스택/지표 수치는 `code/bench/CURRENT_STACK.md`가 단일 출처.
+누적 발견은 `docs/context/memory/MEMORY.md` 색인 → 개별 문서.
 
 ## 코드 지도
 ```

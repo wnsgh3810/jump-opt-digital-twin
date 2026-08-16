@@ -1,0 +1,40 @@
+- [마라톤C 08-01](marathon-c-track-260801.md) — 결손 3분해·발배치 상태변수·τ_lim 유령 철회·커맨드층 PD 형태(0421 dq_des 미인가) 발견
+- [마라톤D 08-01](marathon-d-deploy-260801.md) — fs15 후보(스큐+실게인 J 0.854)·점프높이 sim 과대·지지층 에너지 백도어 규명
+- [마라톤E 08-02](marathon-e-slip-260802.md) — fs16=fs15+FS_PRESLIDE 0.86,0.85 확정 (크리프 규명·Karnopp 이력)·레일 축 기각·D_slip 영상 정합
+- [발 구름 vs 슬립](foot-rolling-vs-slip.md) — 발이동≠슬립 (D P13 선행 판정, E에서 망각 재발견) · 지표 정의 전 직전 마라톤 로그 재독 의무
+- [마라톤F 08-02](marathon-f-conserve-260802.md) — supp 실체=저속 유지-보조 (escrow 실패·속도게이트 held-out −41%)·승격 없음·벨트 SEA 차기 1순위
+- [보고 형식](report-format.md) — 결론 한 줄→적용/미적용 before-after 표→전 후보 판정표→발견→결정 대기→이월→랩업 상태 · **전 항목을 고등학생 눈높이로 비유와 함께 풀어서**
+- [실물 계측 사실](robot-mass-slip-facts.md) — 총질량 3.26kg(정합 3.26~3.3)·23일 딥스쿼트 슬립 8~10mm(sim 절반) · ⚠구 "발 플레이트 120mm 자"는 폐기 — 영상 자는 video-scale-foot-ruler 참조
+- [점프높이 정의](jump-height-definition.md) — 지면 기준 베이스 중심 최고높이 (GRF 체공 상승분과 혼동 금지, 2회 재발) · 정본 심판 _F_jumph_abs.py
+- [지표 출처 원칙](metric-provenance-rule.md) — 지표는 원본에서 직접 재유도 후 사용 · 실측 충돌 시 합리화 금지·사용자에게 질의 (점프높이 3마라톤 오염의 근본 원인)
+- [지식 재고 (재정합 시작점)](goal23-knowledge-inventory.md) — OLD α 이후 발견의 A/B/C 검증 등급 · 무엇을 가져가고 무엇을 버리는가
+- [페이로드 s2s 0604 유효성](payload-s2s-0604-validity.md) — no_cvt는 0kg만 유효(load_5/7.5 기립실패) · 데이터 사전에 반대로 적혀 있던 사례 · 새 데이터는 분석 전 유효성·등급 질의 의무
+- [마라톤G 08-08](marathon-g-transmission-260808.md) — 접착제=효율 75% 전동계 (독립 3중 확인)·J_G 0.7519·인공층 전멸·held-out −38%
+- [영상 스케일 정본](video-scale-foot-ruler.md) — 자=발 금속판 30mm(바깥 40mm, r=20) · 영상마다 재측정 · 적응 추적창+수직구속 · 평활 금지 · 육안과 어긋나면 측정기부터 의심
+- [슬립 전수 측정 확정 사실](slip-measurement-facts.md) — 하강=세션상수 · 푸시는 59fps에서만 측정가능 · CVT는 슬립 무영향(3배는 평행사변형 버그) · 현행 J_G는 하강을 못 봄
+- [측정량 vs 계산량](measurement-vs-computation.md) — 일관된 차이는 물리의 증거가 아니다(버그도 일관된다) · 파생량은 성분 분해로 판별
+- [CVT 링크 길이 출처](cvt-link-length-source.md) — l_i 는 trial별 Clutch 실측(fs_data.cvt_li) · 구 0.02499는 '실측' 표기의 점수 튜닝값이었다 · 바로잡자 ModeA 10/10 개선
+- [전달효율 무릎88%/힙100%](transmission-efficiency-knee-vs-hip.md) — 무게추 왕복의 상행-하행 절반차로 직접 측정 · 마라톤G가 평균으로 지운 성분 · 단 고속 외삽 모형은 2회 기각(포화가 이김)
+- [준정적 실측은 하한이다](quasistatic-is-lower-bound.md) — 08-11 탐색범위 3연속 오류 · 토크채널은 명령이라 고속 손실이 원리상 안 보임 · 추론한 등가점을 정답으로 믿지 말 것
+- [상대 게이트는 절대 실패를 못 본다](relative-gates-miss-absolute-failure.md) — 변속기 24배 오차가 계속 통과 · 원인은 물리가 아니라 채점 코드(무변속 모델에 태움) · 새 판 만들 때 기존 필터의 이유부터 읽을 것
+- [한쪽 경로에만 있는 물리](physics-split-across-rollout-paths.md) — 폐루프는 PD가 감춰 준다 · 개루프에서만 터진다 · 물리 의심 전에 두 경로 훅부터 grep (변속기 손실 17.86°→4.27°)
+- [힙 관성 = 0.014~0.019](hip-inertia-freeswing.md) — 모터 끈 자유 흔들림 실측 (현행 0.010은 부족) · 마찰 0으로도 같은 답 · 작은 폭 스윙은 마찰 조기정지로 못 씀 · 폐루프만 걸리므로 축에 넣어 재적합
+- [실측값의 이식 가능성](measured-value-transferability.md) — 실측이라고 모델의 그 자리에 들어가는 건 아니다 · 무릎마찰 O · 힙관성 부분(점프만 거부) · **토크환산 X**(이중계산+범위밖 외삽) · 넣어 보고 어느 판이 거부하는지부터
+- [토크 환산이 평평하다](torque-map-flat-vs-measured.md) — 모델 0.65~0.68 고정 vs 분동 실측 1.26(저)~0.86(고) · 매달린 구간 1.85배 어긋남 · 정적으로는 마찰과 분리 불가
+- [부호 검사는 모델 없이](sign-check-without-model.md) — 토크는 위치 오차와 같은 부호여야 한다 · 36기록 전수 정상 · 이 시험이 26.04.29 무릎과 0802 한 건을 잡아냄
+- [최종 지표 첫 실측](tau-fidelity-first-measurement.md) — 26.07.27 계획 vs 측정: 무릎 28%/힙 46%(피크 1.49배) · 계획 파일 t0nc_cl_v9.npz · 교차상관 정렬 금지 · 정본 도구 fs_taufid.py
+- [하중비례 무릎 손실 확인](load-proportional-knee-loss-confirmed.md) — 넣으니 일어서기 3.16→1.54(무변속 4.78→0.48) · 측정→예측→확인 3단 성공 · 점프 +26% 대가라 공동 재적합 필수 · 6회차 1순위 축
+- [일어서기 오차의 자리 = 변속기](s2s-error-lives-in-transmission.md) — 지렛대 비율 낮고 급변하는 두 구간(−170~−140°·−60~0°)에서 생김 · 무변속은 없음 · 하중 비례 · 속도 무관 · **재앵커 짧은 창으로만 읽을 것**
+- ⛔ [축 토크 15 N·m = 사용자의 설계 목표](torque-limit-15-is-a-design-choice.md) — 하드웨어 한계 아님 · **맞는지 다시 묻지 말 것**(반복 질문 지적 08-14) · 진짜 천장은 명령 35.5(≈축 20.5)
+- [배포 계획의 약속이 거짓이었다](deployed-jump-saturated-motor.md) — 14.65라고 약속했으나 실제 22.56 요구·명령 37.2로 천장 초과 · 정직한 도달선 0.764 m (계획 0.878은 지킬 수 없는 값)
+- [계획이 틀린 이유 = 낡은 트윈+α표](plan-alpha-outdated-twin.md) — 계획토크=α×PD출력(힙 0.40) · 옛 트윈 추종 12.9° vs 현행 7.5°(실기 8.1°) · 다시 계획하면 힙 0.461→0.131 · **새 계획엔 α 쓰지 말 것**
+- [창 분할 금지는 성능에서도 옳다](no-window-splitting-verified.md) — 통짜가 3.5배 더 잘 구분(8.0배 vs 2.3배) · 나눈 판엔 바닥이 있어 좋은 모델을 못 알아본다 · 판 구분력은 후보를 넓게 벌려 놓고 재라
+- [무게 ≠ 비중](score-composition-vs-final-goal.md) — 값 크기가 다르면 큰 항이 점수를 지배 · 5회차 점수 −20%인데 최종 지표 악화 · **각 항을 출발점 값으로 나누고 최종 목표 항엔 잠금**
+- [채점 자기참조·침묵 탈락 금지](scorer-self-reference-and-silent-drop.md) — 자를 후보가 만지면 12% 부풀림 실측 · 실패=만점 구멍 · 기대 목록은 등록부에서 (08-14 세 구멍 수리)
+- [점프는 마찰과 토크환산을 못 가른다](jump-data-cannot-separate-friction-from-torque.md) — 5회차 488분이 점프에 기여한 것 0 · 개선은 100% 신규 두 성분 · 총점만 보면 오독한다
+- [무릎 손실은 토크 비례다 (무게 아님)](knee-loss-is-torque-proportional-not-mass.md) — 전달 효율 · 훑기가 원하는 0.45는 실측 0.12의 3.8배 = 마찰 아닌 것(전압 한계)이 섞여 있다
+- [v9 "시드 4개"는 난수가 아니라 출발점](v9-seeds-were-start-points-not-random-seeds.md) — 난수 씨앗은 11로 전부 동일 · 로그 문구는 고정 문자열 · CMA-ES 16후보/16변수/313세대/5009평가
+- [평균이 그 한 세션을 가린다](board-average-hides-the-one-session-that-matters.md) — 6회차 총점 −10.2%인데 최종 목표 +8.5% 악화 · 배포 세션만 +7.1% · 최종 목표 항 잠금을 안 넣은 내 실수
+- [역기전력 가설 사망 (P7 적중)](board-average-hides-the-one-session-that-matters.md) — 모터 천장 속도의존을 안전한 초집합으로 열었더니 데이터가 0을 골랐다(+0.0117, 부호마저 반대) · 4번째이자 가장 강한 기각
+- [변속 세션이 그림에서 통째로 빠져 있었다](cvt-session-invisible-in-figures.md) — 채점엔 들어가는데 눈으론 못 봄 · 건너뛰기 주석의 이유는 맞았고 처방이 과했다
+- [짧은 창이 일반 오차를 가린다](short-window-hides-a-general-model-error.md) — 같은 0.2초로 재면 점프도 8° 틀린다 · 점프가 맞아 보인 건 창이 짧고 86° 움직여서 · 오차÷이동량을 볼 것
