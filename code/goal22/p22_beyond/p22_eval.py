@@ -10,7 +10,7 @@
          + 0.15·ÔLdq + 0.10·Ĥ   (성분̂ = 성분/P19_rebased 앵커, JŴ06 = 0.5·J6Ĵ + 0.5·J6Ĉ,
          ÔLdq = 세션별 정규화 후 평균)
 
-통짜 재생 규약 (golden = Desktop/jump_opt/g22_p19_all_results 를 만든
+통짜 재생 규약 (golden = CVT/jump_opt/g22_p19_all_results 를 만든
 p19_all_results.run_any mode-A 그대로 — 앵커 검증으로 강제):
   - settle: t<0 동안 S.SETTLE_KP/KD PD (목표 = 측정 q(0)+offset), 커맨드는 ahat 경유
   - 주입: tau = ahat(A_PAPER, traw, dq) 를 t−P.SD 로 interp (무릎은 +lam_vec(c_qs, v0)),

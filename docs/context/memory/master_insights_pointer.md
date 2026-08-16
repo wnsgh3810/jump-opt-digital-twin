@@ -11,7 +11,7 @@ metadata:
 
 ## ★ 현행 메인 위치 (2026-06-09 이후, GOAL9~16)
 
-**`C:\Users\junho\Desktop\jump_opt\MASTER_INSIGHTS_G9.md`** (10,239줄, 548K, 2026-06-09~ 계속 append)
+**`C:\Users\junho\CVT\jump_opt\MASTER_INSIGHTS_G9.md`** (10,239줄, 548K, 2026-06-09~ 계속 append)
 
 이게 **현재 authoritative 마스터 문서**. 새 goal(GOAL17+) 시작 시 **반드시 read**. 구조맵(line 기준):
 - 1–124 Header/Base model/Score fn | GOAL9 125–1512 (Final stack @893, 5 Mode-A insights @940)

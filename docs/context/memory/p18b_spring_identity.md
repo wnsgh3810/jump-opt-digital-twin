@@ -26,4 +26,4 @@ metadata:
 
 **교훈**: ①XML 문자열 치환 침묵 실패 주의 — 컴파일된 모델의 jnt_stiffness로 검증 필수 (iter1의 "calf 승리"는 실제 "스프링 제거"였음) ②과거 기각된 축(stiction 등)은 "스프링이 역할을 흡수한 상태"에서의 기각 — 구조가 바뀌면 재심 필요 ③Mode A에서 동일한 두 가설은 CL로 판별하라.
 
-파일: `code/goal22/p18_cvt/` (cvt_run2, iter1~12, cvt_final, MARATHON_P18B.md), 후보 `fourbar_p18b_candidate.json`, 결과 `Desktop/jump_opt/g22_cvt_0429_results/{png_v2,gif_v2}`. 관련: [[fourbar-structure-critical]], [[goal19-underjump-diagnosis]], [[next-goal22-mission]]
+파일: `code/goal22/p18_cvt/` (cvt_run2, iter1~12, cvt_final, MARATHON_P18B.md), 후보 `fourbar_p18b_candidate.json`, 결과 `CVT/jump_opt/g22_cvt_0429_results/{png_v2,gif_v2}`. 관련: [[fourbar-structure-critical]], [[goal19-underjump-diagnosis]], [[next-goal22-mission]]

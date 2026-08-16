@@ -92,7 +92,7 @@ metadata:
 **사용자 제안 (2026-07-06)**: a_hat 유지, dynamics를 백지에서 — 해석적 EoM + 회귀 ID.
 joint 마찰/발끝 마찰/미끄러짐/q offset/4-bar compliance/**레일 마찰(신규)** 포함, s2s_gnd도 fit.
 
-**계획서**: `Documents/jump-opt-digital-twin/code/goal21/GOAL21_PLAN.md` (커밋됨) — 데이터 전략(s2s_air=무접촉 주력, 스탠스=구속 투영으로 GRF 소거), 1단계 선형(base params+마찰+레일+offset 선형화, ddq 필터 가중), 2단계 잔차 지도 기반 비선형, 3자 검증(회귀 vs CAD vs canonical 트윈 → 최종 multiple shooting 대결).
+**계획서**: `CVT/twin/code/goal21/GOAL21_PLAN.md` (커밋됨) — 데이터 전략(s2s_air=무접촉 주력, 스탠스=구속 투영으로 GRF 소거), 1단계 선형(base params+마찰+레일+offset 선형화, ddq 필터 가중), 2단계 잔차 지도 기반 비선형, 3자 검증(회귀 vs CAD vs canonical 트윈 → 최종 multiple shooting 대결).
 
 **착수 전 알아야 할 07-06 교훈** (goal20_marathon_state.md 07-06 섹션 필독):
 - τ 잔차 계열 4중 기각 (scale/poly/MLP/sign-v) — 잔차는 whip(고속+고부하) 집중 상태의존

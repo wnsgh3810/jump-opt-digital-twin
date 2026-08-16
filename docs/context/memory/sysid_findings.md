@@ -94,5 +94,7 @@ Hip torque +20Nm spike는 foot length 부재가 가장 의심되는데, foot len
 
 ### 세션 백업
 - 모든 jsonl 살아있음 (`C:\Users\junho\.claude\projects\...\No-Tr\`)
-- 텍스트 timeline 3개: `C:\Users\junho\Desktop\session_timeline_{af8c5d47,b0a02628,c82aa01d}.txt`
-- 추출 스크립트: `C:\Users\junho\Desktop\extract_sessions_all.py`
+- 텍스트 timeline 3개: 옛 `C:\Users\junho\Desktop\session_timeline_{af8c5d47,b0a02628,c82aa01d}.txt`
+  — **2026-08-16 확인: CVT 안에 없다.** 이사 때 안 딸려왔거나 그전에 지워졌다.
+  같은 내용은 `C:\Users\junho\CVT\AVT LEG\utils\session_backup\subagents\` 아래 timeline 파일들에 남아 있다.
+- 추출 스크립트: `C:\Users\junho\CVT\AVT LEG\utils\extract_sessions_all.py`

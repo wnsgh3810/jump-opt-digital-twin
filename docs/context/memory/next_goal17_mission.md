@@ -7,7 +7,7 @@ metadata:
   originSessionId: 63705ea5-db81-4f09-83d9-aa9b74dfbbc4
 ---
 
-★ **다음 세션 시작점.** GOAL16 종료(Iter17 157.42 best, DROP) 후 **GOAL17**이 다음 예정(현재 `Desktop/jump_opt/GOAL17_PROMPT.md`만 존재, 작업 미시작).
+★ **다음 세션 시작점.** GOAL16 종료(Iter17 157.42 best, DROP) 후 **GOAL17**이 다음 예정(현재 `CVT/jump_opt/GOAL17_PROMPT.md`만 존재, 작업 미시작).
 
 **Baseline** = GOAL16 Iter17 **157.42**, KEEP **156.0**(−1.42, 0.9% 필요). plateau = 12D×15=**180-param 모델 한계** → **새 axis pool 필수**(기존 optimizer/score 변형은 GOAL13/16에서 다 실패).
 

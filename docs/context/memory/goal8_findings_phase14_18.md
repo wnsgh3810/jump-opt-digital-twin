@@ -118,13 +118,13 @@ Phase 18: κ_h ≈ ?, κ_k ≈ ?
 
 ## 코드 위치
 
-- `Desktop/jump_opt/goal6/goal8_stage14_bo.py` (Phase 14)
-- `Desktop/jump_opt/goal6/goal8_stage15_bo.py` (Phase 15)
-- `Desktop/jump_opt/goal6/goal8_stage16_bo.py` (Phase 16) — `goal8_clean_helpers` + v8
-- `Desktop/jump_opt/goal6/goal8_stage17_bo.py` (Phase 17)
-- `Desktop/jump_opt/goal6/goal8_stage18_bo.py` (Phase 18)
-- `Desktop/jump_opt/goal6/run_trial_modeB_v8.py` (clean Mode B, no stage14 import)
-- `Desktop/jump_opt/goal6/goal8_clean_helpers.py` (build_xml + weights)
+- `CVT/jump_opt/goal6/goal8_stage14_bo.py` (Phase 14)
+- `CVT/jump_opt/goal6/goal8_stage15_bo.py` (Phase 15)
+- `CVT/jump_opt/goal6/goal8_stage16_bo.py` (Phase 16) — `goal8_clean_helpers` + v8
+- `CVT/jump_opt/goal6/goal8_stage17_bo.py` (Phase 17)
+- `CVT/jump_opt/goal6/goal8_stage18_bo.py` (Phase 18)
+- `CVT/jump_opt/goal6/run_trial_modeB_v8.py` (clean Mode B, no stage14 import)
+- `CVT/jump_opt/goal6/goal8_clean_helpers.py` (build_xml + weights)
 
 ## 관련 memory
 

@@ -417,7 +417,7 @@ serial+등가관성으로 축약 가능: knee 등가 armature ≈ arm_knee + IC 
 <p class="kicker">10 · 링크 모음</p>
 <h2>코드 · 자산 · 문헌</h2>
 <div class="linkgrid">
-<div class="link"><div class="t">REPO</div><code>Documents/jump-opt-digital-twin</code> — 모든 코드/모델/로그 (git 커밋 완비)</div>
+<div class="link"><div class="t">REPO</div><code>CVT/twin</code> — 모든 코드/모델/로그 (git 커밋 완비)</div>
 <div class="link"><div class="t">FINAL MODEL</div><code>code/goal19/goal20_final_model.json</code></div>
 <div class="link"><div class="t">FIGURES</div><code>scratchpad viz_final/</code> (원본 PNG) — 본 페이지에 전부 임베드</div>
 <div class="link"><div class="t">ANIMATIONS ×24</div><code>code/goal19/phase11/anim_final/</code> — canonical 렌더러(goal18_v9 universal colored)</div>

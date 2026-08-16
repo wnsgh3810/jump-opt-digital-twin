@@ -70,7 +70,7 @@ def main():
                        "커맨드 l_i=30 vs 25.08 반복 점프)가 최종 심판. 베이스 파라미터 분석(널스페이스)은 "
                        "아직 진행 중.")),
         loc("실험 스크립트 repo/code/goal22/p22_beyond/p22_probe_0429_energy.py, p22_exp_cvtloss.py, "
-            "p22_exp_sens.py · 결과 JSON 같은 폴더 · 그림 Desktop/jump_opt/g22_p22_results/"),
+            "p22_exp_sens.py · 결과 JSON 같은 폴더 · 그림 CVT/jump_opt/g22_p22_results/"),
     ])
     ok = N.verify_images(p)
     print("P22-4", p, "images:", ok)

@@ -118,9 +118,9 @@ append(root, [
     bullet(rt("⑦ 반증 실험들 — a_hat 항등 대조, 속도 텀 기각, 아키텍처 판정")),
     bullet(rt("⑧ 최종 스택 — P14로 전체 재실행한 결과와 남은 일")),
     h2("원본 자료 위치"),
-    bullet(rt("코드: "), rt("Documents/jump-opt-digital-twin/code/goal22/", code=True),
+    bullet(rt("코드: "), rt("CVT/twin/code/goal22/", code=True),
            rt(" (p14_ahat, p15_vterm, cl_p14, cl_fit2~4, p13i 등 폴더별)")),
-    bullet(rt("그림·애니메이션: "), rt("Desktop/jump_opt/g22_cl_results, g22_cl_fit2~4_results, g22_cl_p14_results", code=True)),
+    bullet(rt("그림·애니메이션: "), rt("CVT/jump_opt/g22_cl_results, g22_cl_fit2~4_results, g22_cl_p14_results", code=True)),
     bullet(rt("실험 페이지(웹): "), rt("tau-fidelity 실험 v5", link="https://claude.ai/code/artifact/6e33131f-e177-4ad8-be17-ec70fea2d96e")),
     bullet(rt("커밋 체인: 461f109 → 40436b0 (약 15 커밋, 각 커밋 메시지에 결과 요약)")),
 ])

@@ -156,7 +156,7 @@ B = [
     quote(rt("전달비가 다른 세션은 crank측 손실과 calf측 손실을 '구분 가능'하게 만든다 — 평행사변형 데이터만으로는 원리적으로 "
              "불가능했던 식별이다. 0429를 이중 심판 적합에 포함하는 P18b가 손실 원장 분리의 다음 열쇠.", bold=True)),
     bullet(rt("P18b 제안: 0429 10 trials를 fit set에 추가 + 마찰을 crank측/calf측으로 분리(fv/fc_calf 신설) + 이중 심판 재적합")),
-    bullet(rt("결과 파일: "), rt("Desktop/jump_opt/g22_cvt_0429_results/", code=True),
+    bullet(rt("결과 파일: "), rt("CVT/jump_opt/g22_cvt_0429_results/", code=True),
            rt(" (png 20 · gif 20) · 코드: "), rt("code/goal22/p18_cvt/", code=True)),
     h2("7. 그림·시뮬레이션"),
 ]

@@ -114,7 +114,7 @@ B += [N.h1("7. 실기 배포 권고안"),
 
 # ── 8. 재현 포인터 ──
 B += [N.h1("8. 파일/재현"),
-      N.code_block("repo: Documents/jump-opt-digital-twin/code/goal22/p25_deploy/\n"
+      N.code_block("repo: CVT/twin/code/goal22/p25_deploy/\n"
                    "계획: p25_{a_ol_cma,a_mppi,a_cl_cma,a4_ilqr,b_traj,c_ppo,c_ppo_best}[_t18].npz\n"
                    "채점: P25_T18=1 P25_CLIP_RAW=31.1771 P25_GAINS_FULL=1 python p25_d_runall.py / _shape / _ff\n"
                    "통합: p25_e_summary.py (+P25_T18) · p25_e_cross.py — 표 p25_e_table[_t18].md · 원장 p25_e_master[_t18].json\n"

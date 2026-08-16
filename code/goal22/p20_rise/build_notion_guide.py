@@ -114,7 +114,7 @@ def main():
     B += [N.bullet(N.rt("미사용 보물 데이터: 3월에 크랭크 19.5mm로 찍은 변속 점프 — 세 번째 검증 지점으로 대기 중"))]
 
     B += [N.h2("10. 어디에 뭐가 있나")]
-    B += [N.bullet(N.rt("전 세션 그래프·시뮬 영상: ", bold=True), N.rt("Desktop/jump_opt/g22_p19_all_results/ (세션별 폴더)", code=True))]
+    B += [N.bullet(N.rt("전 세션 그래프·시뮬 영상: ", bold=True), N.rt("CVT/jump_opt/g22_p19_all_results/ (세션별 폴더)", code=True))]
     B += [N.bullet(N.rt("P20 수사 전체 기록: ", bold=True), N.rt("노션 'P20 마라톤' 페이지 + repo/code/goal22/p20_rise/HYPOTHESES.md", code=True))]
     B += [N.bullet(N.rt("현재 공식 모델(승격본): ", bold=True), N.rt("repo/code/bench/CURRENT_STACK.md (수치의 단일 출처)", code=True))]
     B += [N.bullet(N.rt("기각된 가설 대장: ", bold=True), N.rt("repo/code/bench/REJECTED.md (#1~29)", code=True))]

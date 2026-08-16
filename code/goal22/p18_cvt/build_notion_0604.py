@@ -147,7 +147,7 @@ for p, cap in imgs:
         B.append(img(p, cap))
     except Exception as e:
         B.append(para(rt(f"[업로드 실패 {Path(p).name}: {e}]")))
-B.append(para(rt("결과 폴더: "), rt("Desktop/jump_opt/g22_s2s_0604_results/", code=True),
+B.append(para(rt("결과 폴더: "), rt("CVT/jump_opt/g22_s2s_0604_results/", code=True),
               rt(" (png 8 · counterfactual 10 · gif 4 · torque_margin · MODEL.txt) · 코드: "),
               rt("code/goal22/p18_cvt/s2s_0604*.py", code=True)))
 for i in range(0, len(B), 80):

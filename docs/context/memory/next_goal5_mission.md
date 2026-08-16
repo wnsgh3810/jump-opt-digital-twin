@@ -10,10 +10,10 @@ metadata:
 # GOAL5: MuJoCo Digital Twin Validation
 
 **Mission**: MuJoCo 환경 설정을 실제 robot과 매칭시켜 digital twin 완성.
-**Full prompt**: `C:\Users\junho\Desktop\jump_opt\GOAL5_PROMPT.md`
+**Full prompt**: `C:\Users\junho\CVT\jump_opt\GOAL5_PROMPT.md`
 
 ## Data Sources
-- **Reference**: `Desktop\jump_opt\no_cvt_alphaonly\jump_no_cvt_alphaonly_results.xlsx` (q_ref, dq_ref)
+- **Reference**: `CVT\jump_opt\no_cvt_alphaonly\jump_no_cvt_alphaonly_results.xlsx` (q_ref, dq_ref)
 - **실측**: `Research\4-Bar Link CVT\Data\26.06.02\position\` 6 trial (60_0.75_60_2, 60_1.5_60_1.5, 90_0.75_90_2, 120_2_120_2, 150_2.2_250_3, 150_2.2_500_5)
 - **Torque correction**: paper a_hat (pure paper, sgn only) → `ak80_9_torque_calibration.md`
 

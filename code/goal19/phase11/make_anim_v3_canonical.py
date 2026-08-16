@@ -5,7 +5,7 @@ locked jump animation standard (v3 P60 canonical look: 640x480, 60 frames, 40ms,
 iso camera, forced reference palette, trial/t/base_z/GRF/h_sim/h_real overlay).
 This script ONLY produces the inputs (v3 sim log npz + v3 XML) and calls the module.
 An archived copy of the renderer lives at code/goal19/canonical_render/ for durability;
-the ORIGINAL at Desktop/jump_opt/goal18_v9/ remains the reference.
+the ORIGINAL at CVT/jump_opt/goal18_v9/ remains the reference.
 """
 # --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o3, sys as _s3

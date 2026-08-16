@@ -25,7 +25,7 @@ metadata:
 - 링크: thigh=calf=250mm, l_i=l_o=30mm (실험 세션 전부), 발 실린더 r=21mm
 
 ## MuJoCo XML 정의 (올바른 빌더)
-- **정본 빌더: `Documents/jump-opt-digital-twin/code/goal21/g21_fourbar_flip.py :: build_xml_fourbar_flip`**
+- **정본 빌더: `CVT/twin/code/goal21/g21_fourbar_flip.py :: build_xml_fourbar_flip`**
 - crank geom `fromto 0,0,0 → 0,0,+LC`, crank inertial pos `+RC` / coupler body pos `(0,0,+LC)`, geom −z로 L1 / connect anchor `(0,0,-L1)` (coupler frame) → calf-local `(0,0,+LC)`에 결합
 - qpos 초기화 `[bz, q1, q2, -q2, q2]` 그대로 폐루프 성립 (잔차 1e-16)
 - ⚠️ **`code/goal19/phase11/mshoot_fourbar.py::build_xml_fourbar_jump`는 구(잘못된)위상** — crank가 정강이와 평행, rocker가 발쪽. G20-A~P9의 canonical(`fourbar_refit_best.json`)이 이 위상으로 fit됨. **새 작업에 사용 금지** (재현용으로만 보존)

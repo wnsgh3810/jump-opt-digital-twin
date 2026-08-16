@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """P19 전 데이터 결과 생성 — 현행 승격 스택으로 모든 세션 그래프+GIF+npz.
 
-출력: Desktop/jump_opt/g22_p19_all_results/<세션>/{png,gif,traj}/
+출력: CVT/jump_opt/g22_p19_all_results/<세션>/{png,gif,traj}/
   - 점프 5세션 (0324 held-out / 0421 / 0424 / 0602 / 0429 CVT) × 트라이얼별
     Mode A(τ replay) + CL(커맨드층 α·클립·tm 반영) 각각 PNG + GIF + npz
   - s2s_gnd_0319: 사이클 리셋 Mode A replay (P19는 점프 전용 fit — 참고용)

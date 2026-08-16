@@ -173,7 +173,7 @@ B = [
         ["구조 변경", "스프링 1.33@크랭크", "스프링 0.40@무릎 + 30mm 프리로드 +2Nm", "0429 q-오프셋 (+3.1°, −3.0°)"],
     ]),
     para(rt("파일: "), rt("code/goal22/p18_cvt/fourbar_p18b_candidate.json", code=True),
-         rt(" · 결과: "), rt("Desktop/jump_opt/g22_cvt_0429_results/{png_v2, gif_v2}", code=True),
+         rt(" · 결과: "), rt("CVT/jump_opt/g22_cvt_0429_results/{png_v2, gif_v2}", code=True),
          rt(" · 로그: "), rt("MARATHON_P18B.md", code=True)),
 
     h1("8. 남은 갭 (정직)"),

@@ -56,7 +56,7 @@ originSessionId: c82aa01d-1bc5-42d3-ad69-d2998821e712
 - **rail_friction = 5 N·s/m, joint_friction = 0.3 Nm·s/rad**
 - vs Real P40: dq2 0.4%, Impulse 1.2%, Energy 1.9%, h 0.9%, E/(Imp)²=1.023
 - Score = 4/945 (best)
-- 코드: `C:\Users\junho\Desktop\final.py`
+- 코드: `C:\Users\junho\CVT\AVT LEG\optimization\final.py`
 
 ## Alpha별 경향 (0.70~1.0 sweep)
 - α=0.70~0.80: E/(Imp)² < 0.8 → 물리적으로 부적합

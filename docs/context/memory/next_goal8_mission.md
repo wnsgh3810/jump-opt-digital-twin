@@ -55,7 +55,7 @@ metadata:
 - **★ Animation V25 스타일**: skybox(gradient), headlight(diffuse 0.6/ambient 0.3), groundplane reflectance=0.2, malgun.ttf, 흰글자+검은 stroke, 검은 박스 ❌, cam az=135 el=-15 dist=1.2, 80f 60ms
 
 ## 참조 문서
-- 전체 프롬프트: `C:\Users\junho\Desktop\jump_opt\NEXT_GOAL8_MODE_B_REFINEMENT.md`
+- 전체 프롬프트: `C:\Users\junho\CVT\jump_opt\NEXT_GOAL8_MODE_B_REFINEMENT.md`
 - 점프 높이 정의: 바닥 z=0부터 max base_z 절대 거리
 - Plot 색: matplotlib auto, sim/real 매칭은 get_color()
 - 애니메이션 스타일: V25 (흰글자+검은 outline, malgun.ttf, 검은 박스 없음)

@@ -225,7 +225,7 @@ def main():
     # ══ J. 지도 ══
     B += [N.h2("J. 어디에 뭐가 있나")]
     B += [N.bullet(N.rt("이 수사의 실험별 상세 기록(child 9개): ", bold=True), N.rt("노션 'P20 마라톤' 페이지", code=False))]
-    B += [N.bullet(N.rt("전 세션 그래프·시뮬 영상: "), N.rt("Desktop/jump_opt/g22_p19_all_results/", code=True))]
+    B += [N.bullet(N.rt("전 세션 그래프·시뮬 영상: "), N.rt("CVT/jump_opt/g22_p19_all_results/", code=True))]
     B += [N.bullet(N.rt("후보 파일·러너: "), N.rt("repo/code/goal22/p20_rise/{fourbar_p20_candidate.json, p20_run.py}", code=True))]
     B += [N.bullet(N.rt("기각 대장(#1~29)·현행 수치: "), N.rt("repo/code/bench/{REJECTED.md, CURRENT_STACK.md}", code=True))]
     N.append(p, B)

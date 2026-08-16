@@ -9,12 +9,14 @@
 - 코드/하네스(git): `C:/Users/junho/CVT/twin/` (repo CLAUDE.md 필독)
 - 현행 스택/지표: `<repo>/code/bench/CURRENT_STACK.md` · 방법론: `<repo>/code/bench/PLAYBOOK.md`
 - 기각된 가설: `<repo>/code/bench/REJECTED.md` (새 축 시도 전 필독)
-- 실험 데이터: `C:/Users/junho/CVT/Data/<YY.MM.DD>/` (읽기 전용)
-- 레거시 결과/문서: `C:/Users/junho/Desktop/jump_opt/` (MASTER_INSIGHTS*, g22_* 결과 폴더)
+- 실험 데이터: `C:/Users/junho/CVT/Data/<YY_MM_DD>/` (폴더 이름은 **밑줄**, 예 `26_07_27`. 실측 원본은 읽기 전용)
+- 레거시 결과/문서: `C:/Users/junho/CVT/jump_opt/` (MASTER_INSIGHTS*, g22_* 결과 폴더)
 
 ## 철칙 10 (훅이 상당수 기계적으로 강제함)
-1. 후보 JSON(`fourbar_*_candidate.json`)은 불변 — 갱신은 새 pXX 파일 + `bench promote`로만.
-2. `goal18_CANONICAL/`(양쪽 사본)과 `CANONICAL_LOCK.md`는 불가침 — 렌더링은 import해서 쓰기만.
+1. 후보 JSON(`fourbar_*_candidate.json`)의 **파라미터는 불변** — 갱신은 새 pXX 파일 + `bench promote`로만.
+2. `goal18_CANONICAL/` 과 `CANONICAL_LOCK.md` 의 **렌더링 동작은 건드리지 않는다** — 렌더링은 import해서 쓰기만.
+   1·2 모두 내용이 아닌 글자 고침(옛 경로 정정 등)은 **사용자에게 먼저 확인받고** 한다 (2026-08-16 문구 통일).
+   ※ 옛 표현 "(양쪽 사본)"은 Desktop 사본이 있던 시절 것 — 이사 후 사본은 하나뿐이다.
 3. 장시간 sweep은 사용자 .bat 더블클릭으로만 시동 (PowerShell/Tee-Object 직접 실행 금지).
 4. python 실행 시 `PYTHONIOENCODING=utf-8` (cp949 크래시) — bash면 `export`, 스크립트면 `safe.utf8_console()`.
 5. XML 문자열 치환은 `safe.xml_patch`(치환수 검증), qpos/qvel 인덱스는 `safe.qadr/dofadr`(이름 조회)만.

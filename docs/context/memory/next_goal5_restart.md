@@ -11,7 +11,7 @@ metadata:
 
 **Status**: 이전 GOAL5 V1-V9 모두 폐기. 처음부터 다시.
 
-**Full prompt**: `C:\Users\junho\Desktop\jump_opt\GOAL5_PROMPT.md`
+**Full prompt**: `C:\Users\junho\CVT\jump_opt\GOAL5_PROMPT.md`
 
 ## 사용자 결정적 지적
 1. **PD ±18 sat이 hard limit이라는 분석은 틀림**. 실 robot도 sat이었고 정상 동작.

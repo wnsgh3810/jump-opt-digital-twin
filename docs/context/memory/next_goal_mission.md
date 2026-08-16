@@ -68,7 +68,7 @@ metadata:
 
 ## 다음 작업
 
-`C:\Users\junho\Desktop\jump_opt\NEXT_GOAL_PROMPT.md` 참조.
+`C:\Users\junho\CVT\jump_opt\NEXT_GOAL_PROMPT.md` 참조.
 
 요약: jump_opt baseline 식 + V1~V12 발견 중 명백 정당 7-10개 distill + forward drift metric + hold-out validation. ~24-28 params, V1~V8 + 자율 진화.
 

@@ -21,19 +21,19 @@
 ■ 읽을 곳 — **요약본을 믿지 말고 원본을 읽어라**
 
 ```
-규칙      C:/Users/junho/Desktop/CLAUDE.md
-          C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/CLAUDE.md   ← 데이터 함정, 정독
-          C:/Users/junho/Documents/jump-opt-digital-twin/CLAUDE.md
+규칙      C:/Users/junho/CVT/twin/docs/context/CONSTITUTION.md
+          C:/Users/junho/CVT/Data/CLAUDE.md   ← 데이터 함정, 정독
+          C:/Users/junho/CVT/twin/CLAUDE.md
 현행·방법 <repo>/code/bench/  → CURRENT_STACK.md · PLAYBOOK.md · REJECTED.md
                                 TRUTH.md · VERDICT_260812.md
 기록      <repo>/code/goal23_fullspan/*.md   (마라톤 로그 A~H 등 17개)
 기억      C:/Users/junho/.claude/projects/C--Users-junho-Desktop-Research-4-Bar-Link-CVT-Data-26-03-24-Jump/memory/
           → MEMORY.md 가 색인, 그 아래 23개
-레거시    C:/Users/junho/Desktop/jump_opt/   (과거 결과·통찰 문서)
+레거시    C:/Users/junho/CVT/jump_opt/   (과거 결과·통찰 문서)
 이력      git log  — 825 커밋. **메시지 본문에 수치와 판정 근거가 들어 있다.**
 ```
 
-데이터 루트: `C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data/` — **세션 24개**
+데이터 루트: `C:/Users/junho/CVT/Data/` — **세션 24개**
 (`26_02_24` ~ `26_08_07`). 각 시행 폴더에 원본 `hip/knee/GRF.xlsx`(점프창 근처만),
 전 구간 확장판 `hip2/knee2/GRF2.xlsx`, 더 넓은 `hip3/knee3.xlsx`, 변속 링크 길이
 `Clutch.xlsx`, 실측 점프 높이 `Real Data.txt`, 메모 `What.txt` 가 있다.

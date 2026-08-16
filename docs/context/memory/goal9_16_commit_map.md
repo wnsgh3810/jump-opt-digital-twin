@@ -7,7 +7,9 @@ metadata:
   originSessionId: 63705ea5-db81-4f09-83d9-aa9b74dfbbc4
 ---
 
-git repo `C:\Users\junho\Desktop` (677 commits). GOAL9~16 전 구간이 하나의 연속 세션(rolling **"GOAL9 checkpoint t+Nh"** 커밋, t+48h~t+144h = 6일+ = 283MB jsonl 세션과 일치).
+git repo — **그 당시** `C:\Users\junho\Desktop` 에 있었다 (677 commits). 지금 그 저장소는
+`C:\Users\junho\CVT\twin` 이다 (2026-08-16 이사, 924 commits). 아래 커밋 해시는 그대로 유효하다.
+GOAL9~16 전 구간이 하나의 연속 세션(rolling **"GOAL9 checkpoint t+Nh"** 커밋, t+48h~t+144h = 6일+ = 283MB jsonl 세션과 일치).
 
 **주요 milestone 커밋**:
 - GOAL12: Final `a74c0e0a`, overfit-진단 `c8bdd6c1` (Iter38 176.41 공식 / Iter42 128.57 기각)

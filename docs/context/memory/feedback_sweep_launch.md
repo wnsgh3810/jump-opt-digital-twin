@@ -15,7 +15,7 @@ When starting a long parameter sweep, **user double-clicks the .bat file directl
 - Create `run_vXX_sweep.bat` with this exact pattern (cmd-native redirect, no pipeline):
   ```bat
   @echo off
-  cd /d C:\Users\junho\Desktop
+  cd /d %~dp0
   start "PD sweep vXX (...)" cmd /k "python pd_sweep_mp_a1_vXX.py > pd_sweep_a1_vXX_results.txt 2>&1"
   echo vXX sweep launched.
   ```

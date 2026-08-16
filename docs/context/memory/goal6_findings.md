@@ -33,7 +33,7 @@ metadata:
 - Stage 2: https://app.notion.com/p/Stage-2-Motor-Model-Fit-377ab81d255081b19d92dcb66abcbd90
 
 ### XML
-- Stage 1 best: `Desktop/jump_opt/goal6/urdf/leg_g6s1_best.xml`
+- Stage 1 best: `CVT/jump_opt/goal6/urdf/leg_g6s1_best.xml`
 - Code: `goal6/stage1_bo.py`, `stage2_bo.py`, `stage1_plots_and_notion.py`, `stage2_plots_and_notion.py`
 
 ### 향후 (Stage 3 선택)

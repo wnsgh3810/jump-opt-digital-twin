@@ -44,7 +44,7 @@ def main():
         N.para(N.rt("P22-1 쉬운 이야기(에너지 원장과 로더 버그) / P22-2 판별 실험 4건 상세 / "
                     "P22-3 마라톤 헌장(지표 v5·재베이스라인·로드맵)")),
         loc("코드 repo/code/goal22/p22_beyond/ · 판별 스크립트 p20_rise/p22_probe_t1~t3.py · "
-            "그림 Desktop/jump_opt/g22_p22_results/ · 기각 대장 repo/code/bench/REJECTED.md"),
+            "그림 CVT/jump_opt/g22_p22_results/ · 기각 대장 repo/code/bench/REJECTED.md"),
     ])
 
     # ── P22-1 쉬운 이야기 ──

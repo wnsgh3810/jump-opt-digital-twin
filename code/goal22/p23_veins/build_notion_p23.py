@@ -62,7 +62,7 @@ def main():
         N.para(N.rt("P23-1 쉬운 이야기(서랍 속 데이터와 유령 셋) / P23-2 측정된 법칙(λ 캘리브레이션) / "
                     "P23-3 판별 3택(동적 상승의 범인) / P23-4 구조 재건과 후보 p23a")),
         loc("코드 repo/code/goal22/p23_veins/ · 그림 p23_law_fit.png·p23_x3_lambda.png(폴더 내) "
-            "및 Desktop/jump_opt/g22_p23_results/ · 서사 정본 MARATHON_p23.md"),
+            "및 CVT/jump_opt/g22_p23_results/ · 서사 정본 MARATHON_p23.md"),
     ])
 
     # ══════════ P23-1 쉬운 이야기 ══════════
@@ -329,7 +329,7 @@ def main():
                       "수술만으로 충분했기 때문. 남은 AIR 잔차의 후보 원인으로 이월.")),
         loc("적합 repo/code/goal22/p23_veins/p23_fit_nsga.py(+_front.json) · 평가 p23_v6_eval.py · "
             "러너 p23_v6_runners.py · held-out 검사 p23_ho_check.json · 절제 p23_sg_ablation.json · "
-            "보조 그림 Desktop/jump_opt/g22_p23_results/"),
+            "보조 그림 CVT/jump_opt/g22_p23_results/"),
     ])
 
     # ══════════ 검증 (철칙 8) ══════════

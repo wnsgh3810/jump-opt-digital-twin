@@ -71,7 +71,7 @@ def main():
                     "보수성 우선. 판단 자료: g22_p22b_all_results의 79 그래프/GIF를 g22_p19_all_results와 "
                     "나란히 보면 된다. 승격 시: bench promote (게이트 자동 검증) → CURRENT_STACK 갱신.")),
         loc("후보 fourbar_p22b_candidate.json (judge p22, REPRODUCED) · 그래프 "
-            "Desktop/jump_opt/g22_p22b_all_results/ · 비교 그림 g22_p22_results/overlay_p19_p22b.png"),
+            "CVT/jump_opt/g22_p22b_all_results/ · 비교 그림 g22_p22_results/overlay_p19_p22b.png"),
     ])
     ok = N.verify_images(p)
     print("P22-6", p, "images:", ok)

@@ -212,7 +212,7 @@ fit에 한 번도 안 쓴 공중 sit2stand 데이터(로봇을 매달고 다리�
 
 ## 10. 산출물 위치 총정리
 
-- **저장소**: `Documents/jump-opt-digital-twin/` (전부 git 커밋)
+- **저장소**: `CVT/twin/` (전부 git 커밋)
 - **최종 모델 카드**: `code/goal19/goal20_final_model.json` (파라미터는 `phase11/fourbar_refit_best.json`)
 - **식별/기각 코드**: `code/goal19/phase11/mshoot*.py` (fourbar/dateoff/sea/stribeck/resid/mlp/stiction/uncertainty/s2s_air_holdout)
 - **NLP 데모**: `code/goal19/nlp_demo/` (g20_vertjump_fric.py, contact_sweep_results.json, headroom_results.json, deploy_cl_check.json)

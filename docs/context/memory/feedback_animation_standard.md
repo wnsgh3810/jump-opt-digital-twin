@@ -14,14 +14,14 @@ metadata:
 **Why**: 2026-06-15 ~ 2026-07-01 사이 v10→v14 (10+ iteration) 동안 사용자가 반복적으로 지적한 시각적 요구사항을 최종 반영한 결과. 이 스펙에서 벗어난 렌더링은 매번 재작업이 발생함. 사용자 명시: "앞으로 모든 시뮬레이션은 이거 기준으로 하는거야 앞으로 모델이 수정되도 시뮬레이션은 이거 기준으로 하는거야".
 
 **How to apply**:
-- 새로운 sit2stand/jump 렌더링 코드가 필요한 상황 → **먼저** `C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/make_anim.py`를 import
+- 새로운 sit2stand/jump 렌더링 코드가 필요한 상황 → **먼저** `C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/make_anim.py`를 import
 - 모델 params (mass/inertia/PD gain 등)이 바뀌면: `regen_all.py::load_pm()`만 수정, 나머지는 그대로
 - XML이 바뀌면: `build_xml_i38`로 새 leg.xml 생성 (joint 이름 `hip`/`knee`, geom `foot` 필수)
 
 **★★ 렌더러 정확한 위치 (2026-07-05 확정 — 새 렌더러 작성 절대 금지)**:
 - **sit2stand**: `goal18_CANONICAL/code/make_anim.py :: render_sit2stand(npz, xml, gif, label, kind)` — real-time pace (40ms 물리시간/frame), gnd=발바닥 접지 base_z 계산, air=base 0.55 고정.
-- **jump**: `C:/Users/junho/Desktop/jump_opt/goal18_v9/_make_anim_universal_colored.py :: make_anim_universal_colored(npz, xml, gif, trial_label, h_real_m)` — canonical 트리의 jump GIF들은 regen_all이 v10에서 cp한 것이고 그 원본 렌더러가 이것. **640×480, 60 frames, 40ms, iso 카메라(azimuth 135/elev −15/dist 1.2/lookat 0,0,0.3), 팔레트 강제(base 회색/thigh 청회/calf 청록), 오버레이 trial/t/base_z(cyan)/GRF(yellow)/h_sim(green)/h_real(orange)**. npz 포맷: `t`, `q`[N,3 mj-frame], `grf_z`[N]. ("60-frame 금지" 규칙은 sit2stand용 — jump는 이 60f 규격이 canonical.)
-- **아카이브 사본**: `Documents/jump-opt-digital-twin/code/goal19/canonical_render/_make_anim_universal_colored.py` (원본 불변, 참조용). 드라이버 예: `code/goal19/phase11/make_anim_v3_canonical.py`.
+- **jump**: `C:/Users/junho/CVT/jump_opt/goal18_v9/_make_anim_universal_colored.py :: make_anim_universal_colored(npz, xml, gif, trial_label, h_real_m)` — canonical 트리의 jump GIF들은 regen_all이 v10에서 cp한 것이고 그 원본 렌더러가 이것. **640×480, 60 frames, 40ms, iso 카메라(azimuth 135/elev −15/dist 1.2/lookat 0,0,0.3), 팔레트 강제(base 회색/thigh 청회/calf 청록), 오버레이 trial/t/base_z(cyan)/GRF(yellow)/h_sim(green)/h_real(orange)**. npz 포맷: `t`, `q`[N,3 mj-frame], `grf_z`[N]. ("60-frame 금지" 규칙은 sit2stand용 — jump는 이 60f 규격이 canonical.)
+- **아카이브 사본**: `CVT/twin/code/goal19/canonical_render/_make_anim_universal_colored.py` (원본 불변, 참조용). 드라이버 예: `code/goal19/phase11/make_anim_v3_canonical.py`.
 
 **★ 위반 사건 (2026-07-05, 교훈)**: GOAL19 v3 애니메이션을 새 렌더러(make_anim_v3.py)로 만들었다가 사용자 지적. canonical make_anim.py가 s2s 전용인 걸 보고 "jump 렌더러 없음"으로 성급 판단 — 실제로는 goal18_v9에 있었음. **교훈: 렌더링 요청 시 반드시 이 메모리의 경로부터 확인, 없어 보여도 새로 짜지 말고 원본 렌더러를 추적할 것.**
 - **절대 금지**:

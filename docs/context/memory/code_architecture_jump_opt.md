@@ -7,7 +7,7 @@ metadata:
   originSessionId: 63705ea5-db81-4f09-83d9-aa9b74dfbbc4
 ---
 
-`C:\Users\junho\Desktop\jump_opt\` 디지털트윈 최적화 코드 구조 (GOAL9~16).
+`C:\Users\junho\CVT\jump_opt\` 디지털트윈 최적화 코드 구조 (GOAL9~16).
 
 **A. Pipeline**: real data → a_hat τ 변환 → XML build → MuJoCo rollout(Mode A) → score vs real → optimizer loop → metrics.json → plots/anim/Notion/git.
 - Data+a_hat: `goal12/data_loaders/load_combined_15trial.py` (hip/knee/GRF xlsx, `currentTorque`→`paper_a_hat`, h_real from Real Data.txt, 15 trial = 9×0424 + 6×0602, cache `goal12/data_loaded_combined.npz`)

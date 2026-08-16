@@ -17,8 +17,8 @@ originSessionId: cb42ed46-5d3f-447a-94f6-732ce10d7dfc
 - v9, v10은 11 dim → M_tot=3.268, fb=0 기본값으로 채워서 19 컬럼 표준화 (이미 처리됨)
 
 **파일 위치**:
-- 통합 파일: `C:\Users\junho\Desktop\multi_trial_top_combined.npz`
-- 통합 스크립트: `C:\Users\junho\Desktop\combine_multi_trial_top500.py`
+- 통합 파일: `C:\Users\junho\CVT\AVT LEG\sweep\results\multi_trial_top_combined.npz`
+- 통합 스크립트: `C:\Users\junho\CVT\AVT LEG\sweep\combine_multi_trial_top500.py`
 
 **npz 구조**:
 - `data`: shape (N, 19), columns = [sc_mean, sc_max, alpha, gAv, gBv, Is1, Is2, Kv, kc, bc, sp, sd, tm, M_tot, fb, q1e_avg, q2e_avg, tau1e_avg, tau2e_avg]

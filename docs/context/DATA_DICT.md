@@ -1,6 +1,6 @@
 # 실험 데이터 루트 — 데이터 사전 (≤30줄 유지, 원본 읽기 전용)
 
-헌법: `C:/Users/junho/Desktop/CLAUDE.md` · 코드/하네스: `C:/Users/junho/CVT/twin/`
+헌법: `C:/Users/junho/CVT/twin/docs/context/CONSTITUTION.md` · 코드/하네스: `C:/Users/junho/CVT/twin/`
 
 ## 세션 인덱스 (점프 fit/게이트 관점)
 - **held-out: 26.03.24** (jump_0324, FF 토크 세션 — fit 포함 절대 금지)
@@ -21,7 +21,8 @@
   26.05.28 / 26.03.09 / 26.03.11 은 편입 불가(구모터·l_i 시변·기록 결손).
 - **26.03.24/sit2stand = 공중(매달림) 세션** (사용자 확인 07-16; knee â rms 0.25Nm=공중 서명, GRF 없음) — P23부터 무부하 앵커로 사용. 0422/0421/0319의 `jump_opt_compare/predicted_compare.csv`는 토크 ×1.3~1.36 오염 — **절대 사용 금지, xlsx 직행** (P22/P23 발굴)
 - held-out 0324 = Jump/**Jump_No_Tr** (3 subs). ~~미사용 발굴: Jump_Tr/TR_JUMP l_i≈19.5mm~~ **사용 불가 (사용자 확인 07-13: 링크 제어 불량으로 trial 중 l_i 흔들림)**. 무변속 세션 l_i=30.00은 가정 (Clutch 미기록)
-- 폴더 규약: `<YY.MM.DD>/<게인라벨 kp1_kd1_kp2_kd2>/` — **폴더 라벨 = 실제 커맨드 게인** (파서 코드로 확정)
+- 폴더 규약: `<YY_MM_DD>/<게인라벨 kp1_kd1_kp2_kd2>/` — **폴더 라벨 = 실제 커맨드 게인** (파서 코드로 확정).
+  날짜 폴더는 **밑줄**이다 (`26_07_27`). 문서 본문에서 `26.03.24` 처럼 점으로 쓴 것은 세션을 부르는 이름일 뿐 폴더 이름이 아니다.
 
 ## 데이터 사전 (핵심 함정)
 - **`hip2/knee2/GRF2.xlsx` (07-29+, 점프 계열 전 세션)**: 전 구간(앉기~착지 안정화) 확장판 — **전 세션 rad 통일**·
@@ -52,4 +53,4 @@
   보정해야 함 (미보정 시 push서 kp·e가 25~30% 과대 = 구 'α/유령천장' 오독의 근원, 08-01 P18 판독 R²0.99).
 
 ## 원칙
-원본 xlsx/txt 수정 금지. 분석 산출물은 repo 또는 `Desktop/jump_opt/`로. 코드 실행은 repo에서.
+실측 원본 xlsx/txt 내용 수정 금지. 분석 산출물은 repo 또는 `C:/Users/junho/CVT/jump_opt/`로. 코드 실행은 repo에서.

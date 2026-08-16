@@ -9,7 +9,7 @@ metadata:
 
 # GOAL19 Final — Unified 7-Dataset Mode A Digital Twin (2026-07-03 완료)
 
-**Repo**: `C:/Users/junho/Documents/jump-opt-digital-twin/` (Desktop과 분리, git + MkDocs + GH Pages)
+**Repo**: `C:/Users/junho/CVT/twin/` (Desktop과 분리, git + MkDocs + GH Pages)
 **Live docs**: https://wnsgh3810.github.io/jump-opt-digital-twin/
 **GitHub**: https://github.com/wnsgh3810/jump-opt-digital-twin
 **최종 모델 파일**: `code/goal19/goal19_final_model.json`

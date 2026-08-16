@@ -90,7 +90,7 @@ footer{{border-top:1px solid var(--border);padding:20px 0 40px;color:var(--faint
 <figcaption><span class="sub">nlp_envelope_check</span><span class="chips"><span class="chip">NLP 최적 vs 실증 운전점 (hip/knee)</span></span></figcaption></figure>
 </div></div></section>
 <div class="wrap">{sections}</div>
-<footer><div class="wrap">원본 PNG: Documents/jump-opt-digital-twin/code/goal19/phase11/viz_final/ · 애니메이션 25 GIF: 같은 경로 anim_final/ · sim = round-1 4-bar canonical twin</div></footer>
+<footer><div class="wrap">원본 PNG: CVT/twin/code/goal19/phase11/viz_final/ · 애니메이션 25 GIF: 같은 경로 anim_final/ · sim = round-1 4-bar canonical twin</div></footer>
 <div class="lb" id="lb"><img id="lbimg" alt=""></div>
 <script>(function(){{var lb=document.getElementById('lb'),im=document.getElementById('lbimg');
 document.addEventListener('click',function(e){{if(e.target.classList&&e.target.classList.contains('zoom')){{im.src=e.target.src;lb.classList.add('on');}}

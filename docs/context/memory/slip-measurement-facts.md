@@ -9,7 +9,7 @@ metadata:
 ---
 
 2026-08-09 전수 측정 완료 (55 trial · 10세션 · 육안 220컷 검증).
-산출물: `C:/Users/junho/Desktop/jump_opt/G_slip_all_260809/`
+산출물: `C:/Users/junho/CVT/jump_opt/G_slip_all_260809/`
 
 **확정 사실 넷**
 

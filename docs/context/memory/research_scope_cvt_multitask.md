@@ -17,7 +17,7 @@ metadata:
 3. **sit-to-stand 최대하중 (payload/max load) — CVT의 간판 이득**: NLP상 **CVT ≈8~9kg vs no-CVT ≈3.7kg (≈2.3×)**. HW 실측은 CVT load_2.5/5kg, no_cvt load_5/7.5kg(26.06.04). 목표 with-CVT ≥8kg. TR가 하중 따라 1.66→1.73로 증폭 쪽 shift.
 
 **방법론 2축**:
-- **NLP 궤적 최적화** (CasADi/IPOPT direct collocation), task마다 CVT vs no-CVT. 코드: **`C:\Users\junho\Desktop\AVT LEG\optimization_tasks\`** (task9 forward, task28/task30 payload s2s, task29 2D). 진짜 metric = **forward sim-to-real consistency**(NLP q*/dq* → 실 로봇 재생 → 실측 τ/GRF ≈ 예측). [[master_insights_pointer]] §1.
+- **NLP 궤적 최적화** (CasADi/IPOPT direct collocation), task마다 CVT vs no-CVT. 코드: **`C:\Users\junho\CVT\AVT LEG\optimization_tasks\`** (task9 forward, task28/task30 payload s2s, task29 2D). 진짜 metric = **forward sim-to-real consistency**(NLP q*/dq* → 실 로봇 재생 → 실측 τ/GRF ≈ 예측). [[master_insights_pointer]] §1.
 - **디지털트윈/시스템ID** (GOAL1~17, `jump_opt/`): NLP를 신뢰·전이 가능하게 + CVT 숨은 동역학 검증.
 
 **실험 캠페인(26.02~26.06)**: 점프(position/torque/feedforward, PD sweep, Tr/noTr), sit2stand(air/ground, chirp ID), CVT vs no_cvt, payload(26.06.04), AK80-9 a_hat 캘리브레이션, loadcell 토크 검증, P-sweep. 데이터 `Research\4-Bar Link CVT\Data\`.

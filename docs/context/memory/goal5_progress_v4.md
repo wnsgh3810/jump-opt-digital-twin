@@ -43,7 +43,7 @@ metadata:
   - 아니면 robot model의 mass/CoM/inertia 추가 fit
 
 ## 파일 위치
-- 디렉토리: `Desktop/jump_opt/goal5/`
+- 디렉토리: `CVT/jump_opt/goal5/`
 - MJCF: urdf/leg_g5v1.xml, v2, v3, v4
 - 코드: phase0_*, phase1_*, phase3_*
 - 결과: phase1_v1_results.npz, phase3_v2/v3/v4_results.npz, phase3_v4_bo_study.pkl

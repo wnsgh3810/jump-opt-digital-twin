@@ -28,9 +28,9 @@ MuJoCo 시뮬레이션 모델(디지털 트윈)을 실제 로봇과 일치하도
 | 무엇 | 어디 | 성격 |
 |---|---|---|
 | **코드·하네스·결과 (이 저장소)** | `C:\Users\junho\CVT\twin` | 쓰기 가능, git 관리 |
-| **실험 원본 데이터** | `C:\Users\junho\CVT\Data\<YY.MM.DD>\` | **읽기 전용, 수정 절대 금지** |
-| 레거시 결과·문서 | `C:\Users\junho\Desktop\jump_opt\` | 참조용 (35 GB, 손대지 말 것) |
-| 연구 헌법 | `docs/context/CONSTITUTION.md` (원본: `C:\Users\junho\Desktop\CLAUDE.md`) | |
+| **실험 원본 데이터** | `C:\Users\junho\CVT\Data\<YY_MM_DD>\` (밑줄, 예 `26_07_27`) | **실측 원본은 읽기 전용** |
+| 레거시 결과·문서 | `C:\Users\junho\CVT\jump_opt\` | 참조용 (34 GB, 손대지 말 것) |
+| 연구 헌법 | `docs/context/CONSTITUTION.md` — 이게 정본 (옛 원본 `C:\Users\junho\Desktop\CLAUDE.md` 는 07-12 판에서 멈춤) | |
 | 데이터 사전 (함정 목록) | `docs/context/DATA_DICT.md` (원본: `Data\CLAUDE.md`) | **데이터 만지기 전 필독** |
 | 누적된 발견 **133건** | `docs/context/memory/` (색인 = `MEMORY.md`) | 시기별 3구역 |
 
@@ -148,8 +148,10 @@ MuJoCo 시뮬레이션 모델(디지털 트윈)을 실제 로봇과 일치하도
 3. **긴 훑기는 사용자가 `.bat` 파일을 더블클릭해서만 시동한다.** 에이전트가 직접 실행하지 않는다.
    `.bat` 파일 안에는 **영문/ASCII만** 쓴다 (명령창이 cp949라 한글이 깨진다).
 4. **26.03.24 세션은 검증 전용이다. 모델 적합에 절대 포함하지 않는다.**
-5. `code/goal18_CANONICAL/` 과 후보 JSON 파일(`fourbar_*_candidate.json`)은 수정·덮어쓰기 금지.
-   갱신은 새 파일을 만들어 승격 절차를 밟는 것으로만 한다.
+5. `code/goal18_CANONICAL/` 과 후보 JSON 파일(`fourbar_*_candidate.json`)은 **함부로 고치지 않는다.**
+   내용(렌더링 규격·후보 파라미터)의 갱신은 새 파일을 만들어 승격 절차를 밟는 것으로만 한다.
+   내용이 아닌 글자 고침(옛 경로 정정 등)은 **사용자에게 먼저 확인받고** 한다.
+   (2026-08-16 사용자 확인: 무조건 금지가 아니라 '확인 후'가 원래 뜻. 이날 세 문서 문구를 통일했다.)
 6. **채점에서 구간을 나누지 않는다** (통짜 채점과 나란히 두는 것은 허용 — 9회차 일어서기가 그 구조).
 7. **정본 코드를 고친다. 사본을 만들지 않는다.**
 8. python 실행 시 `PYTHONIOENCODING=utf-8` (안 하면 cp949 오류로 죽는다).

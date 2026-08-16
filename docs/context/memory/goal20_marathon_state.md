@@ -85,7 +85,7 @@ metadata:
 - **★★ k_eq 자기일관성 (08:40)**: 트윈 접촉 등가강성 실측(하중 스윕 0.5-8g, 힘-침투 선형 fit) **k_eq≈1.3×10⁵ N/m** = NLP 접촉 스윕 최적대(1e5-2e5)와 정확 일치 — 두 실험 상호 검증. 실무지침 정량화: NLP k_c≈1.3e5 + 식별 마찰. 보고서·Notion 반영, artifact 재배포(label keq-self-consistency), 커밋 완료.
 - **✅ 보고서 v2 배포 완료 (07:40)**: NLP 마찰분해+접촉스윕 표(§7 신규), iso-1% 불확실성 표, MLP/polish/stiction 기각 카드, 유효범위, related-work(임피던스매칭·Linderoth stiction·리드스크류) 전부 반영해 artifact 재배포 완료. 빌더 repo 보존(code/goal19/report_builder.py). **15:00 최종 갱신 잔여**: Notion 페이지에 신규 발견 반영(§7 요약+air stiction+불확실성), 이후 신규 결과 있으면 재빌드·재배포, 대표 GIF/그래프 SendUserFile, 최종 커밋+요약보고.
 
-## 파일맵 (`Documents/jump-opt-digital-twin/code/goal19/phase11/`)
+## 파일맵 (`CVT/twin/code/goal19/phase11/`)
 - `mshoot.py` 창 하네스(0.1s/0.05 jump, FK캐시) + MARCH loader(0324 3trial, 0319 제외)
 - `mshoot_refit_best.json` = **v3 serial canonical** (jump창 13239, held-out h 0.84-0.94)
 - `mshoot_fourbar.py` 4-bar XML+창eval / `mshoot_fourbar_refit.py` joint refit / `fourbar_refit_best.json` (결과)

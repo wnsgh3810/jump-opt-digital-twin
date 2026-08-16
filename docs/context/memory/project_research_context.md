@@ -14,7 +14,7 @@ originSessionId: c82aa01d-1bc5-42d3-ad69-d2998821e712
 
 ## 코드 위치 및 구조
 
-### 1. `C:\Users\junho\Desktop\2DOF Leg Jumping Optimization.py` (648줄)
+### 1. `C:\Users\junho\CVT\AVT LEG\utils\session_backup\recovered_files\2DOF Leg Jumping Optimization.py` (648줄)
 - 이전 Claude가 작성한 코드
 - CasADi IPOPT, Direct Collocation (사다리꼴 적분법), N=60 노드
 - 3가지 Contact Model 선택: `'hard'` | `'alpha'` | `'soft'` (현재 `CONTACT_MODEL = 'soft'`)
@@ -28,7 +28,7 @@ originSessionId: c82aa01d-1bc5-42d3-ad69-d2998821e712
 - 스탠스 시간 T_st: 0.05~0.3s 범위
 - 출력: 5개 Figure (Kinematics&Dynamics, Stick Figure, Energy&GRF, Contact Dynamics, GRF Decomposition)
 
-### 2. `C:\Users\junho\Desktop\Identify_Contact_Params.py` (447줄)
+### 2. `C:\Users\junho\CVT\AVT LEG\sys_id\Identify_Contact_Params.py` (447줄)
 - 이전 Claude가 작성한 코드
 - 역방향 EOM 분석으로 soft contact 파라미터 식별
 - 핵심 방법: ddz_kin(운동학) vs ddz_true(GRF 기반) 차이 → delta(침투깊이) → 선형회귀

@@ -26,10 +26,11 @@ originSessionId: cb42ed46-5d3f-447a-94f6-732ce10d7dfc
 4. `pd_sweep_mp_a1_v4_fine.py` 자동 생성 (v3 코드 base, ranges만 변경)
 5. `run_fine_sweep.bat` 만들고 외부 cmd 실행
 
-## 코드 위치 (만들 예정)
-- `C:\Users\junho\Desktop\generate_fine_sweep.py` — v3 best 읽고 fine sweep 코드 생성
-- `C:\Users\junho\Desktop\pd_sweep_mp_a1_v4_fine.py` — 실제 fine sweep
-- `C:\Users\junho\Desktop\run_fine_sweep.bat` — launcher
+## 코드 위치 (만들 예정이었음 — **실제로 만들어지지 않았다**)
+> 2026-08-16 확인: 아래 세 파일은 CVT 어디에도 없다. 옛 Desktop 시절 계획으로만 남은 것이다.
+- `generate_fine_sweep.py` — v3 best 읽고 fine sweep 코드 생성
+- `pd_sweep_mp_a1_v4_fine.py` — 실제 fine sweep
+- `run_fine_sweep.bat` — launcher
 - 결과: `pd_sweep_a1_v4_fine_results.txt`, `pd_sweep_a1_v4_fine_best.npz`
 
 ## 예상 ranges (v3 best가 가령 gAv=1.36일 때)

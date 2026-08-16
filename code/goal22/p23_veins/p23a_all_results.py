@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """p23a 후보 전 데이터 결과 생성 — g22_p19_all_results / g22_p22b_all_results와 1:1 파일 호환.
 
-출력: Desktop/jump_opt/g22_p23a_all_results/<세션>/{png,gif,traj}/ + INDEX.md
+출력: CVT/jump_opt/g22_p23a_all_results/<세션>/{png,gif,traj}/ + INDEX.md
   - 점프 5세션 (0324 held-out / 0421 / 0424 / 0602 / 0429 CVT) × CL + A
   - s2s_gnd_0319 (사이클 리셋 Mode A replay) · s2s_0604_payload (CL + A)
   - 보너스: jump_0422 / jump_0319tau (CL(FF)+A) · s2s_air_0319 (A, 용접 베이스)

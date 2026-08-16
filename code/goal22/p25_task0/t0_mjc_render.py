@@ -4,7 +4,7 @@
 사용자 정정 (07-18): 디지털 트윈 실험의 시뮬 렌더링은 canonical 파이프라인이 정본
 (AVT 스틱피겨 GIF는 보조). 렌더러는 import만 — 절대 수정 금지 (헌법 철칙 2).
 
-정본 렌더러: Desktop/jump_opt/goal18_v9/_make_anim_universal_colored.py
+정본 렌더러: CVT/jump_opt/goal18_v9/_make_anim_universal_colored.py
   :: make_anim_universal_colored(npz, xml, gif, trial_label, h_real_m)
   (640x480 / 60 frames / 40ms / iso 카메라 az135 el-15 d1.2 / 팔레트 강제 /
    오버레이 trial/t/base_z/GRF/h_sim/h_real — jump 정본 규격)

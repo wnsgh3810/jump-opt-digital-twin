@@ -1,6 +1,6 @@
 > 🔒 **STATUS: LOCKED CANONICAL — 2026-07-01.** 앞으로 모든 시뮬레이션 렌더링은 이 코드 기준. 모델이 수정되어도 시각화 파이프라인은 그대로 사용.
 
-> **File location**: `C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/`
+> **File location**: `C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/`
 > **Final output**: `goal18_v13/Iter6/` — 30/30 sub-folders, 217 gifs, 224 plots
 > **Git tag**: `v14-canonical` (annotated) + `LOCKED-2026-07-01`
 > **Commit**: `e2fc5ed9` (canonical folder), `f14ca44b` (dependency freeze)
@@ -239,18 +239,18 @@ from pathlib import Path
 import sys, json, shutil
 import numpy as np
 
-V13 = Path("C:/Users/junho/Desktop/jump_opt/goal18_v13/Iter6")
-V10 = Path("C:/Users/junho/Desktop/jump_opt/goal18_v10/Iter6")
+V13 = Path("C:/Users/junho/CVT/jump_opt/goal18_v13/Iter6")
+V10 = Path("C:/Users/junho/CVT/jump_opt/goal18_v10/Iter6")
 
 sys.path.insert(0, str(V13))
-sys.path.insert(0, "C:/Users/junho/Desktop/jump_opt/goal12/iter38")
+sys.path.insert(0, "C:/Users/junho/CVT/jump_opt/goal12/iter38")
 
 from _make_anim_sit2stand import render_sit2stand
 from run_i38 import build_xml_i38
 
 
 def load_pm():
-    with open("C:/Users/junho/Desktop/jump_opt/goal12/iter38/iter38_metrics.json") as f:
+    with open("C:/Users/junho/CVT/jump_opt/goal12/iter38/iter38_metrics.json") as f:
         p = json.load(f)['per_trial']['0424_60_0.75_60_2']
     return dict(fv_hip=float(p['fv_hip']), fv_knee=float(p['fv_knee']),
                 fc_hip=float(p['fc_hip']),
@@ -324,7 +324,7 @@ def main():
     reports = []
 
     # sit2stand_0324 subfolders (canonical from goal16)
-    s2s_src = Path("C:/Users/junho/Desktop/jump_opt/goal16/cross_validation_clean/sit2stand_0324")
+    s2s_src = Path("C:/Users/junho/CVT/jump_opt/goal16/cross_validation_clean/sit2stand_0324")
     for sub in sorted(s2s_src.iterdir()):
         if not sub.is_dir() or 'OLD' in sub.name:
             continue
@@ -338,7 +338,7 @@ def main():
 
     # sit2stand_air_0319 (canonical from v4)
     r = render_dataset(
-        Path("C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/sit2stand_air_0319/ROOT"),
+        Path("C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/sit2stand_air_0319/ROOT"),
         V13 / 'sit2stand_air_0319' / 'ROOT',
         "sit2stand_air_0319 ROOT", xml_path, 'air')
     r['folder'] = "sit2stand_air_0319/ROOT"; r['kind'] = 'air'
@@ -346,7 +346,7 @@ def main():
 
     # sit2stand_gnd_0319
     r = render_dataset(
-        Path("C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/sit2stand_gnd_0319/ROOT"),
+        Path("C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/sit2stand_gnd_0319/ROOT"),
         V13 / 'sit2stand_gnd_0319' / 'ROOT',
         "sit2stand_gnd_0319 ROOT", xml_path, 'gnd')
     r['folder'] = "sit2stand_gnd_0319/ROOT"; r['kind'] = 'gnd'
@@ -394,7 +394,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-V13_ITER6 = Path("C:/Users/junho/Desktop/jump_opt/goal18_v13/Iter6")
+V13_ITER6 = Path("C:/Users/junho/CVT/jump_opt/goal18_v13/Iter6")
 XML_PATH = V13_ITER6 / "leg.xml"
 
 sys.path.insert(0, str(V13_ITER6))
@@ -409,49 +409,49 @@ DIVERGE_BASE_M = 5.0
 
 ENTRIES = [
     {"dataset": "jump_0424", "sub": "120_2.2_150_2.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/120_2.2_150_2.5/sim_data/iter6_sim.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/120_2.2_150_2.5/sim_data/iter6_sim.npz",
      "pd_gains": {"kp_hip": 120, "kd_hip": 2.2, "kp_knee": 150, "kd_knee": 2.5}},
     {"dataset": "jump_0424", "sub": "120_2.2_200_2.8",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/120_2.2_200_2.8/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/120_2.2_200_2.8/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 120, "kd_hip": 2.2, "kp_knee": 200, "kd_knee": 2.8}},
     {"dataset": "jump_0424", "sub": "120_2_120_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/120_2_120_2/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/120_2_120_2/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 120, "kd_hip": 2, "kp_knee": 120, "kd_knee": 2}},
     {"dataset": "jump_0424", "sub": "150_2.2_250_3",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_250_3/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_250_3/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 250, "kd_knee": 3}},
     {"dataset": "jump_0424", "sub": "150_2.2_350_3.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_350_3.5/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_350_3.5/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 350, "kd_knee": 3.5}},
     {"dataset": "jump_0424", "sub": "150_2.2_500_4",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_500_4/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/150_2.2_500_4/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 500, "kd_knee": 4}},
     {"dataset": "jump_0424", "sub": "60_0.75_60_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/60_0.75_60_2/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/60_0.75_60_2/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 60, "kd_hip": 0.75, "kp_knee": 60, "kd_knee": 2}},
     {"dataset": "jump_0424", "sub": "60_1.5_60_1.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/60_1.5_60_1.5/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/60_1.5_60_1.5/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 60, "kd_hip": 1.5, "kp_knee": 60, "kd_knee": 1.5}},
     {"dataset": "jump_0424", "sub": "90_0.75_90_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0424/90_0.75_90_2/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0424/90_0.75_90_2/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 90, "kd_hip": 0.75, "kp_knee": 90, "kd_knee": 2}},
     {"dataset": "jump_0602", "sub": "120_2_120_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/120_2_120_2/sim_data/iter6_sim.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0602/120_2_120_2/sim_data/iter6_sim.npz",
      "pd_gains": {"kp_hip": 120, "kd_hip": 2, "kp_knee": 120, "kd_knee": 2}},
     {"dataset": "jump_0602", "sub": "150_2.2_250_3",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/150_2.2_250_3/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0602/150_2.2_250_3/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 250, "kd_knee": 3}},
     {"dataset": "jump_0602", "sub": "150_2.2_500_5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/150_2.2_500_5/sim_data/iter6_sim.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0602/150_2.2_500_5/sim_data/iter6_sim.npz",
      "pd_gains": {"kp_hip": 150, "kd_hip": 2.2, "kp_knee": 500, "kd_knee": 5}},
     {"dataset": "jump_0602", "sub": "60_0.75_60_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18/iter1/jump_0602/60_0.75_60_2/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18/iter1/jump_0602/60_0.75_60_2/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 60, "kd_hip": 0.75, "kp_knee": 60, "kd_knee": 2}},
     {"dataset": "jump_0602", "sub": "60_1.5_60_1.5",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18/iter1/jump_0602/60_1.5_60_1.5/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18/iter1/jump_0602/60_1.5_60_1.5/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 60, "kd_hip": 1.5, "kp_knee": 60, "kd_knee": 1.5}},
     {"dataset": "jump_0602", "sub": "90_0.75_90_2",
-     "mode_A_source": r"C:/Users/junho/Desktop/jump_opt/goal18_v4/Iter6/jump_0602/90_0.75_90_2/sim_data/run_log.npz",
+     "mode_A_source": r"C:/Users/junho/CVT/jump_opt/goal18_v4/Iter6/jump_0602/90_0.75_90_2/sim_data/run_log.npz",
      "pd_gains": {"kp_hip": 90, "kd_hip": 0.75, "kp_knee": 90, "kd_knee": 2}},
 ]
 
@@ -1021,12 +1021,12 @@ if __name__ == '__main__':
 **한 cycle 렌더**:
 ```python
 import sys
-sys.path.insert(0, 'C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code')
+sys.path.insert(0, 'C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code')
 from make_anim import render_sit2stand
 
 render_sit2stand(
     canon_npz_path='.../cycle01.npz',
-    model_xml_path='C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/leg.xml',
+    model_xml_path='C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/leg.xml',
     out_gif_path='.../cycle01.gif',
     trial_label='sit2stand_0324 P20_D1 mode_A cyc01',
     kind='air'   # or 'gnd'
@@ -1042,7 +1042,7 @@ open('leg.xml', 'w').write(xml)
 
 **전체 재생성**:
 ```
-python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/regen_all.py
+python C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/regen_all.py
 ```
 
 ## ⚠️ 알려진 이슈
@@ -1056,4 +1056,4 @@ python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/regen_all.py
 
 - Memory: `goal18_canonical_pipeline.md`, `feedback_animation_standard.md`
 - Git tag: `v14-canonical` (annotated commit `e2fc5ed9`)
-- Root marker: `C:/Users/junho/Desktop/jump_opt/CANONICAL_LOCK.md`
+- Root marker: `C:/Users/junho/CVT/jump_opt/CANONICAL_LOCK.md`

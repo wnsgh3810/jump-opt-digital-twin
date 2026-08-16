@@ -73,7 +73,7 @@ def main():
                        "그래프 79종(g22_p22a_all_results)이 판단 자료다. 벽을 근본적으로 옮기는 건 "
                        "여전히 벤치 실측(질량 2종은 수학적으로 데이터 불가 판정).")),
         loc("후보 fourbar_p22a_candidate.json (judge p22, REPRODUCED) · 탐색 p22_nsga.py + ckpt · "
-            "게이트 p22_gate_check.json · 그래프 Desktop/jump_opt/g22_p22a_all_results/ (79 png+gif)"),
+            "게이트 p22_gate_check.json · 그래프 CVT/jump_opt/g22_p22a_all_results/ (79 png+gif)"),
     ])
     ok = N.verify_images(p)
     print("P22-5", p, "images:", ok)

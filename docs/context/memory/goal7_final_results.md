@@ -53,8 +53,8 @@ Mode B: S9 1476 → S16 1370 → S22 506 → S26 380 → S39 371.70 (75% 개선)
 
 ## Best XML 파일 위치
 
-- Mode A best: `C:\Users\junho\Desktop\jump_opt\goal6\stage44\urdf\leg_g6s40_best.xml`
-- Mode B best: `C:\Users\junho\Desktop\jump_opt\goal6\stage26\urdf\leg_g6s26_best.xml`
+- Mode A best: `C:\Users\junho\CVT\jump_opt\goal6\stage44\urdf\leg_g6s40_best.xml`
+- Mode B best: `C:\Users\junho\CVT\jump_opt\goal6\stage26\urdf\leg_g6s26_best.xml`
 
 ## Visualization
 

@@ -45,7 +45,7 @@ def main():
         N.h2("child 페이지"),
         N.para(N.rt("P20-1 쉬운 이야기(전말) / P20-2 프로브 방법론(수식) / P20-3 기각 실험 3종 / "
                     "P20-4 가설 현황판·부수 발견 / P20-5 다음 계획")),
-        loc("코드 repo/code/goal22/p20_rise/ · 그림 Desktop/jump_opt/g22_p20_results/ 및 "
+        loc("코드 repo/code/goal22/p20_rise/ · 그림 CVT/jump_opt/g22_p20_results/ 및 "
             "g22_p19_all_results/pre30_probe/ · 기각 대장 repo/code/bench/REJECTED.md #22~#26"),
     ])
 
@@ -83,7 +83,7 @@ def main():
         N.callout("🏆", N.rt("이 과정의 가치: ", bold=True),
                   N.rt("가설이 죽을 때마다 탐색 공간이 좁아진다. 특히 '모터측 전체 기각'(0429 교차게이트)은 "
                        "다음 마라톤이 헛수고할 뻔한 방향(a_hat 재적합)을 하루 만에 차단했다.")),
-        loc("프로브: repo/code/goal22/p19_jump/pre30_probe.py · 그림: Desktop/jump_opt/g22_p19_all_results/pre30_probe/"),
+        loc("프로브: repo/code/goal22/p19_jump/pre30_probe.py · 그림: CVT/jump_opt/g22_p19_all_results/pre30_probe/"),
     ])
 
     # ── P20-2 프로브 방법론 ──

@@ -33,8 +33,8 @@ metadata:
 
 ## 적용 위치
 
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage20_modeA_motor_lpf.py`
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage20\stage20_study.pkl`
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage20\urdf\leg_g6s20_best.xml`
+- `C:\Users\junho\CVT\jump_opt\goal6\stage20_modeA_motor_lpf.py`
+- `C:\Users\junho\CVT\jump_opt\goal6\stage20\stage20_study.pkl`
+- `C:\Users\junho\CVT\jump_opt\goal6\stage20\urdf\leg_g6s20_best.xml`
 
 [[goal6-findings]]

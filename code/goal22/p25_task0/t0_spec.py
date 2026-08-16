@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """P25-task0 캠페인 공용 제약 스펙 (사용자 지시 07-18: 제약은 AVT LEG task0 스크립트를 따름).
 
-출처: C:/Users/junho/Desktop/AVT LEG/optimization_tasks/task0_vertjump_{no,with}_cvt.py
+출처: C:/Users/junho/CVT/AVT LEG/optimization_tasks/task0_vertjump_{no,with}_cvt.py
 - 토크 제약: |τ_axis| ≤ 15 Nm  → 트윈 raw 도메인 등가 박스 RAW15 = 25.5810
   (a_hat 운동방향 가지 정확히 15.00 Nm — 18Nm→31.1771과 동일 규약, brentq 역산)
 - 모터 T-N 포락선: |dq_j| ≤ TN_COEF·|τ̂_j| + TN_OFF   (모터별; CVT는 크랭크측)

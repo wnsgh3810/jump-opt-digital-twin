@@ -13,13 +13,13 @@ metadata:
 
 ## 파일 위치
 
-- **Canonical folder**: `C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/`
+- **Canonical folder**: `C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/`
   - `README_CANONICAL_RENDERING.md` — 전체 스펙
   - `code/make_anim.py` — 핵심 렌더러
   - `code/regen_all.py` — 30 sub-folder orchestrator
   - `code/gen_mode_B_pd.py` — PD sim mode_B 생성 (jump_0424/0602)
   - `code/leg.xml` — 시각화용 XML
-- **최종 output**: `C:/Users/junho/Desktop/jump_opt/goal18_v13/Iter6/` — 30 subs, 217 gifs, 224 plots
+- **최종 output**: `C:/Users/junho/CVT/jump_opt/goal18_v13/Iter6/` — 30 subs, 217 gifs, 224 plots
 - **Notion**: [GOAL18 CANONICAL page](https://app.notion.com/p/390ab81d255081ce9a92f1128080783e) — parent = CONCEPT (`115ab81d255080fdaae6f28f55e3e205`)
 
 ## LOCK 원칙 (절대 변경 금지)
@@ -55,7 +55,7 @@ metadata:
 
 ```python
 import sys
-sys.path.insert(0, 'C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code')
+sys.path.insert(0, 'C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code')
 from make_anim import render_sit2stand
 
 render_sit2stand(
@@ -67,4 +67,4 @@ render_sit2stand(
 )
 ```
 
-전체 재생성: `python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/regen_all.py`
+전체 재생성: `python C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/regen_all.py`

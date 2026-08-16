@@ -56,7 +56,7 @@ metadata:
 
 ## 다음 작업 명령
 
-`C:\Users\junho\Desktop\jump_opt\NEXT_GOAL4_PROMPT.md` 참조.
+`C:\Users\junho\CVT\jump_opt\NEXT_GOAL4_PROMPT.md` 참조.
 
 시작 시 user paste용 메시지 prompt 끝에 명시.
 

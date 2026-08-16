@@ -6,7 +6,7 @@ originSessionId: cb42ed46-5d3f-447a-94f6-732ce10d7dfc
 ---
 # Sub-agent 작업 인덱스
 
-이전 클로드 세션에서 Plan/Explore/general-purpose agent로 위임한 큰 데이터 탐색·분석 작업들. 결과는 모두 `C:\Users\junho\Desktop\session_backup\subagents\<parent_session>\` 보존됨 (jsonl + 텍스트 timeline).
+이전 클로드 세션에서 Plan/Explore/general-purpose agent로 위임한 큰 데이터 탐색·분석 작업들. 결과는 모두 `C:\Users\junho\CVT\AVT LEG\utils\session_backup\subagents\<parent_session>\` 보존됨 (jsonl + 텍스트 timeline).
 
 ## b0a02628 세션 산하 (4/17~4/24, 메인 세션)
 

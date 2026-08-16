@@ -5,7 +5,7 @@
 > 이 파일은 그 다음이다 (코드 구조 전용).
 > Codex 등 다른 에이전트용 진입점은 루트의 `AGENTS.md`.
 
-연구 헌법 = `docs/context/CONSTITUTION.md` (원본 `C:/Users/junho/Desktop/CLAUDE.md`).
+연구 헌법 = `docs/context/CONSTITUTION.md` — **이 파일이 정본**. (옛 원본 `C:/Users/junho/Desktop/CLAUDE.md` 는 2026-07-12 판에서 멈췄다. 참고만.)
 데이터 사전 = `docs/context/DATA_DICT.md` (원본 `Data/CLAUDE.md`) — 데이터 만지기 전 필독.
 현행 스택/지표 수치는 `code/bench/CURRENT_STACK.md`가 단일 출처.
 누적 발견은 `docs/context/memory/MEMORY.md` 색인 → 개별 문서.
@@ -14,7 +14,7 @@
 ```
 code/
 ├─ bench/            평가 하네스 (bench.py CLI, safe.py, p19_adapter, registry, PLAYBOOK/REJECTED)
-├─ goal18_CANONICAL/ 시각화 "규격" 정본 v14 — LOCK (수정 금지, import 전용; Desktop에 사본 있음).
+├─ goal18_CANONICAL/ 시각화 "규격" 정본 v14 — LOCK (수정 금지, import 전용).
 │                    주의: 내부 leg.xml은 pre-4bar 2링크 모델 — 4-bar 렌더 정본은
 │                    goal22/p18_cvt/cvt_anim.py::build_anim_model (canonical 규격 상속)
 ├─ goal21/           4-bar 구조 정본 (g21_fourbar_flip.py = 모델 빌더 정본, g21_p13_linkage 등)
@@ -47,7 +47,7 @@ python code/bench/bench.py list | stack
 - 3계층 구조: 플랜트 물리(x) × 커맨드층(α·클립·지연) × 변환식 A — 승격 시 세 계층 모두 명시.
 
 ## 결과물 관례
-- 그림/GIF 결과 폴더: `C:/Users/junho/Desktop/jump_opt/g22_<이름>_results/` (repo에 대용량 바이너리 커밋 금지)
+- 그림/GIF 결과 폴더: `C:/Users/junho/CVT/jump_opt/g22_<이름>_results/` (repo에 대용량 바이너리 커밋 금지)
 - GIF는 goal18_CANONICAL 규격으로만 (새 렌더러 금지) — cvt_anim.py가 상속 실례.
 - GIF 텍스트 오버레이는 `bench/render_kit.draw_overlay`만 (표준 7필드: trial/t/base_z/hip/knee/h_sim/h_real
   + **l_i 상시 표기** — 사용자 선호 2026-07-13). CL 렌더/그래프는 커맨드층(α+클립) 반영 필수 (훅이 경고).

@@ -20,7 +20,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "p25_deploy"))
 sys.path.insert(0, str(HERE.parent.parent / "bench"))
-sys.path.insert(0, r"C:\Users\junho\Desktop\AVT LEG\optimization_tasks")
+sys.path.insert(0, r"C:\Users\junho\CVT\AVT LEG\optimization_tasks")
 
 import t0_figs as F
 import t0_export as E

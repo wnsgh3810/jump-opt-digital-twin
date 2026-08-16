@@ -16,7 +16,7 @@ parts = []
 
 parts.append("""> 🔒 **STATUS: LOCKED CANONICAL — 2026-07-01.** 앞으로 모든 시뮬레이션 렌더링은 이 코드 기준. 모델이 수정되어도 시각화 파이프라인은 그대로 사용.
 
-> **File location**: `C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/`
+> **File location**: `C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/`
 > **Final output**: `goal18_v13/Iter6/` — 30/30 sub-folders, 217 gifs, 224 plots
 > **Git tag**: `v14-canonical` (annotated) + `LOCKED-2026-07-01`
 > **Commit**: `e2fc5ed9` (canonical folder), `f14ca44b` (dependency freeze)
@@ -77,12 +77,12 @@ parts.append("""
 **한 cycle 렌더**:
 ```python
 import sys
-sys.path.insert(0, 'C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code')
+sys.path.insert(0, 'C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code')
 from make_anim import render_sit2stand
 
 render_sit2stand(
     canon_npz_path='.../cycle01.npz',
-    model_xml_path='C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/leg.xml',
+    model_xml_path='C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/leg.xml',
     out_gif_path='.../cycle01.gif',
     trial_label='sit2stand_0324 P20_D1 mode_A cyc01',
     kind='air'   # or 'gnd'
@@ -98,7 +98,7 @@ open('leg.xml', 'w').write(xml)
 
 **전체 재생성**:
 ```
-python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/regen_all.py
+python C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/regen_all.py
 ```
 
 ## ⚠️ 알려진 이슈
@@ -112,7 +112,7 @@ python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/regen_all.py
 
 - Memory: `goal18_canonical_pipeline.md`, `feedback_animation_standard.md`
 - Git tag: `v14-canonical` (annotated commit `e2fc5ed9`)
-- Root marker: `C:/Users/junho/Desktop/jump_opt/CANONICAL_LOCK.md`
+- Root marker: `C:/Users/junho/CVT/jump_opt/CANONICAL_LOCK.md`
 """)
 
 output = "".join(parts)

@@ -24,12 +24,12 @@ GOAL3 final stack: **V8 = V5 (30p baseline+motor lag+Coulomb+Stribeck+foot+kindG
 - Hold-out 6-fold CV inv hip 3.84/knee 2.89 (V5 base, V7 측정)
 
 **Final 파일**:
-- `Desktop/jump_opt/dynamics_v8.py` (CasADi NLP 통합)
-- `Desktop/jump_opt/dynamics_v5.py` (numpy inverse_predict_v5, forward_sim_v5)
-- `Desktop/jump_opt/goal3/v5_results/theta_v5.npz` (params)
-- `Desktop/jump_opt/goal3/v8_results/v8_nlp.npz` (NLP solution + check)
-- `Desktop/jump_opt/v8_self_cons.py` (self-cons test)
-- `Desktop/jump_opt/v12_forward_real.py` (사용자 진짜 metric surrogate)
+- `CVT/jump_opt/dynamics_v8.py` (CasADi NLP 통합)
+- `CVT/jump_opt/dynamics_v5.py` (numpy inverse_predict_v5, forward_sim_v5)
+- `CVT/jump_opt/goal3/v5_results/theta_v5.npz` (params)
+- `CVT/jump_opt/goal3/v8_results/v8_nlp.npz` (NLP solution + check)
+- `CVT/jump_opt/v8_self_cons.py` (self-cons test)
+- `CVT/jump_opt/v12_forward_real.py` (사용자 진짜 metric surrogate)
 
 **Notion**:
 - Parent: GOAL3 (376ab81d25508123b2ded69787012592)

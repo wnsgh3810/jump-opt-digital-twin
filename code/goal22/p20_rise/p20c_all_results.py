@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """p20c 모델 전 데이터 결과 생성 — p19_all_results 정본 파이프라인 재사용 (모델만 교체).
 
-출력: Desktop/jump_opt/g22_p20c_all_results/<세션>/{png,gif,traj}/
+출력: CVT/jump_opt/g22_p20c_all_results/<세션>/{png,gif,traj}/
 구성 차이 (vs P19): pre30=0 (담요 제거), 보정층 c_qs≈0.005는 <0.1Nm이라 생략(INDEX에 명기),
 0429 각도 영점 = 재적합값 (7.0°, −5.0°) — A/CL 동일 적용. 플랜트 x = p20c.
 """

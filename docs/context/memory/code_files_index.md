@@ -4,7 +4,11 @@ description: Desktop에 있는/있었던 .py 파일들의 용도와 상태 색�
 type: reference
 originSessionId: c82aa01d-1bc5-42d3-ad69-d2998821e712
 ---
-# C:\Users\junho\Desktop\ Python 파일 색인
+# 옛 `C:\Users\junho\Desktop\` 시절 Python 파일 색인 (과거 기록)
+
+> 2026-08-16 이사 안내: 아래 경로들은 **그 당시의 자리**다. 살아남은 파일들은 지금
+> `C:\Users\junho\CVT\AVT LEG\` 아래로 옮겨져 있다 (`optimization\`, `sweep\`, `sys_id\`, `utils\`).
+> 파일 이름으로 찾는 것이 확실하다.
 
 10일 세션 동안 80+ 개 파일이 생성/수정됨. 4/24 오후 사용자 지시로 중간 sweep 파일들 대량 삭제됨. 현재 active 파일과 history를 함께 정리.
 

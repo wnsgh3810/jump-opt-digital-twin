@@ -11,7 +11,7 @@ import numpy as np
 import openpyxl
 
 HERE = Path(__file__).parent
-AVT = Path(r"C:\Users\junho\Desktop\AVT LEG\optimization_tasks")
+AVT = Path(r"C:\Users\junho\CVT\AVT LEG\optimization_tasks")
 sys.path.insert(0, str(AVT))
 sys.path.insert(0, str(HERE))
 

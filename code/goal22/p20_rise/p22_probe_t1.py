@@ -12,7 +12,7 @@
   피크 탐색은 t ≤ toff+0.1 (GRF 이륙시각, cvt_run2.takeoff_time 로직 복제; GRF 없으면 전체)
   푸시 = 전역 |dq2_s| 피크를 포함하는 연속 구간 where |dq2_s| > 0.30·피크
 데이터: fit 세션만 (0421/0424/0602/0429). held-out 0324 제외 (철칙 9).
-원본 xlsx 읽기 전용. 산출물: 표(stdout) + JSON(Desktop/jump_opt/g22_p20_results).
+원본 xlsx 읽기 전용. 산출물: 표(stdout) + JSON(CVT/jump_opt/g22_p20_results).
 """
 # --- 옛 결과 폴더 위치: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o3, sys as _s3

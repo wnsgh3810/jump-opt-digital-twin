@@ -36,10 +36,10 @@ metadata:
 
 ## 적용 위치
 
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage28_modeA_q1weight.py` (tau_scale 처음 발견)
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage31\` (Mode A super-narrow best)
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage34\` (Mode A ultra-narrow best)
-- `C:\Users\junho\Desktop\jump_opt\goal6\stage36\` (Mode A 최종 plateau 215.90)
+- `C:\Users\junho\CVT\jump_opt\goal6\stage28_modeA_q1weight.py` (tau_scale 처음 발견)
+- `C:\Users\junho\CVT\jump_opt\goal6\stage31\` (Mode A super-narrow best)
+- `C:\Users\junho\CVT\jump_opt\goal6\stage34\` (Mode A ultra-narrow best)
+- `C:\Users\junho\CVT\jump_opt\goal6\stage36\` (Mode A 최종 plateau 215.90)
 
 ## 추가 발견
 

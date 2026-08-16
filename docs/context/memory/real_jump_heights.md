@@ -9,7 +9,8 @@ metadata:
 
 # 실제 점프 높이 (26.06.02 Real Data.txt)
 
-**위치**: `C:\Users\junho\Desktop\Research\4-Bar Link CVT\Data\26.06.02\position\{trial}\Real Data.txt`
+**위치**: `C:\Users\junho\CVT\Data\26_06_02\position\{trial}\Real Data.txt`
+(2026-08-16 이사 반영. 폴더 이름의 점이 밑줄로 바뀌었다: `26.06.02` → `26_06_02`)
 
 각 파일 첫 줄에 `실제 점프 높이 : X.XXm` 또는 `Estimated final jump height` 표기.
 

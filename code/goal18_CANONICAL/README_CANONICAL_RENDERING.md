@@ -95,7 +95,7 @@ for _ in range(1500):   # ★ 1500 필수 (500은 부족 → 29.3cm에서 정지
 ### 기본 렌더 (한 cycle)
 ```python
 import sys
-sys.path.insert(0, 'C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code')
+sys.path.insert(0, 'C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code')
 from make_anim import render_sit2stand
 
 render_sit2stand(
@@ -109,12 +109,12 @@ render_sit2stand(
 
 ### 전체 재생성
 ```bash
-python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/regen_all.py
+python C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/regen_all.py
 ```
 
 ### PD sim으로 mode_B 생성 (canonical 없을 때)
 ```bash
-python C:/Users/junho/Desktop/jump_opt/goal18_CANONICAL/code/gen_mode_B_pd.py
+python C:/Users/junho/CVT/jump_opt/goal18_CANONICAL/code/gen_mode_B_pd.py
 ```
 * PD gain은 폴더 이름에서 파싱 (예: `60_0.75_60_2` → kp_hip=60, kd_hip=0.75, kp_knee=60, kd_knee=2)
 
