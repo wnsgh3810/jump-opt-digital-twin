@@ -175,11 +175,48 @@ rem  previously-capped channels now report their real, compressed size).
 rem  Wiring re-verified after all edits: normalized deployed stack = 1.000000.
 rem
 rem  ---------------------------------------------------------------------
+rem  CHANGE 6 -- SIT-TO-STAND IS NOW SCORED ON TWO BOARDS (user's design).
+rem
+rem  User's proposal, adopted: "score it two ways -- one whole window, and one
+rem  chopped into 0.2 s pieces that keep resetting."
+rem      whole window 1.9 s        -> does it KEEP UP over time
+rem      0.2 s pieces, each restarted from the measured pose -> is the PHYSICS
+rem                                   right moment to moment, with no build-up
+rem  Each board plugs the other's hole.  Whole-window alone carries no
+rem  information after the first blow-up (74-94% of the window is post-
+rem  divergence noise).  Pieces alone cannot see whether it keeps up at all,
+rem  since every piece resets the error to zero -- which is exactly why window
+rem  splitting is normally FORBIDDEN here.  Keeping the whole-window board
+rem  closes that hole, so the two together do not violate the rule.
+rem
+rem  MY EARLIER PROPOSAL WAS REJECTED BY THE USER, CORRECTLY.  I had suggested
+rem  "score only up to the moment the foot leaves the ground".  That makes
+rem  taking off PROFITABLE: an early take-off shortens the scored window, so the
+rem  error shrinks.  It is the same shape of hole as the silent drop fixed in
+rem  CHANGE 5.  Not doing it.
+rem
+rem  Sit-to-stand keeps its total share of 0.19, now split three ways:
+rem      whole-window score  0.07 . keep-up time 0.06 . 0.2 s pieces 0.06
+rem  Reference values at the deployed stack: 6.8498 / 0.6813 / 1.7425.
+rem  The pieces board reads much lower (1.74 vs 6.85) precisely because nothing
+rem  accumulates -- that is the point, not a bug.
+rem
+rem  ALSO WITHDRAWN: "divide the error by how far the joint moved".  The scorer
+rem  ALREADY divides by the standard deviation of the measured signal over the
+rem  window, which is the same normalization.  My proposal was a duplicate.
+rem
+rem  COST NOTE: the pieces board runs many short replays per case, so each
+rem  evaluation is slower.  20 hours will therefore cover fewer candidates than
+rem  a run without it.  That is the trade accepted for seeing sit-to-stand
+rem  properly.
+rem
+rem  ---------------------------------------------------------------------
 rem  EXPECTED FIRST LINES:
 rem    - data: "56 trial (cvt 10) . torque wrap fix 46 . hanging 15 records
 rem      . sit-to-stand 4 cases".  If wrap fix is 0, close and report.
-rem    - "normalization ON" with EIGHT reference values, the last being the new
-rem      "fast knee" term (0.5023).  Sit-to-stand score reference is 6.8498.
+rem    - "normalization ON" with NINE reference values, including the new
+rem      "fast knee" term (0.5023) -- NINE reference values in total, the last
+rem      being the sit-to-stand 0.2 s pieces board (1.7425).
 rem    - "wiring check: normalized score of deployed stack = 1.000000  PASS"
 rem    - deployed stack penalty 0.000, total 1.00000
 rem    - "canon_mixv - 32 axes", among the last ones

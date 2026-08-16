@@ -940,10 +940,10 @@ def s2s_ma_score():
     import fs_runner as FR, fs_cvt as FC
     m0 = float(os.environ.get("FS_MASS", "3.30"))
     keep = os.environ.get("FS_MASS")
-    vals = {}; hvals = {}
+    vals = {}; hvals = {}; cvals = {}
     try:
         for sub, pay, cvt, d, W in (_S or []):
-            per = []; hper = []
+            per = []; hper = []; cper = []
             try:
                 os.environ["FS_MASS"] = f"{m0 + pay:.4f}"
                 FR._CACHE.clear(); _CVT_STAMPED.clear()
@@ -995,13 +995,51 @@ def s2s_ma_score():
                         _k = np.where(_ed > _th)[0]
                         _hs.append(float(tg[_k[0]]) if len(_k) else float(tg[-1]))
                     hper.append(float(np.mean(_hs)) / max(float(tg[-1]), 1e-6))
+                # ★★★ 08-16 (9 회차, 사용자 설계) — **0.2 초 조각 재생**.
+                #   왜 통짜와 따로 두 판을 보나 (사용자: "차라리 전체 구간 하나 · 0.2s 로
+                #   나눠서 계속 리셋되는 것 하나, 이렇게 두 개로 평가하는 게 어떨지"):
+                #     · 통짜만 보면 **한 번 무너진 뒤로는 아무 정보가 없다** — 1.9 초 중
+                #       74~94% 가 발산 후 구간이라, 거기 값은 물리가 아니라 잡음이다.
+                #     · 조각만 보면 **오래 버티는지를 못 본다** — 조각마다 오차가 0 으로
+                #       초기화되니 금방 무너지는 모델도 좋아 보인다 (그래서 창 분할은 금지다).
+                #   ⇒ 둘 다 보면 서로의 구멍을 막는다. 통짜는 그대로 남으므로 분할 금지
+                #     원칙과 충돌하지 않는다.
+                #   ☠ 내가 먼저 낸 "발이 뜨는 순간까지만 자르자"는 **사용자가 기각했고 옳다** —
+                #     빨리 뜰수록 채점 구간이 짧아져 점수가 좋아진다. 즉 **뜨는 게 이득**이 된다.
+                #     방금 수리한 "발산하면 그 시행이 사라진다"와 같은 구조의 구멍이었다.
+                #   조각마다 **실측 자세·속도에서 다시 출발**하므로 누적이 없다. 그래서 이 항은
+                #   "오래 버티나"가 아니라 **"물리가 순간순간 얼마나 맞나"** 를 잰다.
+                #   실측(08-16): 0.2 초로 통일해 재면 일어서기 6.8~11.8 · 점프 8.03 으로
+                #   비교 가능한 값이 나온다 (같은 자, 0 이 완벽).
+                _CW = 0.20                    # 조각 길이 [s] — 점프 밀어내기와 같은 규모
+                _dt = float(np.median(np.diff(tg))) if len(tg) > 2 else 0.002
+                _nw = max(int(round(_CW / max(_dt, 1e-9))), 20)
+                _st = max(_nw // 2, 1)        # 절반씩 겹쳐 밀어 표본을 두 배로
+                _ti = np.where(mm)[0]
+                for _a in range(0, len(_ti) - _nw - 1, _st):
+                    _ii = _ti[_a]; _sl = slice(_a, _a + _nw + 1)
+                    _tc = tg[_sl] - tg[_a]
+                    _Lc = FR.rollout_ol_fs_b(
+                        ft, _tc, d["raw1"][mm][_sl], d["raw2"][mm][_sl],
+                        float(d["q1"][_ii]), float(d["q2"][_ii]),
+                        float(d["dq1"][_ii]), float(d["dq2"][_ii]),
+                        float(_tc[-1] - 0.004), fade=True)
+                    if _Lc is None:
+                        continue
+                    _sc = [np.interp(_tc, _Lc["t"], _Lc[k]) for k in ("thm1", "q2", "dq1", "dq2")]
+                    _vc = [_r80(_tc, d[k][mm][_sl], _sm, floor=fl)
+                           for k, _sm, fl in zip(CH4, _sc, AIR_FLOOR)]
+                    if all(np.isfinite(_vc)):
+                        cper.append(float(np.mean([x if x <= 10.0 else 10.0 + np.log1p(x - 10.0)
+                                                   for x in _vc])))
             except Exception:
-                per = []; hper = []
+                per = []; hper = []; cper = []
             vals[sub] = float(np.mean(per)) if per else 3.0
             # 따라간 시간 비율을 **점수 방향(0 이 완벽)** 으로 뒤집는다.
             #   1 − (버틴 시간 ÷ 창 길이). 0 이면 끝까지 한 번도 안 벌어졌다는 뜻,
             #   1 이면 시작하자마자 발산. 재생 실패는 1.0(최악)으로 계상.
             hvals[sub] = 1.0 - float(np.mean(hper)) if hper else 1.0
+            cvals[sub] = float(np.mean(cper)) if cper else 3.0
     finally:
         # 질량 env 원복 + 캐시 청소 — 다음 평가가 짐 붙은 모델을 물려받으면 안 된다
         if keep is None:
@@ -1011,10 +1049,11 @@ def s2s_ma_score():
         FR._CACHE.clear(); _CVT_STAMPED.clear()
     # 등록부에 있는데 적재 단계에서 빠진 경우(창 소실 등)도 3.0 으로 계상 — 침묵 탈락 방지
     for sub in (_S_EXPECT or []):
-        vals.setdefault(sub, 3.0); hvals.setdefault(sub, 1.0)
+        vals.setdefault(sub, 3.0); hvals.setdefault(sub, 1.0); cvals.setdefault(sub, 3.0)
     if not vals:
-        return np.nan, np.nan
-    return float(np.mean(list(vals.values()))), float(np.mean(list(hvals.values())))
+        return np.nan, np.nan, np.nan
+    return (float(np.mean(list(vals.values()))), float(np.mean(list(hvals.values()))),
+            float(np.mean(list(cvals.values()))))
 
 
 def absm(B, key, sess, cols):
@@ -1079,13 +1118,17 @@ W_CLQ  = 0.12   # PD 제어를 흉내 낸 판 (점프) — 각도·속도 4 채�
 W_CLT  = 0.23   # PD 제어를 흉내 낸 판 (점프) — **토크 2 채널** (08-14 부터 "명령끼리" 자)
 W_H    = 0.05   # 점프 높이
 W_AIR  = 0.11   # 매달림 15 건 — 측정 토크 주입 재생만 (각도·속도 4 채널)
-W_S2S  = 0.11   # 짐 지고 일어서기 4 경우 — **성적** (각도·속도 4 채널, 채널당 상한 10)
+W_S2S  = 0.07   # 짐 지고 일어서기 4 경우 — **성적** (각도·속도 4 채널, 채널당 상한 10)
 # ★★ 08-16 신설 — 짐 지고 일어서기 **따라간 시간**. 옛 0.10 을 성적 0.05 + 시간 0.05 로 쪼갰다.
 #   왜 쪼갰나: 성적만으로는 **짐 5 kg 경우가 상한에 걸려 아예 안 보인다** (네 채널 중 셋이 10).
 #   상한을 올리면 발산 후 잡음을 더 크게 듣게 되므로 답이 아니다. "언제 발산하기 시작하나"를
 #   따로 재면 상한 포화가 원리적으로 없다. 08-16 검산: 문턱 10° 에서 링크 관절 마찰을 넣었을 때
 #   성적은 −9.6% 인데 따라간 시간으로는 **+31%** 로 훨씬 선명했다.
-W_S2H  = 0.08
+W_S2H  = 0.06
+# ★★★ 08-16 (9 회차, 사용자 설계) — 짐 지고 일어서기 **0.2 초 조각 재생**.
+#   일어서기 몫 0.19 를 셋으로 나눈다: 통짜 성적 0.07 · 통짜 따라간시간 0.06 · 조각 0.06.
+#   앞 둘은 "오래 버티나", 조각은 "물리가 순간순간 맞나" — 서로 다른 것을 잰다.
+W_S2C  = 0.06
 # ★★ 08-16 (9 회차) 신설 — **무릎이 가장 빠른 순간만** 본 주입 재생 점수 (사용자 지시).
 W_FAST = 0.09
 # ── 08-16 무게 재배분 근거 (합계 1.00 유지) ──────────────────────────────────────
@@ -1098,7 +1141,7 @@ W_FAST = 0.09
 # ★★ 08-14 (6 회차) — 점수 정규화 스위치와 기준값. `_ensure()` 가 배포 스택에서 한 번
 #   계산해 채운다. 여기가 비어 있으면 정규화는 저절로 꺼진다 (안전한 기본값).
 _NORM = os.environ.get("FS_SWEEP_NORM", "1") != "0"
-_NORM_KEYS = ("ma", "clq", "clt", "h", "air", "s2s", "s2h", "fast")
+_NORM_KEYS = ("ma", "clq", "clt", "h", "air", "s2s", "s2h", "fast", "s2c")
 
 
 def norm_ref():
@@ -1160,8 +1203,8 @@ def evaluate(args):
             return 9e2, None
         # ★ 08-14 — 짐 지고 일어서기 판 (아래 s2s_ma_score 참조). 실패 경우는 3.0 계상이라
         #   NaN 은 "판 자체가 안 섰다"는 뜻 → 실패 처리. 기대 목록은 등록부(_S_EXPECT).
-        s2s, s2h = s2s_ma_score() if _S_EXPECT else (0.0, 0.0)
-        if _S_EXPECT and not (np.isfinite(s2s) and np.isfinite(s2h)):
+        s2s, s2h, s2c = s2s_ma_score() if _S_EXPECT else (0.0, 0.0, 0.0)
+        if _S_EXPECT and not (np.isfinite(s2s) and np.isfinite(s2h) and np.isfinite(s2c)):
             return 9e2, None
         # ★★ 08-14 (6 회차) — **점수 정규화**. 5 회차에서 실측된 결함을 고친다.
         #   무게는 0.27/0.15/0.27/0.07/0.14/0.10 으로 줬는데 각 판의 값 크기가 달라
@@ -1174,10 +1217,12 @@ def evaluate(args):
         if _r:
             J = (W_MA * ma8 / _r["ma"] + W_CLQ * clq / _r["clq"] + W_CLT * clt / _r["clt"]
                  + W_H * hr / _r["h"] + W_AIR * air / _r["air"] + W_S2S * s2s / _r["s2s"]
-                 + W_S2H * s2h / _r["s2h"] + W_FAST * fast / _r["fast"])
+                 + W_S2H * s2h / _r["s2h"] + W_FAST * fast / _r["fast"]
+                 + W_S2C * s2c / _r["s2c"])
         else:
             J = (W_MA * ma8 + W_CLQ * clq + W_CLT * clt + W_H * hr
-                 + W_AIR * air + W_S2S * s2s + W_S2H * s2h + W_FAST * fast)
+                 + W_AIR * air + W_S2S * s2s + W_S2H * s2h + W_FAST * fast
+                 + W_S2C * s2c)
         # 벌점 — 적합에 안 쓰는 세션이 **배포 스택보다** 2% 넘게 나빠지면 붙는다 (08-13 변경점)
         pen = 0.0; gl = {}
         for s in GATE_MA:
@@ -1268,7 +1313,7 @@ def evaluate(args):
         Jold = (0.40 * oma + 0.40 * ocl + 0.20 * oh
                 if all(np.isfinite(q) for q in (oma, ocl, oh)) else np.nan)
         return J + pen, dict(J=J, ma=ma8, clq=clq, clt=clt, h=hr, air=air, s2s=s2s, s2h=s2h,
-                             fast=fast,
+                             fast=fast, s2c=s2c,
                              pen=pen, gate=gl, Jold=Jold, old_ma=oma, old_cl=ocl, old_h=oh)
     except Exception:
         return 9e2, None
@@ -1553,15 +1598,16 @@ def main():
             print("     기준값: " + " · ".join(
                 f"{n} {v:.4f}" for n, v in zip(
                     ("주입", "폐루프각", "폐루프토크", "높이", "매달림",
-                     "일어서기 성적", "일어서기 따라간시간", "고속 무릎"), _ref)), flush=True)
+                     "일어서기 성적", "일어서기 따라간시간", "고속 무릎",
+                     "일어서기 0.2초조각"), _ref)), flush=True)
         else:
             print(f"  ★ 정규화 끔 — 기준값이 성립하지 않는다 {_ref}", flush=True)
     b1, d1 = evaluate(("canon_cap", DEPLOY))
     _d1 = d1 or {}
     if _NORM and os.environ.get("FS_SWEEP_NORMREF"):
         print(f"  ■ 배선 검산: 배포 스택의 정규화 점수 = {b1:.6f} "
-              f"(무게 합 {W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S+W_S2H+W_FAST:.4f} 와 같아야 한다)"
-              f"  {'통과' if abs(b1 - (W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S+W_S2H+W_FAST)) < 1e-6 else '★실패'}",
+              f"(무게 합 {W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S+W_S2H+W_FAST+W_S2C:.4f} 와 같아야 한다)"
+              f"  {'통과' if abs(b1 - (W_MA+W_CLQ+W_CLT+W_H+W_AIR+W_S2S+W_S2H+W_FAST+W_S2C)) < 1e-6 else '★실패'}",
               flush=True)
     print(f"  ★ 배포 스택(현행) = **이겨야 할 상대**: 새 자 {b1:.5f} · 옛 자 "
           f"{_d1.get('Jold', float('nan')):.4f}", flush=True)
