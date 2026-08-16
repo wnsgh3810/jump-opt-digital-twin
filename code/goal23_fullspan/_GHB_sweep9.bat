@@ -142,11 +142,44 @@ rem  Deployment-session lock, score normalization, whole-window sit-to-stand
 rem  and hanging replay all unchanged.
 rem
 rem  ---------------------------------------------------------------------
+rem  CHANGE 5 -- AUDIT FINDINGS, FIXED BEFORE THE RUN (2026-08-16).
+rem  User asked: "check properly whether any task is under-weighted, and review
+rem  the code -- this run is long, I want it done right."  Two real holes found.
+rem
+rem   (A) A QUARTER OF THE SIT-TO-STAND SCORE WAS DEAD.  The per-channel cap was
+rem       a hard min(x, 10).  Measured at the deployed stack, 4 of 16 channels
+rem       sit AT the cap:
+rem         payload 5 kg (CVT)  knee angle 20.68 . hip speed 10.31 . knee speed 23.56
+rem         no-CVT 0 kg         knee speed 13.53
+rem       A capped channel cannot move the score AT ALL, however much it
+rem       improves.  So doubling the sit-to-stand weight (0.10 -> 0.19) would
+rem       have delivered only three quarters of that.  Raising the cap is wrong
+rem       (post-divergence values are noise, not information).
+rem       FIX: keep 0..10 EXACTLY as before, and above 10 grow logarithmically:
+rem         20.68 -> 12.46 . 23.56 -> 12.68 . 100 -> 14.5
+rem       The 0..10 gradient is bit-identical, and above 10 the gradient is no
+rem       longer zero, so improvement is rewarded while noise stays compressed.
+rem
+rem   (B) SILENT DROP -- DIVERGING TRIALS VANISHED FROM THE AVERAGE.
+rem       Four places did "if max(v) < 1e3: append(v)".  A trial that blew past
+rem       that was not scored badly -- it was DISCARDED.  Discarding removes it
+rem       from the session mean, so a candidate that makes one trial diverge
+rem       gets a BETTER score.  Divergence was profitable.
+rem       FIX: the same soft cap replaces the drop, in the injection-replay
+rem       board, the new fast-knee term, the closed-loop board and the hanging
+rem       board (all four feed the score).  The two remaining 1e4 filters are on
+rem       the LEGACY metric that is displayed only, and are marked as such.
+rem
+rem  Effect on the reference values: sit-to-stand score 6.4177 -> 6.8498 (the
+rem  previously-capped channels now report their real, compressed size).
+rem  Wiring re-verified after all edits: normalized deployed stack = 1.000000.
+rem
+rem  ---------------------------------------------------------------------
 rem  EXPECTED FIRST LINES:
 rem    - data: "56 trial (cvt 10) . torque wrap fix 46 . hanging 15 records
 rem      . sit-to-stand 4 cases".  If wrap fix is 0, close and report.
 rem    - "normalization ON" with EIGHT reference values, the last being the new
-rem      "fast knee" term.
+rem      "fast knee" term (0.5023).  Sit-to-stand score reference is 6.8498.
 rem    - "wiring check: normalized score of deployed stack = 1.000000  PASS"
 rem    - deployed stack penalty 0.000, total 1.00000
 rem    - "canon_mixv - 32 axes", among the last ones

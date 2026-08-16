@@ -643,12 +643,18 @@ def board():
                 sim = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2")]
                 v = [float(np.sqrt(np.mean((d[k][m] - w) ** 2))) *
                      (180 / np.pi if k in ("q1", "q2") else 1) for k, w in zip(CH4, sim)]
+                # (이 "ma" 는 옛 자 — 지금 점수에 안 들어가고 화면 표시·옛 총점 비교용이다.
+                #  그래서 걸러내기를 그대로 둔다. 점수에 들어가는 것은 아래 "ma8" 이다.)
                 if all(np.isfinite(v)) and max(v) < 1e4:
                     G[s]["ma"].append(v)
                 # 새 자 — 같은 재생 결과를 창 앞 80% 만 잘라 표준편차로 나눈다
                 v8 = [_r80(tg, d[k][m], w) for k, w in zip(CH4, sim)]
-                if all(np.isfinite(v8)) and max(v8) < 1e3:
-                    G[s]["ma8"].append(v8)
+                # ★★ 08-16 (9 회차) — **침묵 탈락 봉인.** 구 코드는 max(v8) >= 1e3 인 trial 을
+                #   그냥 버렸다. 버리면 그 trial 이 세션 평균에서 사라지므로 **발산이 이득이 된다**
+                #   (나쁜 값이 0 이 아니라 아예 없는 값이 되어 평균을 낮춘다).
+                #   ⇒ 버리지 않고 10 위를 로그로 눌러 계상한다. 10 이하는 한 자리도 안 바뀐다.
+                if all(np.isfinite(v8)):
+                    G[s]["ma8"].append([x if x <= 10.0 else 10.0 + np.log1p(x - 10.0) for x in v8])
                 # ★★ 08-16 (9 회차) — **무릎이 가장 빠른 순간만** 따로 잰다.
                 #   왜: 08-16 측정에서 무릎 속도 오차가 세션 최고 속도와 상관 +0.840 이었다.
                 #   그런데 지금 판은 전 구간을 하나로 뭉치고, 그 구간엔 느린 순간이 4,135 개 ·
@@ -662,8 +668,8 @@ def board():
                 if _kk.sum() >= 5:
                     _sd = float(np.std(d["dq2"][m]))
                     _fv = float(np.sqrt(np.mean((d["dq2"][m][_kk] - sim[3][_kk]) ** 2)) / max(_sd, 1e-9))
-                    if np.isfinite(_fv) and _fv < 1e3:
-                        G[s]["mafast"].append([_fv])
+                    if np.isfinite(_fv):    # ★ 침묵 탈락 봉인 (위와 같은 이유)
+                        G[s]["mafast"].append([_fv if _fv <= 10.0 else 10.0 + np.log1p(_fv - 10.0)])
                 t_ext = min(t[m][-1] + 0.6, t[-1])
                 m2 = (t >= t[i0]) & (t <= t_ext); tg2 = t[m2] - t[i0]
                 H = FR.rollout_ol_fs_b(ft, tg2, d["raw1"][m2], d["raw2"][m2],
@@ -709,11 +715,15 @@ def board():
                             return fn(_t, _mc[i], _c[i]) if _okc else np.nan
                         return fn(_t, mf[k], fs[i])
                     v8 = [_ch(i, k, _r80) for i, k in enumerate(CH6)]
-                    if all(np.isfinite(v8)) and max(v8) < 1e3:
+                    if all(np.isfinite(v8)):   # ★ 침묵 탈락 봉인
+                        v8 = [x if x <= 10.0 else 10.0 + np.log1p(x - 10.0) for x in v8]
+                    if all(np.isfinite(v8)):
                         G[s]["cl8"].append(v8)
                     # 이륙 직전 20% — 잠금장치 전용 (점수에는 안 들어간다). 같은 자 규약.
                     v2 = [_ch(i, k, _r20) for i, k in enumerate(CH6)]
-                    if all(np.isfinite(v2)) and max(v2) < 1e3:
+                    if all(np.isfinite(v2)):   # ★ 침묵 탈락 봉인
+                        v2 = [x if x <= 10.0 else 10.0 + np.log1p(x - 10.0) for x in v2]
+                    if all(np.isfinite(v2)):
                         G[s]["cl2"].append(v2)
         except Exception:
             continue
@@ -885,8 +895,10 @@ def air_board():
             sim = [gf("thm1"), gf("q2"), gf("dq1"), gf("dq2")]
             v = [_r80(tg, d[k][m], sm, floor=fl)
                  for k, sm, fl in zip(CH4, sim, AIR_FLOOR)]
-            if all(np.isfinite(v)) and max(v) < 1e3:
-                out.append((nm, v))
+            # ★ 08-16 침묵 탈락 봉인 — 매달림도 점수에 들어간다 (무게 0.11).
+            #   발산한 기록을 버리면 그 기록이 평균에서 사라져 **발산이 이득이 된다.**
+            if all(np.isfinite(v)):
+                out.append((nm, [x if x <= 10.0 else 10.0 + np.log1p(x - 10.0) for x in v]))
     return out
 
 
@@ -956,8 +968,21 @@ def s2s_ma_score():
                     # 잡음이다. 상한 없이는 한 창이 수십~수백을 찍어 점수 전체(무게 0.10)를
                     # 혼자 흔들 수 있다. 10 은 "이미 못 쓰는 수준"의 규모다 (합격선 0.24 의
                     # 40 배). 0~10 사이의 기울기는 그대로 살아 있어 탐색 신호는 유지된다.
+                    # ★★ 08-16 (9 회차) — 딱 자르던 상한을 **부드럽게** 바꾼다.
+                    #   검산에서 드러난 것: 16 채널 중 4 개(25%)가 정확히 상한 10 에 붙어 있다.
+                    #     짐 5kg(변속)  무릎각 20.68 · 힙속 10.31 · 무릎속 23.56  → 3 채널
+                    #     무변속 0kg   무릎속 13.53                              → 1 채널
+                    #   붙은 채널은 **아무리 좋아져도 점수가 한 자리도 안 움직인다.** 그래서
+                    #   일어서기 무게를 0.10 → 0.19 로 올려도 그 몫의 4 분의 1 은 죽어 있었다.
+                    #   상한을 그냥 올리는 것은 답이 아니다 — 발산 후 값은 정보가 아니라
+                    #   잡음이라 크게 들으면 판이 잡음을 좇는다.
+                    #   ⇒ 10 까지는 그대로 두고, 그 위는 **로그로 아주 완만하게** 늘린다.
+                    #     20.68 → 12.46 · 23.56 → 12.68 · 100 → 14.5.
+                    #     0~10 구간의 기울기는 한 자리도 안 바뀌고(회귀 없음), 10 위에서도
+                    #     기울기가 0 이 아니라 **좋아지면 점수가 따라온다.**
                     if all(np.isfinite(v)):
-                        per.append(float(np.mean([min(x, 10.0) for x in v])))
+                        per.append(float(np.mean([x if x <= 10.0 else 10.0 + np.log1p(x - 10.0)
+                                                  for x in v])))
                     # ★★ 08-16 신설 — **따라간 시간**도 같이 잰다.
                     #   왜: 짐 5 kg 경우는 네 채널 중 셋이 상한 10 에 걸려 **점수가 아예 안 움직인다**
                     #   (무릎 각도 최대 오차 2452° = 6.8 바퀴 = 완전 발산). 상한을 올리면 발산 후의
