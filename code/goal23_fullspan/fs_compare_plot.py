@@ -705,39 +705,26 @@ def main():
     want = sys.argv[1].upper() if len(sys.argv) > 1 else "BOTH"
     OUT.mkdir(exist_ok=True)
     agg = {}
-    import fs_cvt as FC
     for s, p, g, cvt, ho in FD.registry():
+        if cvt:
+            continue                       # CVT는 fs_cvt_plot (모델 경로 상이)
         try:
             d = FD.load2(p); seg = FD.segment(d)
             d["_sess"] = s; d["_fold"] = p
         except Exception as ex:
             print(f"{s}/{p.name}: LOAD {type(ex).__name__}", flush=True)
             continue
-        # ★ 변속(CVT) 세션도 그린다 — 08-16 사용자 지적.
-        #   구 코드는 "CVT는 fs_cvt_plot (모델 경로 상이)" 라며 continue 로 건너뛰었고,
-        #   그 결과 **유일한 변속 세션 26.04.29 가 모든 비교 그림에서 통째로 빠졌다.**
-        #   채점판은 이 세션을 쓰는데(6회차 세션 분해에 +5.3% 로 등장) 그림에는 없어,
-        #   변속 쪽 악화를 눈으로 확인할 방법이 없었다.
-        #   아래 일어서기 가지는 이미 같은 방식으로 trial 별 모델을 만들고 있다.
-        #   막대 길이는 trial 마다 Clutch 실측이므로 **trial 단위로** 모델을 새로 만든다.
-        ft_t = FC.cvt_ft(float(FD.cvt_li(p)), ft_base=FR.fs_twin()) if cvt else None
-        # ★ 옛 모델 곡선은 **변속 세션에서도 그대로 그린다** — 모든 세션이 같은 형태여야 한다.
-        #   (08-16 사용자 지적: 0429만 곡선 하나가 빠져 다른 날과 다르게 나왔다.)
-        #   옛 모델은 무릎을 직결로 보는 5관절 구조라 4절 링크가 없다. 그래서 막대 길이를
-        #   바꿀 대상이 아예 없고 — 바꿀 필요도 없다. 그냥 그대로 돌리면 된다.
-        #   `fs_cvt_plot.py` 가 0429 에 대해 이미 같은 방식으로 옛 모델을 돌리고 있다.
-        #   옛 모델이 변속을 못 담는 것은 그 모델의 성질이지 그리지 못할 이유가 아니다.
         # ★ held-out 은 **fit 금지**이지 평가 금지가 아니다 (철칙 9).
         #   승격 판단엔 게이트 세션의 CL 비악화도 봐야 하므로 FS_CMP_HO=1 로 포함시킨다.
         _ho_ok = (not ho) or os.environ.get("FS_CMP_HO") == "1"
         # ★ ModeA 를 **먼저** 돌린다 — 점프높이는 ModeA 연장재생에서만 나오고(정본 정의),
         #   CL 제목도 그 값을 쓰기 때문이다 (사용자 지시: 제목에 점프높이).
         if want in ("BOTH", "MA", "CL"):
-            r = plot_ma(s, p.name, d, seg, ft=ft_t)
+            r = plot_ma(s, p.name, d, seg)
             if r and want in ("BOTH", "MA"):
                 agg.setdefault(("ModeA", s), []).append(r)
         if want in ("BOTH", "CL") and _ho_ok and g:
-            r = plot_cl(s, p.name, d, seg, g, ft=ft_t)
+            r = plot_cl(s, p.name, d, seg, g)
             if r:
                 agg.setdefault(("CL", s), []).append(r)
         print(f"{s}/{p.name}: OK", flush=True)

@@ -18,6 +18,17 @@ import numpy as np
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "bench"))
+
+# ── 탐색 결과 파일에서 모델 값을 직접 불러오는 길 (08-16 추가 — 무변속 판과 동일하게) ──
+#   무변속 비교 그림(`fs_compare_plot`)은 이미 이 길이 있는데 여기만 없었다. 그래서 변속
+#   세션 그림은 손으로 환경변수를 넣어 줄 때만 만들 수 있었고, 회차 폴더에 자주 빠졌다.
+#   같은 변환 함수(`_GHB_sweep.apply_from_json`)를 쓰므로 그림과 점수가 같은 지점을 가리킨다.
+#     set FS_CMP_FROM=_GHB_sweep8.json     ← 어느 탐색 결과를 그릴지
+#     set FS_CMP_OUT_CVT=_compare_H8_260816 ← 산출 폴더 (무변속 판과 같은 폴더로 맞춘다)
+if os.environ.get("FS_CMP_FROM"):
+    import _GHB_sweep as _SW
+    _SW.apply_from_json()
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
