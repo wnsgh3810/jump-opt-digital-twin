@@ -17,9 +17,15 @@
 | 2 | `twin/docs/context/HANDOFF.md` | 연구 배경 · 지금 하는 일 · 규칙 상세 · 미리 등록한 예측 | 항상 |
 | 3 | `twin/docs/context/memory/MEMORY.md` | 누적된 발견 **133건**의 색인 → 개별 문서 | 항상 |
 | 4 | `twin/code/bench/CURRENT_STACK.md` | **현행 모델 수치의 단일 출처** | 모델 손대기 전 |
-| 5 | `twin/docs/context/DATA_DICT.md` | 실험 데이터의 함정 목록 | **데이터 만지기 전 필독** |
-| 6 | `twin/code/bench/REJECTED.md` | 이미 기각된 가설 | 새 축 열기 전 필독 |
-| 7 | `twin/CLAUDE.md` | 코드 구조 · import 규약 · 후보 JSON 규약 | 코드 짜기 전 |
+| 5 | **`twin/code/bench/TRUTH.md`** | **"지금 무엇이 참인가" 확정 사실 대장** | ★ **새 물리축 만지기 전 반드시** |
+| 6 | `twin/code/bench/REJECTED.md` | **이미 기각한 물리축 33건과 그 사유** | ★ **새 축 열기 전 반드시** |
+| 7 | `twin/docs/context/DATA_DICT.md` | 실험 데이터의 함정 목록 | **데이터 만지기 전 필독** |
+| 8 | `twin/CLAUDE.md` | 코드 구조 · import 규약 · 후보 JSON 규약 | 코드 짜기 전 |
+
+★ **5·6번을 건너뛰면 실제로 사고가 난다.** `TRUTH.md` 는 이렇게 시작한다:
+
+> 기록이 저장소 900 KB + 옛 기록 1.4 MB 이고, 그 안에 **철회·재심·재재심이 12건 이상** 섞여 있다.
+> 실제 사고: 08-12 하루에 **이미 세 번 기각된 축을 다시 팠다.**
 
 **3번(기억 133건)을 건너뛰지 마라.** 같은 실수를 두 번 하는 것을 막는 장치다.
 색인의 한 줄 요약만 훑고, 지금 하는 일과 겹치는 것만 열어 보면 된다.
@@ -224,8 +230,13 @@ p = data("26_07_27", "250_3_250_3", "hip2.xlsx")
 | 지금 상황 전체 · 미리 등록한 예측 | `twin/docs/context/HANDOFF.md` |
 | 누적된 발견 **133건** (색인 → 개별 문서) | `twin/docs/context/memory/MEMORY.md` |
 | **현행 모델 수치 (단일 출처)** | `twin/code/bench/CURRENT_STACK.md` |
-| 이미 기각된 가설 (새 축 열기 전 필독) | `twin/code/bench/REJECTED.md` |
+| ★ **지금 무엇이 참인가 (확정 사실 대장)** | `twin/code/bench/TRUTH.md` |
+| ★ **기각한 물리축 33건과 사유** | `twin/code/bench/REJECTED.md` |
 | 방법론 | `twin/code/bench/PLAYBOOK.md` |
+| 승격 이력 대장 | `twin/code/bench/registry.json` |
+| 한 판단의 근거를 길게 적은 것 | `twin/code/bench/VERDICT_260812.md` |
+| 긴 작업의 서사 기록 | `twin/code/goal23_fullspan/MARATHON_*.md` |
+| MuJoCo 모델 빌더·과제 코드·시동 파일 위치 | **이 파일 §5-A** |
 | 실험 데이터의 함정 (데이터 만지기 전 필독) | `twin/docs/context/DATA_DICT.md` |
 | 연구 헌법 | `twin/docs/context/CONSTITUTION.md` |
 | 코드 구조·import 규약·후보 JSON 규약 | `twin/CLAUDE.md` |
@@ -242,6 +253,120 @@ p = data("26_07_27", "250_3_250_3", "hip2.xlsx")
 **시기가 곧 신뢰도다.** 나중에 뒤집힌 사실이 실제로 여러 건 있다.
 **충돌이 보이면 언제나 더 최근 것이 맞다.** 옛 기억을 근거로 삼기 전에
 같은 주제의 최신 항목이 있는지 먼저 확인할 것.
+
+---
+
+## 5-A. 연구가 실제로 어떻게 돌아가는가 (구체적인 자리)
+
+> 위 §5 는 "어느 문서에 무엇이 적혀 있나"이고, 이 절은 **"실제 물건이 어디 있나"**다.
+
+### (1) MuJoCo 모델을 어디서 만드나
+
+모델은 **파일로 저장해 두는 게 아니라 코드가 그때그때 만든다.**
+
+| 무엇 | 어디 |
+|---|---|
+| **4절 링크 구조 정본 빌더** | `twin/code/goal21/g21_fourbar_flip.py` :: `build_xml_fourbar_flip` |
+| 변속기(입력 링크 길이 가변) 모델 | `twin/code/goal22/p18_cvt/cvt_core.py` · `cvt_run2.py` |
+| 현행 스택이 쓰는 빌더 | `twin/code/goal23_fullspan/fs_runner.py` (환경변수로 물리축을 켜고 끈다) |
+| 저장된 XML 6개 | `goal23_fullspan/_base_model.xml` `_cvt_base.xml` `_cvt_fs.xml` `_fs_model_v1.xml` · `goal18_CANONICAL/code/leg.xml` |
+
+⚠ **`goal18_CANONICAL/code/leg.xml` 은 4절 링크 이전의 2링크 모델이다.** 시각화 규격용이지
+현행 물리 모델이 아니다. 4절 렌더링 정본은 `goal22/p18_cvt/cvt_anim.py :: build_anim_model` 이다.
+
+⚠ **구조 주의**: 크랭크와 로커는 **정강이 반대 방향**(무릎 위/뒤)에 있다.
+옛 위상으로 만든 XML 을 쓰면 안 된다. 근거는 기억 `fourbar_structure_critical.md`.
+
+### (2) 세 과제(task) 코드가 어디 있나
+
+| 과제 | 코드 |
+|---|---|
+| 수직 점프 (궤적 최적화) | `twin/code/goal19/nlp_demo/g20_vertjump_demo.py` · `g20_vertjump_fric.py` |
+| 배포 리허설 (실기 적용 준비) | `twin/code/goal22/p25_task0/` (`t0_export.py` · `t0_deploy.py` · `t0_mjc_render.py`) |
+| 짐 지고 일어서기 · 수평 점프 등 | `C:\Users\junho\CVT\AVT LEG\optimization_tasks\` (**git 밖**. 절대 경로로 연다) |
+
+`AVT LEG` 는 git 이 관리하지 않지만 **작업 사본에서도 절대 경로로 그냥 열린다** (확인 완료).
+
+### (3) 왜 `.bat` 을 만드나, 어떻게 쓰나
+
+**왜**: 파라미터 훑기는 몇 시간~수십 시간 걸린다. 에이전트가 직접 돌리면
+① 대화가 끝나면 같이 죽고 ② 사용자가 멈추거나 되돌릴 방법이 없다.
+`.bat` 으로 만들어 **사용자가 더블클릭**하면 자기 창에서 독립적으로 돌고, 언제든 닫을 수 있다.
+
+**어떻게** — 실제로 쓰는 틀:
+
+```bat
+@echo off
+cd /d %~dp0
+start "sweep vXX" cmd /k "python 훑기코드.py > 결과.txt 2>&1"
+echo vXX sweep launched.
+```
+
+| 조각 | 왜 그렇게 쓰나 |
+|---|---|
+| `cd /d %~dp0` | **자기 파일이 있는 폴더로 이동.** 그래서 폴더를 옮겨도 안 깨진다 |
+| `cmd /k` | 창이 안 닫히고 남아서 진행 상황을 볼 수 있다 |
+| `> 파일 2>&1` | 화면 출력을 파일로 남긴다. 파이프(`|`)를 쓰면 안 된다 |
+| **ASCII/영문만** | 명령창 글자표가 cp949 라 한글을 넣으면 깨진다 |
+
+진행 확인은 그 결과 파일과 중간 저장 파일(`*_checkpoint.npz`)로만 한다.
+
+현행 시동 파일: `twin/code/goal23_fullspan/_GHB_sweep9.bat` (저장소에 `.bat` 23개가 있다)
+
+### (4) 지금까지의 결과가 어디 있나
+
+| 무엇 | 어디 | 규모 |
+|---|---|---|
+| 그림·애니메이션·옛 단계 결과 | `C:\Users\junho\CVT\jump_opt\` (**git 밖**) | 27,708 파일 / 34 GB |
+| 저장소 안 결과 (후보 JSON·중간 저장·그림) | `twin/code/goal*/` | JSON 960 · 그림 2,601 · 계산결과 113 |
+| 실험 원본 | `C:\Users\junho\CVT\Data\<YY_MM_DD>\` (**git 밖**) | 7,479 파일 |
+
+`jump_opt` 아래 결과 폴더 이름 규칙은 `g22_<이름>_results/` 다.
+경로는 코드에서 `from datapaths import LEGACY_ROOT` 로 얻는다.
+
+### (5) 후보를 평가하고 승격하는 절차 (평가 하네스)
+
+**모든 후보 평가는 이 하네스로만 한다.** 직접 점수를 계산해 비교하지 마라.
+
+```
+python twin/code/bench/bench.py eval <후보.json>       # 채널별 오차 + 재현 판정
+python twin/code/bench/bench.py compare <a> <b> ...    # 맞대결
+python twin/code/bench/bench.py promote <후보> --note ".."   # 조건 통과 시만 승격
+python twin/code/bench/bench.py list | stack
+```
+
+| 파일 | 하는 일 |
+|---|---|
+| `bench/bench.py` | 평가·비교·승격 명령 |
+| `bench/registry.json` | 승격 이력 대장 |
+| `bench/safe.py` | 덮어쓰기 방지·원자적 저장 (여러 작업자가 동시에 써도 안 깨지게) |
+| `bench/render_kit.py` | 그림·애니메이션 표준 규격 (**새 그림 형식 발명 금지**) |
+| `bench/datapaths.py` | 실험 데이터 경로의 **단일 출처** |
+
+후보 JSON 규약: 이름은 `fourbar_pXX_candidate.json`, **기존 파일 덮어쓰기 금지**
+(막는 장치가 거부한다). 갱신은 새 파일 + 승격 절차로만.
+
+### (6) 연구 역사 — goal 번호가 무엇이었나
+
+| 단계 | 폴더 | 무엇을 했나 |
+|---|---|---|
+| GOAL2~17 | `twin/docs/legacy/jump_opt/` (기록만) | 초기 시스템 동정, 파라미터 훑기, 정체 구간 탈출 시도 |
+| GOAL18 | `twin/code/goal18_CANONICAL/` | **시각화 규격 확정** (지금도 렌더링 정본) |
+| GOAL19 | `twin/code/goal19/` | 7개 데이터셋 31실험 통합 모델 · 궤적 최적화 실증 |
+| GOAL21 | `twin/code/goal21/` | **4절 링크 구조 확정** (모델 빌더 정본) |
+| GOAL22 | `twin/code/goal22/` | 변속기 모델 · 토크 일치도 지표 · 배포 리허설 |
+| GOAL23 | `twin/code/goal23_fullspan/` | **현행.** 전 구간 데이터로 백지 재구축 |
+
+각 단계의 결론은 기억 `goal*_findings.md` / `goal*_final.md` 에 있고,
+긴 서사는 `goal23_fullspan/MARATHON_*.md` 에 있다.
+
+### (7) 고려했다가 기각한 물리축 — 새 축 열기 전 반드시
+
+`twin/code/bench/REJECTED.md` 에 **33건**이 사유와 함께 적혀 있다 (369줄).
+발 미끄러짐 측정 자, 영상 추적점, 토크 변환식 손보기 등이 여기 있다.
+
+**이걸 안 읽어서 이미 세 번 기각된 축을 하루에 다시 판 적이 있다.**
+그 사고 때문에 `TRUTH.md`(지금 무엇이 참인가)가 따로 만들어졌다.
 
 ---
 
