@@ -48,7 +48,7 @@ rem  see the geometry-amplified axes at all.  FS_SWEEP_CVTLOCK=0 disables it.
 rem
 rem  ---------------------------------------------------------------------
 rem  CHANGE 2 -- SIT-TO-STAND WEIGHT DOUBLED, 0.10 -> 0.19.
-rem      score 0.05 -> 0.11   ·   hold time 0.05 -> 0.08
+rem      score 0.05 -> 0.11   .   hold time 0.05 -> 0.08
 rem  It is one of the three final tasks; 0.10 was too little to defend itself.
 rem
 rem  ---------------------------------------------------------------------
