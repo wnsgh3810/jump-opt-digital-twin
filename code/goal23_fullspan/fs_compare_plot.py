@@ -721,23 +721,23 @@ def main():
         #   아래 일어서기 가지는 이미 같은 방식으로 trial 별 모델을 만들고 있다.
         #   막대 길이는 trial 마다 Clutch 실측이므로 **trial 단위로** 모델을 새로 만든다.
         ft_t = FC.cvt_ft(float(FD.cvt_li(p)), ft_base=FR.fs_twin()) if cvt else None
-        # ★ 변속 세션에서는 **옛 모델 곡선을 그리지 않는다** (show_old=False).
-        #   옛 모델(FMET.tw0)은 무릎을 직결로 보는 5관절 구조라 4절 링크 자체가 없다.
-        #   막대 길이를 바꿀 대상이 없으니 변속판을 만들 수 없고, 그대로 그리면
-        #   평행사변형(무변속) 곡선을 '변속 세션의 옛 모델'인 양 보여 주게 된다.
-        #   → 변속 세션은 "실측 vs 현행" 만 그린다. 이것이 구 코드가 통째로 건너뛴 진짜 이유다.
-        _old_ok = not cvt
+        # ★ 옛 모델 곡선은 **변속 세션에서도 그대로 그린다** — 모든 세션이 같은 형태여야 한다.
+        #   (08-16 사용자 지적: 0429만 곡선 하나가 빠져 다른 날과 다르게 나왔다.)
+        #   옛 모델은 무릎을 직결로 보는 5관절 구조라 4절 링크가 없다. 그래서 막대 길이를
+        #   바꿀 대상이 아예 없고 — 바꿀 필요도 없다. 그냥 그대로 돌리면 된다.
+        #   `fs_cvt_plot.py` 가 0429 에 대해 이미 같은 방식으로 옛 모델을 돌리고 있다.
+        #   옛 모델이 변속을 못 담는 것은 그 모델의 성질이지 그리지 못할 이유가 아니다.
         # ★ held-out 은 **fit 금지**이지 평가 금지가 아니다 (철칙 9).
         #   승격 판단엔 게이트 세션의 CL 비악화도 봐야 하므로 FS_CMP_HO=1 로 포함시킨다.
         _ho_ok = (not ho) or os.environ.get("FS_CMP_HO") == "1"
         # ★ ModeA 를 **먼저** 돌린다 — 점프높이는 ModeA 연장재생에서만 나오고(정본 정의),
         #   CL 제목도 그 값을 쓰기 때문이다 (사용자 지시: 제목에 점프높이).
         if want in ("BOTH", "MA", "CL"):
-            r = plot_ma(s, p.name, d, seg, ft=ft_t, show_old=_old_ok)
+            r = plot_ma(s, p.name, d, seg, ft=ft_t)
             if r and want in ("BOTH", "MA"):
                 agg.setdefault(("ModeA", s), []).append(r)
         if want in ("BOTH", "CL") and _ho_ok and g:
-            r = plot_cl(s, p.name, d, seg, g, ft=ft_t, show_old=_old_ok)
+            r = plot_cl(s, p.name, d, seg, g, ft=ft_t)
             if r:
                 agg.setdefault(("CL", s), []).append(r)
         print(f"{s}/{p.name}: OK", flush=True)
