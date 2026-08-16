@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 """p23_survey — verify baked tau provenance of 0422 npz caches used by load_31exp.
 Compare npz tau_real vs clean xlsx->Paper ahat conversion (RMS ratio)."""
+# --- 저장소 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o2, sys as _s2
+_d2 = _o2.path.dirname(_o2.path.abspath(__file__))
+while _d2 != _o2.path.dirname(_d2) and not _o2.path.isdir(_o2.path.join(_d2, 'code', 'bench')):
+    _d2 = _o2.path.dirname(_d2)
+if _o2.path.join(_d2, 'code', 'bench') not in _s2.path:
+    _s2.path.append(_o2.path.join(_d2, 'code', 'bench'))
+from datapaths import REPO_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -16,7 +25,7 @@ import pandas as pd
 from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-REPO = Path("C:/Users/junho/Documents/jump-opt-digital-twin")
+REPO = Path(REPO_ROOT)
 sys.path.insert(0, str(REPO / "code/goal22/p19_jump"))
 sys.path.insert(0, str(REPO / "code/bench"))
 import p19_judge as P

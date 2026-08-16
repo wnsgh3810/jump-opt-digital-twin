@@ -24,12 +24,18 @@
 
 import os
 
-# 데이터가 실제로 있는 곳 (Data 폴더의 한 단계 위 = 4-Bar_Link_CVT 폴더)
+# 데이터가 실제로 있는 곳 (Data 폴더의 한 단계 위).
 # 이 문자열이 저장소 전체에서 실험 데이터 경로가 적힌 유일한 자리다.
-_DEFAULT_CVT_ROOT = "C:/Users/junho/Desktop/Research/4-Bar_Link_CVT"
+# 2026-08-16: Desktop/Research/4-Bar_Link_CVT 에서 여기로 옮겼다.
+#   옛 자리에는 빈 폴더와 안내문(MOVED_TO_C_Users_junho_CVT.txt)만 남아 있다.
+_DEFAULT_CVT_ROOT = "C:/Users/junho/CVT"
 
 CVT_ROOT = os.environ.get("JUMP_CVT_ROOT", _DEFAULT_CVT_ROOT).replace("\\", "/").rstrip("/")
 DATA_ROOT = CVT_ROOT + "/Data"
+
+# 이 저장소 자신의 위치. 이 파일은 항상 <저장소>/code/bench/ 에 있으므로 두 단계 올라가면 된다.
+# 절대경로를 적어 두지 않으므로 저장소를 어디로 옮기든 저절로 따라온다.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).replace("\\", "/")
 
 
 def data(*parts):

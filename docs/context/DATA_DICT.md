@@ -1,6 +1,6 @@
 # 실험 데이터 루트 — 데이터 사전 (≤30줄 유지, 원본 읽기 전용)
 
-헌법: `C:/Users/junho/Desktop/CLAUDE.md` · 코드/하네스: `C:/Users/junho/Documents/jump-opt-digital-twin/`
+헌법: `C:/Users/junho/Desktop/CLAUDE.md` · 코드/하네스: `C:/Users/junho/CVT/twin/`
 
 ## 세션 인덱스 (점프 fit/게이트 관점)
 - **held-out: 26.03.24** (jump_0324, FF 토크 세션 — fit 포함 절대 금지)

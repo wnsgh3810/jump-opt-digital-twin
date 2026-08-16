@@ -40,3 +40,6 @@ MUJOCO_LOG.TXT
 
 code/goal23_fullspan/_G52_dump/
 code/goal23_fullspan/graphs/G79_slip_all/
+
+# Claude 개인 설정 (사용자별 허용 규칙 — 공유 대상 아님)
+.claude/settings.local.json

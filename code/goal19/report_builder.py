@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 """G20 final report — self-contained, detailed, Korean narrative."""
+# --- 저장소 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o2, sys as _s2
+_d2 = _o2.path.dirname(_o2.path.abspath(__file__))
+while _d2 != _o2.path.dirname(_d2) and not _o2.path.isdir(_o2.path.join(_d2, 'code', 'bench')):
+    _d2 = _o2.path.dirname(_d2)
+if _o2.path.join(_d2, 'code', 'bench') not in _s2.path:
+    _s2.path.append(_o2.path.join(_d2, 'code', 'bench'))
+from datapaths import REPO_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import json, base64, re
 from pathlib import Path
 
 SCR = Path(r"C:/Users/junho/AppData/Local/Temp/claude/C--Users-junho-Desktop-Research-4-Bar-Link-CVT-Data-26-03-24-Jump/91aad6ed-e999-400c-bacd-e1da7d4a5da4/scratchpad")
 VIZ = SCR / "viz_final"; JPG = VIZ / "jpg"
-REPO = Path(r"C:/Users/junho/Documents/jump-opt-digital-twin")
+REPO = Path(REPO_ROOT)
 OUT = SCR / "twin_dashboard.html"   # same path => same artifact URL
 
 res = json.load(open(VIZ / "viz_index.json"))

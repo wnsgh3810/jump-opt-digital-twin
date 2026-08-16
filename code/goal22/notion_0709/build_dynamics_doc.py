@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 """4-bar 동역학 정본 해설 — 해석식 vs MuJoCo + 파라미터 전서 + 순차 식별 논의 (GOAL22 하위)."""
+# --- 저장소 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o2, sys as _s2
+_d2 = _o2.path.dirname(_o2.path.abspath(__file__))
+while _d2 != _o2.path.dirname(_d2) and not _o2.path.isdir(_o2.path.join(_d2, 'code', 'bench')):
+    _d2 = _o2.path.dirname(_d2)
+if _o2.path.join(_d2, 'code', 'bench') not in _s2.path:
+    _s2.path.append(_o2.path.join(_d2, 'code', 'bench'))
+from datapaths import REPO_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import requests, time, json
 import numpy as np
 from pathlib import Path
@@ -8,7 +17,7 @@ TOKEN = "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"
 H = {"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2022-06-28"}
 HJ = {**H, "Content-Type": "application/json"}
 GOAL22 = "396ab81d2550814b9780f32285133840"
-REPO = Path(r"C:/Users/junho/Documents/jump-opt-digital-twin")
+REPO = Path(REPO_ROOT)
 
 
 def req(method, url, **kw):

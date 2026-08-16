@@ -20,6 +20,15 @@
     (탐사에서 rms 비율 1.0000 검증된 청정본) — per-sub max|Δ|/max|τ| < 1e-3 필수.
   - load_s2s_air 사이클 분할 vs 레거시 캐시 (goal18/iter0R + goal12/xval_v2 cycle_final.npz).
 """
+# --- 저장소 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o2, sys as _s2
+_d2 = _o2.path.dirname(_o2.path.abspath(__file__))
+while _d2 != _o2.path.dirname(_d2) and not _o2.path.isdir(_o2.path.join(_d2, 'code', 'bench')):
+    _d2 = _o2.path.dirname(_d2)
+if _o2.path.join(_d2, 'code', 'bench') not in _s2.path:
+    _s2.path.append(_o2.path.join(_d2, 'code', 'bench'))
+from datapaths import REPO_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 # --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
 import os as _o, sys as _s
 _d = _o.path.dirname(_o.path.abspath(__file__))
@@ -37,7 +46,7 @@ import numpy as np
 import pandas as pd
 
 DATA = Path(DATA_ROOT)
-REPO = Path("C:/Users/junho/Documents/jump-opt-digital-twin")
+REPO = Path(REPO_ROOT)
 JO = Path("C:/Users/junho/Desktop/jump_opt")
 
 COLS = ["Time", "currentAngle", "desiredAngle", "currentAngleVelocity",

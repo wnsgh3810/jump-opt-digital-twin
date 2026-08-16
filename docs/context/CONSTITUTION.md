@@ -6,10 +6,10 @@
 지표·현행 스택 수치는 여기 적지 않는다 → CURRENT_STACK.md가 단일 출처.
 
 ## 경로 지도
-- 코드/하네스(git): `C:/Users/junho/Documents/jump-opt-digital-twin/` (repo CLAUDE.md 필독)
+- 코드/하네스(git): `C:/Users/junho/CVT/twin/` (repo CLAUDE.md 필독)
 - 현행 스택/지표: `<repo>/code/bench/CURRENT_STACK.md` · 방법론: `<repo>/code/bench/PLAYBOOK.md`
 - 기각된 가설: `<repo>/code/bench/REJECTED.md` (새 축 시도 전 필독)
-- 실험 데이터: `C:/Users/junho/Desktop/Research/4-Bar Link CVT/Data/<YY.MM.DD>/` (읽기 전용)
+- 실험 데이터: `C:/Users/junho/CVT/Data/<YY.MM.DD>/` (읽기 전용)
 - 레거시 결과/문서: `C:/Users/junho/Desktop/jump_opt/` (MASTER_INSIGHTS*, g22_* 결과 폴더)
 
 ## 철칙 10 (훅이 상당수 기계적으로 강제함)

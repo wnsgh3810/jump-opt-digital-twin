@@ -13,14 +13,29 @@ os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 from pathlib import Path
 import numpy as np, pandas as pd
 
-# 데이터 루트 — 2026-08-02 사용자가 트리를 **언더스코어 규약으로 개명**했다:
-#   "4-Bar Link CVT" → "4-Bar_Link_CVT",  "26.03.24" → "26_03_24"
+# 데이터 루트 — 위치는 code/bench/datapaths.py 한 곳에서만 정한다 (환경변수 JUMP_CVT_ROOT 로 덮어쓸 수 있다).
 # 세션 **키는 옛 표기(26.03.24)를 유지**한다 — 보드 JSON·세션 상수·기준선이 전부 그 키를 쓰므로
 # 키를 바꾸면 마라톤 G 기준선과의 비교가 끊긴다. 키→폴더 변환은 `_D()`가 담당.
-_ROOTS = [Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data"),
-          Path(r"C:/Users/junho/Desktop/Research/4-Bar_Link_CVT/Data")]
-ROOT = next((p for p in _ROOTS if p.exists()), _ROOTS[0])
-_UNDERSCORE = (ROOT.name == "Data" and "4-Bar_Link_CVT" in str(ROOT))
+#
+# 2026-08-02 사용자가 폴더 이름을 **밑줄 규약으로 개명**했다: "26.03.24" → "26_03_24".
+# 2026-08-16 수리: 예전에는 이 규약을 **경로 문자열에 "4-Bar_Link_CVT" 가 들어 있는지**로 판정했다.
+#   그래서 데이터를 다른 이름의 폴더로 옮기는 순간 조용히 옛 점 표기로 되돌아가 전부 깨졌다.
+#   이제는 **실제로 어느 이름의 폴더가 있는지 눈으로 확인**해서 정한다 — 어디로 옮겨도 안 깨진다.
+# --- 실험 데이터 경로: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o, sys as _s
+_d = _o.path.dirname(_o.path.abspath(__file__))
+while _d != _o.path.dirname(_d) and not _o.path.isdir(_o.path.join(_d, 'code', 'bench')):
+    _d = _o.path.dirname(_d)
+if _o.path.join(_d, 'code', 'bench') not in _s.path:
+    _s.path.append(_o.path.join(_d, 'code', 'bench'))
+from datapaths import DATA_ROOT  # noqa: E402
+# ---------------------------------------------------------------
+ROOT = Path(DATA_ROOT)
+_UNDERSCORE = (ROOT / "26_03_24").is_dir() or not (ROOT / "26.03.24").is_dir()
+if not ROOT.is_dir():
+    raise FileNotFoundError(
+        "실험 데이터 폴더가 없다: %s\n"
+        "  옮겼다면 환경변수 JUMP_CVT_ROOT 를 설정하거나 code/bench/datapaths.py 한 줄을 고쳐라." % ROOT)
 
 
 def _D(*parts):

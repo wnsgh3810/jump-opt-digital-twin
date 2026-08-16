@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 """P9 — Notion 완전 해설: MuJoCo 트윈 최적화 흐름 · 접촉 · 4-bar · 파라미터 사전.
 부모 페이지 + 분야별 child 7개. 이미지: file_uploads 3-step."""
+# --- 저장소 위치: 단일 출처 (code/bench/datapaths.py) ---
+import os as _o2, sys as _s2
+_d2 = _o2.path.dirname(_o2.path.abspath(__file__))
+while _d2 != _o2.path.dirname(_d2) and not _o2.path.isdir(_o2.path.join(_d2, 'code', 'bench')):
+    _d2 = _o2.path.dirname(_d2)
+if _o2.path.join(_d2, 'code', 'bench') not in _s2.path:
+    _s2.path.append(_o2.path.join(_d2, 'code', 'bench'))
+from datapaths import REPO_ROOT  # noqa: E402
+# ---------------------------------------------------------------
 import requests, time, json
 from pathlib import Path
 
@@ -8,7 +17,7 @@ TOKEN = "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"
 H = {"Authorization": f"Bearer {TOKEN}", "Notion-Version": "2022-06-28"}
 CONCEPT = "115ab81d255080fdaae6f28f55e3e205"
 FIG = Path(r"C:/Users/junho/AppData/Local/Temp/claude/C--Users-junho-Desktop-Research-4-Bar-Link-CVT-Data-26-03-24-Jump/91aad6ed-e999-400c-bacd-e1da7d4a5da4/scratchpad/p9_explain")
-P6FIG = Path(r"C:/Users/junho/Documents/jump-opt-digital-twin/code/goal21")
+P6FIG = Path((REPO_ROOT + "/code/goal21"))
 
 
 def rt(text):
