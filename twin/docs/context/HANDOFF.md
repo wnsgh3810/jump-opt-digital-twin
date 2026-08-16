@@ -27,9 +27,11 @@ MuJoCo 시뮬레이션 모델(디지털 트윈)을 실제 로봇과 일치하도
 
 | 무엇 | 어디 | 성격 |
 |---|---|---|
-| **코드·하네스·결과 (이 저장소)** | `C:\Users\junho\CVT\twin` | 쓰기 가능, git 관리 |
-| **실험 원본 데이터** | `C:\Users\junho\CVT\Data\<YY_MM_DD>\` (밑줄, 예 `26_07_27`) | **실측 원본은 읽기 전용** |
-| 레거시 결과·문서 | `C:\Users\junho\CVT\jump_opt\` | 참조용 (34 GB, 손대지 말 것) |
+| **git 저장소 뿌리 = 프로젝트 뿌리** | `C:\Users\junho\CVT` | 2026-08-17 부터. `cd twin` 없이 git 명령이 바로 된다 |
+| **코드·하네스·결과** | `C:\Users\junho\CVT\twin` | 쓰기 가능. git 이 실제로 관리하는 것은 사실상 이 폴더 |
+| **실험 원본 데이터** | `C:\Users\junho\CVT\Data\<YY_MM_DD>\` (밑줄, 예 `26_07_27`) | **실측 원본은 읽기 전용 · git 제외** |
+| 레거시 결과·문서 | `C:\Users\junho\CVT\jump_opt\` | 참조용 (34 GB, 손대지 말 것) · **git 제외** |
+| 다리 최적화·시스템 동정 | `C:\Users\junho\CVT\AVT LEG\` | 18.5 GB · **git 제외** |
 | 연구 헌법 | `docs/context/CONSTITUTION.md` — 이게 정본 (옛 원본 `C:\Users\junho\Desktop\CLAUDE.md` 는 07-12 판에서 멈춤) | |
 | 데이터 사전 (함정 목록) | `docs/context/DATA_DICT.md` (원본: `Data\CLAUDE.md`) | **데이터 만지기 전 필독** |
 | 누적된 발견 **133건** | `docs/context/memory/` (색인 = `MEMORY.md`) | 시기별 3구역 |
